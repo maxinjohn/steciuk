@@ -1,23 +1,50 @@
+# Git & IDE
 .git
+.gitattributes
+.github
 .gitignore
+.cursor
+.idea
+.vscode
+.editorconfig
+*.md
+README.md
+Makefile
+
+# Secrets & local env
 .env
 .env.*
 !.env.example
+
+# Dependencies (installed in build stages)
 node_modules
 vendor
-storage/logs/*
-storage/framework/cache/*
-storage/framework/sessions/*
-storage/framework/views/*
+public/build
+public/hot
+public/fonts-manifest.dev.json
+
+# Runtime data (mounted or created at start)
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
 storage/database/*.sqlite
-bootstrap/cache/*
-.phpunit.result.cache
+bootstrap/cache/*.php
+
+# Tests & dev tooling
 tests
+phpunit.xml
+.phpunit.cache
+.phpunit.result.cache
+coverage
+
+# Docker (not needed inside the image)
 docker-compose*.yml
 Dockerfile
-README.md
-.idea
-.vscode
-*.md
+.dockerignore
+
+# Misc
+.DS_Store
+Thumbs.db
 agent-tools
 terminals

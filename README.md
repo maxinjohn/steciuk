@@ -119,10 +119,9 @@ BOOTSTRAP_CACHE_HOST_PATH=/var/lib/steciuk/bootstrap-cache
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `NGINX_HTTP_PORT` | `8080` | Public website (maps to container port 80) |
-| `NGINX_HTTPS_PORT` | `8443` | Reserved for HTTPS when configured |
-| `RUN_QUEUE_WORKER` | `true` | Queue worker inside the container |
+| `NGINX_HTTP_PORT` | `8080` | Host port → container port 80 |
 | `RUN_SCHEDULER` | `true` | Scheduler inside the container |
+| `RUN_QUEUE_WORKER` | `false` | Set `true` only with `QUEUE_CONNECTION=database` |
 | `RUN_MIGRATIONS` | `true` | Auto-migrate on container start |
 | `RUN_SEED` | `false` | Auto-seed on container start |
 
@@ -193,65 +192,53 @@ Navigate to `/admin` and sign in.
 
 ## Docker deployment
 
-**One container** runs everything: nginx, PHP-FPM, queue worker, and task scheduler (via supervisord).
+**One file** (`docker-compose.yml`), **one container**. Dev vs production is controlled by `.env` only — no separate dev compose file.
 
 ```bash
 cp .env.example .env
 docker compose build
 docker compose up -d
-
-# First deploy with reference content:
-docker compose exec app php artisan site:bootstrap --force
+docker compose exec app php artisan site:bootstrap --force   # first time only
 ```
 
-| URL | Address |
-|-----|---------|
-| Site | http://localhost:8080 (or `NGINX_HTTP_PORT`) |
-| Admin | http://localhost:8080/admin |
+| `.env` for local Docker | `.env` for production |
+|-------------------------|-------------------------|
+| `APP_ENV=local` | `APP_ENV=production` |
+| `APP_DEBUG=true` | `APP_DEBUG=false` |
+| `SEED_MODE=bootstrap` | `SEED_MODE=off` |
+| `DB_DATABASE=/var/www/html/storage/database/database.sqlite` | same + `APP_URL=https://steciuk.org` |
 
-### Why Node/npm appears in the Dockerfile (but not in the running container)
+Site: http://localhost:8080 · Admin: http://localhost:8080/admin
 
-Laravel uses **Vite** to compile Tailwind CSS and JavaScript into static files in `public/build/`. That compilation happens **once at image build time** in a temporary Node stage — the final container only contains PHP + nginx and the pre-built assets. No Node.js runs in production.
+### What's inside the container
 
-To change styles or JS locally:
+| Process | Default | Purpose |
+|---------|---------|---------|
+| nginx | on | Web server + gzip |
+| php-fpm | on | Laravel |
+| schedule:work | on | Weekly SQLite maintenance |
+| queue:work | **off** | Only if `QUEUE_CONNECTION=database` |
 
-```bash
-npm ci && npm run build          # one-off compile
-npm run dev                      # hot reload (run on your host, not in Docker)
-```
+### Image size optimisations
 
-### Docker environment
+- Node and Composer run **only at build** — not in the final image
+- Vendor `tests/` and markdown stripped from the image
+- OPcache + JIT, nginx gzip, realpath cache
+- Sync queue by default (no extra worker process)
+- `wget` healthcheck (no curl package)
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NGINX_HTTP_PORT` | `8080` | Host port → container port 80 |
-| `RUN_MIGRATIONS` | `true` | Auto-migrate on start |
-| `RUN_SEED` | `false` | Auto-seed on start |
-| `RUN_QUEUE_WORKER` | `true` | Background queue worker |
-| `RUN_SCHEDULER` | `true` | Laravel scheduled tasks |
-| `STORAGE_HOST_PATH` | *(named volume)* | Bind-mount for site data |
+### Node/npm
+
+Builds Tailwind/Vite assets into `public/build/` during `docker compose build`. To change CSS/JS: run `npm run build` on your host, then rebuild the image.
 
 ### Make shortcuts
 
 ```bash
-make prod       # build + start
-make bootstrap  # first-time reference data
-make sync       # sync dev changes to prod safely
+make prod       # build + up
+make bootstrap  # reference data
 make logs       # tail logs
 make shell      # container shell
-make dev        # bind-mount source for development
 ```
-
-### Architecture (single container)
-
-| Process | Role |
-|---------|------|
-| nginx | Web server, static files, `/storage` uploads |
-| php-fpm | Laravel + Filament |
-| queue:work | Database queue jobs (emails, etc.) |
-| schedule:work | Cron replacement (`db:optimize-sqlite`, etc.) |
-
-Persistent data: `steci-storage` volume (or `STORAGE_HOST_PATH` bind mount).
 
 ## Deployment (cPanel / shared VPS)
 

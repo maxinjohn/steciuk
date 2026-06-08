@@ -1,22 +1,20 @@
 #!/usr/bin/env make
-# STECI UK Parish — Docker & artisan shortcuts
+# STECI UK Parish — Docker shortcuts (single compose file)
 
-.PHONY: help build up down logs shell migrate seed bootstrap sync fresh prod dev
+.PHONY: help build up down logs shell migrate bootstrap sync fresh prod
 
 help:
-	@echo "STECI UK commands:"
-	@echo "  make build      Build production Docker images"
-	@echo "  make up         Start single app container"
-	@echo "  make down       Stop all containers"
-	@echo "  make logs       Tail container logs"
-	@echo "  make shell      Open shell in app container"
-	@echo "  make migrate    Run migrations in container"
-	@echo "  make seed       Run db:seed (respects SEED_MODE in .env)"
-	@echo "  make bootstrap  First-time reference data install"
-	@echo "  make sync       Sync dev reference data without wiping prod data"
+	@echo "STECI UK — docker compose (dev/prod via .env only):"
+	@echo "  make build      Build image"
+	@echo "  make up         Start container"
+	@echo "  make down       Stop container"
+	@echo "  make logs       Tail logs"
+	@echo "  make shell      Shell into container"
+	@echo "  make migrate    Run migrations"
+	@echo "  make bootstrap  First-time reference data"
+	@echo "  make sync       Sync reference data to prod safely"
 	@echo "  make fresh      migrate:fresh + bootstrap"
-	@echo "  make prod       build + up (production)"
-	@echo "  make dev        Dev mode with source bind mount"
+	@echo "  make prod       build + up"
 
 build:
 	docker compose build
@@ -36,9 +34,6 @@ shell:
 migrate:
 	docker compose exec app php artisan migrate --force
 
-seed:
-	docker compose exec app php artisan db:seed --force
-
 bootstrap:
 	docker compose exec app php artisan site:bootstrap --force
 
@@ -52,6 +47,3 @@ fresh:
 prod: build up
 	@echo "Site:  http://localhost:$${NGINX_HTTP_PORT:-8080}"
 	@echo "Admin: http://localhost:$${NGINX_HTTP_PORT:-8080}/admin"
-
-dev:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up
