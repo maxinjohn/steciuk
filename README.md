@@ -119,10 +119,10 @@ BOOTSTRAP_CACHE_HOST_PATH=/var/lib/steciuk/bootstrap-cache
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `NGINX_HTTP_PORT` | `8080` | Public website |
-| `NGINX_HTTPS_PORT` | `8443` | HTTPS (when SSL configured) |
-| `VITE_DEV_PORT` | `5173` | Vite dev server (dev profile) |
-| `PHP_FPM_PORT` | `9000` | PHP-FPM internal |
+| `NGINX_HTTP_PORT` | `8080` | Public website (maps to container port 80) |
+| `NGINX_HTTPS_PORT` | `8443` | Reserved for HTTPS when configured |
+| `RUN_QUEUE_WORKER` | `true` | Queue worker inside the container |
+| `RUN_SCHEDULER` | `true` | Scheduler inside the container |
 | `RUN_MIGRATIONS` | `true` | Auto-migrate on container start |
 | `RUN_SEED` | `false` | Auto-seed on container start |
 
@@ -193,10 +193,10 @@ Navigate to `/admin` and sign in.
 
 ## Docker deployment
 
+**One container** runs everything: nginx, PHP-FPM, queue worker, and task scheduler (via supervisord).
+
 ```bash
 cp .env.example .env
-# Edit .env — APP_URL, ports, optional STORAGE_HOST_PATH
-
 docker compose build
 docker compose up -d
 
@@ -209,6 +209,28 @@ docker compose exec app php artisan site:bootstrap --force
 | Site | http://localhost:8080 (or `NGINX_HTTP_PORT`) |
 | Admin | http://localhost:8080/admin |
 
+### Why Node/npm appears in the Dockerfile (but not in the running container)
+
+Laravel uses **Vite** to compile Tailwind CSS and JavaScript into static files in `public/build/`. That compilation happens **once at image build time** in a temporary Node stage — the final container only contains PHP + nginx and the pre-built assets. No Node.js runs in production.
+
+To change styles or JS locally:
+
+```bash
+npm ci && npm run build          # one-off compile
+npm run dev                      # hot reload (run on your host, not in Docker)
+```
+
+### Docker environment
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `NGINX_HTTP_PORT` | `8080` | Host port → container port 80 |
+| `RUN_MIGRATIONS` | `true` | Auto-migrate on start |
+| `RUN_SEED` | `false` | Auto-seed on start |
+| `RUN_QUEUE_WORKER` | `true` | Background queue worker |
+| `RUN_SCHEDULER` | `true` | Laravel scheduled tasks |
+| `STORAGE_HOST_PATH` | *(named volume)* | Bind-mount for site data |
+
 ### Make shortcuts
 
 ```bash
@@ -216,26 +238,20 @@ make prod       # build + start
 make bootstrap  # first-time reference data
 make sync       # sync dev changes to prod safely
 make logs       # tail logs
-make shell      # app container shell
-make dev        # dev mode with hot reload
+make shell      # container shell
+make dev        # bind-mount source for development
 ```
 
-### Optional services
+### Architecture (single container)
 
-```bash
-docker compose --profile queue up -d      # queue worker
-docker compose --profile scheduler up -d  # task scheduler
-docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up  # Vite HMR
-```
+| Process | Role |
+|---------|------|
+| nginx | Web server, static files, `/storage` uploads |
+| php-fpm | Laravel + Filament |
+| queue:work | Database queue jobs (emails, etc.) |
+| schedule:work | Cron replacement (`db:optimize-sqlite`, etc.) |
 
-### Architecture
-
-- **app** — PHP 8.4-FPM (Laravel + Filament)
-- **nginx** — Nginx 1.27 Alpine (static assets + reverse proxy)
-- **queue** — `php artisan queue:work` (optional profile)
-- **scheduler** — cron replacement (optional profile)
-
-Persistent data: `steci-storage` volume (or `STORAGE_HOST_PATH` bind mount) for SQLite + uploads.
+Persistent data: `steci-storage` volume (or `STORAGE_HOST_PATH` bind mount).
 
 ## Deployment (cPanel / shared VPS)
 

@@ -6,7 +6,7 @@
 help:
 	@echo "STECI UK commands:"
 	@echo "  make build      Build production Docker images"
-	@echo "  make up         Start production stack (nginx + app)"
+	@echo "  make up         Start single app container"
 	@echo "  make down       Stop all containers"
 	@echo "  make logs       Tail container logs"
 	@echo "  make shell      Open shell in app container"
@@ -16,7 +16,7 @@ help:
 	@echo "  make sync       Sync dev reference data without wiping prod data"
 	@echo "  make fresh      migrate:fresh + bootstrap"
 	@echo "  make prod       build + up (production)"
-	@echo "  make dev        Dev stack with Vite HMR"
+	@echo "  make dev        Dev mode with source bind mount"
 
 build:
 	docker compose build
@@ -54,4 +54,4 @@ prod: build up
 	@echo "Admin: http://localhost:$${NGINX_HTTP_PORT:-8080}/admin"
 
 dev:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up

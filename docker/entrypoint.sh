@@ -58,6 +58,9 @@ else
     php artisan config:clear --no-interaction 2>/dev/null || true
 fi
 
+export RUN_QUEUE_WORKER="${RUN_QUEUE_WORKER:-true}"
+export RUN_SCHEDULER="${RUN_SCHEDULER:-true}"
+
 echo "STECI UK Parish ready — env=${APP_ENV} db=${DB_FILE}"
 
 exec "$@"
