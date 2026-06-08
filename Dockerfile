@@ -27,7 +27,7 @@ RUN composer install \
     --optimize-autoloader
 
 # --- Stage 3: PHP-FPM application ---
-FROM php:8.3-fpm-alpine AS production
+FROM php:8.4-fpm-alpine AS production
 
 WORKDIR /var/www/html
 

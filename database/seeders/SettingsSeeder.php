@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
+use App\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 
 class SettingsSeeder extends Seeder
@@ -31,10 +32,17 @@ class SettingsSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
-            Setting::query()->updateOrCreate(
-                ['key' => $setting['key']],
-                ['value' => $setting['value'], 'group' => $setting['group']],
-            );
+            if (SeedConfig::shouldOverwriteSettings()) {
+                Setting::query()->updateOrCreate(
+                    ['key' => $setting['key']],
+                    ['value' => $setting['value'], 'group' => $setting['group']],
+                );
+            } else {
+                Setting::query()->firstOrCreate(
+                    ['key' => $setting['key']],
+                    ['value' => $setting['value'], 'group' => $setting['group']],
+                );
+            }
         }
     }
 }

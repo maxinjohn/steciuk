@@ -10,18 +10,19 @@ services:
       APP_DEBUG: "true"
       RUN_MIGRATIONS: "true"
       RUN_SEED: "true"
+      SEED_MODE: bootstrap
     volumes:
       - .:/var/www/html
       - /var/www/html/vendor
       - /var/www/html/node_modules
-      - steci-storage:/var/www/html/storage
+      - ${STORAGE_HOST_PATH:-steci-storage}:/var/www/html/storage
 
   nginx:
     ports:
       - "${NGINX_HTTP_PORT:-8080}:80"
     volumes:
       - ./public:/var/www/html/public:ro
-      - steci-storage:/var/www/html/storage:ro
+      - ${STORAGE_HOST_PATH:-steci-storage}:/var/www/html/storage:ro
 
   vite:
     image: node:22-alpine

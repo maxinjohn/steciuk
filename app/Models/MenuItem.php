@@ -18,6 +18,7 @@ class MenuItem extends Model
         'page_id',
         'parent_id',
         'menu_location',
+        'seed_key',
         'target',
         'sort_order',
         'is_visible',

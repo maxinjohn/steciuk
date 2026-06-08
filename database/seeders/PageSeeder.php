@@ -7,6 +7,7 @@ use App\Enums\PublishStatus;
 use App\Models\ContentBlock;
 use App\Models\Page;
 use App\Models\User;
+use App\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 
 class PageSeeder extends Seeder
@@ -23,8 +24,15 @@ class PageSeeder extends Seeder
             $blocks = $pageData['content_blocks'] ?? [];
             unset($pageData['content_blocks']);
 
+            $slug = $pageData['slug'];
+            $existingPage = Page::query()->where('slug', $slug)->first();
+
+            if ($existingPage && ! SeedConfig::shouldOverwritePages()) {
+                continue;
+            }
+
             $page = Page::query()->updateOrCreate(
-                ['slug' => $pageData['slug']],
+                ['slug' => $slug],
                 array_merge($pageData, [
                     'created_by' => $adminId,
                     'updated_by' => $adminId,
@@ -33,15 +41,18 @@ class PageSeeder extends Seeder
             );
 
             foreach ($blocks as $index => $block) {
+                $seedKey = $block['seed_key'] ?? ('block-'.($index + 1));
+
                 ContentBlock::query()->updateOrCreate(
                     [
                         'page_id' => $page->id,
-                        'type' => $block['type'],
-                        'sort_order' => $block['sort_order'] ?? ($index + 1),
+                        'seed_key' => $seedKey,
                     ],
                     [
+                        'type' => $block['type'],
                         'title' => $block['title'] ?? null,
                         'content' => $block['content'] ?? [],
+                        'sort_order' => $block['sort_order'] ?? ($index + 1),
                         'is_visible' => $block['is_visible'] ?? true,
                     ],
                 );
@@ -124,6 +135,7 @@ class PageSeeder extends Seeder
             'is_home' => true,
             'content_blocks' => [
                 [
+                    'seed_key' => 'hero',
                     'type' => ContentBlockType::Hero,
                     'title' => 'Hero Banner',
                     'sort_order' => 1,
@@ -146,6 +158,7 @@ class PageSeeder extends Seeder
                     ],
                 ],
                 [
+                    'seed_key' => 'locations',
                     'type' => ContentBlockType::Location,
                     'title' => 'Service Locations',
                     'sort_order' => 2,
@@ -158,6 +171,7 @@ class PageSeeder extends Seeder
                     ],
                 ],
                 [
+                    'seed_key' => 'welcome-quote',
                     'type' => ContentBlockType::Quote,
                     'title' => 'Welcome Message',
                     'sort_order' => 3,
@@ -169,6 +183,7 @@ class PageSeeder extends Seeder
                     ],
                 ],
                 [
+                    'seed_key' => 'ministries',
                     'type' => ContentBlockType::MinistryCards,
                     'title' => 'Our Ministries',
                     'sort_order' => 4,
@@ -181,6 +196,7 @@ class PageSeeder extends Seeder
                     ],
                 ],
                 [
+                    'seed_key' => 'events',
                     'type' => ContentBlockType::EventList,
                     'title' => 'Upcoming Events',
                     'sort_order' => 5,
@@ -192,6 +208,7 @@ class PageSeeder extends Seeder
                     ],
                 ],
                 [
+                    'seed_key' => 'news',
                     'type' => ContentBlockType::TextImage,
                     'title' => 'Latest News',
                     'sort_order' => 6,
@@ -204,6 +221,7 @@ class PageSeeder extends Seeder
                     ],
                 ],
                 [
+                    'seed_key' => 'sermons',
                     'type' => ContentBlockType::SermonList,
                     'title' => 'Recent Sermons',
                     'sort_order' => 7,
@@ -215,6 +233,7 @@ class PageSeeder extends Seeder
                     ],
                 ],
                 [
+                    'seed_key' => 'gallery',
                     'type' => ContentBlockType::Gallery,
                     'title' => 'Gallery Preview',
                     'sort_order' => 8,
@@ -226,6 +245,7 @@ class PageSeeder extends Seeder
                     ],
                 ],
                 [
+                    'seed_key' => 'cta-prayer',
                     'type' => ContentBlockType::Cta,
                     'title' => 'Prayer Request CTA',
                     'sort_order' => 9,
@@ -238,6 +258,7 @@ class PageSeeder extends Seeder
                     ],
                 ],
                 [
+                    'seed_key' => 'cta-new-member',
                     'type' => ContentBlockType::Cta,
                     'title' => 'New Member CTA',
                     'sort_order' => 10,

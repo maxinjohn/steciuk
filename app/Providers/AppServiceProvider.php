@@ -11,7 +11,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        if ($storagePath = env('APP_STORAGE_PATH')) {
+            $this->app->useStoragePath($storagePath);
+        }
     }
 
     public function boot(): void

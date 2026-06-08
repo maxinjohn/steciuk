@@ -13,6 +13,7 @@ class ContentBlock extends Model
 
     protected $fillable = [
         'page_id',
+        'seed_key',
         'type',
         'title',
         'content',
