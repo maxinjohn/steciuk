@@ -52,7 +52,7 @@ window.galleryLightbox = () => ({
 });
 
 const initScrollReveal = () => {
-    const elements = document.querySelectorAll('.animate-fade-up, .glass-card, .bento-grid > *, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip');
+    const elements = document.querySelectorAll('.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z');
 
     if (!('IntersectionObserver' in window) || ! elements.length) return;
 

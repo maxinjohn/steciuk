@@ -42,4 +42,6 @@ return [
         'overwrite_pages' => env('SEED_OVERWRITE_PAGES', true),
     ],
 
+    'admin_email' => env('ADMIN_EMAIL', 'admin@steciuk.org'),
+
 ];

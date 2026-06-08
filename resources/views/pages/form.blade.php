@@ -4,20 +4,19 @@
 @section('description', $page->seo_description ?? strip_tags($page->content))
 
 @section('content')
-    <x-hero
+    <x-page-band
         :title="$page->hero_title ?? $page->title"
         :subtitle="$page->hero_subtitle"
-        :image="$page->featured_image"
-        size="small"
+        kicker="Get in touch"
     />
 
-    <section class="py-12 sm:py-16">
+    <section class="page-section py-10 sm:py-14">
         <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
             @if ($page->content)
-                <div class="prose-church mb-10 text-center">{!! safeHtml($page->content) !!}</div>
+                <div class="prose-church mb-8 text-center">{!! safeHtml($page->content) !!}</div>
             @endif
 
-            <x-card>
+            <div class="form-gen-z card-modern">
                 @php
                     $formComponent = match ($page->slug) {
                         'prayer-request' => 'forms.prayer-request-form',
@@ -28,7 +27,7 @@
                 @endphp
 
                 @livewire($formComponent)
-            </x-card>
+            </div>
         </div>
     </section>
 

@@ -124,9 +124,13 @@
                 $style = $data['style'] ?? 'primary';
                 $isPrimary = $style === 'primary';
             @endphp
-            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
+            <section class="page-section py-12 sm:py-16 md:py-20">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
-                    <div class="overflow-hidden rounded-3xl {{ $isPrimary ? 'hero-modern px-6 py-12 text-center sm:px-12 sm:py-16' : 'card-modern' }}">
+                    <div @class([
+                        'cta-gen-z overflow-hidden rounded-3xl px-6 py-12 text-center sm:px-12 sm:py-16',
+                        'cta-gen-z--primary' => $isPrimary,
+                        'cta-gen-z--secondary card-modern' => ! $isPrimary,
+                    ])>
                         <x-section-heading
                             :title="$data['heading'] ?? $block->title"
                             :subtitle="$data['body'] ?? null"
@@ -148,30 +152,31 @@
 
         @case('ministry_cards')
             @php $items = $ministries->take($data['limit'] ?? 4); @endphp
-            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
+            <section class="page-section py-12 sm:py-16 md:py-20">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <x-section-heading :title="$data['heading'] ?? 'Our Ministries'" :subtitle="$data['subheading'] ?? null" />
-                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="bento-grid bento-grid--ministries mt-8">
                         @forelse ($items as $ministry)
-                            <x-card :href="route('ministries.show', $ministry->slug)" :padding="false">
-                                <div class="aspect-[4/3] overflow-hidden bg-[var(--site-surface-2)]">
+                            <a href="{{ route('ministries.show', $ministry->slug) }}" class="bento-tile group">
+                                <div class="bento-tile-media">
                                     @if ($storageUrl($ministry->featured_image))
-                                        <img src="{{ $storageUrl($ministry->featured_image) }}" alt="{{ $ministry->name }}" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                                        <img src="{{ $storageUrl($ministry->featured_image) }}" alt="{{ $ministry->name }}" loading="lazy" decoding="async" class="bento-tile-image">
                                     @else
-                                        <div class="flex h-full items-center justify-center bg-gradient-to-br from-[var(--site-brand)]/10 to-[var(--site-warm)]/10">
-                                            <span class="font-bold text-2xl text-ink-muted/50">{{ substr($ministry->name, 0, 1) }}</span>
-                                        </div>
+                                        <div class="bento-tile-fallback"><span>{{ substr($ministry->name, 0, 1) }}</span></div>
                                     @endif
+                                    <div class="bento-tile-shade"></div>
                                 </div>
-                                <div class="p-5">
-                                    <h3 class="font-bold text-xl font-semibold text-ink group-hover:text-brand">{{ $ministry->name }}</h3>
+                                <div class="bento-tile-body">
+                                    <span class="feed-sticker feed-sticker--inline">Ministry</span>
+                                    <h3 class="bento-tile-title">{{ $ministry->name }}</h3>
                                     @if ($ministry->short_description)
-                                        <p class="mt-2 line-clamp-3 text-sm text-ink-muted">{{ $ministry->short_description }}</p>
+                                        <p class="bento-tile-desc">{{ $ministry->short_description }}</p>
                                     @endif
+                                    <span class="bento-tile-link">Explore →</span>
                                 </div>
-                            </x-card>
+                            </a>
                         @empty
-                            <p class="col-span-full text-center text-ink-muted">Ministries will appear here soon.</p>
+                            <p class="feed-empty col-span-full">Ministries will appear here soon.</p>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -187,36 +192,40 @@
 
         @case('event_list')
             @php $items = $events->take($data['limit'] ?? 3); @endphp
-            <section class="bg-surface py-16 sm:py-20">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <section class="page-section py-12 sm:py-16 md:py-20">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <x-section-heading :title="$data['heading'] ?? 'Upcoming Events'" />
-                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="feed-grid mt-8">
                         @forelse ($items as $event)
-                            <x-card :href="route('events.show', $event->slug)" :padding="false">
-                                <div class="aspect-video overflow-hidden bg-[var(--site-surface-2)]">
+                            <x-card
+                                href="{{ route('events.show', $event->slug) }}"
+                                :padding="false"
+                                @class(['feed-card overflow-hidden', 'feed-card--featured' => $loop->first])
+                            >
+                                <div class="feed-card-media">
                                     @if ($storageUrl($event->featured_image))
-                                        <img src="{{ $storageUrl($event->featured_image) }}" alt="{{ $event->title }}" loading="lazy" class="h-full w-full object-cover">
+                                        <img src="{{ $storageUrl($event->featured_image) }}" alt="" class="feed-card-image" loading="lazy" decoding="async">
                                     @else
-                                        <div class="flex h-full flex-col items-center justify-center bg-gradient-to-br from-[var(--site-brand-dark)] to-[var(--site-brand)] p-4 text-center text-white">
-                                            <time datetime="{{ $event->starts_at->toIso8601String() }}" class="font-bold text-3xl font-semibold text-brand">
-                                                {{ $event->starts_at->format('d') }}
-                                            </time>
-                                            <span class="text-sm uppercase tracking-wider text-white/80">{{ $event->starts_at->format('M Y') }}</span>
+                                        <div class="feed-card-fallback feed-card-fallback--event">
+                                            <span class="feed-date-day">{{ $event->starts_at->format('d') }}</span>
+                                            <span class="feed-date-month">{{ $event->starts_at->format('M') }}</span>
                                         </div>
                                     @endif
+                                    <span class="feed-sticker">{{ $event->category ?? 'Event' }}</span>
                                 </div>
-                                <div class="p-5">
-                                    <time datetime="{{ $event->starts_at->toIso8601String() }}" class="text-sm font-medium text-brand">
-                                        {{ $event->starts_at->format('l, j F Y') }}
+                                <div class="feed-card-body">
+                                    <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
+                                        {{ $event->starts_at->format('l, j F') }}
                                     </time>
-                                    <h3 class="mt-1 font-bold text-xl font-semibold text-ink group-hover:text-brand">{{ $event->title }}</h3>
+                                    <h3 class="feed-card-title">{{ $event->title }}</h3>
                                     @if ($event->location)
-                                        <p class="mt-2 text-sm text-ink-muted">{{ $event->location }}</p>
+                                        <p class="feed-card-desc">{{ $event->location }}</p>
                                     @endif
+                                    <span class="feed-card-cta">View details →</span>
                                 </div>
                             </x-card>
                         @empty
-                            <p class="col-span-full text-center text-ink-muted">No upcoming events at this time.</p>
+                            <p class="feed-empty">No upcoming events at this time.</p>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -232,35 +241,32 @@
 
         @case('sermon_list')
             @php $items = $sermons->take($data['limit'] ?? 3); @endphp
-            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
+            <section class="page-section py-12 sm:py-16 md:py-20">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <x-section-heading :title="$data['heading'] ?? 'Recent Sermons'" />
-                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="sermon-stack mt-8">
                         @forelse ($items as $sermon)
-                            <x-card>
-                                <div class="flex items-start gap-4">
-                                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[var(--site-brand)] text-white">
-                                        <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6.75 6.75 0 006.75-6.75v-1.5m-6.75 1.5c-1.357 0-2.573.516-3.5 1.35m0 0c-1.128 1.019-2.25 1.519-3.5 1.519m9 2.25c-1.357 0-2.573-.516-3.5-1.35m0 0c-1.128-1.019-2.25-1.519-3.5-1.519m0 0V21m0-3.375c0-1.357.516-2.573 1.35-3.5m0 0c1.019-1.128 1.519-2.25 1.519-3.5"/></svg>
+                            <x-card class="sermon-card">
+                                <div class="sermon-card-top">
+                                    <div class="sermon-card-icon" aria-hidden="true">
+                                        <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6.75 6.75 0 006.75-6.75v-1.5m-6.75 1.5c-1.357 0-2.573.516-3.5 1.35m0 0c-1.128 1.019-2.25 1.519-3.5 1.519m9 2.25c-1.357 0-2.573-.516-3.5-1.35m0 0c-1.128-1.019-2.25-1.519-3.5-1.519m0 0V21m0-3.375c0-1.357.516-2.573 1.35-3.5m0 0c1.019-1.128 1.519-2.25 1.519-3.5"/></svg>
                                     </div>
                                     <div class="min-w-0 flex-1">
-                                        <h3 class="font-bold text-lg font-semibold text-ink">{{ $sermon->title }}</h3>
-                                        <p class="mt-1 text-sm text-ink-muted">{{ $sermon->speaker }} · {{ $sermon->preached_at?->format('j M Y') }}</p>
                                         @if ($sermon->bible_passage)
-                                            <p class="mt-1 text-sm font-medium text-brand">{{ $sermon->bible_passage }}</p>
+                                            <span class="feed-sticker feed-sticker--inline">{{ $sermon->bible_passage }}</span>
                                         @endif
-                                        <div class="mt-3 flex flex-wrap gap-2">
-                                            @if ($sermon->youtube_url)
-                                                <a href="{{ $sermon->youtube_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 rounded-lg bg-[var(--site-surface-2)] px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-[var(--site-surface-2)]">Watch</a>
-                                            @endif
-                                            @if ($sermon->getFirstMediaUrl('audio'))
-                                                <a href="{{ $sermon->getFirstMediaUrl('audio') }}" class="inline-flex items-center gap-1 rounded-lg bg-[var(--site-surface-2)] px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-[var(--site-surface-2)]">Listen</a>
-                                            @endif
-                                        </div>
+                                        <h3 class="sermon-card-title">{{ $sermon->title }}</h3>
+                                        <p class="sermon-card-meta">{{ $sermon->speaker }} · {{ $sermon->preached_at?->format('j M Y') }}</p>
                                     </div>
+                                </div>
+                                <div class="sermon-card-actions">
+                                    @if ($sermon->youtube_url)
+                                        <x-button href="{{ $sermon->youtube_url }}" variant="primary" class="!min-h-11 !text-sm" target="_blank" rel="noopener noreferrer">Watch</x-button>
+                                    @endif
                                 </div>
                             </x-card>
                         @empty
-                            <p class="col-span-full text-center text-ink-muted">Sermons will appear here soon.</p>
+                            <p class="feed-empty">Sermons will appear here soon.</p>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -276,25 +282,26 @@
 
         @case('gallery')
             @php $items = $albums->take($data['limit'] ?? 6); @endphp
-            <section class="bg-surface py-16 sm:py-20">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <section class="page-section py-12 sm:py-16 md:py-20">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <x-section-heading :title="$data['heading'] ?? 'Gallery'" />
-                    <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+                    <div class="gallery-mosaic mt-8">
                         @forelse ($items as $album)
-                            <a href="{{ route('gallery.show', $album->slug) }}" class="group relative aspect-square overflow-hidden rounded-2xl bg-[var(--site-surface-2)]">
-                                @if ($storageUrl($album->cover_image))
-                                    <img src="{{ $storageUrl($album->cover_image) }}" alt="{{ $album->title }}" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
-                                @else
-                                    <div class="flex h-full items-center justify-center bg-gradient-to-br from-[var(--site-brand)]/20 to-[var(--site-warm)]/20">
-                                        <svg class="h-10 w-10 text-ink-muted/50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                            <x-card :href="route('gallery.show', $album->slug)" :padding="false" class="gallery-tile overflow-hidden">
+                                <div class="gallery-tile-media">
+                                    @if ($storageUrl($album->cover_image))
+                                        <img src="{{ $storageUrl($album->cover_image) }}" alt="{{ $album->title }}" loading="lazy" decoding="async" class="gallery-tile-image">
+                                    @else
+                                        <div class="gallery-tile-fallback"><span>{{ substr($album->title, 0, 1) }}</span></div>
+                                    @endif
+                                    <div class="gallery-tile-overlay">
+                                        <span class="feed-sticker">Album</span>
+                                        <h3 class="gallery-tile-title">{{ $album->title }}</h3>
                                     </div>
-                                @endif
-                                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4">
-                                    <span class="font-bold text-sm font-semibold text-white sm:text-base">{{ $album->title }}</span>
                                 </div>
-                            </a>
+                            </x-card>
                         @empty
-                            <p class="col-span-full text-center text-ink-muted">Gallery albums coming soon.</p>
+                            <p class="feed-empty col-span-full">Gallery albums coming soon.</p>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -309,15 +316,13 @@
             @break
 
         @case('quote')
-            <section class="py-16 sm:py-20">
+            <section class="page-section py-12 sm:py-16 md:py-20">
                 <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                    <blockquote class="relative rounded-3xl bg-surface px-8 py-12 shadow-lg ring-1 border border-[var(--site-border)] sm:px-12 sm:py-16">
-                        <svg class="absolute left-6 top-6 h-10 w-10 text-brand/30 sm:left-10 sm:top-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.29l.806 1.548C6.657 7.898 5.094 10.009 5.094 12.011c0 1.097.378 1.977 1.084 2.637.707.659 1.677 1.063 2.803 1.063 1.394 0 2.583-.544 3.482-1.632.899-1.088 1.348-2.431 1.348-4.029 0-2.325-1.008-4.236-3.024-5.733C8.772 4.215 6.186 3.011 3 3.011V0c3.763 0 6.953 1.401 9.571 4.203C15.189 7.005 16.5 10.015 16.5 13.233c0 2.652-.892 4.816-2.676 6.492C12.04 21.401 9.806 22.239 7.083 22.239c-1.394 0-2.652-.352-3.773-1.055z"/></svg>
-                        <p class="relative font-bold text-xl leading-relaxed text-ink sm:text-2xl lg:text-3xl">
-                            {{ $data['quote'] ?? '' }}
-                        </p>
+                    <blockquote class="quote-gen-z">
+                        <span class="quote-gen-z-mark" aria-hidden="true">"</span>
+                        <p class="quote-gen-z-text">{{ $data['quote'] ?? '' }}</p>
                         @if (! empty($data['attribution']))
-                            <footer class="mt-6 font-medium text-brand">— {{ $data['attribution'] }}</footer>
+                            <footer class="quote-gen-z-footer">— {{ $data['attribution'] }}</footer>
                         @endif
                         @if (! empty($data['link_label']))
                             <div class="mt-8">

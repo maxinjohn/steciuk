@@ -72,7 +72,7 @@ trait HandlesChurchForm
 
     protected function notifyAdmin(): void
     {
-        $email = Setting::get('contact_email', config('mail.from.address'));
+        $email = Setting::get('contact_email') ?: config('site.admin_email') ?: config('mail.from.address');
 
         if (! $email) {
             return;

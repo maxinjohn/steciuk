@@ -262,11 +262,15 @@
                     <div>
                         <h2>Service Locations</h2>
                         <ul class="mt-3 space-y-2 text-sm text-[var(--site-footer-muted)]" role="list">
-                            <li>Manchester</li>
-                            <li>Leicester</li>
-                            <li>Dartford</li>
-                            <li>Sunderland</li>
-                            <li>Bristol</li>
+                            @forelse ($serviceLocations ?? [] as $location)
+                                <li>{{ $location }}</li>
+                            @empty
+                                <li>Manchester</li>
+                                <li>Leicester</li>
+                                <li>Dartford</li>
+                                <li>Sunderland</li>
+                                <li>Bristol</li>
+                            @endforelse
                         </ul>
                         <a href="{{ route('services.index') }}" class="mt-4 inline-block text-sm font-semibold text-[var(--site-brand)] transition hover:opacity-80">
                             View service times →
@@ -342,11 +346,15 @@
                                     </div>
                                 @elseif ($section['slot'] === 'locations')
                                     <ul class="space-y-2 pt-3 text-sm text-[var(--site-footer-muted)]" role="list">
-                                        <li>Manchester</li>
-                                        <li>Leicester</li>
-                                        <li>Dartford</li>
-                                        <li>Sunderland</li>
-                                        <li>Bristol</li>
+                                        @forelse ($serviceLocations ?? [] as $location)
+                                            <li>{{ $location }}</li>
+                                        @empty
+                                            <li>Manchester</li>
+                                            <li>Leicester</li>
+                                            <li>Dartford</li>
+                                            <li>Sunderland</li>
+                                            <li>Bristol</li>
+                                        @endforelse
                                     </ul>
                                     <a href="{{ route('services.index') }}" class="mt-3 inline-block text-sm font-semibold text-[var(--site-brand)]">View service times →</a>
                                 @elseif ($section['slot'] === 'contact')
