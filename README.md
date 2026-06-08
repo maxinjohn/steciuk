@@ -7,60 +7,176 @@ Production-ready church website for **steciuk.org**, built with Laravel 13, Fila
 - **Fully dynamic CMS** — pages, menus, events, news, sermons, ministries, gallery, resources, and church settings editable from admin
 - **Rich text editing** — Filament RichEditor (TipTap) for page and content editing
 - **Flexible content blocks** — hero, CTA, ministry cards, event/sermon lists, gallery, FAQ, maps, YouTube embeds, and more
-- **Mobile-first design** — sticky header, slide-out navigation, card layouts, accessible colours
+- **Mobile-first Gen Z UI** — bento layouts, feed cards, sticky dock navigation, gradient titles, PWA install
 - **Secure forms** — contact, prayer request, new member, event enquiry, volunteer (honeypot + rate limiting)
-- **SEO ready** — dynamic meta tags, Open Graph, sitemap.xml, robots.txt, Schema.org Church data
+- **SEO ready** — dynamic meta tags, Open Graph, JSON-LD, sitemap.xml, robots.txt
 - **Role-based admin** — Super Admin, Editor, Viewer roles with policies
+- **Env-configurable** — data paths, ports, seeding behaviour, and security flags via `.env`
 
 ## Requirements
 
-- PHP 8.3+
+- PHP 8.3 or 8.4
 - Composer 2
 - Node.js 20+ and npm
 - SQLite extension enabled
 
-## Local Setup
+## Quick start (local, no Docker)
 
 ```bash
-# Clone and install
+git clone git@github.com:maxinjohn/steciuk.git
+cd steciuk
 composer install
 cp .env.example .env
 php artisan key:generate
 
-# Create SQLite database outside public directory
 mkdir -p storage/database
 touch storage/database/database.sqlite
 
-# Update .env — set absolute path for DB_DATABASE:
-# DB_DATABASE=/full/path/to/storage/database/database.sqlite
-
-php artisan migrate --seed
+php artisan migrate
+php artisan site:bootstrap
 php artisan storage:link
-npm install && npm run build
+npm ci && npm run build
 
-# Create additional admin user (optional)
-php artisan make:filament-user
+php artisan serve
 ```
 
-### Default admin credentials (change immediately in production)
+| URL | Address |
+|-----|---------|
+| Public site | http://localhost:8000 |
+| Admin panel | http://localhost:8000/admin |
+
+Or run everything together (server, queue, logs, Vite):
+
+```bash
+composer dev
+```
+
+### Default admin credentials
+
+Change these immediately before any public deployment.
 
 | Email | Password | Role |
 |-------|----------|------|
 | admin@steciuk.org | password | Super Admin |
 | editor@steciuk.org | password | Editor |
 
-- **Public site:** `http://localhost:8000`
-- **Admin panel:** `http://localhost:8000/admin`
+## Environment configuration
+
+Copy `.env.example` to `.env` and adjust. The example file contains every variable with standard defaults and inline comments.
 
 ```bash
-php artisan serve
-# or use composer dev for server + queue + vite
-composer dev
+cp .env.example .env
+php artisan key:generate
 ```
 
-## Admin Panel
+### Key variables
 
-Navigate to `/admin` and sign in. Key modules:
+| Variable | Local default | Production |
+|----------|---------------|------------|
+| `APP_ENV` | `local` | `production` |
+| `APP_DEBUG` | `true` | `false` |
+| `APP_URL` | `http://localhost:8000` | `https://steciuk.org` |
+| `DB_DATABASE` | `storage/database/database.sqlite` | absolute path outside `public/` |
+| `FILESYSTEM_DISK` | `public` | `public` |
+| `CACHE_STORE` | `file` | `file` |
+| `MAIL_MAILER` | `log` | `smtp` |
+| `FORCE_HTTPS` | `false` | `true` |
+| `SEED_MODE` | `bootstrap` | `off` |
+| `EXPOSE_EXCEPTION_DETAILS` | `false` | `false` |
+
+### Site data paths (optional)
+
+Store uploads and the database outside the application directory:
+
+```env
+APP_STORAGE_PATH=/var/lib/steciuk/storage
+PUBLIC_STORAGE_PATH=/var/lib/steciuk/uploads
+PRIVATE_STORAGE_PATH=/var/lib/steciuk/private
+DB_DATABASE=/var/lib/steciuk/storage/database/database.sqlite
+```
+
+Docker bind mount (instead of named volumes):
+
+```env
+STORAGE_HOST_PATH=/var/lib/steciuk/storage
+BOOTSTRAP_CACHE_HOST_PATH=/var/lib/steciuk/bootstrap-cache
+```
+
+### Security variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `FORCE_HTTPS` | `false` | Redirect HTTP → HTTPS |
+| `CSP_ENABLED` | `true` | Content Security Policy headers |
+| `BLOCK_SUSPICIOUS_REQUESTS` | `true` | Block common injection patterns |
+| `REQUIRE_MFA_SUPER_ADMIN` | `false` | Require 2FA for super admins |
+| `MAX_LOGIN_ATTEMPTS` | `5` | Admin login rate limit |
+| `LOGIN_DECAY_MINUTES` | `15` | Lockout window |
+| `TRUSTED_PROXIES` | *(empty)* | Set to `*` behind nginx/load balancer |
+| `EXPOSE_EXCEPTION_DETAILS` | `false` | Never enable on production |
+
+### Docker ports
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `NGINX_HTTP_PORT` | `8080` | Public website |
+| `NGINX_HTTPS_PORT` | `8443` | HTTPS (when SSL configured) |
+| `VITE_DEV_PORT` | `5173` | Vite dev server (dev profile) |
+| `PHP_FPM_PORT` | `9000` | PHP-FPM internal |
+| `RUN_MIGRATIONS` | `true` | Auto-migrate on container start |
+| `RUN_SEED` | `false` | Auto-seed on container start |
+
+## Reference data & seeding
+
+All parish content (pages, menus, events, news, services, etc.) lives in `database/seeders/` as **idempotent reference data**.
+
+| `SEED_MODE` | Behaviour |
+|-------------|-----------|
+| `bootstrap` | First install — creates all reference pages, menus, settings, sample content |
+| `sync` | Deploy update — upserts seeded records by slug/key; **never deletes prod-only data** |
+| `off` | No seeding (default production after bootstrap) |
+
+### Commands
+
+```bash
+# First install (local or production)
+php artisan site:bootstrap --force
+
+# Push dev content changes to production without wiping prod-only records
+php artisan site:sync-reference-data --force
+```
+
+### What sync preserves
+
+- News, events, pages created only in production (no matching slug)
+- Custom menu links added in admin (no `seed_key`)
+- Admin passwords (unless `SEED_OVERWRITE_USER_PASSWORDS=true`)
+- Settings edited in production (unless `SEED_OVERWRITE_SETTINGS=true`)
+
+### What sync updates
+
+- Seeded pages, events, news, ministries, services, etc. (matched by **slug**)
+- Menu structure for seeded items (matched by **seed_key**)
+- Home page content blocks (matched by **seed_key**)
+
+### Production first deploy
+
+```env
+SEED_MODE=off
+RUN_SEED=false
+```
+
+Then run once:
+
+```bash
+php artisan site:bootstrap --force
+```
+
+Or for Docker first boot only: `RUN_SEED=true` and `SEED_MODE=bootstrap` in `.env`, then set back to `off`.
+
+## Admin panel
+
+Navigate to `/admin` and sign in.
 
 | Module | Purpose |
 |--------|---------|
@@ -75,30 +191,80 @@ Navigate to `/admin` and sign in. Key modules:
 | Church Settings | Logo, contact info, social links, SEO defaults |
 | Users | Manage admin accounts (Super Admin only) |
 
-## Deployment (cPanel / Shared VPS)
+## Docker deployment
+
+```bash
+cp .env.example .env
+# Edit .env — APP_URL, ports, optional STORAGE_HOST_PATH
+
+docker compose build
+docker compose up -d
+
+# First deploy with reference content:
+docker compose exec app php artisan site:bootstrap --force
+```
+
+| URL | Address |
+|-----|---------|
+| Site | http://localhost:8080 (or `NGINX_HTTP_PORT`) |
+| Admin | http://localhost:8080/admin |
+
+### Make shortcuts
+
+```bash
+make prod       # build + start
+make bootstrap  # first-time reference data
+make sync       # sync dev changes to prod safely
+make logs       # tail logs
+make shell      # app container shell
+make dev        # dev mode with hot reload
+```
+
+### Optional services
+
+```bash
+docker compose --profile queue up -d      # queue worker
+docker compose --profile scheduler up -d  # task scheduler
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up  # Vite HMR
+```
+
+### Architecture
+
+- **app** — PHP 8.4-FPM (Laravel + Filament)
+- **nginx** — Nginx 1.27 Alpine (static assets + reverse proxy)
+- **queue** — `php artisan queue:work` (optional profile)
+- **scheduler** — cron replacement (optional profile)
+
+Persistent data: `steci-storage` volume (or `STORAGE_HOST_PATH` bind mount) for SQLite + uploads.
+
+## Deployment (cPanel / shared VPS)
 
 ### 1. Upload files
 
-Upload the project to a directory **above** or **beside** `public_html`, with only the `public/` folder contents mapped to the web root.
-
-Recommended structure:
+Place the Laravel app **outside** the web root. Only `public/` should be web-accessible.
 
 ```
-/home/user/steciuk.org/          ← Laravel app root (NOT web accessible)
-/home/user/public_html/          ← Symlink or copy of public/
+/home/user/steciuk.org/     ← app root (NOT web accessible)
+/home/user/public_html/     ← contents of public/ or symlink
 ```
 
 ### 2. Environment
 
-```bash
+```env
 APP_ENV=production
 APP_DEBUG=false
+EXPOSE_EXCEPTION_DETAILS=false
 APP_URL=https://steciuk.org
 
 DB_CONNECTION=sqlite
 DB_DATABASE=/home/user/steciuk.org/storage/database/database.sqlite
 
 FILESYSTEM_DISK=public
+CACHE_STORE=file
+MAIL_MAILER=smtp
+FORCE_HTTPS=true
+SEED_MODE=off
+TRUSTED_PROXIES=*
 ```
 
 ### 3. Post-deploy commands
@@ -106,199 +272,91 @@ FILESYSTEM_DISK=public
 ```bash
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
+php artisan site:bootstrap --force   # first deploy only
 php artisan storage:link
+npm ci && npm run build
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-npm ci && npm run build
-```
-
-Set directory permissions:
-
-```bash
 chmod -R 775 storage bootstrap/cache
 ```
 
-### 4. Cron (optional, for queues)
+### 4. Cron (optional)
 
 ```
 * * * * * cd /home/user/steciuk.org && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-### 5. Security checklist
+### 5. Production checklist
 
 - [ ] Change default admin passwords
-- [ ] Set `APP_DEBUG=false`
-- [ ] Confirm SQLite file is **not** inside `public/`
-- [ ] Block direct access to `.env` and `storage/`
-- [ ] Enable HTTPS (Let's Encrypt via cPanel)
-- [ ] Configure SMTP for form email notifications
+- [ ] `APP_DEBUG=false` and `EXPOSE_EXCEPTION_DETAILS=false`
+- [ ] SQLite file **not** inside `public/`
+- [ ] Block `.env` and `storage/` in web server config
+- [ ] HTTPS enabled (Let's Encrypt)
+- [ ] SMTP configured for form notifications
+- [ ] `SEED_MODE=off` after bootstrap
+- [ ] Enable MFA for super admin (`REQUIRE_MFA_SUPER_ADMIN=true`)
 
 ## Backup
-
-Back up these regularly:
 
 ```bash
 # Database
 cp storage/database/database.sqlite backups/database-$(date +%Y%m%d).sqlite
 
-# Uploaded media
+# Uploads
 tar -czf backups/uploads-$(date +%Y%m%d).tar.gz storage/app/public/
-```
-
-## Project Structure
-
-```
-app/
-├── Filament/          Admin panel resources and pages
-├── Http/Controllers/  Public site controllers
-├── Livewire/Forms/    Secure public forms
-├── Models/            Eloquent models
-└── Enums/             Status, roles, block types
-
-resources/views/
-├── layouts/           Main site layout
-├── pages/             Page templates
-├── components/        Reusable UI + content blocks
-└── livewire/          Form components
-
-database/seeders/      Sample STECI UK Parish content
 ```
 
 ## Security
 
-Production-hardened with:
-
-- **HTTPS enforcement** (`FORCE_HTTPS=true` in production)
-- **Content Security Policy** headers on public pages
-- **Suspicious request blocking** (SQL injection / XSS patterns)
-- **Secure headers**: HSTS, COOP, CORP, X-Frame-Options, nosniff
-- **Rate limiting** on Livewire forms and login attempts
-- **Session encryption** and admin session timeout (120 min)
-- **2FA (TOTP)** available in admin profile (Filament App Authentication)
-- **Security audit log** at `/admin` → Security (Super Admin only)
-- **Role-based access**: Super Admin, Editor, Viewer
-- **Strong passwords**: 12+ chars, mixed case, numbers, symbols
-- **Honeypot + rate limits** on all public forms
+- HTTPS enforcement (`FORCE_HTTPS=true`)
+- Content Security Policy on public pages
+- Suspicious request blocking (SQL injection / XSS patterns)
+- Secure headers: HSTS, COOP, CORP, X-Frame-Options, nosniff
+- Rate limiting on forms and admin login
+- Session encryption and admin session timeout (120 min)
+- 2FA (TOTP) in admin profile
+- Security audit log (Super Admin only)
+- Safe error pages — no stack traces or env leakage
+- Honeypot + rate limits on all public forms
 
 Enable MFA: Admin → Profile → Two-factor authentication.
 
-## PWA (Progressive Web App)
-
-The site is installable on mobile and tablet:
+## PWA
 
 - Web manifest at `/manifest.webmanifest`
-- Service worker at `/sw.js` (offline fallback + asset caching)
-- Install prompt banner on supported browsers
-- Apple touch icon and standalone mode
+- Service worker at `/sw.js` (static assets only; HTML not cached)
+- Install prompt on supported browsers
+- Offline fallback page
 
-## Page Customization
+## Project structure
 
-Every page is fully editable in **Admin → Pages**:
+```
+app/
+├── Console/Commands/   site:bootstrap, site:sync-reference-data
+├── Filament/           Admin panel resources
+├── Http/Controllers/   Public site
+├── Livewire/Forms/     Secure public forms
+├── Models/             Eloquent models
+├── Services/           Caching, SEO, SQLite optimiser
+└── Support/            SeedConfig, embed sanitiser
 
-- Rich text content (TipTap editor)
-- Hero title, subtitle, style (gradient / image / minimal / immersive)
-- Content blocks (15+ section types)
-- Custom CSS and JS per page
-- Layout variants: standard, bento, minimal, immersive
-- Accent colours, SEO fields, template selection
+config/
+├── site.php            Paths and seeding behaviour
+└── security.php        Security flags
 
-Module listing pages (Events, News, Services, etc.) also pull hero/content from their matching Page record in the database.
-
-## Docker Production Deployment
-
-All ports and startup behaviour are configurable in `.env`:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NGINX_HTTP_PORT` | `8080` | Public website port |
-| `NGINX_HTTPS_PORT` | `8443` | HTTPS port (when SSL configured) |
-| `VITE_DEV_PORT` | `5173` | Vite dev server (dev profile only) |
-| `PHP_FPM_PORT` | `9000` | PHP-FPM internal port |
-| `RUN_MIGRATIONS` | `true` | Auto-run migrations on startup |
-| `RUN_SEED` | `false` | Seed database on first deploy |
-
-### Quick start
-
-```bash
-cp .env.example .env
-# Edit .env — set APP_KEY (or let entrypoint generate), APP_URL, ports
-
-docker compose build
-docker compose up -d
-
-# First deploy with sample content:
-RUN_SEED=true docker compose up -d
+database/seeders/       Idempotent reference parish content
 ```
 
-Site: `http://localhost:8080` (or your `NGINX_HTTP_PORT`)  
-Admin: `http://localhost:8080/admin`
-
-### Make shortcuts
-
-```bash
-make prod      # build + start
-make logs      # tail logs
-make shell     # app container shell
-make fresh     # migrate:fresh --seed
-make dev       # dev mode with hot reload
-```
-
-### Optional services
-
-```bash
-# Queue worker
-docker compose --profile queue up -d
-
-# Task scheduler
-docker compose --profile scheduler up -d
-
-# Development with Vite HMR
-docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up
-```
-
-### Architecture
-
-- **app** — PHP 8.3-FPM (Laravel + Filament)
-- **nginx** — Nginx 1.27 Alpine (static assets + reverse proxy)
-- **queue** — `php artisan queue:work` (optional profile)
-- **scheduler** — cron replacement (optional profile)
-
-Persistent volumes: `steci-storage` (SQLite DB + uploads), `steci-bootstrap-cache`
-
-### Production checklist
-
-```bash
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://steciuk.org
-FORCE_HTTPS=true
-RUN_SEED=false
-```
-
-Change default admin passwords after first login.
-
-## Mobile & Tablet
-
-The site is built **mobile-first** with:
-
-- 48px minimum touch targets on all buttons and nav items
-- 16px form inputs (prevents iOS zoom)
-- Safe-area insets for notched phones and PWA standalone mode
-- Tablet navigation from 768px (`md` breakpoint)
-- Full-width buttons on mobile, inline on tablet+
-- Horizontal scroll carousels where needed
-- PWA install support with offline fallback
-- No horizontal overflow — tested layouts at 320px–1024px
-
-## Tech Stack
+## Tech stack
 
 - Laravel 13
-- Filament v4 (admin)
+- Filament v4
 - Livewire 3
 - Tailwind CSS v4
-- Spatie Media Library
-- Spatie Sitemap
+- PHP 8.3 / 8.4
+- Spatie Media Library & Sitemap
 - Mews HTML Purifier
 
 ## Licence
