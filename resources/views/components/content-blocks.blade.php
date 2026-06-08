@@ -1,0 +1,543 @@
+@props([
+    'blocks',
+    'services' => collect(),
+    'ministries' => collect(),
+    'events' => collect(),
+    'news' => collect(),
+    'sermons' => collect(),
+    'albums' => collect(),
+])
+
+@php
+    $resolveLink = function (?string $url): string {
+        if (! $url) {
+            return '#';
+        }
+
+        return str_starts_with($url, 'http') ? $url : url($url);
+    };
+
+    $storageUrl = function (?string $path): ?string {
+        if (! $path) {
+            return null;
+        }
+
+        return str_starts_with($path, 'http') ? $path : asset('storage/' . ltrim($path, '/'));
+    };
+
+    $youtubeEmbed = function (?string $url): ?string {
+        if (! $url) {
+            return null;
+        }
+
+        if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            return 'https://www.youtube-nocookie.com/embed/' . $matches[1];
+        }
+
+        return null;
+    };
+@endphp
+
+@foreach ($blocks as $block)
+    @php
+        $data = $block->content ?? [];
+        $type = $block->type->value ?? $block->type;
+    @endphp
+
+    @switch($type)
+        @case('hero')
+            <x-hero
+                :title="$data['headline'] ?? $block->title"
+                :subtitle="$data['subtitle'] ?? null"
+                :eyebrow="$data['eyebrow'] ?? null"
+                :badge="$data['badge'] ?? 'UK Parish'"
+                :image="$data['image'] ?? null"
+                :stats="$data['stats'] ?? []"
+                size="large"
+            >
+                @if (! empty($data['primary_cta_label']))
+                    <x-button href="{{ $resolveLink($data['primary_cta_url'] ?? '#') }}" hero>
+                        {{ $data['primary_cta_label'] }}
+                    </x-button>
+                @endif
+                @if (! empty($data['secondary_cta_label']))
+                    <x-button href="{{ $resolveLink($data['secondary_cta_url'] ?? '#') }}" hero variant="outline">
+                        {{ $data['secondary_cta_label'] }}
+                    </x-button>
+                @endif
+                @if (! empty($data['tertiary_cta_label']))
+                    <x-button href="{{ $resolveLink($data['tertiary_cta_url'] ?? '#') }}" hero variant="outline">
+                        {{ $data['tertiary_cta_label'] }}
+                    </x-button>
+                @endif
+            </x-hero>
+            @break
+
+        @case('text_image')
+        @case('image_text')
+            @php $imageFirst = $type === 'image_text'; @endphp
+            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                    <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16 {{ $imageFirst ? '' : '' }}">
+                        @if ($imageFirst)
+                            <div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--site-surface-2)] shadow-lg">
+                                @if ($storageUrl($data['image'] ?? null))
+                                    <img src="{{ $storageUrl($data['image']) }}" alt="{{ $data['image_alt'] ?? $data['heading'] ?? '' }}" loading="lazy" class="h-full w-full object-cover">
+                                @else
+                                    <div class="flex h-full items-center justify-center bg-gradient-to-br from-[var(--site-brand-dark)] to-[var(--site-brand)]">
+                                        <svg class="h-16 w-16 text-brand/40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                        <div>
+                            @if (! empty($data['heading']))
+                                <x-section-heading :title="$data['heading']" :subtitle="$data['subheading'] ?? null" align="left" class="!mb-6" />
+                            @endif
+                            @if (! empty($data['body']))
+                                <div class="prose-church">{!! safeHtml($data['body']) !!}</div>
+                            @endif
+                            @if (! empty($data['link_label']))
+                                <x-button href="{{ $resolveLink($data['link_url'] ?? '#') }}" variant="secondary" class="mt-6">
+                                    {{ $data['link_label'] }}
+                                </x-button>
+                            @endif
+                        </div>
+                        @unless ($imageFirst)
+                            <div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--site-surface-2)] shadow-lg">
+                                @if ($storageUrl($data['image'] ?? null))
+                                    <img src="{{ $storageUrl($data['image']) }}" alt="{{ $data['image_alt'] ?? $data['heading'] ?? '' }}" loading="lazy" class="h-full w-full object-cover">
+                                @else
+                                    <div class="flex h-full items-center justify-center bg-gradient-to-br from-[var(--site-brand-dark)] to-[var(--site-brand)]">
+                                        <svg class="h-16 w-16 text-brand/40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                                    </div>
+                                @endif
+                            </div>
+                        @endunless
+                    </div>
+                </div>
+            </section>
+            @break
+
+        @case('cta')
+            @php
+                $style = $data['style'] ?? 'primary';
+                $isPrimary = $style === 'primary';
+            @endphp
+            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                    <div class="overflow-hidden rounded-3xl {{ $isPrimary ? 'hero-modern px-6 py-12 text-center sm:px-12 sm:py-16' : 'card-modern' }}">
+                        <x-section-heading
+                            :title="$data['heading'] ?? $block->title"
+                            :subtitle="$data['body'] ?? null"
+                            :light="$isPrimary"
+                            class="!mb-8"
+                        />
+                        @if (! empty($data['button_label']))
+                            <x-button
+                                href="{{ $resolveLink($data['button_url'] ?? '#') }}"
+                                :variant="$isPrimary ? 'primary' : 'secondary'"
+                            >
+                                {{ $data['button_label'] }}
+                            </x-button>
+                        @endif
+                    </div>
+                </div>
+            </section>
+            @break
+
+        @case('ministry_cards')
+            @php $items = $ministries->take($data['limit'] ?? 4); @endphp
+            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                    <x-section-heading :title="$data['heading'] ?? 'Our Ministries'" :subtitle="$data['subheading'] ?? null" />
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        @forelse ($items as $ministry)
+                            <x-card :href="route('ministries.show', $ministry->slug)" :padding="false">
+                                <div class="aspect-[4/3] overflow-hidden bg-[var(--site-surface-2)]">
+                                    @if ($storageUrl($ministry->featured_image))
+                                        <img src="{{ $storageUrl($ministry->featured_image) }}" alt="{{ $ministry->name }}" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                                    @else
+                                        <div class="flex h-full items-center justify-center bg-gradient-to-br from-[var(--site-brand)]/10 to-[var(--site-warm)]/10">
+                                            <span class="font-bold text-2xl text-ink-muted/50">{{ substr($ministry->name, 0, 1) }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="p-5">
+                                    <h3 class="font-bold text-xl font-semibold text-ink group-hover:text-brand">{{ $ministry->name }}</h3>
+                                    @if ($ministry->short_description)
+                                        <p class="mt-2 line-clamp-3 text-sm text-ink-muted">{{ $ministry->short_description }}</p>
+                                    @endif
+                                </div>
+                            </x-card>
+                        @empty
+                            <p class="col-span-full text-center text-ink-muted">Ministries will appear here soon.</p>
+                        @endforelse
+                    </div>
+                    @if (! empty($data['link_label']))
+                        <div class="mt-10 text-center">
+                            <x-button href="{{ $resolveLink($data['link_url'] ?? route('ministries.index')) }}" variant="outline">
+                                {{ $data['link_label'] }}
+                            </x-button>
+                        </div>
+                    @endif
+                </div>
+            </section>
+            @break
+
+        @case('event_list')
+            @php $items = $events->take($data['limit'] ?? 3); @endphp
+            <section class="bg-surface py-16 sm:py-20">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <x-section-heading :title="$data['heading'] ?? 'Upcoming Events'" />
+                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        @forelse ($items as $event)
+                            <x-card :href="route('events.show', $event->slug)" :padding="false">
+                                <div class="aspect-video overflow-hidden bg-[var(--site-surface-2)]">
+                                    @if ($storageUrl($event->featured_image))
+                                        <img src="{{ $storageUrl($event->featured_image) }}" alt="{{ $event->title }}" loading="lazy" class="h-full w-full object-cover">
+                                    @else
+                                        <div class="flex h-full flex-col items-center justify-center bg-gradient-to-br from-[var(--site-brand-dark)] to-[var(--site-brand)] p-4 text-center text-white">
+                                            <time datetime="{{ $event->starts_at->toIso8601String() }}" class="font-bold text-3xl font-semibold text-brand">
+                                                {{ $event->starts_at->format('d') }}
+                                            </time>
+                                            <span class="text-sm uppercase tracking-wider text-white/80">{{ $event->starts_at->format('M Y') }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="p-5">
+                                    <time datetime="{{ $event->starts_at->toIso8601String() }}" class="text-sm font-medium text-brand">
+                                        {{ $event->starts_at->format('l, j F Y') }}
+                                    </time>
+                                    <h3 class="mt-1 font-bold text-xl font-semibold text-ink group-hover:text-brand">{{ $event->title }}</h3>
+                                    @if ($event->location)
+                                        <p class="mt-2 text-sm text-ink-muted">{{ $event->location }}</p>
+                                    @endif
+                                </div>
+                            </x-card>
+                        @empty
+                            <p class="col-span-full text-center text-ink-muted">No upcoming events at this time.</p>
+                        @endforelse
+                    </div>
+                    @if (! empty($data['link_label']))
+                        <div class="mt-10 text-center">
+                            <x-button href="{{ $resolveLink($data['link_url'] ?? route('events.index')) }}" variant="outline">
+                                {{ $data['link_label'] }}
+                            </x-button>
+                        </div>
+                    @endif
+                </div>
+            </section>
+            @break
+
+        @case('sermon_list')
+            @php $items = $sermons->take($data['limit'] ?? 3); @endphp
+            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                    <x-section-heading :title="$data['heading'] ?? 'Recent Sermons'" />
+                    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        @forelse ($items as $sermon)
+                            <x-card>
+                                <div class="flex items-start gap-4">
+                                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[var(--site-brand)] text-white">
+                                        <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6.75 6.75 0 006.75-6.75v-1.5m-6.75 1.5c-1.357 0-2.573.516-3.5 1.35m0 0c-1.128 1.019-2.25 1.519-3.5 1.519m9 2.25c-1.357 0-2.573-.516-3.5-1.35m0 0c-1.128-1.019-2.25-1.519-3.5-1.519m0 0V21m0-3.375c0-1.357.516-2.573 1.35-3.5m0 0c1.019-1.128 1.519-2.25 1.519-3.5"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="font-bold text-lg font-semibold text-ink">{{ $sermon->title }}</h3>
+                                        <p class="mt-1 text-sm text-ink-muted">{{ $sermon->speaker }} · {{ $sermon->preached_at?->format('j M Y') }}</p>
+                                        @if ($sermon->bible_passage)
+                                            <p class="mt-1 text-sm font-medium text-brand">{{ $sermon->bible_passage }}</p>
+                                        @endif
+                                        <div class="mt-3 flex flex-wrap gap-2">
+                                            @if ($sermon->youtube_url)
+                                                <a href="{{ $sermon->youtube_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 rounded-lg bg-[var(--site-surface-2)] px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-[var(--site-surface-2)]">Watch</a>
+                                            @endif
+                                            @if ($sermon->getFirstMediaUrl('audio'))
+                                                <a href="{{ $sermon->getFirstMediaUrl('audio') }}" class="inline-flex items-center gap-1 rounded-lg bg-[var(--site-surface-2)] px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-[var(--site-surface-2)]">Listen</a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </x-card>
+                        @empty
+                            <p class="col-span-full text-center text-ink-muted">Sermons will appear here soon.</p>
+                        @endforelse
+                    </div>
+                    @if (! empty($data['link_label']))
+                        <div class="mt-10 text-center">
+                            <x-button href="{{ $resolveLink($data['link_url'] ?? route('sermons.index')) }}" variant="outline">
+                                {{ $data['link_label'] }}
+                            </x-button>
+                        </div>
+                    @endif
+                </div>
+            </section>
+            @break
+
+        @case('gallery')
+            @php $items = $albums->take($data['limit'] ?? 6); @endphp
+            <section class="bg-surface py-16 sm:py-20">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <x-section-heading :title="$data['heading'] ?? 'Gallery'" />
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+                        @forelse ($items as $album)
+                            <a href="{{ route('gallery.show', $album->slug) }}" class="group relative aspect-square overflow-hidden rounded-2xl bg-[var(--site-surface-2)]">
+                                @if ($storageUrl($album->cover_image))
+                                    <img src="{{ $storageUrl($album->cover_image) }}" alt="{{ $album->title }}" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                                @else
+                                    <div class="flex h-full items-center justify-center bg-gradient-to-br from-[var(--site-brand)]/20 to-[var(--site-warm)]/20">
+                                        <svg class="h-10 w-10 text-ink-muted/50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                                    </div>
+                                @endif
+                                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4">
+                                    <span class="font-bold text-sm font-semibold text-white sm:text-base">{{ $album->title }}</span>
+                                </div>
+                            </a>
+                        @empty
+                            <p class="col-span-full text-center text-ink-muted">Gallery albums coming soon.</p>
+                        @endforelse
+                    </div>
+                    @if (! empty($data['link_label']))
+                        <div class="mt-10 text-center">
+                            <x-button href="{{ $resolveLink($data['link_url'] ?? route('gallery.index')) }}" variant="outline">
+                                {{ $data['link_label'] }}
+                            </x-button>
+                        </div>
+                    @endif
+                </div>
+            </section>
+            @break
+
+        @case('quote')
+            <section class="py-16 sm:py-20">
+                <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                    <blockquote class="relative rounded-3xl bg-surface px-8 py-12 shadow-lg ring-1 border border-[var(--site-border)] sm:px-12 sm:py-16">
+                        <svg class="absolute left-6 top-6 h-10 w-10 text-brand/30 sm:left-10 sm:top-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.29l.806 1.548C6.657 7.898 5.094 10.009 5.094 12.011c0 1.097.378 1.977 1.084 2.637.707.659 1.677 1.063 2.803 1.063 1.394 0 2.583-.544 3.482-1.632.899-1.088 1.348-2.431 1.348-4.029 0-2.325-1.008-4.236-3.024-5.733C8.772 4.215 6.186 3.011 3 3.011V0c3.763 0 6.953 1.401 9.571 4.203C15.189 7.005 16.5 10.015 16.5 13.233c0 2.652-.892 4.816-2.676 6.492C12.04 21.401 9.806 22.239 7.083 22.239c-1.394 0-2.652-.352-3.773-1.055z"/></svg>
+                        <p class="relative font-bold text-xl leading-relaxed text-ink sm:text-2xl lg:text-3xl">
+                            {{ $data['quote'] ?? '' }}
+                        </p>
+                        @if (! empty($data['attribution']))
+                            <footer class="mt-6 font-medium text-brand">— {{ $data['attribution'] }}</footer>
+                        @endif
+                        @if (! empty($data['link_label']))
+                            <div class="mt-8">
+                                <x-button href="{{ $resolveLink($data['link_url'] ?? '#') }}" variant="outline">
+                                    {{ $data['link_label'] }}
+                                </x-button>
+                            </div>
+                        @endif
+                    </blockquote>
+                </div>
+            </section>
+            @break
+
+        @case('faq')
+            <section class="py-16 sm:py-20">
+                <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+                    @if (! empty($data['heading']))
+                        <x-section-heading :title="$data['heading']" />
+                    @endif
+                    <div class="space-y-3" x-data="{ open: 0 }">
+                        @foreach ($data['items'] ?? [] as $index => $item)
+                            <div class="overflow-hidden rounded-xl bg-surface shadow-sm ring-1 border border-[var(--site-border)]">
+                                <button
+                                    type="button"
+                                    class="flex w-full items-center justify-between px-5 py-4 text-left font-medium text-ink"
+                                    @click="open = open === {{ $index }} ? null : {{ $index }}"
+                                    :aria-expanded="open === {{ $index }}"
+                                >
+                                    {{ $item['question'] ?? '' }}
+                                    <svg class="h-5 w-5 shrink-0 text-brand transition" :class="open === {{ $index }} && 'rotate-180'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                                </button>
+                                <div
+                                    x-show="open === {{ $index }}"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0"
+                                    x-transition:enter-end="opacity-100"
+                                    class="border-t border-navy/5 px-5 pb-4"
+                                    x-cloak
+                                >
+                                    <div class="prose-church pt-3">{!! safeHtml($item['answer'] ?? '') !!}</div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+            @break
+
+        @case('location')
+            @php
+                $locationNames = collect($data['locations'] ?? [])
+                    ->whenEmpty(fn () => $services->pluck('location')->filter()->unique());
+                $serviceByLocation = $services->keyBy('location');
+                $locationsData = $locationNames->map(function ($name) use ($serviceByLocation) {
+                    $label = is_string($name) ? $name : (string) $name;
+
+                    return [
+                        'name' => $label,
+                        'service' => $serviceByLocation->get($label),
+                    ];
+                })->values();
+            @endphp
+            @if ($locationsData->isNotEmpty())
+                <section class="bg-surface py-12 sm:py-16 md:py-20" x-data="{ active: 0 }">
+                    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <x-section-heading :title="$data['heading'] ?? 'Locations'" :subtitle="$data['subheading'] ?? null" />
+
+                        <div class="location-tabs mt-8" role="tablist" aria-label="UK worship locations">
+                            @foreach ($locationsData as $index => $location)
+                                <button
+                                    type="button"
+                                    role="tab"
+                                    class="location-tab"
+                                    :class="active === {{ $index }} && 'is-active'"
+                                    :aria-selected="active === {{ $index }}"
+                                    @click="active = {{ $index }}"
+                                >
+                                    {{ $location['name'] }}
+                                </button>
+                            @endforeach
+                        </div>
+
+                        @foreach ($locationsData as $index => $location)
+                            @php $service = $location['service']; @endphp
+                            <div
+                                x-show="active === {{ $index }}"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                role="tabpanel"
+                                class="location-panel"
+                                x-cloak
+                            >
+                                <div class="flex items-start gap-4">
+                                    <div class="location-panel-icon shrink-0">
+                                        <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="font-bold text-2xl text-ink">{{ $location['name'] }}</h3>
+                                        @if ($service?->frequency)
+                                            <p class="mt-1 text-sm font-medium text-brand">{{ $service->frequency }}</p>
+                                        @endif
+                                        @if ($service?->description)
+                                            <p class="mt-3 text-sm leading-relaxed text-ink-muted">{{ $service->description }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                @if ($service && ($service->service_day || $service->service_time || $service->address))
+                                    <dl class="mt-6 grid gap-3 sm:grid-cols-2">
+                                        @if ($service->service_day || $service->service_time)
+                                            <div class="rounded-xl bg-[var(--site-surface-2)] px-4 py-3">
+                                                <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">When</dt>
+                                                <dd class="mt-1 text-sm font-medium text-ink">
+                                                    {{ trim(($service->service_day ?? '') . ' · ' . ($service->service_time ?? ''), ' ·') }}
+                                                </dd>
+                                            </div>
+                                        @endif
+                                        @if ($service->address)
+                                            <div class="rounded-xl bg-[var(--site-surface-2)] px-4 py-3 sm:col-span-2">
+                                                <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Address</dt>
+                                                <dd class="mt-1 text-sm text-ink">{{ $service->address }}</dd>
+                                            </div>
+                                        @endif
+                                    </dl>
+                                @endif
+
+                                <div class="mt-6 flex flex-wrap gap-3">
+                                    @if ($service?->map_link)
+                                        <x-button href="{{ $service->map_link }}" variant="outline" class="!min-h-11 !w-auto !px-4 !py-2 !text-sm" target="_blank" rel="noopener noreferrer">View Map</x-button>
+                                    @endif
+                                    <x-button href="{{ $resolveLink($data['link_url'] ?? route('services.index')) }}" variant="secondary" class="!min-h-11 !w-auto !px-4 !py-2 !text-sm">
+                                        {{ $data['link_label'] ?? 'All Service Times' }}
+                                    </x-button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+            @break
+
+        @case('youtube')
+            @php $embed = $youtubeEmbed($data['url'] ?? null); @endphp
+            @if ($embed)
+                <section class="py-16 sm:py-20">
+                    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                        @if (! empty($data['heading']))
+                            <x-section-heading :title="$data['heading']" :subtitle="$data['subheading'] ?? null" />
+                        @endif
+                        <div class="aspect-video overflow-hidden rounded-2xl shadow-lg ring-1 border border-[var(--site-border)]">
+                            <iframe
+                                src="{{ $embed }}"
+                                title="{{ $data['heading'] ?? 'Video' }}"
+                                class="h-full w-full"
+                                loading="lazy"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                            ></iframe>
+                        </div>
+                    </div>
+                </section>
+            @endif
+            @break
+
+        @case('map')
+            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                    @if (! empty($data['heading']))
+                        <x-section-heading :title="$data['heading']" />
+                    @endif
+                    <div class="overflow-hidden rounded-2xl shadow-lg ring-1 border border-[var(--site-border)]">
+                        @if (! empty($data['embed']))
+                            <div class="aspect-video">{!! safeEmbed($data['embed']) ?: '<div class="feed-empty !rounded-none !border-0">Map unavailable</div>' !!}</div>
+                        @elseif ($googleMapsEmbed ?? null)
+                            <div class="aspect-video">{!! safeEmbed($googleMapsEmbed) ?: '<div class="feed-empty !rounded-none !border-0">Map unavailable</div>' !!}</div>
+                        @else
+                            <div class="feed-empty !rounded-none !border-0">Map unavailable</div>
+                        @endif
+                    </div>
+                </div>
+            </section>
+            @break
+
+        @case('contact')
+            <section class="py-16 sm:py-20">
+                <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+                    @if (! empty($data['heading']))
+                        <x-section-heading :title="$data['heading']" />
+                    @endif
+                    @livewire('forms.contact-form')
+                </div>
+            </section>
+            @break
+
+        @case('downloads')
+            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                    @if (! empty($data['heading']))
+                        <x-section-heading :title="$data['heading']" />
+                    @endif
+                    <div class="text-center">
+                        <x-button href="{{ $resolveLink($data['link_url'] ?? route('resources.index')) }}" variant="secondary">
+                            {{ $data['link_label'] ?? 'Browse Resources' }}
+                        </x-button>
+                    </div>
+                </div>
+            </section>
+            @break
+
+        @default
+            @if ($block->title)
+                <section class="py-12">
+                    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <x-section-heading :title="$block->title" />
+                        @if (is_array($data) && ! empty($data['body']))
+                            <div class="prose-church mx-auto max-w-3xl">{!! safeHtml($data['body']) !!}</div>
+                        @endif
+                    </div>
+                </section>
+            @endif
+    @endswitch
+@endforeach

@@ -1,0 +1,41 @@
+# Development overrides — hot reload with bind mounts
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  app:
+    build:
+      target: production
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      RUN_MIGRATIONS: "true"
+      RUN_SEED: "true"
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+      - steci-storage:/var/www/html/storage
+
+  nginx:
+    ports:
+      - "${NGINX_HTTP_PORT:-8080}:80"
+    volumes:
+      - ./public:/var/www/html/public:ro
+      - steci-storage:/var/www/html/storage:ro
+
+  vite:
+    image: node:22-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-steciuk}-vite
+    working_dir: /var/www/html
+    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0 --port ${VITE_DEV_PORT:-5173}"
+    ports:
+      - "${VITE_DEV_PORT:-5173}:${VITE_DEV_PORT:-5173}"
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/node_modules
+    environment:
+      VITE_DEV_PORT: ${VITE_DEV_PORT:-5173}
+    networks:
+      - steci-network
+    profiles:
+      - dev

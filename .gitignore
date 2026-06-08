@@ -1,0 +1,76 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE / local tooling
+/.cursor/
+/.codex
+/.fleet
+/.idea
+/.nova
+/.phpactor.json
+/.vscode
+/.zed
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
+
+# Dependencies (install via composer / npm on deploy)
+/node_modules
+/vendor
+
+# Environment & secrets (never commit)
+.env
+.env.*
+!.env.example
+/auth.json
+*.pem
+
+# Laravel runtime / cache
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/*.key
+/storage/pail
+/storage/database/*.sqlite
+/storage/database/*.sqlite-journal
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+/storage/app/public/*
+!/storage/app/public/.gitignore
+
+# Local SQLite databases
+/database/*.sqlite
+/database/*.sqlite-journal
+
+# Build artifacts (run `npm run build` after deploy)
+/public/build
+/public/hot
+/public/storage
+/public/fonts-manifest.dev.json
+
+# Tests & coverage
+/.phpunit.cache
+/.phpunit.result.cache
+/coverage
+.phpunit.result.cache
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Homestead
+Homestead.json
+Homestead.yaml

@@ -1,0 +1,52 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+.fi-sidebar {
+    @apply border-r border-white/5;
+}
+
+.fi-main {
+    @apply bg-slate-950/50;
+}
+
+.fi-topbar {
+    @apply backdrop-blur-xl bg-slate-900/80 border-b border-white/5;
+}
+
+.fi-sidebar-nav {
+    @apply gap-1;
+}
+
+.fi-sidebar-item-button {
+    @apply rounded-xl transition-all duration-200;
+}
+
+.fi-sidebar-item-button:hover {
+    @apply bg-amber-500/10;
+}
+
+.fi-sidebar-item-active .fi-sidebar-item-button {
+    @apply bg-amber-500/15 text-amber-400;
+}
+
+.fi-section {
+    @apply rounded-2xl border border-white/5 shadow-xl shadow-black/20;
+}
+
+.fi-ta-header-cell {
+    @apply uppercase text-xs tracking-wider;
+}
+
+.fi-btn-primary {
+    @apply shadow-lg shadow-amber-500/20;
+}
+
+.fi-wi-stats-overview-stat {
+    @apply rounded-2xl border border-white/5 bg-gradient-to-br from-slate-900 to-slate-950;
+}

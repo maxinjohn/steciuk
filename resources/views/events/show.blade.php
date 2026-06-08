@@ -1,0 +1,111 @@
+@extends('layouts.app')
+
+@section('title', $event->title . ' | Events | ' . $siteName)
+@section('description', strip_tags($event->description))
+@section('og_type', 'article')
+@if ($event->featured_image)
+    @section('og_image', \App\Support\Seo::absoluteAsset($event->featured_image))
+@endif
+
+@push('head')
+    @php
+        $eventSchema = array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'Event',
+            'name' => $event->title,
+            'description' => \App\Support\Seo::truncateDescription(strip_tags($event->description)),
+            'startDate' => $event->starts_at->toIso8601String(),
+            'endDate' => $event->ends_at?->toIso8601String(),
+            'eventStatus' => 'https://schema.org/EventScheduled',
+            'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
+            'location' => [
+                '@type' => 'Place',
+                'name' => $event->location,
+                'address' => $event->address,
+            ],
+            'url' => url()->current(),
+            'image' => \App\Support\Seo::absoluteAsset($event->featured_image),
+            'organizer' => [
+                '@type' => 'Organization',
+                'name' => $siteName,
+                'url' => url('/'),
+            ],
+        ], fn ($value) => $value !== null && $value !== '' && $value !== []);
+    @endphp
+    <script type="application/ld+json">
+        {!! json_encode($eventSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+@endpush
+
+@section('content')
+    <article>
+        <x-hero :title="$event->title" :subtitle="$event->location" :image="$event->featured_image" size="small">
+            <time datetime="{{ $event->starts_at->toIso8601String() }}" class="inline-flex items-center rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
+                {{ $event->starts_at->format('l, j F Y · g:i A') }}
+                @if ($event->ends_at)
+                    – {{ $event->ends_at->format('g:i A') }}
+                @endif
+            </time>
+        </x-hero>
+
+        <section class="py-12 sm:py-16">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="grid gap-12 lg:grid-cols-3">
+                    <div class="lg:col-span-2">
+                        @if ($event->description)
+                            <div class="prose-church">{!! safeHtml($event->description) !!}</div>
+                        @endif
+                    </div>
+
+                    <aside class="space-y-6">
+                        <x-card>
+                            <h2 class="font-bold text-xl font-semibold text-ink">Event Details</h2>
+                            <dl class="mt-4 space-y-4 text-sm">
+                                <div>
+                                    <dt class="font-medium text-ink-muted">Date & Time</dt>
+                                    <dd class="mt-1 text-ink">{{ $event->starts_at->format('l, j F Y') }}<br>{{ $event->starts_at->format('g:i A') }}</dd>
+                                </div>
+                                @if ($event->location)
+                                    <div>
+                                        <dt class="font-medium text-ink-muted">Location</dt>
+                                        <dd class="mt-1 text-ink">{{ $event->location }}</dd>
+                                    </div>
+                                @endif
+                                @if ($event->address)
+                                    <div>
+                                        <dt class="font-medium text-ink-muted">Address</dt>
+                                        <dd class="mt-1 text-ink">{{ $event->address }}</dd>
+                                    </div>
+                                @endif
+                                @if ($event->category)
+                                    <div>
+                                        <dt class="font-medium text-ink-muted">Category</dt>
+                                        <dd class="mt-1"><span class="rounded-full bg-gold/15 px-3 py-0.5 text-brand-dark">{{ $event->category }}</span></dd>
+                                    </div>
+                                @endif
+                            </dl>
+
+                            @if ($event->registration_link)
+                                <x-button href="{{ $event->registration_link }}" variant="primary" class="mt-6 w-full" target="_blank" rel="noopener noreferrer">
+                                    Register Now
+                                </x-button>
+                            @endif
+                        </x-card>
+
+                        <x-card>
+                            <h2 class="font-bold text-xl font-semibold text-ink">Enquire About This Event</h2>
+                            <p class="mt-2 text-sm text-ink-muted">Have questions? Send us a message.</p>
+                            <div class="mt-4">
+                                @livewire('forms.event-enquiry-form')
+                            </div>
+                        </x-card>
+                    </aside>
+                </div>
+
+                <div class="mt-10">
+                    <x-button href="{{ route('events.index') }}" variant="outline">← Back to Events</x-button>
+                </div>
+            </div>
+        </section>
+    </article>
+@endsection
