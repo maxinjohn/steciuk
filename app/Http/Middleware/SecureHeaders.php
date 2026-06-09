@@ -30,11 +30,11 @@ class SecureHeaders
         if (config('security.csp_enabled') && ! \App\Support\AdminPanelConfig::isAdminRequest($request)) {
             $csp = implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' https://www.youtube.com https://www.google.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com",
                 "style-src 'self' 'unsafe-inline'",
                 "img-src 'self' data: blob: https:",
                 "font-src 'self' data:",
-                "connect-src 'self' https:",
+                "connect-src 'self' https: wss:",
                 "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
                 "media-src 'self' https: blob:",
                 "object-src 'none'",

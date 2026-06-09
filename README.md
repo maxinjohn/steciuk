@@ -7,20 +7,20 @@ Production-ready church website for **steciuk.org**, built with Laravel 13, Fila
 - **Fully dynamic CMS** — pages, menus, events, news, sermons, ministries, gallery, resources, and church settings editable from admin
 - **Rich text editing** — Filament RichEditor (TipTap) for page and content editing
 - **Flexible content blocks** — hero, CTA, ministry cards, event/sermon lists, gallery, FAQ, maps, YouTube embeds, and more
-- **Mobile-first Gen Z UI** — bento layouts, feed cards, sticky dock navigation, gradient titles, PWA install
+- **Mobile-first UI** — hero narrative, bento layouts, sticky dock navigation, gradient titles, PWA install
 - **Secure forms** — contact, prayer request, new member, event enquiry, volunteer (honeypot + rate limiting)
 - **SEO ready** — dynamic meta tags, Open Graph, JSON-LD, sitemap.xml, robots.txt
 - **Role-based admin** — Super Admin, Editor, Viewer roles with policies
-- **Env-configurable** — data paths, ports, seeding behaviour, and security flags via `.env`
+- **Env-configurable** — data paths, seeding behaviour, and security flags via `.env`
 
 ## Requirements
 
-- PHP 8.3 or 8.4
+- PHP 8.3 or 8.4 with extensions: `sqlite3`, `mbstring`, `openssl`, `curl`, `fileinfo`, `gd` or `imagick`
 - Composer 2
 - Node.js 20+ and npm
-- SQLite extension enabled
+- Web server (Apache or nginx) pointing document root at `public/`
 
-## Quick start (local, no Docker)
+## Quick start (local)
 
 ```bash
 git clone git@github.com:maxinjohn/steciuk.git
@@ -33,9 +33,9 @@ mkdir -p storage/database
 touch storage/database/database.sqlite
 
 php artisan migrate
-php artisan site:bootstrap
+php artisan site:bootstrap --force
 php artisan storage:link
-npm ci && npm run build
+npm install && npm run build
 
 php artisan serve
 ```
@@ -45,7 +45,7 @@ php artisan serve
 | Public site | http://localhost:8000 |
 | Admin panel | http://localhost:8000/admin |
 
-Or run everything together (server, queue, logs, Vite):
+Or run server, queue, logs, and Vite together:
 
 ```bash
 composer dev
@@ -62,7 +62,7 @@ Change these immediately before any public deployment.
 
 ## Environment configuration
 
-Copy `.env.example` to `.env` and adjust. The example file contains every variable with standard defaults and inline comments.
+Copy `.env.example` to `.env` and adjust.
 
 ```bash
 cp .env.example .env
@@ -79,7 +79,7 @@ php artisan key:generate
 | `DB_DATABASE` | `storage/database/database.sqlite` | absolute path outside `public/` |
 | `FILESYSTEM_DISK` | `public` | `public` |
 | `CACHE_STORE` | `file` | `file` |
-| `MAIL_MAILER` | `log` | `smtp` |
+| `MAIL_MAILER` | `log` | `smtp` or `sendmail` |
 | `FORCE_HTTPS` | `false` | `true` |
 | `SEED_MODE` | `bootstrap` | `off` |
 | `EXPOSE_EXCEPTION_DETAILS` | `false` | `false` |
@@ -95,13 +95,6 @@ PRIVATE_STORAGE_PATH=/var/lib/steciuk/private
 DB_DATABASE=/var/lib/steciuk/storage/database/database.sqlite
 ```
 
-Docker bind mount (instead of named volumes):
-
-```env
-STORAGE_HOST_PATH=/var/lib/steciuk/storage
-BOOTSTRAP_CACHE_HOST_PATH=/var/lib/steciuk/bootstrap-cache
-```
-
 ### Security variables
 
 | Variable | Default | Purpose |
@@ -114,16 +107,6 @@ BOOTSTRAP_CACHE_HOST_PATH=/var/lib/steciuk/bootstrap-cache
 | `LOGIN_DECAY_MINUTES` | `15` | Lockout window |
 | `TRUSTED_PROXIES` | *(empty)* | Set to `*` behind nginx/load balancer |
 | `EXPOSE_EXCEPTION_DETAILS` | `false` | Never enable on production |
-
-### Docker ports
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NGINX_HTTP_PORT` | `8080` | Host port → container port 80 |
-| `RUN_SCHEDULER` | `true` | Scheduler inside the container |
-| `RUN_QUEUE_WORKER` | `false` | Set `true` only with `QUEUE_CONNECTION=database` |
-| `RUN_MIGRATIONS` | `true` | Auto-migrate on container start |
-| `RUN_SEED` | `false` | Auto-seed on container start |
 
 ## Reference data & seeding
 
@@ -138,12 +121,14 @@ All parish content (pages, menus, events, news, services, etc.) lives in `databa
 ### Commands
 
 ```bash
-# First install (local or production)
+# First install only (local or production)
 php artisan site:bootstrap --force
 
-# Push dev content changes to production without wiping prod-only records
+# Optional: push dev reference content to production without wiping prod-only records
 php artisan site:sync-reference-data --force
 ```
+
+**Important:** Run `site:bootstrap` once on a new server. On later deploys, run **migrations only** — do not re-bootstrap unless you intentionally want to reset reference content.
 
 ### What sync preserves
 
@@ -152,26 +137,130 @@ php artisan site:sync-reference-data --force
 - Admin passwords (unless `SEED_OVERWRITE_USER_PASSWORDS=true`)
 - Settings edited in production (unless `SEED_OVERWRITE_SETTINGS=true`)
 
-### What sync updates
+## Production hosting (PHP / cPanel / VPS)
 
-- Seeded pages, events, news, ministries, services, etc. (matched by **slug**)
-- Menu structure for seeded items (matched by **seed_key**)
-- Home page content blocks (matched by **seed_key**)
+Place the Laravel app **outside** the web root. Only `public/` should be web-accessible.
 
-### Production first deploy
+```
+/home/steciuk/steciuk.org/     ← app root (NOT web accessible)
+/home/steciuk/public_html/     ← document root → symlink or copy of public/
+```
+
+### First deploy
+
+```bash
+git clone git@github.com:maxinjohn/steciuk.git /home/steciuk/steciuk.org
+cd /home/steciuk/steciuk.org
+
+cp .env.example .env
+# Edit .env: APP_ENV=production, APP_DEBUG=false, APP_URL=https://steciuk.org, MAIL_*, etc.
+php artisan key:generate
+
+composer install --optimize-autoloader
+npm install
+npm run build
+
+mkdir -p storage/database
+touch storage/database/database.sqlite
+chmod -R 775 storage bootstrap/cache
+
+php artisan migrate --force
+php artisan site:bootstrap --force
+php artisan storage:link
+
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+chown -R steciuk:steciuk /home/steciuk/steciuk.org
+```
+
+Set in `.env` after bootstrap:
 
 ```env
 SEED_MODE=off
-RUN_SEED=false
 ```
 
-Then run once:
+### Routine deploy (after git pull / merge to main)
+
+Run this on the server whenever you release new code. **No seeding** — migrations only.
 
 ```bash
-php artisan site:bootstrap --force
+cd /home/steciuk/steciuk.org
+git pull origin main
+
+composer install --optimize-autoloader
+
+npm install
+npm run build
+
+chmod -R 775 storage bootstrap/cache
+
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
+php artisan migrate --force
+
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+chown -R steciuk:steciuk /home/steciuk/steciuk.org
 ```
 
-Or for Docker first boot only: `RUN_SEED=true` and `SEED_MODE=bootstrap` in `.env`, then set back to `off`.
+Optional after deploy:
+
+```bash
+php artisan site:ensure-roles
+php artisan site:ensure-admin
+php artisan site:sync-reference-data --force   # only when pushing dev content changes
+```
+
+### Production `.env` example
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+EXPOSE_EXCEPTION_DETAILS=false
+APP_URL=https://steciuk.org
+
+DB_CONNECTION=sqlite
+DB_DATABASE=/home/steciuk/steciuk.org/storage/database/database.sqlite
+
+FILESYSTEM_DISK=public
+CACHE_STORE=file
+MAIL_MAILER=smtp
+MAIL_HOST=mail.example.com
+MAIL_PORT=587
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=admin@steciuk.org
+MAIL_FROM_NAME="${APP_NAME}"
+
+FORCE_HTTPS=true
+SEED_MODE=off
+TRUSTED_PROXIES=*
+```
+
+### Cron (optional)
+
+```
+* * * * * cd /home/steciuk/steciuk.org && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Production checklist
+
+- [ ] Change default admin passwords
+- [ ] `APP_DEBUG=false` and `EXPOSE_EXCEPTION_DETAILS=false`
+- [ ] SQLite file **not** inside `public/`
+- [ ] Block `.env` and `storage/` in web server config
+- [ ] HTTPS enabled (Let's Encrypt)
+- [ ] Mail configured (`.env` SMTP/sendmail **or** admin → Email Setup)
+- [ ] `SEED_MODE=off` after first bootstrap
+- [ ] Enable MFA for super admin (`REQUIRE_MFA_SUPER_ADMIN=true`)
 
 ## Admin panel
 
@@ -188,181 +277,22 @@ Navigate to `/admin` and sign in.
 | Resources | Liturgy, lectionary, forms, safeguarding docs |
 | Form Submissions | View contact and prayer form entries |
 | Church Settings | Logo, contact info, social links, SEO defaults |
+| Email Setup | SMTP or sendmail override for contact forms |
 | Users | Manage admin accounts (Super Admin only) |
 
-## Docker deployment
+## Mail
 
-**One file** (`docker-compose.yml`), **one container**. Dev vs production is controlled by `.env` only — no separate dev compose file.
+Contact forms and admin notifications use Laravel mail. Two options:
 
-```bash
-cp .env.example .env
-docker compose build
-docker compose up -d
-docker compose exec app php artisan site:bootstrap --force   # first time only
-```
+1. **Server `.env`** (default) — set `MAIL_MAILER=smtp` or `MAIL_MAILER=sendmail` in `.env`
+2. **Admin panel** — Site Settings → Email Setup → enable **Use admin-configured mail** and save SMTP or sendmail settings
 
-| `.env` for local Docker | `.env` for production |
-|-------------------------|-------------------------|
-| `APP_ENV=local` | `APP_ENV=production` |
-| `APP_DEBUG=true` | `APP_DEBUG=false` |
-| `SEED_MODE=bootstrap` | `SEED_MODE=off` |
-| `DB_DATABASE=/var/www/html/storage/database/database.sqlite` | same + `APP_URL=https://steciuk.org` |
-
-Site: http://localhost:8080 · Admin: http://localhost:8080/admin
-
-### What's inside the container
-
-| Process | Default | Purpose |
-|---------|---------|---------|
-| nginx | on | Web server + gzip |
-| php-fpm | on | Laravel |
-| schedule:work | on | Weekly SQLite maintenance |
-| queue:work | **off** | Only if `QUEUE_CONNECTION=database` |
-
-### Image size optimisations
-
-- Node and Composer run **only at build** — not in the final image
-- Vendor `tests/` and markdown stripped from the image
-- OPcache + JIT, nginx gzip, realpath cache
-- Sync queue by default (no extra worker process)
-- `wget` healthcheck (no curl package)
-
-### Node/npm
-
-Builds Tailwind/Vite assets into `public/build/` during `docker compose build`. To change CSS/JS: run `npm run build` on your host, then rebuild the image.
-
-### Make shortcuts
-
-```bash
-make prod        # build + up (local)
-make bootstrap   # reference data
-make logs        # tail logs
-make shell       # container shell
-make deploy      # production deploy script
-make deploy-sync # deploy + sync reference data
-```
-
-### Production deploy (Docker server)
-
-Use this on the **production server** after merging `dev` → `main` on GitHub.
-
-```bash
-# One-time on the server
-git clone git@github.com:maxinjohn/steciuk.git
-cd steciuk
-cp .env.example .env
-# Edit .env for production (APP_ENV=production, APP_URL, APP_KEY, etc.)
-php artisan key:generate --show   # paste into .env APP_KEY
-
-# First deploy (creates DB + bootstrap if empty)
-./scripts/deploy.sh
-
-# Routine deploy after each release
-./scripts/deploy.sh
-
-# Deploy code + push dev reference content (pages/menus) to prod DB
-./scripts/deploy.sh --sync
-```
-
-Or via Make:
-
-```bash
-make deploy
-make deploy-sync
-```
-
-**What `scripts/deploy.sh` does:**
-
-1. `git pull` from `main` (ff-only; configurable via `scripts/deploy.env`)
-2. `docker compose build` and `up -d`
-3. Wait for `/up` health check
-4. `php artisan migrate --force`
-5. `site:ensure-roles` and `site:ensure-admin` (safe on every deploy)
-6. Optional `--sync` → `site:sync-reference-data` (upsert seeded content, keeps prod-only records)
-7. SQLite optimize + `php artisan optimize` in production
-8. Smoke test homepage and admin login URL
-
-**Dev → prod workflow:**
-
-| Step | Where | Command |
-|------|-------|---------|
-| 1. Develop | Local | work on `dev` branch |
-| 2. Release | GitHub | merge `dev` → `main` |
-| 3. Deploy | Production server | `./scripts/deploy.sh` |
-| 4. Content sync | Production (optional) | `./scripts/deploy.sh --sync` |
-
-Optional server config: `cp scripts/deploy.env.example scripts/deploy.env` to set `DEPLOY_BRANCH`, ports, etc.
-
-Container **entrypoint** also runs migrations, `site:ensure-roles`, and `site:ensure-admin` on every start — the deploy script runs them again so you see clear output in the deploy log.
-
-## Deployment (cPanel / shared VPS)
-
-### 1. Upload files
-
-Place the Laravel app **outside** the web root. Only `public/` should be web-accessible.
-
-```
-/home/user/steciuk.org/     ← app root (NOT web accessible)
-/home/user/public_html/     ← contents of public/ or symlink
-```
-
-### 2. Environment
-
-```env
-APP_ENV=production
-APP_DEBUG=false
-EXPOSE_EXCEPTION_DETAILS=false
-APP_URL=https://steciuk.org
-
-DB_CONNECTION=sqlite
-DB_DATABASE=/home/user/steciuk.org/storage/database/database.sqlite
-
-FILESYSTEM_DISK=public
-CACHE_STORE=file
-MAIL_MAILER=smtp
-FORCE_HTTPS=true
-SEED_MODE=off
-TRUSTED_PROXIES=*
-```
-
-### 3. Post-deploy commands
-
-```bash
-composer install --no-dev --optimize-autoloader
-php artisan migrate --force
-php artisan site:bootstrap --force   # first deploy only
-php artisan storage:link
-npm ci && npm run build
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-chmod -R 775 storage bootstrap/cache
-```
-
-### 4. Cron (optional)
-
-```
-* * * * * cd /home/user/steciuk.org && php artisan schedule:run >> /dev/null 2>&1
-```
-
-### 5. Production checklist
-
-- [ ] Change default admin passwords
-- [ ] `APP_DEBUG=false` and `EXPOSE_EXCEPTION_DETAILS=false`
-- [ ] SQLite file **not** inside `public/`
-- [ ] Block `.env` and `storage/` in web server config
-- [ ] HTTPS enabled (Let's Encrypt)
-- [ ] SMTP configured for form notifications
-- [ ] `SEED_MODE=off` after bootstrap
-- [ ] Enable MFA for super admin (`REQUIRE_MFA_SUPER_ADMIN=true`)
+Sender name/address from admin settings are applied even when using `.env` transport.
 
 ## Backup
 
 ```bash
-# Database
 cp storage/database/database.sqlite backups/database-$(date +%Y%m%d).sqlite
-
-# Uploads
 tar -czf backups/uploads-$(date +%Y%m%d).tar.gz storage/app/public/
 ```
 
@@ -391,17 +321,13 @@ Enable MFA: Admin → Profile → Two-factor authentication.
 ## Project structure
 
 ```
-scripts/
-├── deploy.sh           Production deploy (git pull + docker + migrate)
-└── deploy.env.example  Optional server deploy overrides
-
 app/
 ├── Console/Commands/   site:bootstrap, site:sync-reference-data, site:ensure-admin
 ├── Filament/           Admin panel resources
 ├── Http/Controllers/   Public site
 ├── Livewire/Forms/     Secure public forms
 ├── Models/             Eloquent models
-├── Services/           Caching, SEO, SQLite optimiser
+├── Services/           Caching, SEO, mail, SQLite optimiser
 └── Support/            SeedConfig, embed sanitiser
 
 config/

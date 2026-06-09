@@ -7,8 +7,6 @@ use App\Models\Role;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Hash;
-
 class UserForm
 {
     public static function configure(Schema $schema): Schema
@@ -24,9 +22,9 @@ class UserForm
                     ->unique(ignoreRecord: true),
                 TextInput::make('password')
                     ->password()
-                    ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? Hash::make($state) : null)
                     ->dehydrated(fn (?string $state): bool => filled($state))
-                    ->required(fn (string $operation): bool => $operation === 'create'),
+                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->helperText('Leave blank when editing to keep the current password.'),
                 Select::make('role')
                     ->options(fn (): array => Role::options())
                     ->default(UserRole::Editor->value)
