@@ -28,8 +28,7 @@ class AppServiceProvider extends ServiceProvider
             return Password::min(12)
                 ->mixedCase()
                 ->numbers()
-                ->symbols()
-                ->uncompromised();
+                ->symbols();
         });
 
         Gate::before(function ($user, $ability) {
@@ -73,7 +72,7 @@ class AppServiceProvider extends ServiceProvider
 
                 if (
                     $event->user instanceof \Filament\Models\Contracts\FilamentUser
-                    && \Filament\Facades\Filament::auth()->getProvider()->validateCredentials($event->user, $event->credentials)
+                    && \Illuminate\Support\Facades\Hash::check($event->credentials['password'] ?? '', $event->user->password)
                     && ! $event->user->canAccessPanel(\Filament\Facades\Filament::getCurrentOrDefaultPanel())
                 ) {
                     request()->attributes->set('admin_login_panel_denied', true);

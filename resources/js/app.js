@@ -163,11 +163,55 @@ const initScrollReveal = () => {
 
 const initMobileDock = () => {
     const toggle = document.getElementById('mobile-menu-toggle');
-    if (!toggle) return;
+    const closeButton = document.getElementById('mobile-menu-close');
+    const menu = document.getElementById('mobile-menu');
+    const overlay = document.getElementById('mobile-menu-overlay');
+
+    if (! toggle || ! menu) {
+        return;
+    }
+
+    const setOpen = (open) => {
+        menu.classList.toggle('is-open', open);
+        overlay?.classList.toggle('is-open', open);
+        toggle.classList.toggle('is-active', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        menu.setAttribute('aria-hidden', open ? 'false' : 'true');
+        overlay?.setAttribute('aria-hidden', open ? 'false' : 'true');
+        document.body.classList.toggle('mobile-menu-open', open);
+    };
 
     toggle.addEventListener('click', (event) => {
         event.preventDefault();
-        window.dispatchEvent(new CustomEvent('toggle-mobile-menu'));
+        setOpen(! menu.classList.contains('is-open'));
+    });
+
+    closeButton?.addEventListener('click', () => setOpen(false));
+    overlay?.addEventListener('click', () => setOpen(false));
+
+    document.querySelectorAll('[data-close-mobile-menu]').forEach((element) => {
+        element.addEventListener('click', () => setOpen(false));
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            setOpen(false);
+        }
+    });
+};
+
+const initMobileNav = () => {
+    document.querySelectorAll('[data-mobile-nav-trigger]').forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+            const section = trigger.closest('[data-mobile-nav-section]');
+            const panel = section?.querySelector('[data-mobile-nav-panel]');
+            const expanded = trigger.getAttribute('aria-expanded') === 'true';
+            const nextExpanded = ! expanded;
+
+            trigger.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
+            panel?.toggleAttribute('hidden', ! nextExpanded);
+            trigger.querySelector('.menu-link-mobile-chevron')?.classList.toggle('rotate-180', nextExpanded);
+        });
     });
 };
 
@@ -232,5 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initLocationTabs();
     initScrollReveal();
     initMobileDock();
+    initMobileNav();
     initPWA();
 });

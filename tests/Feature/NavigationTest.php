@@ -50,4 +50,19 @@ class NavigationTest extends TestCase
         $this->assertGreaterThanOrEqual(5, $panelCount);
         $this->assertSame($panelCount - 1, $hiddenPanelCount);
     }
+
+    public function test_mobile_menu_uses_vanilla_navigation_markup(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('id="mobile-menu"', false);
+        $response->assertSee('data-mobile-nav-trigger', false);
+        $response->assertSee('data-close-mobile-menu', false);
+        $response->assertDontSee('mobile-theme-toggle', false);
+        $response->assertDontSee('x-data="{ mobileOpen: false }"', false);
+    }
 }

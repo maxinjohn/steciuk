@@ -116,12 +116,12 @@ class MailSettings extends Page
             return;
         }
 
-        MailConfigService::applyFromSettings();
+        MailConfigService::applyForSending((bool) ($data['mail_use_admin_smtp'] ?? false));
 
         try {
             Mail::raw(
-                'This is a test message from the STECI UK parish admin panel. SMTP settings are working.',
-                fn ($message) => $message->to($recipient)->subject('STECI UK — SMTP test')
+                'This is a test message from the STECI UK parish admin panel. Mail delivery is working.',
+                fn ($message) => $message->to($recipient)->subject('STECI UK — mail test')
             );
 
             Notification::make()
@@ -148,15 +148,16 @@ class MailSettings extends Page
         return $schema
             ->components([
                 Section::make('SMTP delivery')
-                    ->description('When enabled, contact forms and admin notifications use these settings instead of server environment variables.')
+                    ->description('When disabled, the site uses your server .env mail settings (SMTP or sendmail). When enabled, the values below override .env for contact forms and notifications.')
                     ->schema([
                         Toggle::make('mail_use_admin_smtp')
-                            ->label('Use admin-configured SMTP')
+                            ->label('Use admin-configured mail')
                             ->live(),
                         Select::make('mail_mailer')
                             ->label('Mailer')
                             ->options([
                                 'smtp' => 'SMTP',
+                                'sendmail' => 'PHP sendmail (server mail)',
                                 'log' => 'Log only (development)',
                             ])
                             ->default('smtp')

@@ -220,14 +220,14 @@ html.dark {
     }
 
     .site-logo-line {
-        font-size: 1.25rem;
-        line-height: 1.05;
-        white-space: nowrap;
+        font-size: clamp(0.8125rem, 2.8vw, 1.125rem);
+        line-height: 1.1;
+        white-space: normal;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 480px) {
         .site-logo-line {
-            font-size: clamp(0.9375rem, 0.65vw + 0.55rem, 1.1875rem);
+            white-space: nowrap;
         }
     }
 
@@ -376,18 +376,31 @@ html.dark {
     }
 
     .mobile-overlay {
+        display: none;
         background: rgba(12, 10, 9, 0.55);
         backdrop-filter: blur(4px);
     }
 
+    .mobile-overlay.is-open {
+        display: block;
+    }
+
     .mobile-sheet {
-        display: flex;
+        display: none;
         flex-direction: column;
         inset-inline: 0;
         top: 0;
         bottom: var(--mobile-dock-height);
         background: var(--site-menu-bg);
         padding-top: env(safe-area-inset-top);
+        overflow: hidden;
+    }
+
+    .mobile-sheet.is-open {
+        display: flex;
+    }
+
+    body.mobile-menu-open {
         overflow: hidden;
     }
 
@@ -405,13 +418,29 @@ html.dark {
         position: relative;
         z-index: 1;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
+        gap: 1rem;
         padding: 1.125rem 1.25rem;
         border-bottom: 1px solid var(--site-border);
         background: color-mix(in srgb, var(--site-glass) 90%, transparent);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
+    }
+
+    .mobile-sheet-title {
+        font-size: 1.125rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--site-ink);
+    }
+
+    .mobile-sheet-subtitle {
+        margin-top: 0.375rem;
+        max-width: 16rem;
+        font-size: 0.8125rem;
+        line-height: 1.45;
+        color: var(--site-ink-muted);
     }
 
     .mobile-sheet-badge {
@@ -599,6 +628,7 @@ html.dark {
 
     .menu-link-mobile {
         display: flex;
+        width: 100%;
         align-items: center;
         gap: 0.875rem;
         min-height: 58px;
@@ -607,6 +637,7 @@ html.dark {
         font-weight: 700;
         letter-spacing: -0.02em;
         color: var(--site-menu-ink);
+        text-align: left;
         transition: background 0.15s ease, color 0.15s ease;
     }
 
@@ -635,6 +666,7 @@ html.dark {
 
     .menu-link-mobile-sub {
         display: flex;
+        width: 100%;
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;

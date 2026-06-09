@@ -92,4 +92,24 @@ class TeamAdminPagesTest extends TestCase
         $this->assertSame('Editor', Role::labelForSlug(UserRole::Editor->value));
         $this->assertSame(Role::legacyOptions(), Role::options());
     }
+
+    public function test_admin_password_update_uses_single_hash(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::SuperAdmin,
+            'email' => 'password-test@steciuk.org',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(\App\Filament\Resources\Users\Pages\EditUser::class, ['record' => $admin->getRouteKey()])
+            ->fillForm([
+                'password' => 'NewSecurePass1!',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $admin->refresh();
+
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NewSecurePass1!', $admin->password));
+    }
 }

@@ -12,11 +12,10 @@
     @endphp
     <x-seo-meta :image="$ogImageOverride ?: null" :type="$ogType" />
 
-    @if ($siteFavicon ?? null)
-        <link rel="icon" href="{{ str_starts_with($siteFavicon, 'http') ? $siteFavicon : asset('storage/' . ltrim($siteFavicon, '/')) }}">
-    @else
-        <link rel="icon" href="{{ asset('icons/favicon.svg') }}" type="image/svg+xml">
-    @endif
+    @php
+        $faviconUrl = \App\Models\Setting::assetUrl($siteFavicon ?? null) ?? asset('icons/favicon.svg');
+    @endphp
+    <link rel="icon" href="{{ $faviconUrl }}" type="image/svg+xml">
 
     <link rel="manifest" href="{{ route('manifest') }}">
     <meta name="theme-color" content="{{ $themeColor ?? '#d4cabb' }}">
@@ -62,7 +61,7 @@
         $navMenu = ($mobileMenu ?? collect())->isNotEmpty() ? $mobileMenu : $headerMenu;
     @endphp
 
-    <div x-data="{ mobileOpen: false }" x-effect="document.body.style.overflow = mobileOpen ? 'hidden' : ''; const toggle = document.getElementById('mobile-menu-toggle'); if (toggle) { toggle.classList.toggle('is-active', mobileOpen); toggle.setAttribute('aria-expanded', mobileOpen ? 'true' : 'false'); }" @toggle-mobile-menu.window="mobileOpen = !mobileOpen" @close-mobile-menu.window="mobileOpen = false" @keydown.escape.window="mobileOpen = false">
+    <div id="site-shell">
         <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-[var(--site-brand)] focus:px-4 focus:py-2 focus:text-white focus:shadow-lg">
             Skip to main content
         </a>
@@ -99,42 +98,23 @@
         </header>
 
         <div
-            x-show="mobileOpen"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
+            id="mobile-menu-overlay"
             class="mobile-overlay fixed inset-0 z-[65] lg:hidden"
-            @click="mobileOpen = false"
-            x-cloak
             aria-hidden="true"
         ></div>
 
         <nav
             id="mobile-menu"
-            x-show="mobileOpen"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 translate-y-2"
             class="mobile-sheet fixed z-[70] lg:hidden"
             aria-label="Mobile navigation"
-            x-cloak
-            @click.outside="mobileOpen = false"
+            aria-hidden="true"
         >
             <div class="mobile-sheet-header">
                 <div>
-                    <div class="mobile-sheet-badge">
-                        <span class="mobile-sheet-badge-dot" aria-hidden="true"></span>
-                        Menu
-                    </div>
-                    <x-site-logo variant="sheet" />
+                    <p class="mobile-sheet-title">Parish menu</p>
+                    <p class="mobile-sheet-subtitle">{{ $siteMotto }}</p>
                 </div>
-                <button type="button" @click="mobileOpen = false" class="icon-btn" aria-label="Close menu">
+                <button type="button" id="mobile-menu-close" class="icon-btn" aria-label="Close menu">
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -142,38 +122,41 @@
             </div>
 
             <div class="mobile-sheet-body">
-                <p class="mobile-section-kicker">Quick access</p>
+                <p class="mobile-section-kicker">Parish navigation</p>
+                <x-menu :items="$navMenu" variant="mobile" />
+
+                <p class="mobile-section-kicker mt-8">Quick access</p>
                 <div class="mobile-quick-scroll">
                 <div class="mobile-quick-grid">
-                    <a href="{{ url('/service-times') }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--gold">
+                    <a href="{{ url('/service-times') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--gold">
                         <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
                         <span>
                             <span class="mobile-quick-label">Holy Communion</span>
                             <span class="mobile-quick-desc">Service times · 5 cities</span>
                         </span>
                     </a>
-                    <a href="{{ url('/online-worship') }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--sky">
+                    <a href="{{ url('/online-worship') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--sky">
                         <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg></span>
                         <span>
                             <span class="mobile-quick-label">Online Worship</span>
                             <span class="mobile-quick-desc">Sermons & live stream</span>
                         </span>
                     </a>
-                    <a href="{{ url('/prayer-request') }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--rose">
+                    <a href="{{ url('/prayer-request') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--rose">
                         <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg></span>
                         <span>
                             <span class="mobile-quick-label">Prayer Request</span>
                             <span class="mobile-quick-desc">Intercession ministry</span>
                         </span>
                     </a>
-                    <a href="{{ url('/contact') }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--navy">
+                    <a href="{{ url('/contact') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--navy">
                         <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg></span>
                         <span>
                             <span class="mobile-quick-label">Contact Us</span>
                             <span class="mobile-quick-desc">Get in touch</span>
                         </span>
                     </a>
-                    <a href="{{ url('/news') }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--violet">
+                    <a href="{{ url('/news') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--violet">
                         <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z"/></svg></span>
                         <span>
                             <span class="mobile-quick-label">News</span>
@@ -181,7 +164,7 @@
                         </span>
                     </a>
                     @if ($donationLink)
-                        <a href="{{ $donationLink }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--emerald" target="_blank" rel="noopener noreferrer">
+                        <a href="{{ $donationLink }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--emerald" target="_blank" rel="noopener noreferrer">
                             <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12a2.625 2.625 0 10-2.625-2.625zM12 4.875V19.5m0 0l-3-3m3 3l3-3"/></svg></span>
                             <span>
                                 <span class="mobile-quick-label">Give</span>
@@ -190,28 +173,6 @@
                         </a>
                     @endif
                 </div>
-                </div>
-
-                <p class="mobile-section-kicker">Parish navigation</p>
-                <x-menu :items="$navMenu" variant="mobile" />
-            </div>
-
-            <div class="mobile-sheet-footer">
-                <div class="mobile-sheet-footer-actions">
-                    @if ($donationLink)
-                        <x-button href="{{ $donationLink }}" variant="primary" target="_blank" rel="noopener noreferrer">
-                            Support Our Ministry
-                        </x-button>
-                    @elseif ($sitePhone)
-                        <a href="tel:{{ preg_replace('/\s+/', '', $sitePhone) }}" class="btn btn-primary">
-                            Call {{ $sitePhone }}
-                        </a>
-                    @endif
-                    <button type="button" onclick="toggleDarkMode()" class="mobile-theme-toggle" aria-label="Toggle dark mode">
-                        <svg class="h-5 w-5 dark:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
-                        <svg class="hidden h-5 w-5 dark:block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
-                        <span class="mobile-theme-toggle-label">Theme</span>
-                    </button>
                 </div>
             </div>
         </nav>

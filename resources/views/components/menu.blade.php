@@ -112,36 +112,30 @@
                 $target = $resolveTarget($item);
                 $icon = $iconFor($item->label);
             @endphp
-            <div class="mobile-nav-section" role="none" @if ($hasChildren) x-data="{ expanded: false }" @endif>
+            <div class="mobile-nav-section" role="none" @if ($hasChildren) data-mobile-nav-section @endif>
                 @if ($hasChildren)
                     <button
                         type="button"
-                        @click="expanded = !expanded"
                         class="menu-link-mobile w-full justify-between"
-                        :aria-expanded="expanded"
+                        data-mobile-nav-trigger
+                        aria-expanded="false"
                     >
-                        <span class="flex items-center gap-3">
+                        <span class="flex min-w-0 flex-1 items-center gap-3">
                             <span class="menu-link-mobile-icon" aria-hidden="true">
                                 @include('components.partials.menu-icon', ['name' => $icon])
                             </span>
-                            {{ $item->label }}
+                            <span class="truncate">{{ $item->label }}</span>
                         </span>
-                        <svg class="menu-link-mobile-chevron h-4 w-4" :class="expanded && 'rotate-180'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+                        <svg class="menu-link-mobile-chevron h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                         </svg>
                     </button>
-                    <div
-                        x-show="expanded"
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0"
-                        x-transition:enter-end="opacity-100"
-                        x-cloak
-                    >
+                    <div class="mobile-nav-subpanel" data-mobile-nav-panel hidden>
                         @foreach ($item->children as $child)
                             <a
                                 href="{{ $resolveUrl($child) }}"
                                 @if ($resolveTarget($child)) target="{{ $resolveTarget($child) }}" @if ($resolveTarget($child) === '_blank') rel="noopener noreferrer" @endif @endif
-                                @click="$dispatch('close-mobile-menu')"
+                                data-close-mobile-menu
                                 class="menu-link-mobile-sub"
                                 role="menuitem"
                             >
@@ -153,14 +147,14 @@
                     <a
                         href="{{ $url }}"
                         @if ($target) target="{{ $target }}" @if ($target === '_blank') rel="noopener noreferrer" @endif @endif
-                        @click="$dispatch('close-mobile-menu')"
-                        class="menu-link-mobile"
+                        data-close-mobile-menu
+                        class="menu-link-mobile w-full"
                         role="menuitem"
                     >
                         <span class="menu-link-mobile-icon" aria-hidden="true">
                             @include('components.partials.menu-icon', ['name' => $icon])
                         </span>
-                        {{ $item->label }}
+                        <span class="flex-1">{{ $item->label }}</span>
                     </a>
                 @endif
             </div>

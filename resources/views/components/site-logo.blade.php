@@ -29,7 +29,8 @@
     >
     <span class="site-logo-stack">
         <span class="site-logo-line">
-            <span class="lg:hidden">STECI UK</span>
+            <span class="min-[480px]:hidden">St. Thomas Evangelical Church</span>
+            <span class="hidden min-[480px]:inline lg:hidden">{{ $logoMain }}</span>
             <span class="hidden lg:inline xl:hidden">STECI</span>
             <span class="hidden xl:inline">{{ $logoMain }}</span>
         </span>
