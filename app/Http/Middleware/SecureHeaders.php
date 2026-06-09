@@ -68,7 +68,7 @@ class SecureHeaders
         } elseif ($request->is('sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'sw.js')) {
             $response->headers->set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
         } elseif ($request->isMethod('GET') && ! $request->is('livewire/*')) {
-            $response->headers->set('Cache-Control', 'public, max-age=300, stale-while-revalidate=60');
+            $response->headers->set('Cache-Control', 'public, max-age=600, stale-while-revalidate=120');
         }
 
         return $response;

@@ -1,5 +1,16 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| Mail (bootstrap defaults only)
+|--------------------------------------------------------------------------
+|
+| Production mail is configured in admin → Site Settings → Email Setup.
+| MailConfigService applies those settings on boot. Env values here are
+| used only before settings exist and in automated tests (phpunit.xml).
+|
+*/
+
 return [
 
     /*

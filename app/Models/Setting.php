@@ -68,7 +68,6 @@ class Setting extends Model
     public static function forgetCache(): void
     {
         Cache::forget(static::ALL_CACHE_KEY);
-        Cache::forget('settings.all');
     }
 
     public static function assetUrl(?string $path): ?string

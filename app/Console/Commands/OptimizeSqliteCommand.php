@@ -4,13 +4,14 @@ namespace App\Console\Commands;
 
 use App\Services\SqliteOptimizer;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class OptimizeSqliteCommand extends Command
 {
-    protected $signature = 'db:optimize-sqlite';
+    protected $signature = 'db:optimize-sqlite
+                            {--light : WAL checkpoint and incremental vacuum only}
+                            {--reclaim : Enable incremental auto-vacuum and run VACUUM}';
 
-    protected $description = 'Apply SQLite performance pragmas and run ANALYZE';
+    protected $description = 'Maintain SQLite performance (WAL checkpoint, vacuum, ANALYZE, optimize)';
 
     public function handle(): int
     {
@@ -20,12 +21,26 @@ class OptimizeSqliteCommand extends Command
             return self::SUCCESS;
         }
 
-        SqliteOptimizer::configureConnection();
-        SqliteOptimizer::analyze();
+        $light = (bool) $this->option('light');
+        $reclaim = (bool) $this->option('reclaim');
 
-        DB::connection()->getPdo()->exec('PRAGMA optimize');
+        SqliteOptimizer::maintain($light, $reclaim);
 
-        $this->info('SQLite optimized (WAL, ANALYZE, PRAGMA optimize).');
+        $mode = SqliteOptimizer::autoVacuumMode();
+        $modeLabel = match ($mode) {
+            2 => 'incremental',
+            1 => 'full',
+            0 => 'none',
+            default => 'unknown',
+        };
+
+        if ($reclaim) {
+            $this->info("SQLite reclaimed (VACUUM, WAL truncate, auto_vacuum={$modeLabel}).");
+        } elseif ($light) {
+            $this->info('SQLite light maintenance complete (WAL checkpoint, incremental vacuum).');
+        } else {
+            $this->info("SQLite optimized (ANALYZE, PRAGMA optimize, auto_vacuum={$modeLabel}).");
+        }
 
         return self::SUCCESS;
     }

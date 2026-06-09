@@ -31,7 +31,8 @@
 }
 
 :root {
-    --site-bg: #d4cabb;
+    --site-scripture-serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
     --site-surface: #e0d5c4;
     --site-surface-2: #cfc2ae;
     --site-ink: #1c1917;
@@ -3686,9 +3687,15 @@ html.dark {
         background: var(--site-surface);
     }
 
-    .page-section {
+    .site-mesh {
+        background-attachment: scroll;
+    }
+
+    .page-section,
+    .feed-card,
+    .glass-card {
         content-visibility: auto;
-        contain-intrinsic-size: auto 420px;
+        contain-intrinsic-size: auto 320px;
     }
 
     .feed-card-cta {
@@ -3793,6 +3800,104 @@ html.dark {
 
 .mobile-dock-item.is-active svg {
     filter: drop-shadow(0 0 8px color-mix(in srgb, var(--site-accent) 50%, transparent));
+}
+
+/* Heavenly editorial — scripture typography, soft light, calm sections */
+.hero-evangelical {
+    isolation: isolate;
+}
+
+.hero-evangelical::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(ellipse 90% 55% at 50% -8%, rgba(219, 180, 90, 0.2), transparent 58%),
+        radial-gradient(circle at 88% 92%, rgba(255, 255, 255, 0.06), transparent 42%);
+}
+
+.hero-evangelical .hero-grid,
+.hero-evangelical .hero-deco {
+    position: relative;
+    z-index: 1;
+}
+
+.gospel-reminder-text,
+.sanctuary-peace-quote p,
+.heavenly-comfort-card-text,
+.scripture-ribbon-text,
+.hero-subtitle,
+.quote-gen-z-text {
+    font-family: var(--site-scripture-serif);
+}
+
+.sanctuary-peace,
+.gospel-reminder,
+.heavenly-comfort,
+.scripture-ribbon {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 280px;
+}
+
+.gospel-reminder-cross,
+.sanctuary-peace-cross {
+    box-shadow: 0 0 28px color-mix(in srgb, var(--site-accent) 35%, transparent);
+}
+
+.heavenly-comfort-card {
+    border: 1px solid color-mix(in srgb, var(--site-accent) 18%, var(--site-border));
+    background: linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--site-surface) 92%, white) 0%,
+        color-mix(in srgb, var(--site-surface-2) 88%, var(--site-bg)) 100%
+    );
+}
+
+html.dark .heavenly-comfort-card {
+    background: linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--site-surface) 90%, black) 0%,
+        color-mix(in srgb, var(--site-surface-2) 85%, black) 100%
+    );
+}
+
+@media (min-width: 1024px) {
+    .site-header-inner {
+        padding-inline: 2.5rem;
+    }
+
+    .hero-title-gradient {
+        font-size: clamp(2.5rem, 4.2vw, 3.75rem);
+        letter-spacing: -0.035em;
+    }
+
+    .hero-subtitle {
+        max-width: 38rem;
+        font-size: 1.125rem;
+    }
+
+    .gospel-reminder-inner {
+        padding: 2rem 0 2.35rem;
+    }
+
+    .sanctuary-peace-inner {
+        padding: 2.85rem 0 3.1rem;
+    }
+
+    .sanctuary-peace-quote p {
+        font-size: clamp(1.3rem, 2.1vw, 1.7rem);
+        line-height: 1.55;
+    }
+
+    .desktop-nav-shell {
+        box-shadow: var(--site-shadow-lg);
+    }
+
+    .site-footer {
+        background: linear-gradient(180deg, var(--site-footer-bg) 0%, color-mix(in srgb, var(--site-footer-bg) 92%, black) 100%);
+    }
 }
 
 @media (max-width: 1023px) {

@@ -11,69 +11,59 @@ use Symfony\Component\Process\Process;
 
 class MailConfigService
 {
-    public static function applyFromSettings(): void
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function normalizeFormData(array $data): array
     {
-        static::applyForSending((bool) Setting::get('mail_use_admin_smtp', false));
+        if ($data['mail_log_only'] ?? false) {
+            $data['mail_mailer'] = 'log';
+        } elseif ($data['mail_use_smtp'] ?? false) {
+            $data['mail_mailer'] = 'smtp';
+        } else {
+            $data['mail_mailer'] = 'sendmail';
+        }
+
+        return $data;
     }
 
-    public static function applyForSending(?bool $useAdminSmtp = null): void
+    /**
+     * @return array{mail_use_smtp: bool, mail_log_only: bool}
+     */
+    public static function togglesFromMailer(?string $mailer): array
+    {
+        return [
+            'mail_use_smtp' => $mailer === 'smtp',
+            'mail_log_only' => $mailer === 'log',
+        ];
+    }
+
+    public static function applyFromSettings(): void
     {
         if (! static::settingsTableReady()) {
             return;
         }
 
-        $useAdminSmtp ??= (bool) Setting::get('mail_use_admin_smtp', false);
-
         static::applySenderIdentity();
         static::ensureTransportTimeouts();
-
-        if (! $useAdminSmtp) {
-            return;
-        }
-
         static::applyAdminMailerFromSettings();
     }
 
     /**
      * @param  array<string, mixed>  $data
      */
-    public static function applyFromFormData(array $data, bool $useAdminSmtp): void
+    public static function applyFromFormData(array $data): void
     {
+        $data = static::normalizeFormData($data);
+
         static::applySenderIdentityFromForm($data);
-        static::ensureTransportTimeouts();
-
-        if (! $useAdminSmtp) {
-            return;
-        }
-
-        $mailer = (string) ($data['mail_mailer'] ?? 'smtp');
-        $encryption = (string) ($data['mail_encryption'] ?? 'tls');
-        $password = static::resolvePasswordFromForm($data);
-
-        $config = [
-            'mail.default' => $mailer ?: 'smtp',
-            'mail.from.address' => ($data['mail_from_address'] ?? null) ?: config('mail.from.address'),
-            'mail.from.name' => ($data['mail_from_name'] ?? null) ?: config('mail.from.name'),
-        ];
-
-        if ($mailer === 'sendmail') {
-            $config['mail.mailers.sendmail.transport'] = 'sendmail';
-            $config['mail.mailers.sendmail.path'] = static::resolveSendmailPath($data['mail_sendmail_path'] ?? null);
-        } else {
-            $config['mail.mailers.smtp.transport'] = 'smtp';
-            $config['mail.mailers.smtp.host'] = (string) ($data['mail_host'] ?? '');
-            $config['mail.mailers.smtp.port'] = (int) ($data['mail_port'] ?: 587);
-            $config['mail.mailers.smtp.username'] = (string) ($data['mail_username'] ?? '');
-            $config['mail.mailers.smtp.password'] = $password;
-            $config['mail.mailers.smtp.encryption'] = $encryption === 'none' ? null : $encryption;
-        }
-
-        config($config);
+        static::ensureTransportTimeouts($data);
+        static::applyMailerFromFormData($data);
     }
 
-    public static function validateConfiguration(?bool $useAdminSmtp = null): ?string
+    public static function validateConfiguration(): ?string
     {
-        $useAdminSmtp ??= (bool) Setting::get('mail_use_admin_smtp', false);
         $mailer = (string) config('mail.default', 'log');
 
         if ($mailer === 'log') {
@@ -85,7 +75,7 @@ class MailConfigService
         }
 
         if ($mailer === 'sendmail') {
-            return static::validateSendmailPath();
+            return static::validateSendmailPath((string) config('mail.mailers.sendmail.path', ''));
         }
 
         if ($mailer !== 'smtp') {
@@ -95,9 +85,7 @@ class MailConfigService
         $host = trim((string) config('mail.mailers.smtp.host', ''));
 
         if ($host === '') {
-            return $useAdminSmtp
-                ? 'Enter an SMTP host, or save settings and try again.'
-                : 'MAIL_HOST is missing in .env. Add SMTP settings on the server, set MAIL_MAILER=sendmail for PHP mail, or enable admin-configured mail.';
+            return 'Enter an SMTP host in Email Setup and save, or choose PHP sendmail instead.';
         }
 
         $port = (int) config('mail.mailers.smtp.port', 0);
@@ -150,11 +138,11 @@ class MailConfigService
         $message = trim($exception->getMessage());
 
         if ($exception instanceof ProcessTimedOutException) {
-            return 'PHP mail (sendmail) timed out. Check MAIL_SENDMAIL_PATH, local mail service, or switch to SMTP.';
+            return 'PHP mail (sendmail) timed out. Check the sendmail command in Email Setup or switch to SMTP.';
         }
 
         if ($message === '') {
-            return 'Mail could not be sent. Check your mail settings and try again.';
+            return 'Mail could not be sent. Check Email Setup and try again.';
         }
 
         if (str_contains(strtolower($message), 'connection could not be established')) {
@@ -162,7 +150,7 @@ class MailConfigService
         }
 
         if (str_contains(strtolower($message), 'authentication')) {
-            return 'SMTP authentication failed. Check username and password.';
+            return 'SMTP authentication failed. Check username and password in Email Setup.';
         }
 
         if (str_contains(strtolower($message), 'timed out') || str_contains(strtolower($message), 'timeout')) {
@@ -170,7 +158,7 @@ class MailConfigService
         }
 
         if (str_contains(strtolower($message), 'sendmail')) {
-            return 'PHP mail (sendmail) failed. Verify MAIL_SENDMAIL_PATH and that the server mail service is running.';
+            return 'PHP mail (sendmail) failed. Verify the sendmail command in Email Setup.';
         }
 
         return $message;
@@ -217,34 +205,67 @@ class MailConfigService
 
     private static function applyAdminMailerFromSettings(): void
     {
-        $mailer = Setting::get('mail_mailer', 'smtp');
-        $encryption = Setting::get('mail_encryption');
-        $password = Setting::get('mail_password');
+        static::applyMailerConfig(
+            (string) (Setting::get('mail_mailer') ?: 'sendmail'),
+            Setting::get('mail_host'),
+            Setting::get('mail_port'),
+            Setting::get('mail_username'),
+            static::decryptStoredPassword(Setting::get('mail_password')),
+            Setting::get('mail_encryption'),
+            static::resolveSendmailPath(Setting::get('mail_sendmail_path')),
+            Setting::get('mail_from_address'),
+            Setting::get('mail_from_name'),
+        );
+    }
 
-        if (is_string($password) && $password !== '') {
-            try {
-                $password = Crypt::decryptString($password);
-            } catch (\Throwable) {
-                $password = null;
-            }
-        }
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private static function applyMailerFromFormData(array $data): void
+    {
+        static::applyMailerConfig(
+            (string) ($data['mail_mailer'] ?? 'sendmail'),
+            $data['mail_host'] ?? null,
+            $data['mail_port'] ?? null,
+            $data['mail_username'] ?? null,
+            static::resolvePasswordFromForm($data),
+            $data['mail_encryption'] ?? null,
+            static::resolveSendmailPath($data['mail_sendmail_path'] ?? null),
+            $data['mail_from_address'] ?? null,
+            $data['mail_from_name'] ?? null,
+        );
+    }
 
+    private static function applyMailerConfig(
+        string $mailer,
+        mixed $host,
+        mixed $port,
+        mixed $username,
+        ?string $password,
+        mixed $encryption,
+        string $sendmailPath,
+        mixed $fromAddress,
+        mixed $fromName,
+    ): void {
         $config = [
-            'mail.default' => $mailer ?: 'smtp',
-            'mail.from.address' => Setting::get('mail_from_address') ?: config('mail.from.address'),
-            'mail.from.name' => Setting::get('mail_from_name') ?: config('mail.from.name'),
+            'mail.default' => $mailer ?: 'sendmail',
+            'mail.from.address' => $fromAddress ?: config('mail.from.address'),
+            'mail.from.name' => $fromName ?: config('mail.from.name'),
         ];
 
         if ($mailer === 'sendmail') {
             $config['mail.mailers.sendmail.transport'] = 'sendmail';
-            $config['mail.mailers.sendmail.path'] = static::resolveSendmailPath(Setting::get('mail_sendmail_path'));
+            $config['mail.mailers.sendmail.path'] = $sendmailPath;
+        } elseif ($mailer === 'log') {
+            $config['mail.mailers.log.transport'] = 'log';
         } else {
+            $encryptionValue = $encryption === 'none' ? null : $encryption;
             $config['mail.mailers.smtp.transport'] = 'smtp';
-            $config['mail.mailers.smtp.host'] = Setting::get('mail_host');
-            $config['mail.mailers.smtp.port'] = (int) (Setting::get('mail_port') ?: 587);
-            $config['mail.mailers.smtp.username'] = Setting::get('mail_username');
+            $config['mail.mailers.smtp.host'] = (string) ($host ?? '');
+            $config['mail.mailers.smtp.port'] = (int) ($port ?: 587);
+            $config['mail.mailers.smtp.username'] = (string) ($username ?? '');
             $config['mail.mailers.smtp.password'] = $password;
-            $config['mail.mailers.smtp.encryption'] = $encryption === 'none' ? null : $encryption;
+            $config['mail.mailers.smtp.encryption'] = $encryptionValue ?: 'tls';
         }
 
         config($config);
@@ -261,8 +282,11 @@ class MailConfigService
             return $password;
         }
 
-        $stored = Setting::get('mail_password');
+        return static::decryptStoredPassword(Setting::get('mail_password'));
+    }
 
+    private static function decryptStoredPassword(mixed $stored): ?string
+    {
         if (! is_string($stored) || $stored === '') {
             return null;
         }
@@ -342,17 +366,17 @@ class MailConfigService
         $command = trim($command ?? static::resolveSendmailPath());
 
         if ($command === '') {
-            return 'Sendmail path is missing. Set MAIL_SENDMAIL_PATH in .env or choose PHP sendmail in admin mail settings.';
+            return 'Sendmail command is missing. Enter it in Email Setup (e.g. /usr/sbin/sendmail -bs -i).';
         }
 
         $binary = static::sendmailBinary($command);
 
         if ($binary === null || $binary === '') {
-            return 'Sendmail path is invalid. Example: /usr/sbin/sendmail -bs -i';
+            return 'Sendmail command is invalid. Example: /usr/sbin/sendmail -bs -i';
         }
 
         if (! file_exists($binary)) {
-            return "Sendmail binary not found at {$binary}. Check MAIL_SENDMAIL_PATH in .env.";
+            return "Sendmail binary not found at {$binary}. Check the sendmail command in Email Setup.";
         }
 
         if (! is_executable($binary)) {
@@ -364,23 +388,34 @@ class MailConfigService
 
     private static function resolveSendmailPath(?string $override = null): string
     {
-        $path = trim((string) ($override ?: Setting::get('mail_sendmail_path')));
+        $path = trim((string) ($override ?? ''));
 
-        if ($path !== '') {
-            return $path;
+        if ($path === '') {
+            $path = trim((string) config('mail.mailers.sendmail.path', ''));
         }
 
-        return (string) config('mail.mailers.sendmail.path', '/usr/sbin/sendmail -bs -i');
+        if ($path === '') {
+            $path = trim((string) Setting::get('mail_sendmail_path'));
+        }
+
+        if ($path === '') {
+            $path = '/usr/sbin/sendmail -bs -i';
+        }
+
+        return $path;
     }
 
-    private static function ensureTransportTimeouts(): void
+    private static function ensureTransportTimeouts(?array $data = null): void
     {
-        $smtpTimeout = (int) config('mail.mailers.smtp.timeout', 10);
+        $smtpTimeout = (int) ($data['mail_smtp_timeout'] ?? Setting::get('mail_smtp_timeout') ?: config('mail.mailers.smtp.timeout', 10));
         if ($smtpTimeout <= 0) {
             $smtpTimeout = 10;
         }
 
-        $sendmailTimeout = static::sendmailTimeout();
+        $sendmailTimeout = (int) ($data['mail_sendmail_timeout'] ?? Setting::get('mail_sendmail_timeout') ?: config('mail.mailers.sendmail.timeout', 15));
+        if ($sendmailTimeout <= 0) {
+            $sendmailTimeout = 15;
+        }
 
         config([
             'mail.mailers.smtp.timeout' => $smtpTimeout,
@@ -390,6 +425,8 @@ class MailConfigService
 
     private static function sendmailTimeout(): int
     {
+        static::ensureTransportTimeouts();
+
         $timeout = (int) config('mail.mailers.sendmail.timeout', 15);
 
         return $timeout > 0 ? $timeout : 15;
