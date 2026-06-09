@@ -14,6 +14,10 @@ class ViewServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('*', function ($view): void {
+            if (str_starts_with($view->name(), 'filament.')) {
+                return;
+            }
+
             static $shared = null;
 
             if ($shared === null) {

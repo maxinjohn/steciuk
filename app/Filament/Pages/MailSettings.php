@@ -20,7 +20,7 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 
 class MailSettings extends Page
 {
@@ -60,6 +60,7 @@ class MailSettings extends Page
             'mail_port' => Setting::get('mail_port', '587'),
             'mail_username' => Setting::get('mail_username'),
             'mail_encryption' => Setting::get('mail_encryption', 'tls'),
+            'mail_sendmail_path' => Setting::get('mail_sendmail_path') ?: config('mail.mailers.sendmail.path'),
             'mail_from_address' => Setting::get('mail_from_address') ?: Setting::get('contact_email'),
             'mail_from_name' => Setting::get('mail_from_name') ?: Setting::get('church_name'),
             'mail_test_recipient' => Setting::get('contact_email'),
@@ -79,6 +80,7 @@ class MailSettings extends Page
             Setting::set('mail_port', (string) ($data['mail_port'] ?? '587'), 'mail');
             Setting::set('mail_username', $data['mail_username'] ?? '', 'mail');
             Setting::set('mail_encryption', $data['mail_encryption'] ?? 'tls', 'mail');
+            Setting::set('mail_sendmail_path', $data['mail_sendmail_path'] ?? '', 'mail');
             Setting::set('mail_from_address', $data['mail_from_address'] ?? '', 'mail');
             Setting::set('mail_from_name', $data['mail_from_name'] ?? '', 'mail');
 
@@ -104,7 +106,18 @@ class MailSettings extends Page
 
     public function sendTestEmail(): void
     {
-        $data = $this->form->getState();
+        try {
+            $data = $this->form->getState();
+        } catch (ValidationException $exception) {
+            Notification::make()
+                ->danger()
+                ->title('Fix the form first')
+                ->body(collect($exception->errors())->flatten()->first() ?? 'Check the highlighted fields.')
+                ->send();
+
+            return;
+        }
+
         $recipient = $data['mail_test_recipient'] ?? null;
 
         if (! $recipient) {
@@ -116,24 +129,42 @@ class MailSettings extends Page
             return;
         }
 
-        MailConfigService::applyForSending((bool) ($data['mail_use_admin_smtp'] ?? false));
+        $useAdminSmtp = (bool) ($data['mail_use_admin_smtp'] ?? false);
+        MailConfigService::applyFromFormData($data, $useAdminSmtp);
+
+        if ($error = MailConfigService::validateConfiguration($useAdminSmtp)) {
+            Notification::make()
+                ->danger()
+                ->title('Mail not configured')
+                ->body($error)
+                ->send();
+
+            return;
+        }
 
         try {
-            Mail::raw(
-                'This is a test message from the STECI UK parish admin panel. Mail delivery is working.',
-                fn ($message) => $message->to($recipient)->subject('STECI UK — mail test')
-            );
+            set_time_limit(25);
+            MailConfigService::sendTestMessage($recipient);
+
+            $mailer = (string) config('mail.default', 'log');
+            $body = match (true) {
+                $mailer === 'log' => 'Mail driver is log — check storage/logs/laravel.log instead of an inbox.',
+                $mailer === 'sendmail' && ! $useAdminSmtp => "Check {$recipient}. Sent using PHP mail (sendmail) from .env.",
+                $mailer === 'sendmail' => "Check {$recipient}. Sent using PHP mail (sendmail).",
+                ! $useAdminSmtp => "Check {$recipient}. Sent using server .env mail settings ({$mailer}).",
+                default => "Check {$recipient} for the test message.",
+            };
 
             Notification::make()
                 ->success()
-                ->title('Test email sent')
-                ->body("Check {$recipient} for the test message.")
+                ->title($mailer === 'log' ? 'Test logged' : 'Test email sent')
+                ->body($body)
                 ->send();
         } catch (\Throwable $exception) {
             Notification::make()
                 ->danger()
                 ->title('Test email failed')
-                ->body($exception->getMessage())
+                ->body(MailConfigService::friendlyError($exception))
                 ->send();
         }
     }
@@ -147,8 +178,8 @@ class MailSettings extends Page
     {
         return $schema
             ->components([
-                Section::make('SMTP delivery')
-                    ->description('When disabled, the site uses your server .env mail settings (SMTP or sendmail). When enabled, the values below override .env for contact forms and notifications.')
+                Section::make('Mail delivery')
+                    ->description('When disabled, the site uses your server .env mail settings. Set MAIL_MAILER=smtp or MAIL_MAILER=sendmail in .env for PHP mail. When enabled, the values below override .env for contact forms and notifications.')
                     ->schema([
                         Toggle::make('mail_use_admin_smtp')
                             ->label('Use admin-configured mail')
@@ -161,16 +192,22 @@ class MailSettings extends Page
                                 'log' => 'Log only (development)',
                             ])
                             ->default('smtp')
+                            ->live()
                             ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp')),
+                        TextInput::make('mail_sendmail_path')
+                            ->label('Sendmail command')
+                            ->placeholder('/usr/sbin/sendmail -bs -i')
+                            ->helperText('Full sendmail command used by PHP mail on your host.')
+                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp') && ($get('mail_mailer') === 'sendmail')),
                         TextInput::make('mail_host')
                             ->label('SMTP host')
                             ->placeholder('smtp.example.com')
-                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp')),
+                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp') && ($get('mail_mailer') === 'smtp')),
                         TextInput::make('mail_port')
                             ->label('Port')
                             ->numeric()
                             ->default(587)
-                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp')),
+                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp') && ($get('mail_mailer') === 'smtp')),
                         Select::make('mail_encryption')
                             ->options([
                                 'tls' => 'TLS',
@@ -178,16 +215,16 @@ class MailSettings extends Page
                                 'none' => 'None',
                             ])
                             ->default('tls')
-                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp')),
+                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp') && ($get('mail_mailer') === 'smtp')),
                         TextInput::make('mail_username')
                             ->label('Username')
-                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp')),
+                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp') && ($get('mail_mailer') === 'smtp')),
                         TextInput::make('mail_password')
                             ->label('Password')
                             ->password()
                             ->revealable()
                             ->helperText(MailConfigService::passwordIsConfigured() ? 'Leave blank to keep the current password.' : 'Enter your SMTP password.')
-                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp')),
+                            ->visible(fn ($get) => (bool) $get('mail_use_admin_smtp') && ($get('mail_mailer') === 'smtp')),
                     ]),
                 Section::make('Sender identity')
                     ->schema([
@@ -213,10 +250,12 @@ class MailSettings extends Page
                     ->livewireSubmitHandler('save')
                     ->footer([
                         Actions::make([
-                            Action::make('test')
+                            Action::make('sendTestEmail')
                                 ->label('Send test email')
-                                ->action('sendTestEmail')
-                                ->color('gray'),
+                                ->icon(Heroicon::OutlinedPaperAirplane)
+                                ->action(fn () => $this->sendTestEmail())
+                                ->color('gray')
+                                ->outlined(),
                             Action::make('save')
                                 ->label('Save mail settings')
                                 ->submit('save'),
