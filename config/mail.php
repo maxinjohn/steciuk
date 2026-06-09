@@ -1,5 +1,16 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| Mail (bootstrap defaults only)
+|--------------------------------------------------------------------------
+|
+| Production mail is configured in admin → Site Settings → Email Setup.
+| MailConfigService applies those settings on boot. Env values here are
+| used only before settings exist and in automated tests (phpunit.xml).
+|
+*/
+
 return [
 
     /*
@@ -45,7 +56,7 @@ return [
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
-            'timeout' => null,
+            'timeout' => (int) env('MAIL_TIMEOUT', 10),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
@@ -68,6 +79,7 @@ return [
         'sendmail' => [
             'transport' => 'sendmail',
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
+            'timeout' => (int) env('MAIL_SENDMAIL_TIMEOUT', 15),
         ],
 
         'log' => [

@@ -75,7 +75,13 @@ class SettingsSeeder extends Seeder
             ['key' => 'give_page_intro', 'value' => 'Support the work of the gospel through faithful giving.', 'group' => 'general'],
             ['key' => 'footer_tagline', 'value' => 'Confessing Christ as Lord — Word, worship, and witness.', 'group' => 'general'],
             ['key' => 'footer_copyright', 'value' => '', 'group' => 'general'],
-            ['key' => 'mail_use_admin_smtp', 'value' => '0', 'group' => 'mail'],
+            ['key' => 'mail_mailer', 'value' => 'sendmail', 'group' => 'mail'],
+            ['key' => 'mail_sendmail_path', 'value' => '/usr/sbin/sendmail -bs -i', 'group' => 'mail'],
+            ['key' => 'mail_sendmail_timeout', 'value' => '15', 'group' => 'mail'],
+            ['key' => 'mail_smtp_timeout', 'value' => '10', 'group' => 'mail'],
+            ['key' => 'mail_from_address', 'value' => 'admin@steciuk.org', 'group' => 'mail'],
+            ['key' => 'mail_encryption', 'value' => 'tls', 'group' => 'mail'],
+            ['key' => 'mail_port', 'value' => '587', 'group' => 'mail'],
         ];
 
         foreach ($settings as $setting) {

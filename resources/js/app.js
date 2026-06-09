@@ -134,7 +134,11 @@ const initDesktopNav = () => {
 };
 
 const initScrollReveal = () => {
-    const elements = document.querySelectorAll('.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip');
+    const selector = window.matchMedia('(max-width: 1023px)').matches
+        ? '.animate-fade-up, .glass-card, .page-section, .feed-card, .hero-gen-z, .parish-action-card'
+        : '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip';
+
+    const elements = document.querySelectorAll(selector);
 
     if (!('IntersectionObserver' in window) || ! elements.length) return;
 
@@ -147,7 +151,7 @@ const initScrollReveal = () => {
                 }
             });
         },
-        { threshold: 0.08, rootMargin: '0px 0px -32px 0px' }
+        { threshold: 0.06, rootMargin: '0px 0px -24px 0px' }
     );
 
     elements.forEach((el) => {
@@ -274,8 +278,15 @@ initDarkMode();
 document.addEventListener('DOMContentLoaded', () => {
     initDesktopNav();
     initLocationTabs();
-    initScrollReveal();
     initMobileDock();
     initMobileNav();
+
+    const runDeferred = () => initScrollReveal();
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(runDeferred, { timeout: 1200 });
+    } else {
+        runDeferred();
+    }
+
     initPWA();
 });

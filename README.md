@@ -79,7 +79,6 @@ php artisan key:generate
 | `DB_DATABASE` | `storage/database/database.sqlite` | absolute path outside `public/` |
 | `FILESYSTEM_DISK` | `public` | `public` |
 | `CACHE_STORE` | `file` | `file` |
-| `MAIL_MAILER` | `log` | `smtp` or `sendmail` |
 | `FORCE_HTTPS` | `false` | `true` |
 | `SEED_MODE` | `bootstrap` | `off` |
 | `EXPOSE_EXCEPTION_DETAILS` | `false` | `false` |
@@ -164,7 +163,7 @@ git clone git@github.com:maxinjohn/steciuk.git /home/steciuk/steciuk.org
 cd /home/steciuk/steciuk.org
 
 cp .env.example .env
-# Edit .env: APP_ENV=production, APP_DEBUG=false, APP_URL=https://steciuk.org, MAIL_*, etc.
+# Edit .env: APP_ENV=production, APP_DEBUG=false, APP_URL=https://steciuk.org, etc.
 php artisan key:generate
 
 composer install --optimize-autoloader
@@ -242,25 +241,27 @@ DB_DATABASE=/home/steciuk/steciuk.org/storage/database/database.sqlite
 
 FILESYSTEM_DISK=public
 CACHE_STORE=file
-MAIL_MAILER=smtp
-MAIL_HOST=mail.example.com
-MAIL_PORT=587
-MAIL_USERNAME=
-MAIL_PASSWORD=
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=admin@steciuk.org
-MAIL_FROM_NAME="${APP_NAME}"
 
 FORCE_HTTPS=true
 SEED_MODE=off
 TRUSTED_PROXIES=*
 ```
 
-### Cron (optional)
+### Cron (recommended on production)
 
 ```
 * * * * * cd /home/steciuk/steciuk.org && php artisan schedule:run >> /dev/null 2>&1
 ```
+
+This runs scheduled SQLite maintenance automatically:
+
+| Schedule | Command | Purpose |
+|----------|---------|---------|
+| Daily 03:15 | `db:optimize-sqlite --light` | WAL checkpoint + incremental vacuum |
+| Weekly Sun 04:00 | `db:optimize-sqlite` | ANALYZE + query planner optimize |
+| Monthly 1st 04:30 | `db:optimize-sqlite --reclaim` | Full VACUUM + incremental auto-vacuum |
+
+Run once manually after deploy: `php artisan db:optimize-sqlite --reclaim`
 
 ### Production checklist
 
@@ -269,7 +270,8 @@ TRUSTED_PROXIES=*
 - [ ] SQLite file **not** inside `public/`
 - [ ] Block `.env` and `storage/` in web server config
 - [ ] HTTPS enabled (Let's Encrypt)
-- [ ] Mail configured (`.env` SMTP/sendmail **or** admin → Email Setup)
+- [ ] Cron enabled for `php artisan schedule:run` (SQLite maintenance)
+- [ ] `php artisan db:optimize-sqlite --reclaim` once after first deploy
 - [ ] `SEED_MODE=off` after first bootstrap
 - [ ] Enable MFA for super admin (`REQUIRE_MFA_SUPER_ADMIN=true`)
 
@@ -288,17 +290,18 @@ Navigate to `/admin` and sign in.
 | Resources | Liturgy, lectionary, forms, safeguarding docs |
 | Form Submissions | View contact and prayer form entries |
 | Church Settings | Logo, contact info, social links, SEO defaults |
-| Email Setup | SMTP or sendmail override for contact forms |
+| Email Setup | SMTP or PHP sendmail for contact forms |
 | Users | Manage admin accounts (Super Admin only) |
 
 ## Mail
 
-Contact forms and admin notifications use Laravel mail. Two options:
+Contact forms and admin notifications are configured in **Admin → Site Settings → Email Setup**.
 
-1. **Server `.env`** (default) — set `MAIL_MAILER=smtp` or `MAIL_MAILER=sendmail` in `.env`
-2. **Admin panel** — Site Settings → Email Setup → enable **Use admin-configured mail** and save SMTP or sendmail settings
+1. Choose **PHP sendmail** for typical shared hosting, or **SMTP** for external mail servers.
+2. Set the from address and save.
+3. Use **Send test email** to verify delivery.
 
-Sender name/address from admin settings are applied even when using `.env` transport.
+Do not add `MAIL_*` variables to `.env` — they are ignored once the site is bootstrapped. All delivery settings live in the admin panel.
 
 ## Backup
 

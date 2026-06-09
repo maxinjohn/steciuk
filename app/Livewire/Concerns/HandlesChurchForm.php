@@ -6,7 +6,6 @@ use App\Enums\FormType;
 use App\Services\MailConfigService;
 use App\Models\FormSubmission;
 use App\Models\Setting;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Validate;
 
@@ -92,10 +91,11 @@ trait HandlesChurchForm
         try {
             MailConfigService::applyFromSettings();
 
-            Mail::raw(
+            MailConfigService::deliverPlainTextMessage(
+                $email,
+                'New '.$this->formType()->value.' submission',
                 "New {$this->formType()->value} form submission from steciuk.org\n\n".
                 collect($this->formData())->map(fn ($v, $k) => ucfirst(str_replace('_', ' ', $k)).": {$v}")->implode("\n"),
-                fn ($message) => $message->to($email)->subject('New '.$this->formType()->value.' submission')
             );
         } catch (\Throwable) {
             // Logged mail failures should not block form submission
