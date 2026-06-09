@@ -58,6 +58,11 @@ class SecurityHardeningTest extends TestCase
         $response->assertOk();
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
         $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
+        $response->assertHeader('Content-Security-Policy');
+        $this->assertStringContainsString(
+            'https://static.cloudflareinsights.com',
+            (string) $response->headers->get('Content-Security-Policy'),
+        );
     }
 
     public function test_honeypot_submission_is_logged(): void
