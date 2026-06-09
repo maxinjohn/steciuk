@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Cache;
 
 class HomePageData
 {
-    private const CACHE_KEY = 'home.page.data.v4';
+    private const CACHE_KEY = 'home.page.data.v5';
 
     private const CACHE_TTL_SECONDS = 3600;
 
@@ -73,7 +73,7 @@ class HomePageData
                 ->get(),
             'ministries' => Ministry::query()
                 ->select(['id', 'name', 'slug', 'short_description', 'featured_image', 'sort_order', 'status'])
-                ->where('status', 'published')
+                ->active()
                 ->orderBy('sort_order')
                 ->limit(6)
                 ->get(),
@@ -98,7 +98,7 @@ class HomePageData
                 ->get(),
             'albums' => GalleryAlbum::query()
                 ->select(['id', 'title', 'slug', 'cover_image', 'sort_order', 'status'])
-                ->where('status', 'published')
+                ->active()
                 ->orderBy('sort_order')
                 ->limit(4)
                 ->get(),

@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\GalleryPhotos\Schemas;
 
-use Filament\Forms\Components\FileUpload;
+use App\Filament\Support\SecureFileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
@@ -13,20 +14,28 @@ class GalleryPhotoForm
     {
         return $schema
             ->components([
-                TextInput::make('gallery_album_id')
+                Select::make('gallery_album_id')
+                    ->label('Album')
+                    ->relationship('album', 'title')
+                    ->searchable()
+                    ->preload()
                     ->required()
-                    ->numeric(),
-                TextInput::make('title'),
+                    ->helperText('Choose which album this photo belongs to.'),
+                TextInput::make('title')
+                    ->helperText('Optional title shown in the gallery.'),
                 Textarea::make('caption')
+                    ->rows(3)
                     ->columnSpanFull(),
-                FileUpload::make('image_path')
-                    ->image()
-                    ->required(),
-                TextInput::make('alt_text'),
+                SecureFileUpload::image('image_path', 'gallery/photos')->required(),
+                TextInput::make('alt_text')
+                    ->label('Alt text')
+                    ->helperText('Describe the image for accessibility.'),
                 TextInput::make('sort_order')
+                    ->label('Sort order')
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->default(0)
+                    ->helperText('Lower numbers appear first.'),
             ]);
     }
 }

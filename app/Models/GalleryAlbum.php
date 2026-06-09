@@ -68,4 +68,9 @@ class GalleryAlbum extends Model implements HasMedia
     {
         $this->addMediaCollection('cover')->singleFile();
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
 }

@@ -1,10 +1,11 @@
 @props([
     'page' => null,
+    'suppressContent' => false,
 ])
 
 @if ($page?->custom_css)
     @push('head')
-        <style>{!! $page->custom_css !!}</style>
+        <style>{!! safeCustomCss($page->custom_css) !!}</style>
     @endpush
 @endif
 
@@ -18,11 +19,7 @@
     @endpush
 @endif
 
-@if ($page?->custom_js)
-    @push('scripts')
-        <script>{!! $page->custom_js !!}</script>
-    @endpush
-@endif
+{{-- Custom JS is disabled on the public site for security. Store in admin only if re-enabled via ALLOW_PAGE_CUSTOM_JS. --}}
 
 @php
     $hasBlockHero = $page?->hasHeroContentBlock() ?? false;
@@ -30,7 +27,8 @@
         && $page->show_hero
         && ! $hasBlockHero
         && ($page->hero_title || $page->hero_subtitle || $page->featured_image);
-    $showPageContent = $page?->content
+    $showPageContent = ! $suppressContent
+        && $page?->content
         && ! ($page->is_home && ($page->contentBlocks?->isNotEmpty() ?? false));
 @endphp
 
@@ -41,8 +39,11 @@
         :image="$page->featured_image"
         :style="$page->hero_style ?? 'gradient'"
         :accent="$page->accent_color ?? 'gold'"
-        size="{{ ($page->layout_variant ?? 'standard') === 'immersive' ? 'immersive' : 'default' }}"
+        size="{{ ($page->layout_variant ?? 'standard') === 'immersive' ? 'immersive' : 'small' }}"
+        badge="UK Parish"
     />
+    <x-parish-action-strip />
+    <x-evangelical-trust-bar />
 @endif
 
 @if ($page && $page->contentBlocks->isNotEmpty())
@@ -58,8 +59,10 @@
     />
 @endif
 
+{{ $slot }}
+
 @if ($showPageContent)
-        <section class="page-section py-10 sm:py-12 md:py-16 lg:py-20">
+    <section class="page-section py-10 sm:py-12 md:py-16 lg:py-20">
         <div @class([
             'mx-auto px-4 sm:px-6 lg:px-8',
             'max-w-3xl' => ($page->layout_variant ?? 'standard') === 'standard',
@@ -70,5 +73,3 @@
         </div>
     </section>
 @endif
-
-{{ $slot }}

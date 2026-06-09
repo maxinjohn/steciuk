@@ -28,6 +28,10 @@ class PageSeeder extends Seeder
             $existingPage = Page::query()->where('slug', $slug)->first();
 
             if ($existingPage && ! SeedConfig::shouldOverwritePages()) {
+                if (array_key_exists('show_hero', $pageData)) {
+                    $existingPage->update(['show_hero' => $pageData['show_hero']]);
+                }
+
                 continue;
             }
 
@@ -113,6 +117,7 @@ class PageSeeder extends Seeder
             'template' => $template,
             'sort_order' => 0,
             'is_home' => false,
+            'show_hero' => false,
         ];
     }
 
@@ -141,20 +146,20 @@ class PageSeeder extends Seeder
                     'sort_order' => 1,
                     'content' => [
                         'eyebrow' => 'St. Thomas Evangelical Church of India',
-                        'headline' => 'Welcome to Our UK Parish',
+                        'headline' => 'Word · Worship · Witness',
                         'subtitle' => 'For the Word of God and for the testimony of Jesus Christ',
                         'badge' => 'UK Parish',
                         'stats' => [
-                            ['value' => '5', 'label' => 'UK Locations'],
-                            ['value' => '90+', 'label' => 'Families'],
+                            ['value' => '5', 'label' => 'Worship Locations'],
+                            ['value' => '90+', 'label' => 'Parish Families'],
                             ['value' => '1961', 'label' => 'STECI Founded'],
                         ],
-                        'primary_cta_label' => 'Plan Your Visit',
+                        'primary_cta_label' => 'Plan a Visit',
                         'primary_cta_url' => '/service-times',
-                        'secondary_cta_label' => 'Watch Online',
-                        'secondary_cta_url' => '/online-worship',
-                        'tertiary_cta_label' => 'View Events',
-                        'tertiary_cta_url' => '/events',
+                        'secondary_cta_label' => 'Our Beliefs',
+                        'secondary_cta_url' => '/our-church',
+                        'tertiary_cta_label' => 'Watch a Sermon',
+                        'tertiary_cta_url' => '/sermons',
                     ],
                 ],
                 [
@@ -163,8 +168,8 @@ class PageSeeder extends Seeder
                     'title' => 'Service Locations',
                     'sort_order' => 2,
                     'content' => [
-                        'heading' => 'Worship Across the UK',
-                        'subheading' => 'Monthly worship services in five locations',
+                        'heading' => 'Gathered Worship Across Britain',
+                        'subheading' => 'Monthly Holy Communion and biblical preaching in five cities',
                         'locations' => ['Manchester', 'Leicester', 'Dartford', 'Sunderland', 'Bristol'],
                         'link_url' => '/service-times',
                         'link_label' => 'View All Service Times',
@@ -176,8 +181,8 @@ class PageSeeder extends Seeder
                     'title' => 'Welcome Message',
                     'sort_order' => 3,
                     'content' => [
-                        'quote' => 'It is a joy to welcome you to our parish family. Whether you join us in person at one of our five UK locations or online, we pray you will find a warm community rooted in Scripture, worship, and the rich heritage of the Saint Thomas Christian tradition.',
-                        'attribution' => 'Rev. [Name Placeholder], UK Parish Vicar',
+                        'quote' => 'We welcome you to worship centred on Scripture, the Gospel of Jesus Christ, and the sacraments of the Church — in the warm fellowship of an evangelical Episcopal parish rooted in the Saint Thomas Christian tradition.',
+                        'attribution' => 'St. Thomas Evangelical Church of India – UK Parish',
                         'link_url' => '/welcome',
                         'link_label' => 'Read Full Welcome Message',
                     ],
@@ -188,8 +193,8 @@ class PageSeeder extends Seeder
                     'title' => 'Our Ministries',
                     'sort_order' => 4,
                     'content' => [
-                        'heading' => 'Serving Together',
-                        'subheading' => 'Discover how you can grow and serve in our parish',
+                        'heading' => 'Serving Christ Together',
+                        'subheading' => 'Sunday School, prayer, choir, and mission — for every generation',
                         'limit' => 4,
                         'link_url' => '/ministries',
                         'link_label' => 'View All Ministries',
@@ -201,7 +206,8 @@ class PageSeeder extends Seeder
                     'title' => 'Upcoming Events',
                     'sort_order' => 5,
                     'content' => [
-                        'heading' => 'Upcoming Events',
+                        'heading' => 'Parish Fellowship',
+                        'subheading' => 'Worship gatherings, prayer meetings, and fellowship days',
                         'limit' => 3,
                         'link_url' => '/events',
                         'link_label' => 'See All Events',
@@ -214,7 +220,7 @@ class PageSeeder extends Seeder
                     'sort_order' => 6,
                     'content' => [
                         'heading' => 'Latest News',
-                        'body' => 'Stay connected with parish announcements, fellowship updates, and community news from across our UK locations.',
+                        'body' => 'Gospel-centred news from across our five worship locations — prayer, mission, Holy Communion, and parish fellowship.',
                         'link_url' => '/news',
                         'link_label' => 'Read All News',
                         'image_alt' => 'Parish community gathering',
@@ -226,7 +232,8 @@ class PageSeeder extends Seeder
                     'title' => 'Recent Sermons',
                     'sort_order' => 7,
                     'content' => [
-                        'heading' => 'Recent Sermons',
+                        'heading' => 'Expository Preaching',
+                        'subheading' => 'Sermons from Holy Scripture — for the testimony of Jesus Christ',
                         'limit' => 3,
                         'link_url' => '/sermons',
                         'link_label' => 'Browse All Sermons',
@@ -366,15 +373,9 @@ HTML;
     private function leadershipContent(): string
     {
         return <<<'HTML'
-<h2>Parish Leadership</h2>
-<p>Our UK Parish is served by dedicated leaders who provide spiritual oversight, administration, and governance. The names and details below are placeholders and should be updated with current office holders.</p>
+<p>The UK Parish operates under the constitution of the St. Thomas Evangelical Church of India – UK Parish (Registered Charity No. 1143030). A parish committee supports the Vicar in planning worship, coordinating ministries, and overseeing parish affairs across our five locations — always under the Word of God and for the testimony of Jesus Christ.</p>
 
-<p>Leadership profiles are displayed dynamically on this page from the parish leadership directory. Please contact the parish office if you need to reach any member of the leadership team.</p>
-
-<h2>Parish Committee</h2>
-<p>The UK Parish operates under the constitution of the St. Thomas Evangelical Church of India – UK Parish (Registered Charity No. 1143030). A parish committee supports the Vicar in planning worship, coordinating ministries, and overseeing parish affairs across our five locations.</p>
-
-<p><em>Note: Leadership names and photographs are editable placeholders. Please update via the admin panel with verified information.</em></p>
+<p>Contact the parish office at <a href="mailto:admin@steciuk.org">admin@steciuk.org</a> if you need to reach any member of the leadership team.</p>
 HTML;
     }
 

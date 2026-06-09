@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\SiteCache;
 use App\Support\SeedConfig;
 use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Console\Command;
@@ -28,6 +29,8 @@ class SiteBootstrapCommand extends Command
         $this->call('migrate', ['--force' => true]);
 
         (new ReferenceDataSeeder)->setCommand($this)->run();
+
+        SiteCache::forgetAfterReferenceDataChange();
 
         $this->components->success('Site bootstrap complete.');
 

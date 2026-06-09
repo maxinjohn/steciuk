@@ -27,10 +27,10 @@ class SecureHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
         }
 
-        if (config('security.csp_enabled') && ! $request->is('admin*')) {
+        if (config('security.csp_enabled') && ! \App\Support\AdminPanelConfig::isAdminRequest($request)) {
             $csp = implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com",
+                "script-src 'self' 'unsafe-inline' https://www.youtube.com https://www.google.com",
                 "style-src 'self' 'unsafe-inline'",
                 "img-src 'self' data: blob: https:",
                 "font-src 'self' data:",
@@ -46,7 +46,23 @@ class SecureHeaders
             $response->headers->set('Content-Security-Policy', $csp);
         }
 
-        if ($request->is('admin*')) {
+        if (\App\Support\AdminPanelConfig::isAdminRequest($request) && config('security.csp_enabled')) {
+            $response->headers->set('Content-Security-Policy', implode('; ', [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data: blob: https:",
+                "font-src 'self' data:",
+                "connect-src 'self' https: wss:",
+                "frame-src 'self'",
+                "object-src 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+                "frame-ancestors 'none'",
+            ]));
+        }
+
+        if (\App\Support\AdminPanelConfig::isAdminRequest($request)) {
             $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
             $response->headers->set('Pragma', 'no-cache');
         } elseif ($request->is('sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'sw.js')) {

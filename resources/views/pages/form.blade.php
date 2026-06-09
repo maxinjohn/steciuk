@@ -4,10 +4,30 @@
 @section('description', $page->seo_description ?? strip_tags($page->content))
 
 @section('content')
-    <x-page-band
+    @php
+        [$scripture, $scriptureRef] = match ($page->slug) {
+            'prayer-request' => [
+                'The prayer of a righteous person is powerful and effective.',
+                'James 5:16',
+            ],
+            'new-member' => [
+                'For it is by grace you have been saved, through faith — and this is not from yourselves, it is the gift of God.',
+                'Ephesians 2:8',
+            ],
+            default => [
+                'The Lord is near to all who call on him, to all who call on him in truth.',
+                'Psalm 145:18',
+            ],
+        };
+    @endphp
+
+    <x-page-intro
         :title="$page->hero_title ?? $page->title"
         :subtitle="$page->hero_subtitle"
-        kicker="Get in touch"
+        kicker="Evangelical Episcopal · Connect"
+        :scripture="$scripture"
+        :scripture-ref="$scriptureRef"
+        :show-strips="true"
     />
 
     <section class="page-section py-10 sm:py-14">

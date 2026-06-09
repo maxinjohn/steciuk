@@ -3,6 +3,7 @@
 namespace App\Livewire\Concerns;
 
 use App\Enums\FormType;
+use App\Services\MailConfigService;
 use App\Models\FormSubmission;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Mail;
@@ -34,11 +35,21 @@ trait HandlesChurchForm
     public function submit(): void
     {
         if ($this->website !== '') {
+            \App\Services\SecurityLogger::warning('honeypot_triggered', null, [
+                'type' => $this->formType()->value,
+                'ip' => request()->ip(),
+            ]);
+
             return;
         }
 
         $key = 'form:'.$this->formType()->value.':'.request()->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
+            \App\Services\SecurityLogger::warning('form_rate_limited', null, [
+                'type' => $this->formType()->value,
+                'ip' => request()->ip(),
+            ]);
+
             $this->addError('form', 'Too many submissions. Please try again later.');
 
             return;
@@ -79,6 +90,8 @@ trait HandlesChurchForm
         }
 
         try {
+            MailConfigService::applyFromSettings();
+
             Mail::raw(
                 "New {$this->formType()->value} form submission from steciuk.org\n\n".
                 collect($this->formData())->map(fn ($v, $k) => ucfirst(str_replace('_', ' ', $k)).": {$v}")->implode("\n"),

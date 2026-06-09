@@ -4,7 +4,13 @@
 @section('description', $album->description ?? 'Photo album from ' . $siteName)
 
 @section('content')
-    <x-hero :title="$album->title" :subtitle="$album->description" size="small" />
+    <x-hero
+        :title="$album->title"
+        :subtitle="$album->description"
+        badge="Evangelical Episcopal"
+        size="small"
+    />
+    <x-parish-action-strip class="!py-3" />
 
     <section
         class="py-12 sm:py-16"
@@ -17,7 +23,8 @@
             <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
                 @foreach ($album->photos as $index => $photo)
                     @php
-                        $src = asset('storage/' . ltrim($photo->image_path, '/'));
+                        $variant = str_contains(strtolower($photo->title ?? ''), 'communion') ? 'communion' : (str_contains(strtolower($album->slug ?? ''), 'fellowship') ? 'fellowship' : 'worship');
+                        $src = galleryPhotoUrl($photo->image_path, $variant);
                         $alt = $photo->alt_text ?? $photo->title ?? '';
                     @endphp
                     <button
@@ -88,4 +95,9 @@
             </div>
         </div>
     </section>
+
+    <x-scripture-ribbon
+        text="Come, let us bow down in worship, let us kneel before the Lord our Maker."
+        reference="Psalm 95:6"
+    />
 @endsection

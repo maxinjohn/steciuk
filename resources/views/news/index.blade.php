@@ -4,10 +4,14 @@
 @section('description', $page?->seo_description ?? 'Latest news from STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page">
-        @if (! $page?->hero_title)
-            <x-page-band title="News & Updates" subtitle="Latest from our UK Parish community" kicker="Fresh" />
-        @endif
+    <x-page-shell :page="$page" suppress-content>
+        <x-page-intro
+            title="Parish News"
+            subtitle="Gospel-centred news — worship, prayer, mission, and fellowship across Britain"
+            kicker="Evangelical Episcopal · UK"
+            scripture="They devoted themselves to the apostles' teaching and to fellowship, to the breaking of bread and to prayer."
+            scripture-ref="Acts 2:42"
+        />
 
         <section class="page-section py-10 sm:py-14">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

@@ -14,7 +14,9 @@ return [
 
     'csp_enabled' => env('CSP_ENABLED', true),
 
-    'require_mfa_for_super_admin' => env('REQUIRE_MFA_SUPER_ADMIN', true),
+    'require_mfa_for_super_admin' => env('REQUIRE_MFA_SUPER_ADMIN', env('APP_ENV') === 'production'),
+
+    'allow_page_custom_js' => (bool) env('ALLOW_PAGE_CUSTOM_JS', false),
 
     'trusted_proxies' => env('TRUSTED_PROXIES'),
 

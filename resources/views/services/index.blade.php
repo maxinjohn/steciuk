@@ -4,10 +4,15 @@
 @section('description', $page?->seo_description ?? 'Worship locations across the UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page">
-        @if (! $page?->hero_title)
-            <x-page-band title="Service Times" subtitle="Monthly worship across five UK locations" kicker="Plan your visit" />
-        @endif
+    <x-page-shell :page="$page" suppress-content>
+        <x-page-intro
+            title="Holy Communion & Worship"
+            subtitle="Monthly evangelical Episcopal services across five UK cities"
+            kicker="Plan your visit"
+            scripture="God is spirit, and his worshipers must worship in the Spirit and in truth."
+            scripture-ref="John 4:24"
+        />
+        <x-worship-rhythm />
 
         <section class="page-section py-10 sm:py-14">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

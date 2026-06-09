@@ -13,6 +13,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -31,33 +32,66 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => UserRole::class,
         ];
+    }
+
+    public function roleSlug(): string
+    {
+        $role = $this->role;
+
+        if ($role instanceof UserRole) {
+            return $role->value;
+        }
+
+        return (string) $role;
+    }
+
+    public function roleRecord(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role', 'slug');
     }
 
     public function isSuperAdmin(): bool
     {
-        return $this->role === UserRole::SuperAdmin;
+        if ($this->roleSlug() === UserRole::SuperAdmin->value) {
+            return true;
+        }
+
+        return (bool) Role::findBySlug($this->roleSlug())?->grants_full_access;
     }
 
     public function isEditor(): bool
     {
-        return $this->role === UserRole::Editor;
+        return $this->roleSlug() === UserRole::Editor->value;
     }
 
     public function isViewer(): bool
     {
-        return $this->role === UserRole::Viewer;
+        return $this->roleSlug() === UserRole::Viewer->value;
     }
 
-    public function hasRole(UserRole ...$roles): bool
+    public function hasRole(UserRole|string ...$roles): bool
     {
-        return in_array($this->role, $roles, true);
+        $slugs = array_map(
+            fn (UserRole|string $role) => $role instanceof UserRole ? $role->value : $role,
+            $roles,
+        );
+
+        return in_array($this->roleSlug(), $slugs, true);
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasRole(UserRole::SuperAdmin, UserRole::Editor);
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return app(\App\Services\PermissionService::class)->canAccessAdmin($this);
+    }
+
+    public function hasAdminPermission(\App\Enums\AdminPermission|string $permission): bool
+    {
+        return app(\App\Services\PermissionService::class)->can($this, $permission);
     }
 
     public function createdPages(): HasMany

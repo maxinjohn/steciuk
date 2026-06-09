@@ -57,30 +57,24 @@
                     ? request()->routeIs('home')
                     : request()->is($path, $path . '/*');
             @endphp
-            <li class="relative" role="none" @if ($hasChildren) x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false" @endif>
+            <li class="menu-nav-item relative" role="none" data-menu-item>
                 @if ($hasChildren)
                     <button
                         type="button"
-                        class="menu-link-desktop {{ $isActive ? 'is-active' : '' }}"
-                        :aria-expanded="open"
+                        class="menu-link-desktop menu-nav-trigger {{ $isActive ? 'is-active' : '' }}"
                         aria-haspopup="true"
+                        aria-expanded="false"
+                        data-menu-trigger
                     >
                         {{ $item->label }}
-                        <svg class="menu-chevron" :class="open && 'is-open'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                        <svg class="menu-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                         </svg>
                     </button>
                     <div
-                        x-show="open"
-                        x-transition:enter="transition ease-out duration-150"
-                        x-transition:enter-start="opacity-0 translate-y-1"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-100"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 translate-y-1"
-                        @class(['menu-mega' => $useMega, 'menu-dropdown absolute left-0 top-full z-50 mt-1 py-2' => ! $useMega])
+                        @class(['menu-dropdown-panel menu-mega' => $useMega, 'menu-dropdown-panel menu-dropdown' => ! $useMega])
                         role="menu"
-                        x-cloak
+                        data-menu-panel
                     >
                         <div @class(['menu-mega-grid' => $useMega])>
                             @foreach ($item->children as $child)

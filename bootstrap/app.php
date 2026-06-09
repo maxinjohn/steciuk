@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(\App\Http\Middleware\ForceHttps::class);
         $middleware->prepend(\App\Http\Middleware\BlockSuspiciousRequests::class);
         $middleware->append(\App\Http\Middleware\SecureHeaders::class);
+        $middleware->append(\App\Http\Middleware\CheckSiteMaintenance::class);
         $middleware->append(\App\Http\Middleware\ThrottlePublicForms::class);
 
         $middleware->encryptCookies(except: [
@@ -62,8 +63,19 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             if ($e instanceof \Illuminate\Validation\ValidationException
-                || $e instanceof \Illuminate\Auth\AuthenticationException
                 || $e instanceof \Illuminate\Http\Exceptions\HttpResponseException) {
+                return null;
+            }
+
+            if ($e instanceof \Illuminate\Auth\AuthenticationException) {
+                if ($request->expectsJson()) {
+                    return \App\Support\ErrorResponse::json(401);
+                }
+
+                if (! $request->is(\App\Support\AdminPanelConfig::pathPattern())) {
+                    return \App\Support\ErrorResponse::view(401, $request);
+                }
+
                 return null;
             }
 
@@ -71,28 +83,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 ? $e->getStatusCode()
                 : 500;
 
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => match ($status) {
-                        404 => 'Not found.',
-                        403 => 'Forbidden.',
-                        419 => 'Page expired.',
-                        429 => 'Too many requests.',
-                        503 => 'Service unavailable.',
-                        default => 'Server error.',
-                    },
-                ], $status);
+            if ($request->expectsJson() || $request->hasHeader('X-Livewire')) {
+                return \App\Support\ErrorResponse::json($status);
             }
 
-            $view = match ($status) {
-                404 => 'errors.404',
-                403 => 'errors.403',
-                419 => 'errors.419',
-                429 => 'errors.429',
-                503 => 'errors.503',
-                default => 'errors.500',
-            };
+            $data = [];
 
-            return response()->view($view, ['status' => $status], $status);
+            if ($status === 429 && $e instanceof \Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException) {
+                $data['retryAfter'] = $e->getHeaders()['Retry-After'] ?? null;
+            }
+
+            return \App\Support\ErrorResponse::view($status, $request, $data);
         });
     })->create();

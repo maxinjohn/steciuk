@@ -66,4 +66,9 @@ class Ministry extends Model implements HasMedia
     {
         $this->addMediaCollection('featured')->singleFile();
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
 }

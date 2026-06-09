@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Worship gathering placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a2332"/>
+      <stop offset="100%" stop-color="#2a3548"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="35%" r="55%">
+      <stop offset="0%" stop-color="#b8892a" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#b8892a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <rect width="800" height="800" fill="url(#glow)"/>
+  <g fill="none" stroke="#b8892a" stroke-width="3" opacity="0.9">
+    <path d="M400 220v360M340 280h120"/>
+  </g>
+  <text x="400" y="660" text-anchor="middle" fill="#ece6dc" font-family="Georgia, serif" font-size="28" opacity="0.85">Gathered Worship</text>
+</svg>

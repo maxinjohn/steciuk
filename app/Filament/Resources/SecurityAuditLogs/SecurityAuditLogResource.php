@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SecurityAuditLogs;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\SecurityAuditLogs\Pages\ListSecurityAuditLogs;
 use App\Filament\Resources\SecurityAuditLogs\Tables\SecurityAuditLogsTable;
 use App\Models\SecurityAuditLog;
@@ -17,9 +18,9 @@ class SecurityAuditLogResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static ?string $navigationLabel = 'Security Audit Log';
+    protected static ?string $navigationLabel = 'Activity Log';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Security';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::TeamSecurity;
 
     protected static ?int $navigationSort = 1;
 
@@ -40,7 +41,10 @@ class SecurityAuditLogResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->isSuperAdmin() ?? false;
+        $user = auth()->user();
+
+        return $user?->isSuperAdmin()
+            || $user?->hasAdminPermission(\App\Enums\AdminPermission::SecurityAuditLog);
     }
 
     public static function table(Table $table): Table

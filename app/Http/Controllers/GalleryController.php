@@ -10,7 +10,7 @@ class GalleryController extends Controller
     public function index(): View
     {
         $albums = \App\Models\GalleryAlbum::query()
-            ->where('status', 'published')
+            ->active()
             ->withCount('photos')
             ->orderBy('sort_order')
             ->paginate(12);
@@ -22,7 +22,7 @@ class GalleryController extends Controller
     {
         $album = \App\Models\GalleryAlbum::query()
             ->where('slug', $slug)
-            ->where('status', 'published')
+            ->active()
             ->with(['photos' => fn ($q) => $q->orderBy('sort_order')])
             ->firstOrFail();
 

@@ -69,15 +69,15 @@ class ReferenceDataSeederTest extends TestCase
         config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
         $this->seed(ReferenceDataSeeder::class);
 
-        $original = News::query()->where('slug', 'welcome-new-website')->first();
+        $original = News::query()->where('slug', 'lent-prayer-week-uk-parish')->first();
         $this->assertNotNull($original);
 
         config(['site.seed.mode' => SeedConfig::MODE_SYNC]);
         $this->seed(ReferenceDataSeeder::class);
 
-        $updated = News::query()->where('slug', 'welcome-new-website')->first();
+        $updated = News::query()->where('slug', 'lent-prayer-week-uk-parish')->first();
         $this->assertNotNull($updated);
-        $this->assertSame('Welcome to Our New Website', $updated->title);
+        $this->assertSame('Lent Prayer Week Across the UK Parish', $updated->title);
     }
 
     public function test_sync_does_not_delete_custom_menu_items(): void
@@ -102,6 +102,31 @@ class ReferenceDataSeederTest extends TestCase
 
         $this->assertSame($countBefore, MenuItem::query()->count());
         $this->assertDatabaseHas('menu_items', ['label' => 'Custom Prod Link', 'url' => '/custom']);
+    }
+
+    public function test_sync_removes_legacy_duplicate_header_menu_items(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        MenuItem::query()->create([
+            'label' => 'Home',
+            'url' => '/home',
+            'menu_location' => 'header',
+            'parent_id' => null,
+            'target' => '_self',
+            'sort_order' => 0,
+            'is_visible' => true,
+            'is_external' => false,
+        ]);
+
+        $this->assertSame(2, MenuItem::query()->where('menu_location', 'header')->whereNull('parent_id')->where('label', 'Home')->count());
+
+        config(['site.seed.mode' => SeedConfig::MODE_SYNC]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $this->assertSame(1, MenuItem::query()->where('menu_location', 'header')->whereNull('parent_id')->where('label', 'Home')->count());
+        $this->assertSame(8, MenuItem::query()->where('menu_location', 'header')->whereNull('parent_id')->count());
     }
 
     public function test_database_seeder_skips_when_mode_off(): void

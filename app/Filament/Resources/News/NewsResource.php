@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\News;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\News\Pages\CreateNews;
 use App\Filament\Resources\News\Pages\EditNews;
 use App\Filament\Resources\News\Pages\ListNews;
@@ -20,7 +21,7 @@ class NewsResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNewspaper;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Website;
 
     protected static ?string $navigationLabel = 'News';
 

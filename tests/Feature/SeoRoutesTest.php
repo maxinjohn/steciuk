@@ -8,6 +8,7 @@ use App\Models\GalleryAlbum;
 use App\Models\Ministry;
 use App\Models\News;
 use App\Models\Page;
+use App\Support\AdminPanelConfig;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -39,13 +40,13 @@ class SeoRoutesTest extends TestCase
         $ministry = Ministry::factory()->create([
             'name' => 'Youth Ministry',
             'slug' => 'youth-ministry',
-            'status' => 'published',
+            'status' => 'active',
         ]);
 
         $album = GalleryAlbum::factory()->create([
             'title' => 'Easter Service',
             'slug' => 'easter-service',
-            'status' => 'published',
+            'status' => 'active',
         ]);
 
         $response = $this->get(route('sitemap'));
@@ -89,7 +90,7 @@ class SeoRoutesTest extends TestCase
         $body = $response->getContent();
 
         $this->assertStringContainsString('User-agent: *', $body);
-        $this->assertStringContainsString('Disallow: /admin', $body);
+        $this->assertStringContainsString('Disallow: /'.AdminPanelConfig::path(), $body);
         $this->assertStringContainsString('Sitemap: '.route('sitemap'), $body);
         $this->assertStringContainsString('Host: '.rtrim(config('app.url'), '/'), $body);
     }

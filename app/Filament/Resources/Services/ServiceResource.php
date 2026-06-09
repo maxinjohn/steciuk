@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Services;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\Services\Pages\CreateService;
 use App\Filament\Resources\Services\Pages\EditService;
 use App\Filament\Resources\Services\Pages\ListServices;
@@ -20,7 +21,7 @@ class ServiceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Worship';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Worship;
 
     protected static ?string $navigationLabel = 'Worship Services';
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MenuItems;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\MenuItems\Pages\CreateMenuItem;
 use App\Filament\Resources\MenuItems\Pages\EditMenuItem;
 use App\Filament\Resources\MenuItems\Pages\ListMenuItems;
@@ -20,9 +21,9 @@ class MenuItemResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBars3;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Website;
 
-    protected static ?string $navigationLabel = 'Menu Items';
+    protected static ?string $navigationLabel = 'Menus & Links';
 
     protected static ?string $modelLabel = 'Menu Item';
 

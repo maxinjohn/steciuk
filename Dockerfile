@@ -36,10 +36,11 @@ RUN composer install \
     --no-scripts \
     --prefer-dist \
     --optimize-autoloader \
-    --classmap-authoritative
+    --classmap-authoritative \
+    && composer dump-autoload --optimize --classmap-authoritative --no-interaction
 
 # --- Runtime ---
-FROM php:8.4-fpm-alpine AS production
+FROM php:8.5-fpm-alpine AS production
 
 WORKDIR /var/www/html
 
@@ -100,6 +101,12 @@ RUN find vendor -type d -name tests -prune -exec rm -rf {} + 2>/dev/null || true
 
 ENV RUN_QUEUE_WORKER=false
 ENV RUN_SCHEDULER=true
+ENV RUN_MIGRATIONS=true
+ENV RUN_SEED=false
+ENV AUTO_BOOTSTRAP=true
+ENV AUTO_SYNC_REFERENCE=false
+ENV APP_STORAGE_PATH=/var/www/html/storage
+ENV DB_DATABASE=/var/www/html/storage/database/database.sqlite
 
 EXPOSE 80
 

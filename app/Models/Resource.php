@@ -55,4 +55,9 @@ class Resource extends Model
 
         return $slug;
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
 }

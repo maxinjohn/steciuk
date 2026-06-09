@@ -21,12 +21,12 @@ class CheckRole
             abort(403, 'Unauthorized.');
         }
 
-        $allowedRoles = array_map(
-            fn (string $role) => UserRole::from($role),
+        $allowedSlugs = array_map(
+            fn (string $role) => UserRole::tryFrom($role)?->value ?? $role,
             $roles,
         );
 
-        if (! $user->hasRole(...$allowedRoles)) {
+        if (! in_array($user->roleSlug(), $allowedSlugs, true)) {
             abort(403, 'You do not have permission to access this resource.');
         }
 

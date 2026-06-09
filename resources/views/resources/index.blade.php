@@ -4,10 +4,14 @@
 @section('description', $page?->seo_description ?? 'Downloads and parish documents')
 
 @section('content')
-    <x-page-shell :page="$page">
-        @if (! $page?->hero_title)
-            <x-page-band title="Resources & Downloads" subtitle="Liturgy, forms, and parish documents" kicker="Downloads" />
-        @endif
+    <x-page-shell :page="$page" suppress-content>
+        <x-page-intro
+            title="Liturgy & Parish Forms"
+            subtitle="Worship resources, prayer guides, and parish documents"
+            kicker="Evangelical Episcopal · Resources"
+            scripture="Your word is a lamp to my feet and a light to my path."
+            scripture-ref="Psalm 119:105"
+        />
 
         <section class="page-section py-10 sm:py-14">
             <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">

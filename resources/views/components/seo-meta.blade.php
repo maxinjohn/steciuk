@@ -24,6 +24,7 @@
         ?? (trim($__env->yieldContent('og_image')) ?: null)
         ?: Seo::absoluteAsset(
             (isset($page) && $page?->og_image ? $page->og_image : null)
+            ?? ($seoDefaultOgImage ?? null)
             ?? ($siteLogo ?? null)
         );
     $ogType = $type;

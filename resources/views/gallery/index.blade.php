@@ -4,10 +4,14 @@
 @section('description', $page?->seo_description ?? 'Photo gallery from STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page">
-        @if (! $page?->hero_title)
-            <x-page-band title="Photo Gallery" subtitle="Moments from worship, fellowship, and parish life" kicker="Memories" />
-        @endif
+    <x-page-shell :page="$page" suppress-content>
+        <x-page-intro
+            title="Worship & Fellowship"
+            subtitle="Holy Communion, prayer, and parish life in pictures"
+            kicker="Saint Thomas heritage"
+            scripture="Come, let us bow down in worship, let us kneel before the Lord our Maker."
+            scripture-ref="Psalm 95:6"
+        />
 
         <section class="page-section py-10 sm:py-14">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -22,13 +26,10 @@
                             ])
                         >
                             <div class="gallery-tile-media">
-                                @if ($album->cover_image)
-                                    <img src="{{ asset('storage/' . ltrim($album->cover_image, '/')) }}" alt="{{ $album->title }}" loading="lazy" decoding="async" class="gallery-tile-image">
-                                @else
-                                    <div class="gallery-tile-fallback">
-                                        <svg class="h-10 w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
-                                    </div>
-                                @endif
+                                @php
+                                    $coverVariant = str_contains(strtolower($album->slug), 'fellowship') ? 'fellowship' : 'worship';
+                                @endphp
+                                <img src="{{ galleryCoverUrl($album->cover_image, $coverVariant) }}" alt="{{ $album->title }}" loading="lazy" decoding="async" class="gallery-tile-image">
                                 <div class="gallery-tile-overlay">
                                     <span class="feed-sticker">{{ $album->photos_count }} photos</span>
                                     <h2 class="gallery-tile-title">{{ $album->title }}</h2>

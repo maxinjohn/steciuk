@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Resources;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\Resources\Pages\CreateResource;
 use App\Filament\Resources\Resources\Pages\EditResource;
 use App\Filament\Resources\Resources\Pages\ListResources;
@@ -20,7 +21,7 @@ class ResourceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowDownTray;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Website;
 
     protected static ?string $navigationLabel = 'Downloads';
 

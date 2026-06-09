@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Fellowship gathering placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1a2332"/>
+      <stop offset="100%" stop-color="#314055"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <g fill="#b8892a" opacity="0.55">
+    <circle cx="280" cy="380" r="48"/>
+    <circle cx="400" cy="350" r="52"/>
+    <circle cx="520" cy="380" r="48"/>
+  </g>
+  <path d="M220 520 Q400 460 580 520" fill="none" stroke="#ece6dc" stroke-width="3" opacity="0.45"/>
+  <text x="400" y="660" text-anchor="middle" fill="#ece6dc" font-family="Georgia, serif" font-size="28" opacity="0.85">Parish Fellowship</text>
+</svg>

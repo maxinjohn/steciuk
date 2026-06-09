@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\LeadershipMembers\Schemas;
 
-use Filament\Forms\Components\FileUpload;
+use App\Filament\Support\SecureFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -21,10 +21,7 @@ class LeadershipMemberForm
                 Textarea::make('bio')
                     ->rows(6)
                     ->columnSpanFull(),
-                FileUpload::make('photo')
-                    ->image()
-                    ->directory('leadership/photos')
-                    ->disk('public'),
+                SecureFileUpload::image('photo', 'leadership/photos'),
                 TextInput::make('email')
                     ->label('Email address')
                     ->email(),

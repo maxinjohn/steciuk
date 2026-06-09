@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Holy Communion placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#151b28"/>
+      <stop offset="100%" stop-color="#243044"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <ellipse cx="400" cy="430" rx="120" ry="28" fill="#b8892a" opacity="0.25"/>
+  <path d="M360 360h80l-40 140z" fill="none" stroke="#b8892a" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="400" cy="330" r="36" fill="none" stroke="#ece6dc" stroke-width="3" opacity="0.7"/>
+  <text x="400" y="660" text-anchor="middle" fill="#ece6dc" font-family="Georgia, serif" font-size="28" opacity="0.85">Holy Communion</text>
+</svg>

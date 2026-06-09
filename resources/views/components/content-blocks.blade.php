@@ -10,11 +10,7 @@
 
 @php
     $resolveLink = function (?string $url): string {
-        if (! $url) {
-            return '#';
-        }
-
-        return str_starts_with($url, 'http') ? $url : url($url);
+        return \App\Support\SafeUrl::resolve($url);
     };
 
     $storageUrl = function (?string $path): ?string {
@@ -54,6 +50,7 @@
                 :image="$data['image'] ?? null"
                 :stats="$data['stats'] ?? []"
                 size="large"
+                :show-side-panel="true"
             >
                 @if (! empty($data['primary_cta_label']))
                     <x-button href="{{ $resolveLink($data['primary_cta_url'] ?? '#') }}" hero>
@@ -71,6 +68,14 @@
                     </x-button>
                 @endif
             </x-hero>
+            <x-faith-pillars />
+            <x-scripture-ribbon text="God is spirit, and his worshipers must worship in the Spirit and in truth." reference="John 4:24" />
+            <x-heavenly-comfort
+                :heading="$faithComfortHeading ?? null"
+                :subheading="$faithComfortSubheading ?? null"
+                :kicker="$faithComfortKicker ?? null"
+                :cards="$faithComfortCards ?? []"
+            />
             @break
 
         @case('text_image')
@@ -289,11 +294,10 @@
                         @forelse ($items as $album)
                             <x-card :href="route('gallery.show', $album->slug)" :padding="false" class="gallery-tile overflow-hidden">
                                 <div class="gallery-tile-media">
-                                    @if ($storageUrl($album->cover_image))
-                                        <img src="{{ $storageUrl($album->cover_image) }}" alt="{{ $album->title }}" loading="lazy" decoding="async" class="gallery-tile-image">
-                                    @else
-                                        <div class="gallery-tile-fallback"><span>{{ substr($album->title, 0, 1) }}</span></div>
-                                    @endif
+                                    @php
+                                        $coverVariant = str_contains(strtolower($album->slug), 'fellowship') ? 'fellowship' : 'worship';
+                                    @endphp
+                                    <img src="{{ galleryCoverUrl($album->cover_image, $coverVariant) }}" alt="{{ $album->title }}" loading="lazy" decoding="async" class="gallery-tile-image">
                                     <div class="gallery-tile-overlay">
                                         <span class="feed-sticker">Album</span>
                                         <h3 class="gallery-tile-title">{{ $album->title }}</h3>
@@ -386,7 +390,7 @@
                 })->values();
             @endphp
             @if ($locationsData->isNotEmpty())
-                <section class="bg-surface py-12 sm:py-16 md:py-20" x-data="{ active: 0 }">
+                <section class="bg-surface py-12 sm:py-16 md:py-20" data-location-tabs>
                     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <x-section-heading :title="$data['heading'] ?? 'Locations'" :subtitle="$data['subheading'] ?? null" />
 
@@ -395,10 +399,12 @@
                                 <button
                                     type="button"
                                     role="tab"
-                                    class="location-tab"
-                                    :class="active === {{ $index }} && 'is-active'"
-                                    :aria-selected="active === {{ $index }}"
-                                    @click="active = {{ $index }}"
+                                    class="location-tab {{ $index === 0 ? 'is-active' : '' }}"
+                                    data-location-tab
+                                    data-location-index="{{ $index }}"
+                                    aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+                                    aria-controls="location-panel-{{ $block->id ?? 'block' }}-{{ $index }}"
+                                    id="location-tab-{{ $block->id ?? 'block' }}-{{ $index }}"
                                 >
                                     {{ $location['name'] }}
                                 </button>
@@ -408,13 +414,13 @@
                         @foreach ($locationsData as $index => $location)
                             @php $service = $location['service']; @endphp
                             <div
-                                x-show="active === {{ $index }}"
-                                x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-start="opacity-0 translate-y-1"
-                                x-transition:enter-end="opacity-100 translate-y-0"
                                 role="tabpanel"
                                 class="location-panel"
-                                x-cloak
+                                data-location-panel
+                                data-location-index="{{ $index }}"
+                                id="location-panel-{{ $block->id ?? 'block' }}-{{ $index }}"
+                                aria-labelledby="location-tab-{{ $block->id ?? 'block' }}-{{ $index }}"
+                                @if ($index !== 0) hidden @endif
                             >
                                 <div class="flex items-start gap-4">
                                     <div class="location-panel-icon shrink-0">

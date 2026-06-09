@@ -234,11 +234,66 @@ Builds Tailwind/Vite assets into `public/build/` during `docker compose build`. 
 ### Make shortcuts
 
 ```bash
-make prod       # build + up
-make bootstrap  # reference data
-make logs       # tail logs
-make shell      # container shell
+make prod        # build + up (local)
+make bootstrap   # reference data
+make logs        # tail logs
+make shell       # container shell
+make deploy      # production deploy script
+make deploy-sync # deploy + sync reference data
 ```
+
+### Production deploy (Docker server)
+
+Use this on the **production server** after merging `dev` → `main` on GitHub.
+
+```bash
+# One-time on the server
+git clone git@github.com:maxinjohn/steciuk.git
+cd steciuk
+cp .env.example .env
+# Edit .env for production (APP_ENV=production, APP_URL, APP_KEY, etc.)
+php artisan key:generate --show   # paste into .env APP_KEY
+
+# First deploy (creates DB + bootstrap if empty)
+./scripts/deploy.sh
+
+# Routine deploy after each release
+./scripts/deploy.sh
+
+# Deploy code + push dev reference content (pages/menus) to prod DB
+./scripts/deploy.sh --sync
+```
+
+Or via Make:
+
+```bash
+make deploy
+make deploy-sync
+```
+
+**What `scripts/deploy.sh` does:**
+
+1. `git pull` from `main` (ff-only; configurable via `scripts/deploy.env`)
+2. `docker compose build` and `up -d`
+3. Wait for `/up` health check
+4. `php artisan migrate --force`
+5. `site:ensure-roles` and `site:ensure-admin` (safe on every deploy)
+6. Optional `--sync` → `site:sync-reference-data` (upsert seeded content, keeps prod-only records)
+7. SQLite optimize + `php artisan optimize` in production
+8. Smoke test homepage and admin login URL
+
+**Dev → prod workflow:**
+
+| Step | Where | Command |
+|------|-------|---------|
+| 1. Develop | Local | work on `dev` branch |
+| 2. Release | GitHub | merge `dev` → `main` |
+| 3. Deploy | Production server | `./scripts/deploy.sh` |
+| 4. Content sync | Production (optional) | `./scripts/deploy.sh --sync` |
+
+Optional server config: `cp scripts/deploy.env.example scripts/deploy.env` to set `DEPLOY_BRANCH`, ports, etc.
+
+Container **entrypoint** also runs migrations, `site:ensure-roles`, and `site:ensure-admin` on every start — the deploy script runs them again so you see clear output in the deploy log.
 
 ## Deployment (cPanel / shared VPS)
 
@@ -336,8 +391,12 @@ Enable MFA: Admin → Profile → Two-factor authentication.
 ## Project structure
 
 ```
+scripts/
+├── deploy.sh           Production deploy (git pull + docker + migrate)
+└── deploy.env.example  Optional server deploy overrides
+
 app/
-├── Console/Commands/   site:bootstrap, site:sync-reference-data
+├── Console/Commands/   site:bootstrap, site:sync-reference-data, site:ensure-admin
 ├── Filament/           Admin panel resources
 ├── Http/Controllers/   Public site
 ├── Livewire/Forms/     Secure public forms

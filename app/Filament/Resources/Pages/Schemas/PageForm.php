@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\Pages\Schemas;
 
 use App\Enums\PublishStatus;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
+use App\Filament\Support\ChurchRichEditor;
+use App\Filament\Support\SecureFileUpload;
+use App\Models\Page;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -27,10 +29,28 @@ class PageForm
                         Tab::make('Content')
                             ->icon('heroicon-o-document-text')
                             ->schema([
+                                Placeholder::make('sections_notice')
+                                    ->hiddenLabel()
+                                    ->content(function (?Page $record, string $operation): string {
+                                        if ($operation === 'create') {
+                                            return 'After saving, use the Page Sections panel below to add hero banners, location tabs, CTAs, and other visible layout blocks.';
+                                        }
+
+                                        if ($record?->contentBlocks()->exists()) {
+                                            return 'This page is built from '. $record->contentBlocks()->count() .' section(s). Edit each section in the Page Sections panel below — headlines, buttons, stats, and quotes live there.';
+                                        }
+
+                                        if ($record?->is_home || $record?->template === 'home') {
+                                            return 'The homepage uses Page Sections (below), not this body field. Add or edit hero, locations, ministries, and CTAs there.';
+                                        }
+
+                                        return 'Use the Page Sections panel below for layout blocks, or this field for rich body text on standard pages.';
+                                    })
+                                    ->columnSpanFull(),
                                 TextInput::make('title')
                                     ->required()
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(function (Set $set, ?string $state, string $operation): void {
+                                    ->afterStateUpdated(function (Set $set, ?string $state, ?string $operation): void {
                                         if ($operation === 'create') {
                                             $set('slug', Str::slug($state ?? ''));
                                         }
@@ -39,16 +59,26 @@ class PageForm
                                     ->required()
                                     ->unique(ignoreRecord: true)
                                     ->helperText('URL path for this page, e.g. welcome → /welcome'),
-                                RichEditor::make('content')
-                                    ->columnSpanFull()
-                                    ->helperText('Full page body — fully editable rich text with headings, lists, links, and images.'),
+                                ChurchRichEditor::make('content')
+                                    ->helperText(function (?Page $record): string {
+                                        if ($record?->is_home || $record?->template === 'home') {
+                                            return 'Optional extra prose below page sections. The homepage layout comes from Page Sections below.';
+                                        }
+
+                                        if ($record?->contentBlocks()->exists()) {
+                                            return 'Optional body text shown below page sections when present.';
+                                        }
+
+                                        return 'Full page body — headings, lists, links, tables, and images are preserved on save.';
+                                    }),
                             ]),
                         Tab::make('Hero')
                             ->icon('heroicon-o-photo')
                             ->schema([
                                 Toggle::make('show_hero')
                                     ->label('Show hero section')
-                                    ->default(true),
+                                    ->default(true)
+                                    ->helperText('Disable when the page uses a Hero section block in Page Sections below.'),
                                 Select::make('hero_style')
                                     ->options([
                                         'gradient' => 'Animated Gradient (Modern)',
@@ -59,11 +89,7 @@ class PageForm
                                     ->default('gradient'),
                                 TextInput::make('hero_title'),
                                 TextInput::make('hero_subtitle'),
-                                FileUpload::make('featured_image')
-                                    ->image()
-                                    ->maxSize(5120)
-                                    ->directory('pages/featured')
-                                    ->disk('public'),
+                                SecureFileUpload::image('featured_image', 'pages/featured'),
                             ]),
                         Tab::make('Design')
                             ->icon('heroicon-o-paint-brush')
@@ -78,7 +104,8 @@ class PageForm
                                         'full-width' => 'Full Width',
                                     ])
                                     ->default('default')
-                                    ->required(),
+                                    ->required()
+                                    ->helperText('Home template expects Page Sections rather than body content.'),
                                 Select::make('layout_variant')
                                     ->options([
                                         'standard' => 'Standard',
@@ -98,11 +125,13 @@ class PageForm
                                 Textarea::make('custom_css')
                                     ->label('Custom CSS')
                                     ->rows(4)
-                                    ->helperText('Page-specific styles. Avoid script tags.'),
+                                    ->helperText('CSS only — scripts and @import are stripped on save.'),
                                 Textarea::make('custom_js')
-                                    ->label('Custom JS')
+                                    ->label('Custom JS (disabled on public site)')
                                     ->rows(4)
-                                    ->helperText('Page-specific scripts. Use with caution.'),
+                                    ->helperText('Stored for reference only. Public custom JS is blocked for security.')
+                                    ->visible(fn (): bool => (bool) config('security.allow_page_custom_js')
+                                        && auth()->user()?->isSuperAdmin()),
                             ]),
                         Tab::make('SEO')
                             ->icon('heroicon-o-magnifying-glass')
@@ -113,10 +142,7 @@ class PageForm
                                 TextInput::make('meta_robots')
                                     ->placeholder('index, follow')
                                     ->helperText('Leave blank for default indexing'),
-                                FileUpload::make('og_image')
-                                    ->image()
-                                    ->directory('pages/og')
-                                    ->disk('public'),
+                                SecureFileUpload::image('og_image', 'pages/og', 4096),
                             ]),
                         Tab::make('Settings')
                             ->icon('heroicon-o-cog-6-tooth')
@@ -131,8 +157,8 @@ class PageForm
                                     ->required(),
                                 Toggle::make('is_home')
                                     ->helperText('Only one page should be marked as the homepage.'),
-                                Section::make('Content Blocks')
-                                    ->description('Add flexible sections on the Content Blocks tab after saving.')
+                                Section::make('Menus')
+                                    ->description('Use the Menu Placement tab below to add this page to header, footer, or mobile menus — including submenus.')
                                     ->schema([]),
                             ]),
                     ])

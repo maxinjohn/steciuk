@@ -87,8 +87,85 @@ class MenuSeeder extends Seeder
         ];
 
         $this->seedMenu($headerStructure, MenuLocation::Header, $pages);
+        $this->pruneLegacyDuplicates(MenuLocation::Header);
+
         $this->seedMenu($headerStructure, MenuLocation::Mobile, $pages);
+        $this->pruneLegacyDuplicates(MenuLocation::Mobile);
+
         $this->seedMenu($footerStructure, MenuLocation::Footer, $pages);
+        $this->pruneLegacyDuplicates(MenuLocation::Footer);
+    }
+
+    /**
+     * Remove pre-seed_key duplicates while keeping prod-only custom links.
+     */
+    private function pruneLegacyDuplicates(MenuLocation $location): void
+    {
+        $seeded = MenuItem::query()
+            ->where('menu_location', $location)
+            ->whereNotNull('seed_key')
+            ->get(['id', 'label', 'url', 'page_id', 'parent_id', 'seed_key']);
+
+        $legacyRoots = MenuItem::query()
+            ->where('menu_location', $location)
+            ->whereNull('seed_key')
+            ->whereNull('parent_id')
+            ->get();
+
+        foreach ($legacyRoots as $legacy) {
+            if ($this->hasSeededCounterpart($legacy, $seeded)) {
+                $this->deleteMenuSubtree($legacy);
+            }
+        }
+
+        MenuItem::query()
+            ->where('menu_location', $location)
+            ->whereNull('seed_key')
+            ->whereNotNull('parent_id')
+            ->get()
+            ->each(function (MenuItem $legacy) use ($seeded): void {
+                if ($this->hasSeededCounterpart($legacy, $seeded)) {
+                    $legacy->delete();
+                }
+            });
+    }
+
+    /** @param \Illuminate\Support\Collection<int, MenuItem> $seeded */
+    private function hasSeededCounterpart(MenuItem $legacy, $seeded): bool
+    {
+        $legacyParent = $legacy->parent_id ? MenuItem::query()->find($legacy->parent_id) : null;
+
+        return $seeded->contains(function (MenuItem $seed) use ($legacy, $legacyParent): bool {
+            if ($seed->label !== $legacy->label) {
+                return false;
+            }
+
+            if ($seed->url !== $legacy->url) {
+                return false;
+            }
+
+            if ($seed->page_id && $legacy->page_id && (int) $seed->page_id !== (int) $legacy->page_id) {
+                return false;
+            }
+
+            if ($legacy->parent_id === null) {
+                return $seed->parent_id === null;
+            }
+
+            if (! $legacyParent) {
+                return false;
+            }
+
+            $seedParent = $seeded->firstWhere('id', $seed->parent_id);
+
+            return $seedParent && $seedParent->label === $legacyParent->label;
+        });
+    }
+
+    private function deleteMenuSubtree(MenuItem $item): void
+    {
+        $item->children()->each(fn (MenuItem $child) => $this->deleteMenuSubtree($child));
+        $item->delete();
     }
 
     /**

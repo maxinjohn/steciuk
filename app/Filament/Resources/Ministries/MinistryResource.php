@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Ministries;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\Ministries\Pages\CreateMinistry;
 use App\Filament\Resources\Ministries\Pages\EditMinistry;
 use App\Filament\Resources\Ministries\Pages\ListMinistries;
@@ -20,7 +21,7 @@ class MinistryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Worship';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Worship;
 
     protected static ?string $navigationLabel = 'Ministries';
 

@@ -10,7 +10,7 @@ class ResourceController extends Controller
     public function index(): View
     {
         $resources = \App\Models\Resource::query()
-            ->where('status', 'published')
+            ->active()
             ->orderBy('sort_order')
             ->get()
             ->groupBy('category');

@@ -3,7 +3,7 @@
 const updateThemeColor = () => {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) return;
-    meta.setAttribute('content', document.documentElement.classList.contains('dark') ? '#131316' : '#1a2332');
+    meta.setAttribute('content', document.documentElement.classList.contains('dark') ? '#131316' : '#d4cabb');
 };
 
 const initDarkMode = () => {
@@ -51,8 +51,90 @@ window.galleryLightbox = () => ({
     },
 });
 
+const initLocationTabs = () => {
+    document.querySelectorAll('[data-location-tabs]').forEach((root) => {
+        const tabs = [...root.querySelectorAll('[data-location-tab]')];
+        const panels = [...root.querySelectorAll('[data-location-panel]')];
+
+        if (! tabs.length || ! panels.length) {
+            return;
+        }
+
+        const activate = (index) => {
+            tabs.forEach((tab) => {
+                const isActive = Number(tab.dataset.locationIndex) === index;
+                tab.classList.toggle('is-active', isActive);
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            panels.forEach((panel) => {
+                const isActive = Number(panel.dataset.locationIndex) === index;
+                panel.hidden = ! isActive;
+            });
+        };
+
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                activate(Number(tab.dataset.locationIndex));
+            });
+        });
+
+        activate(Number(tabs.find((tab) => tab.classList.contains('is-active'))?.dataset.locationIndex ?? 0));
+    });
+};
+
+const initDesktopNav = () => {
+    const items = document.querySelectorAll('[data-menu-item]');
+
+    if (! items.length) {
+        return;
+    }
+
+    const closeAll = (except = null) => {
+        items.forEach((item) => {
+            if (item === except) {
+                return;
+            }
+
+            item.classList.remove('is-open');
+            item.querySelector('[data-menu-trigger]')?.setAttribute('aria-expanded', 'false');
+        });
+    };
+
+    items.forEach((item) => {
+        const trigger = item.querySelector('[data-menu-trigger]');
+        const panel = item.querySelector('[data-menu-panel]');
+
+        if (! trigger || ! panel) {
+            return;
+        }
+
+        trigger.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const willOpen = ! item.classList.contains('is-open');
+            closeAll(willOpen ? item : null);
+
+            item.classList.toggle('is-open', willOpen);
+            trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        });
+
+        panel.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+    });
+
+    document.addEventListener('click', () => closeAll());
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeAll();
+        }
+    });
+};
+
 const initScrollReveal = () => {
-    const elements = document.querySelectorAll('.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z');
+    const elements = document.querySelectorAll('.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip');
 
     if (!('IntersectionObserver' in window) || ! elements.length) return;
 
@@ -146,6 +228,8 @@ const initPWA = () => {
 
 initDarkMode();
 document.addEventListener('DOMContentLoaded', () => {
+    initDesktopNav();
+    initLocationTabs();
     initScrollReveal();
     initMobileDock();
     initPWA();

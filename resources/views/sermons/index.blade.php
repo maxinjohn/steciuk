@@ -4,10 +4,14 @@
 @section('description', $page?->seo_description ?? 'Biblical teaching from STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page">
-        @if (! $page?->hero_title)
-            <x-page-band title="Sermons & Messages" subtitle="Biblical teaching from our parish preachers" kicker="Watch & listen" />
-        @endif
+    <x-page-shell :page="$page" suppress-content>
+        <x-page-intro
+            title="Expository Preaching"
+            subtitle="Sermons from Holy Scripture — for the testimony of Jesus Christ"
+            kicker="Word of God"
+            scripture="Faith comes from hearing the message, and the message is heard through the word about Christ."
+            scripture-ref="Romans 10:17"
+        />
 
         <section class="page-section py-10 sm:py-14">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

@@ -114,4 +114,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication timing mitigation (microseconds)
+    |--------------------------------------------------------------------------
+    |
+    | Filament login uses this minimum duration when validating credentials.
+    | Lower values feel faster; higher values reduce timing side-channels.
+    |
+    */
+
+    'timebox_duration' => (int) env('AUTH_TIMEBOX_MICROSECONDS', 100_000),
+
 ];

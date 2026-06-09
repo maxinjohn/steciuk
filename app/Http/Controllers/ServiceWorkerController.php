@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\AdminPanelConfig;
 use Illuminate\Http\Response;
 
 class ServiceWorkerController extends Controller
@@ -10,6 +11,7 @@ class ServiceWorkerController extends Controller
     {
         $cacheVersion = 'steci-'.substr(md5((string) config('app.key')), 0, 8);
         $offlineUrl = route('offline');
+        $adminPath = '/'.AdminPanelConfig::path();
 
         $js = <<<JS
 const CACHE = '{$cacheVersion}';
@@ -34,7 +36,7 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(event.request.url);
 
-    if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/livewire')) {
+    if (url.pathname.startsWith('{$adminPath}') || url.pathname.startsWith('/livewire')) {
         return;
     }
 

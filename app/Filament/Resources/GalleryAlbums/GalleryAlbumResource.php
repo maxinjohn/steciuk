@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\GalleryAlbums;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\GalleryAlbums\Pages\CreateGalleryAlbum;
 use App\Filament\Resources\GalleryAlbums\Pages\EditGalleryAlbum;
 use App\Filament\Resources\GalleryAlbums\Pages\ListGalleryAlbums;
@@ -20,7 +21,7 @@ class GalleryAlbumResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Media';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Media;
 
     protected static ?string $navigationLabel = 'Gallery Albums';
 

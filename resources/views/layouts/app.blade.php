@@ -15,15 +15,15 @@
     @if ($siteFavicon ?? null)
         <link rel="icon" href="{{ str_starts_with($siteFavicon, 'http') ? $siteFavicon : asset('storage/' . ltrim($siteFavicon, '/')) }}">
     @else
-        <link rel="icon" href="{{ asset('icons/icon-192.png') }}">
+        <link rel="icon" href="{{ asset('icons/favicon.svg') }}" type="image/svg+xml">
     @endif
 
     <link rel="manifest" href="{{ route('manifest') }}">
-    <meta name="theme-color" content="#1a2332">
+    <meta name="theme-color" content="{{ $themeColor ?? '#d4cabb' }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="STECI UK">
-    <link rel="apple-touch-icon" href="{{ asset('icons/icon-192.png') }}">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ $pwaShortName ?? 'STECI UK' }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/steci-mark.svg') }}">
     <meta name="mobile-web-app-capable" content="yes">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -47,6 +47,7 @@
                 $socialYoutube ?? null,
                 $socialFacebook ?? null,
                 $socialInstagram ?? null,
+                $socialTwitter ?? null,
             ])) ?: null,
         ], fn ($v) => $v !== null && $v !== []);
     @endphp
@@ -66,33 +67,15 @@
             Skip to main content
         </a>
 
-        <header class="site-header sticky top-0 z-50 pt-safe">
+        <x-site-announcement />
+
+        <header class="site-header sticky top-0 z-[200] pt-safe">
             <div class="site-header-inner">
                 <a href="{{ route('home') }}" class="site-logo-link" aria-label="{{ $siteName }} — Home">
-                    @if ($siteLogo)
-                        <img
-                            src="{{ str_starts_with($siteLogo, 'http') ? $siteLogo : asset('storage/' . ltrim($siteLogo, '/')) }}"
-                            alt="{{ $siteName }}"
-                            class="h-10 w-auto shrink-0 sm:h-11 lg:h-14"
-                            loading="eager"
-                        >
-                    @else
-                        @php
-                            $logoMain = trim(preg_replace('/\s*[–—-]\s*UK Parish\s*$/iu', '', $siteName) ?: $siteName);
-                        @endphp
-                        <span class="site-logo-text">
-                            <span class="site-logo-stack">
-                                <span class="site-logo-line">
-                                    <span class="sm:hidden">STECI</span>
-                                    <span class="hidden sm:inline">{{ $logoMain }}</span>
-                                </span>
-                                <span class="site-logo-sub">UK Parish</span>
-                            </span>
-                        </span>
-                    @endif
+                    <x-site-logo />
                 </a>
 
-                <nav class="hidden lg:flex lg:justify-center" aria-label="Main navigation">
+                <nav class="site-header-nav hidden lg:flex lg:justify-center" aria-label="Main navigation">
                     <x-menu :items="$headerMenu" variant="desktop" />
                 </nav>
 
@@ -149,10 +132,7 @@
                         <span class="mobile-sheet-badge-dot" aria-hidden="true"></span>
                         Menu
                     </div>
-                    <div class="site-logo-stack">
-                        <span class="site-logo-line site-logo-line--sheet">Explore</span>
-                        <span class="site-logo-sub">UK Parish</span>
-                    </div>
+                    <x-site-logo variant="sheet" />
                 </div>
                 <button type="button" @click="mobileOpen = false" class="icon-btn" aria-label="Close menu">
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -168,22 +148,22 @@
                     <a href="{{ url('/service-times') }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--gold">
                         <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
                         <span>
-                            <span class="mobile-quick-label">Service Times</span>
-                            <span class="mobile-quick-desc">5 UK locations</span>
+                            <span class="mobile-quick-label">Holy Communion</span>
+                            <span class="mobile-quick-desc">Service times · 5 cities</span>
                         </span>
                     </a>
                     <a href="{{ url('/online-worship') }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--sky">
                         <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg></span>
                         <span>
-                            <span class="mobile-quick-label">Watch Online</span>
-                            <span class="mobile-quick-desc">Live & sermons</span>
+                            <span class="mobile-quick-label">Online Worship</span>
+                            <span class="mobile-quick-desc">Sermons & live stream</span>
                         </span>
                     </a>
                     <a href="{{ url('/prayer-request') }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--rose">
                         <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg></span>
                         <span>
                             <span class="mobile-quick-label">Prayer Request</span>
-                            <span class="mobile-quick-desc">Confidential</span>
+                            <span class="mobile-quick-desc">Intercession ministry</span>
                         </span>
                     </a>
                     <a href="{{ url('/contact') }}" @click="mobileOpen = false" class="mobile-quick-link mobile-quick-link--navy">
@@ -212,7 +192,7 @@
                 </div>
                 </div>
 
-                <p class="mobile-section-kicker mt-2">Browse all</p>
+                <p class="mobile-section-kicker">Parish navigation</p>
                 <x-menu :items="$navMenu" variant="mobile" />
             </div>
 
@@ -236,9 +216,16 @@
             </div>
         </nav>
 
-        <main id="main-content" class="flex-1 overflow-x-clip lg:pb-0">
+        <main id="main-content" class="flex-1 lg:pb-0">
             @yield('content')
         </main>
+
+        <x-sanctuary-peace
+            :kicker="$faithSanctuaryKicker ?? null"
+            :note="$faithSanctuaryNote ?? null"
+            :verses="$faithSanctuaryVerses ?? []"
+        />
+        <x-gospel-reminder />
 
         <footer class="site-footer pb-dock lg:pb-0" aria-label="Site footer">
             <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
@@ -272,7 +259,7 @@
                                 <li>Bristol</li>
                             @endforelse
                         </ul>
-                        <a href="{{ route('services.index') }}" class="mt-4 inline-block text-sm font-semibold text-[var(--site-brand)] transition hover:opacity-80">
+                        <a href="{{ route('services.index') }}" class="site-footer-accent-link mt-4 inline-block text-sm transition hover:opacity-90">
                             View service times →
                         </a>
                     </div>
@@ -283,10 +270,10 @@
                                 <li>{{ $siteAddress }}</li>
                             @endif
                             @if ($sitePhone)
-                                <li><a href="tel:{{ preg_replace('/\s+/', '', $sitePhone) }}" class="transition hover:text-[var(--site-brand)]">{{ $sitePhone }}</a></li>
+                                <li><a href="tel:{{ preg_replace('/\s+/', '', $sitePhone) }}" class="transition hover:text-[var(--site-accent)]">{{ $sitePhone }}</a></li>
                             @endif
                             @if ($siteEmail)
-                                <li><a href="mailto:{{ $siteEmail }}" class="transition hover:text-[var(--site-brand)]">{{ $siteEmail }}</a></li>
+                                <li><a href="mailto:{{ $siteEmail }}" class="transition hover:text-[var(--site-accent)]">{{ $siteEmail }}</a></li>
                             @endif
                         </ul>
                         <div class="mt-4 flex gap-3">
@@ -356,12 +343,12 @@
                                             <li>Bristol</li>
                                         @endforelse
                                     </ul>
-                                    <a href="{{ route('services.index') }}" class="mt-3 inline-block text-sm font-semibold text-[var(--site-brand)]">View service times →</a>
+                                    <a href="{{ route('services.index') }}" class="site-footer-accent-link mt-3 inline-block text-sm">View service times →</a>
                                 @elseif ($section['slot'] === 'contact')
                                     <ul class="space-y-2 pt-3 text-sm text-[var(--site-footer-muted)]" role="list">
                                         @if ($siteAddress)<li>{{ $siteAddress }}</li>@endif
-                                        @if ($sitePhone)<li><a href="tel:{{ preg_replace('/\s+/', '', $sitePhone) }}" class="hover:text-[var(--site-brand)]">{{ $sitePhone }}</a></li>@endif
-                                        @if ($siteEmail)<li><a href="mailto:{{ $siteEmail }}" class="hover:text-[var(--site-brand)]">{{ $siteEmail }}</a></li>@endif
+                                        @if ($sitePhone)<li><a href="tel:{{ preg_replace('/\s+/', '', $sitePhone) }}" class="hover:text-[var(--site-accent)]">{{ $sitePhone }}</a></li>@endif
+                                        @if ($siteEmail)<li><a href="mailto:{{ $siteEmail }}" class="hover:text-[var(--site-accent)]">{{ $siteEmail }}</a></li>@endif
                                     </ul>
                                 @endif
                             </div>
@@ -370,7 +357,9 @@
                 </div>
 
                 <div class="mt-10 border-t border-white/10 pt-8 text-center text-sm text-[var(--site-footer-muted)]">
-                    <p>&copy; {{ date('Y') }} {{ $siteName }}. All rights reserved.</p>
+                    <x-faith-pillars variant="footer" class="!py-0 !mb-8" />
+                    <p class="text-xs uppercase tracking-[0.2em] text-[var(--site-footer-muted)]/70">Evangelical Episcopal · Saint Thomas Christian heritage</p>
+                    <p class="mt-3">&copy; {{ date('Y') }} {{ $siteName }}. All rights reserved.</p>
                 </div>
             </div>
         </footer>

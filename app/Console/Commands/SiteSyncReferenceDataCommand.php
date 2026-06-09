@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\SiteCache;
 use App\Support\SeedConfig;
 use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Console\Command;
@@ -24,9 +25,11 @@ class SiteSyncReferenceDataCommand extends Command
         config(['site.seed.mode' => SeedConfig::MODE_SYNC]);
 
         $this->components->info('Syncing reference data (SEED_MODE=sync)...');
-        $this->components->comment('Preserves: prod-only pages/menus, admin passwords, and settings (unless SEED_OVERWRITE_* is true).');
+        $this->line('Preserves: prod-only pages/menus, admin passwords, and settings (unless SEED_OVERWRITE_* is true).');
 
         (new ReferenceDataSeeder)->setCommand($this)->run();
+
+        SiteCache::forgetAfterReferenceDataChange();
 
         $this->components->success('Reference data sync complete.');
 

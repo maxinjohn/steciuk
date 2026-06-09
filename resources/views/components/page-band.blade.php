@@ -1,11 +1,12 @@
 @props([
     'title',
     'subtitle' => null,
-    'kicker' => 'UK Parish',
+    'kicker' => 'Evangelical Episcopal Parish',
 ])
 
 <section {{ $attributes->merge(['class' => 'page-band page-section']) }}>
     <div class="page-band-bg" aria-hidden="true">
+        <span class="page-band-cross" aria-hidden="true">✝</span>
         <span class="page-band-orb page-band-orb--gold"></span>
         <span class="page-band-orb page-band-orb--navy"></span>
         <span class="page-band-grid"></span>

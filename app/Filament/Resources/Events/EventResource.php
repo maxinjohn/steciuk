@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Events;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\Events\Pages\CreateEvent;
 use App\Filament\Resources\Events\Pages\EditEvent;
 use App\Filament\Resources\Events\Pages\ListEvents;
@@ -20,7 +21,7 @@ class EventResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Worship';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Worship;
 
     protected static ?string $navigationLabel = 'Events';
 

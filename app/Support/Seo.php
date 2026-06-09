@@ -34,7 +34,12 @@ class Seo
 
     public static function isReservedSlug(string $slug): bool
     {
-        return in_array(strtolower($slug), self::RESERVED_SLUGS, true);
+        $reserved = array_unique([
+            ...self::RESERVED_SLUGS,
+            AdminPanelConfig::path(),
+        ]);
+
+        return in_array(strtolower($slug), $reserved, true);
     }
 
     public static function truncateDescription(?string $text, int $limit = 160): string

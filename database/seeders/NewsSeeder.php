@@ -19,15 +19,15 @@ class NewsSeeder extends Seeder
 
         $articles = [
             [
-                'title' => 'Welcome to Our New Website',
-                'slug' => 'welcome-new-website',
-                'excerpt' => 'We are pleased to launch our new parish website — a place to find service times, news, sermons, and resources for the STECI UK Parish community.',
-                'content' => '<p>We are delighted to launch the new website for the St. Thomas Evangelical Church of India – UK Parish. This site has been created to help our parish family and visitors find information about worship, ministries, events, and resources across our five UK locations.</p><p>Content will be updated regularly by parish administrators. If you notice anything that needs correcting, please contact the parish office.</p>',
-                'category' => 'Announcements',
+                'title' => 'Lent Prayer Week Across the UK Parish',
+                'slug' => 'lent-prayer-week-uk-parish',
+                'excerpt' => 'Join parish prayer groups across Manchester, Leicester, Dartford, Sunderland, and Bristol for a week of united intercession for families, mission, and the Church.',
+                'content' => '<p>Our parish prayer groups invite every member to draw near to God in a dedicated week of prayer. Daily online meetings and local gatherings will be held across all five UK worship locations.</p><p>We will intercede for families, for the preaching of the Gospel, for our missionaries, and for unity in Christ across our dispersed parish family.</p><p>Contact the parish office for meeting times, online links, and local prayer group details.</p>',
+                'category' => 'Prayer',
                 'published_at' => now()->subDays(3),
                 'status' => PublishStatus::Published,
-                'seo_title' => 'Welcome to Our New Website | STECI UK Parish',
-                'seo_description' => 'Launch announcement for the new STECI UK Parish website.',
+                'seo_title' => 'Lent Prayer Week | STECI UK Parish',
+                'seo_description' => 'Invitation to parish-wide prayer across UK worship locations.',
             ],
             [
                 'title' => 'Monthly Worship Schedule Update',

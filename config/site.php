@@ -44,4 +44,27 @@ return [
 
     'admin_email' => env('ADMIN_EMAIL', 'admin@steciuk.org'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin panel (Filament)
+    |--------------------------------------------------------------------------
+    |
+    | ADMIN_PATH     — URL segment for the control panel (default: admin).
+    |                  Example: parish-office → https://yoursite.org/parish-office
+    | ADMIN_PANEL_NAME       — Full title in the browser tab and header.
+    | ADMIN_PANEL_SHORT_NAME — Short label under the logo in the sidebar.
+    |
+    */
+
+    'admin' => [
+        'path' => (static function (): string {
+            $raw = strtolower(trim((string) env('ADMIN_PATH', 'admin'), '/'));
+            $sanitized = preg_replace('/[^a-z0-9\-]/', '', $raw) ?? '';
+
+            return $sanitized !== '' ? $sanitized : 'admin';
+        })(),
+        'name' => env('ADMIN_PANEL_NAME', env('APP_NAME', 'STECI UK Parish').' Admin'),
+        'short_name' => env('ADMIN_PANEL_SHORT_NAME', 'Parish Admin'),
+    ],
+
 ];

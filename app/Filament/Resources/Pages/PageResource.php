@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Pages;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\Pages\Pages\CreatePage;
 use App\Filament\Resources\Pages\Pages\EditPage;
 use App\Filament\Resources\Pages\Pages\ListPages;
 use App\Filament\Resources\Pages\RelationManagers\ContentBlocksRelationManager;
+use App\Filament\Resources\Pages\RelationManagers\MenuItemsRelationManager;
 use App\Filament\Resources\Pages\Schemas\PageForm;
 use App\Filament\Resources\Pages\Tables\PagesTable;
 use App\Models\Page;
@@ -23,7 +25,7 @@ class PageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Content';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Website;
 
     protected static ?string $navigationLabel = 'Pages';
 
@@ -47,6 +49,7 @@ class PageResource extends Resource
     {
         return [
             ContentBlocksRelationManager::class,
+            MenuItemsRelationManager::class,
         ];
     }
 

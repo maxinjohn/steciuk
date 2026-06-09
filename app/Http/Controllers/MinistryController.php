@@ -10,7 +10,7 @@ class MinistryController extends Controller
     public function index(): View
     {
         $ministries = \App\Models\Ministry::query()
-            ->where('status', 'published')
+            ->active()
             ->orderBy('sort_order')
             ->get();
 
@@ -21,7 +21,7 @@ class MinistryController extends Controller
     {
         $ministry = \App\Models\Ministry::query()
             ->where('slug', $slug)
-            ->where('status', 'published')
+            ->active()
             ->firstOrFail();
 
         return view('ministries.show', compact('ministry'));

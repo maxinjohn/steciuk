@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Sermons;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\Sermons\Pages\CreateSermon;
 use App\Filament\Resources\Sermons\Pages\EditSermon;
 use App\Filament\Resources\Sermons\Pages\ListSermons;
@@ -20,7 +21,7 @@ class SermonResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMicrophone;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Worship';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Worship;
 
     protected static ?string $navigationLabel = 'Sermons';
 

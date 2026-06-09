@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\LeadershipMembers;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\LeadershipMembers\Pages\CreateLeadershipMember;
 use App\Filament\Resources\LeadershipMembers\Pages\EditLeadershipMember;
 use App\Filament\Resources\LeadershipMembers\Pages\ListLeadershipMembers;
@@ -20,7 +21,7 @@ class LeadershipMemberResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Worship';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Worship;
 
     protected static ?string $navigationLabel = 'Leadership';
 

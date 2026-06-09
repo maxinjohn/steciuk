@@ -24,6 +24,10 @@ class Setting extends Model
     public static function allValues(): array
     {
         return Cache::rememberForever(static::ALL_CACHE_KEY, function (): array {
+            if (! \Illuminate\Support\Facades\Schema::hasTable('settings')) {
+                return [];
+            }
+
             return static::query()
                 ->pluck('value', 'key')
                 ->all();
@@ -32,7 +36,11 @@ class Setting extends Model
 
     public static function get(string $key, mixed $default = null): mixed
     {
-        $values = static::allValues();
+        try {
+            $values = static::allValues();
+        } catch (\Throwable) {
+            return $default;
+        }
 
         return array_key_exists($key, $values) ? $values[$key] : $default;
     }
@@ -61,5 +69,22 @@ class Setting extends Model
     {
         Cache::forget(static::ALL_CACHE_KEY);
         Cache::forget('settings.all');
+    }
+
+    public static function assetUrl(?string $path): ?string
+    {
+        if ($path === null || trim($path) === '') {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        if (str_starts_with($path, '/')) {
+            return asset(ltrim($path, '/'));
+        }
+
+        return asset('storage/'.ltrim($path, '/'));
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Ministries\Schemas;
 
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
+use App\Filament\Support\ChurchRichEditor;
+use App\Filament\Support\SecureFileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -21,12 +21,8 @@ class MinistryForm
                     ->required(),
                 Textarea::make('short_description')
                     ->columnSpanFull(),
-                RichEditor::make('description')
-                    ->columnSpanFull(),
-                FileUpload::make('featured_image')
-                    ->image()
-                    ->directory('ministries/featured')
-                    ->disk('public'),
+                ChurchRichEditor::make('description'),
+                SecureFileUpload::image('featured_image', 'ministries/featured'),
                 TextInput::make('contact_person'),
                 TextInput::make('contact_email')
                     ->email(),

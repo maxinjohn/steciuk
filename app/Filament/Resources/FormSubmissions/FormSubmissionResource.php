@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\FormSubmissions;
 
+use App\Enums\AdminNavigationGroup;
 use App\Filament\Resources\FormSubmissions\Pages\ListFormSubmissions;
 use App\Filament\Resources\FormSubmissions\Pages\ViewFormSubmission;
 use App\Filament\Resources\FormSubmissions\Schemas\FormSubmissionInfolist;
@@ -19,9 +20,9 @@ class FormSubmissionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInbox;
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Forms';
+    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Messages;
 
-    protected static ?string $navigationLabel = 'Form Submissions';
+    protected static ?string $navigationLabel = 'Inbox';
 
     protected static ?string $modelLabel = 'Form Submission';
 

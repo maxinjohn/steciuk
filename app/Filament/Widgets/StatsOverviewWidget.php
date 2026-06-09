@@ -17,16 +17,16 @@ class StatsOverviewWidget extends BaseWidget
     {
         return [
             Stat::make('Pages', Page::query()->count())
-                ->description('Total pages')
+                ->description('Website pages live on the site')
                 ->icon('heroicon-o-document-text'),
             Stat::make('Events', Event::query()->count())
-                ->description('Total events')
+                ->description('Upcoming parish gatherings')
                 ->icon('heroicon-o-calendar-days'),
             Stat::make('News', News::query()->count())
-                ->description('News articles')
+                ->description('News articles published')
                 ->icon('heroicon-o-newspaper'),
-            Stat::make('Unread submissions', FormSubmission::query()->where('is_read', false)->count())
-                ->description('Form submissions')
+            Stat::make('Unread inbox', FormSubmission::query()->where('is_read', false)->count())
+                ->description('Prayer requests, contact, forms')
                 ->icon('heroicon-o-inbox')
                 ->color('warning'),
         ];

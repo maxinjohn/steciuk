@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\UserRole;
+use App\Models\Role;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -27,8 +28,8 @@ class UserForm
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->required(fn (string $operation): bool => $operation === 'create'),
                 Select::make('role')
-                    ->options(UserRole::class)
-                    ->default(UserRole::Editor)
+                    ->options(fn (): array => Role::options())
+                    ->default(UserRole::Editor->value)
                     ->required()
                     ->disabled(fn (): bool => ! auth()->user()?->isSuperAdmin()),
             ]);

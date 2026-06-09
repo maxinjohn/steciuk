@@ -4,19 +4,22 @@
 @section('description', $page->seo_description ?? strip_tags($page->content))
 
 @section('content')
-    <x-hero
+    <x-page-intro
         :title="$page->hero_title ?? $page->title"
-        :subtitle="$page->hero_subtitle"
-        :image="$page->featured_image"
-        size="small"
+        :subtitle="$page->hero_subtitle ?? 'Reach our parish office for worship, pastoral care, or prayer'"
+        kicker="UK Parish · Connect"
+        scripture="The Lord is near to all who call on him, to all who call on him in truth."
+        scripture-ref="Psalm 145:18"
     />
 
-    <section class="py-12 sm:py-16">
+    <section class="page-section py-10 sm:py-14">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid gap-12 lg:grid-cols-5">
-                <div class="lg:col-span-2">
-                    <x-card>
-                        <h2 class="font-bold text-2xl font-semibold text-ink">Get in Touch</h2>
+                <div class="lg:col-span-2 space-y-6">
+                    <x-card class="contact-office-card">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand">We are here for you</p>
+                        <h2 class="mt-2 font-bold text-2xl font-semibold text-ink">{{ $contactOfficeHeading }}</h2>
+                        <p class="mt-2 text-sm leading-relaxed text-ink-muted">{{ $contactOfficeIntro }}</p>
                         <ul class="mt-6 space-y-4 text-ink-muted" role="list">
                             @if ($siteAddress)
                                 <li class="flex gap-3">
@@ -36,7 +39,18 @@
                                     <a href="mailto:{{ $siteEmail }}" class="transition hover:text-brand">{{ $siteEmail }}</a>
                                 </li>
                             @endif
+                            @if ($charityNumber)
+                                <li class="flex gap-3 text-sm">
+                                    <span class="mt-0.5 font-semibold text-brand">Charity</span>
+                                    <span>{{ $charityNumber }}</span>
+                                </li>
+                            @endif
                         </ul>
+
+                        <div class="mt-8 flex flex-wrap gap-3">
+                            <x-button href="{{ url('/prayer-request') }}" variant="outline" class="!text-sm">Submit a Prayer Request</x-button>
+                            <x-button href="{{ url('/service-times') }}" variant="outline" class="!text-sm">Service Times</x-button>
+                        </div>
 
                         <div class="mt-8 flex gap-3">
                             @if ($socialYoutube)
@@ -56,6 +70,13 @@
                             @endif
                         </div>
                     </x-card>
+
+                    <x-card class="border border-brand/20 bg-gradient-to-br from-[var(--site-surface)] to-[var(--site-surface-2)]">
+                        <p class="text-sm leading-relaxed text-ink-muted">
+                            <span class="font-semibold text-brand">Pastoral care:</span>
+                            You are welcome in Christ. If you need prayer, counsel, or simply someone to listen, our clergy and parish family are glad to walk with you.
+                        </p>
+                    </x-card>
                 </div>
 
                 <div class="lg:col-span-3">
@@ -63,9 +84,9 @@
                         <div class="prose-church mb-10">{!! safeHtml($page->content) !!}</div>
                     @endif
 
-                    <x-card>
-                        <h2 class="font-bold text-2xl font-semibold text-ink">Send a Message</h2>
-                        <p class="mt-2 text-ink-muted">Fill out the form below and we will respond as soon as possible.</p>
+                    <x-card class="contact-form-card shadow-lg ring-1 ring-[var(--site-border)]">
+                        <h2 class="font-bold text-2xl font-semibold text-ink">{{ $contactFormHeading }}</h2>
+                        <p class="mt-2 text-ink-muted">{{ $contactFormIntro }}</p>
                         <div class="mt-6">
                             @livewire('forms.contact-form')
                         </div>
@@ -75,7 +96,7 @@
 
             @if ($googleMapsEmbed)
                 <div class="mt-12 overflow-hidden rounded-2xl shadow-lg ring-1 border border-[var(--site-border)]">
-                    <div class="aspect-video [&>iframe]:h-full [&>iframe]:w-full">{!! $googleMapsEmbed !!}</div>
+                    <div class="aspect-video [&>iframe]:h-full [&>iframe]:w-full">{!! safeEmbed($googleMapsEmbed) !!}</div>
                 </div>
             @endif
         </div>

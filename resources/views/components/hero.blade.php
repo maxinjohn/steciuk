@@ -9,6 +9,7 @@
     'accent' => 'gold',
     'overlay' => true,
     'stats' => [],
+    'showSidePanel' => false,
 ])
 
 @php
@@ -25,8 +26,9 @@
     $statItems = collect($stats)->filter(fn ($stat) => ! empty($stat['label'] ?? null));
 @endphp
 
-<section {{ $attributes->merge(['class' => 'hero-modern hero-mesh hero-gen-z relative flex items-center ' . $sizeClasses]) }}>
+<section {{ $attributes->merge(['class' => 'hero-modern hero-mesh hero-gen-z hero-evangelical relative flex items-center ' . $sizeClasses]) }}>
     @if ($style !== 'minimal')
+        <span class="hero-cross-mark" aria-hidden="true">✝</span>
         <div class="hero-deco" aria-hidden="true">
             <span class="hero-glow hero-glow-left"></span>
             <span class="hero-glow hero-glow-right"></span>
@@ -72,6 +74,9 @@
                     ])>
                         {{ $subtitle }}
                     </p>
+                    @if ($style !== 'minimal' && str_contains($subtitle, 'Word of God'))
+                        <p class="hero-scripture-ref">Revelation 19:10</p>
+                    @endif
                 @endif
 
                 @if ($statItems->isNotEmpty() && $style !== 'minimal')
@@ -92,15 +97,15 @@
                 @endif
             </div>
 
-            @if ($style !== 'minimal')
-                <aside class="hero-side-panel max-lg:!hidden hidden lg:flex" aria-label="Quick parish info">
+            @if ($style !== 'minimal' && $showSidePanel)
+                <aside class="hero-side-panel max-lg:!hidden hidden lg:flex" aria-label="Parish worship">
                     <div class="hero-panel hero-panel--glass">
-                        <div class="hero-panel-sticker">5 cities</div>
-                        <p class="hero-panel-kicker">Worship across Britain</p>
-                        <h2 class="hero-panel-title">Manchester · Leicester · Dartford · Sunderland · Bristol</h2>
-                        <p class="hero-panel-text">Monthly worship, fellowship, and pastoral care for STECI families across the UK.</p>
-                        <a href="{{ url('/service-times') }}" class="hero-panel-link">
-                            View service times
+                        <div class="hero-panel-sticker">Monthly worship</div>
+                        <p class="hero-panel-kicker">UK Parish · STECI</p>
+                        <h2 class="hero-panel-title">Scripture · Gospel · Sacraments</h2>
+                        <p class="hero-panel-text">Monthly Holy Communion, expository preaching, and intercessory prayer across five cities — confessing Christ as Lord in the evangelical Episcopal tradition of the Saint Thomas Christian Church.</p>
+                        <a href="{{ url('/our-church') }}" class="hero-panel-link">
+                            Our beliefs
                             <span aria-hidden="true">→</span>
                         </a>
                     </div>

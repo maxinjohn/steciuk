@@ -82,7 +82,7 @@ class SitemapBuilder
             ));
 
         Ministry::query()
-            ->where('status', 'published')
+            ->active()
             ->orderBy('sort_order')
             ->get(['slug', 'updated_at'])
             ->each(fn (Ministry $ministry) => $this->addUrl(
@@ -94,7 +94,7 @@ class SitemapBuilder
             ));
 
         GalleryAlbum::query()
-            ->where('status', 'published')
+            ->active()
             ->orderBy('sort_order')
             ->get(['slug', 'updated_at'])
             ->each(fn (GalleryAlbum $album) => $this->addUrl(

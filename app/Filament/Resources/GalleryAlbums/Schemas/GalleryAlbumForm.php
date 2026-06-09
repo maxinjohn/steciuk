@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\GalleryAlbums\Schemas;
 
-use Filament\Forms\Components\FileUpload;
+use App\Filament\Support\SecureFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
@@ -19,8 +19,7 @@ class GalleryAlbumForm
                     ->required(),
                 Textarea::make('description')
                     ->columnSpanFull(),
-                FileUpload::make('cover_image')
-                    ->image(),
+                SecureFileUpload::image('cover_image', 'gallery/albums'),
                 TextInput::make('sort_order')
                     ->required()
                     ->numeric()

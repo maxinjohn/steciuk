@@ -4,8 +4,9 @@ namespace App\Filament\Resources\Events\Schemas;
 
 use App\Enums\PublishStatus;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
+use App\Filament\Support\ChurchRichEditor;
+use App\Filament\Support\SecureFileUpload;
+use App\Rules\SafeHttpUrl;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -22,12 +23,8 @@ class EventForm
                     ->required(),
                 TextInput::make('slug')
                     ->required(),
-                RichEditor::make('description')
-                    ->columnSpanFull(),
-                FileUpload::make('featured_image')
-                    ->image()
-                    ->directory('events/featured')
-                    ->disk('public'),
+                ChurchRichEditor::make('description'),
+                SecureFileUpload::image('featured_image', 'events/featured'),
                 DateTimePicker::make('starts_at')
                     ->required(),
                 DateTimePicker::make('ends_at'),
@@ -36,7 +33,8 @@ class EventForm
                 TextInput::make('address'),
                 Toggle::make('registration_required'),
                 TextInput::make('registration_link')
-                    ->url(),
+                    ->url()
+                    ->rules([new SafeHttpUrl()]),
                 TextInput::make('category'),
                 Select::make('status')
                     ->options(PublishStatus::class)

@@ -19,7 +19,7 @@ class GalleryAlbumFactory extends Factory
             'slug' => null,
             'description' => fake()->sentence(),
             'sort_order' => 0,
-            'status' => 'published',
+            'status' => 'active',
         ];
     }
 }

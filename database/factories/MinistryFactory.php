@@ -20,7 +20,7 @@ class MinistryFactory extends Factory
             'short_description' => fake()->sentence(),
             'description' => fake()->paragraph(),
             'sort_order' => 0,
-            'status' => 'published',
+            'status' => 'active',
         ];
     }
 }

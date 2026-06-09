@@ -4,19 +4,22 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Response;
 
+use App\Support\AdminPanelConfig;
+
 class RobotsController extends Controller
 {
     public function __invoke(): Response
     {
         $sitemap = route('sitemap');
         $host = rtrim(config('app.url'), '/');
+        $adminPath = AdminPanelConfig::path();
 
         $lines = [
             '# STECI UK Parish',
             'User-agent: *',
             'Allow: /',
-            'Disallow: /admin',
-            'Disallow: /admin/',
+            'Disallow: /'.$adminPath,
+            'Disallow: /'.$adminPath.'/',
             'Disallow: /offline',
             'Disallow: /livewire/',
             '',

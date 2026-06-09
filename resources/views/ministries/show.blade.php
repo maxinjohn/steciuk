@@ -5,7 +5,14 @@
 
 @section('content')
     <article>
-        <x-hero :title="$ministry->name" :subtitle="$ministry->short_description" :image="$ministry->featured_image" size="small" />
+        <x-hero
+            :title="$ministry->name"
+            :subtitle="$ministry->short_description"
+            :image="$ministry->featured_image"
+            badge="Evangelical Episcopal"
+            size="small"
+        />
+        <x-parish-action-strip class="!py-3" />
 
         <section class="py-12 sm:py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -42,8 +49,9 @@
                         </x-card>
 
                         <x-card>
-                            <h2 class="font-bold text-xl font-semibold text-ink">Volunteer</h2>
-                            <p class="mt-2 text-sm text-ink-muted">Interested in serving? Let us know.</p>
+                            <h2 class="font-bold text-xl font-semibold text-ink">Serve the Lord</h2>
+                            <p class="mt-2 text-sm text-ink-muted">Every believer is called to serve Christ and His Church. If God is stirring your heart to join this ministry, we would love to hear from you.</p>
+                            <p class="mt-3 text-xs font-semibold uppercase tracking-wider text-brand">Colossians 3:23–24</p>
                             <div class="mt-4">
                                 @livewire('forms.volunteer-form')
                             </div>
@@ -56,5 +64,10 @@
                 </div>
             </div>
         </section>
+
+        <x-scripture-ribbon
+            text="Each of you should use whatever gift you have received to serve others, as faithful stewards of God's grace in its various forms."
+            reference="1 Peter 4:10"
+        />
     </article>
 @endsection

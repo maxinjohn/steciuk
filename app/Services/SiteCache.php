@@ -25,4 +25,11 @@ class SiteCache
         static::forgetSitemap();
         static::forgetPageContext($pageSlug);
     }
+
+    /** Clear menus, home page, and sitemap after bootstrap/sync or container boot. */
+    public static function forgetAfterReferenceDataChange(): void
+    {
+        MenuCache::forgetAll();
+        static::forgetPublicContent();
+    }
 }

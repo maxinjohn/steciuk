@@ -79,6 +79,16 @@ class Page extends Model implements HasMedia
             }
         });
 
+        static::saving(function (Page $page): void {
+            if ($page->isDirty('custom_css')) {
+                $page->custom_css = \App\Support\CustomAssetSanitizer::css($page->custom_css);
+            }
+
+            if ($page->isDirty('custom_js')) {
+                $page->custom_js = \App\Support\CustomAssetSanitizer::js($page->custom_js);
+            }
+        });
+
         static::deleted(function (Page $page): void {
             \App\Services\SiteCache::forgetPageContext($page->slug);
             \App\Services\SiteCache::forgetSitemap();
@@ -142,6 +152,15 @@ class Page extends Model implements HasMedia
     public function menuItems(): HasMany
     {
         return $this->hasMany(MenuItem::class);
+    }
+
+    public function publicUrl(): string
+    {
+        if ($this->is_home) {
+            return url('/');
+        }
+
+        return url('/'.$this->slug);
     }
 
     public function registerMediaCollections(): void
