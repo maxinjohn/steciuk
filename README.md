@@ -62,7 +62,7 @@ Change these immediately before any public deployment.
 
 ## Environment configuration
 
-Copy `.env.example` to `.env` and adjust.
+Copy `.env.example` to `.env` and generate a key:
 
 ```bash
 cp .env.example .env
