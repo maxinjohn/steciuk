@@ -86,14 +86,25 @@ php artisan key:generate
 
 ### Site data paths (optional)
 
-Store uploads and the database outside the application directory:
+Store logs, cache, uploads, and the database outside the application directory:
 
 ```env
 APP_STORAGE_PATH=/var/lib/steciuk/storage
-PUBLIC_STORAGE_PATH=/var/lib/steciuk/uploads
-PRIVATE_STORAGE_PATH=/var/lib/steciuk/private
-DB_DATABASE=/var/lib/steciuk/storage/database/database.sqlite
+PUBLIC_STORAGE_PATH=/var/lib/steciuk/pub_uploads
+PRIVATE_STORAGE_PATH=/var/lib/steciuk/private_uploads
+DB_DATABASE=/var/lib/steciuk/database/database.sqlite
+PUBLIC_STORAGE_URL=/storage
 ```
+
+| Variable | What it is |
+|----------|------------|
+| `APP_STORAGE_PATH` | Laravel storage (logs, cache, framework) |
+| `PUBLIC_STORAGE_PATH` | Upload folder on disk |
+| `PRIVATE_STORAGE_PATH` | Private/Filament media folder |
+| `DB_DATABASE` | SQLite file path |
+| `PUBLIC_STORAGE_URL` | Browser URL path only (`/storage`) — **not** a folder path |
+
+Relative paths like `../site_data/storage` resolve from the project root. After changing paths, run `php artisan storage:link` and ensure folders exist.
 
 ### Security variables
 

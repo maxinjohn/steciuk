@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Middleware\ThrottleAdminLogin;
 use App\Services\MailConfigService;
 use App\Services\SqliteOptimizer;
+use App\Support\SitePaths;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -13,13 +14,15 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        if ($storagePath = env('APP_STORAGE_PATH')) {
+        if ($storagePath = SitePaths::resolve(env('APP_STORAGE_PATH'))) {
             $this->app->useStoragePath($storagePath);
         }
     }
 
     public function boot(): void
     {
+        $this->applyCustomDataPaths();
+
         SqliteOptimizer::configureConnection();
 
         MailConfigService::applyFromSettings();
@@ -113,5 +116,25 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
         );
+    }
+
+    private function applyCustomDataPaths(): void
+    {
+        if ($database = SitePaths::resolve(env('DB_DATABASE'))) {
+            config(['database.connections.sqlite.database' => $database]);
+        }
+
+        if ($private = SitePaths::resolve(env('PRIVATE_STORAGE_PATH'))) {
+            config(['filesystems.disks.local.root' => $private]);
+        }
+
+        if ($public = SitePaths::resolve(env('PUBLIC_STORAGE_PATH'))) {
+            config([
+                'filesystems.disks.public.root' => $public,
+                'filesystems.links' => [
+                    public_path('storage') => $public,
+                ],
+            ]);
+        }
     }
 }
