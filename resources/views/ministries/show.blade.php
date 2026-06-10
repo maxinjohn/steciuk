@@ -9,7 +9,7 @@
             :title="$ministry->name"
             :subtitle="$ministry->short_description"
             :image="$ministry->featured_image"
-            badge="Evangelical Episcopal"
+            badge="Evangelical Oriental Protestant"
             size="small"
         />
         <x-parish-action-strip class="!py-3" />

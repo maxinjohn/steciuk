@@ -7,7 +7,7 @@
     <x-hero
         :title="$album->title"
         :subtitle="$album->description"
-        badge="Evangelical Episcopal"
+        badge="Evangelical Oriental Protestant"
         size="small"
     />
     <x-parish-action-strip class="!py-3" />

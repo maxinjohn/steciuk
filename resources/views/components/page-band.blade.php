@@ -1,7 +1,7 @@
 @props([
     'title',
     'subtitle' => null,
-    'kicker' => 'Evangelical Episcopal Parish',
+    'kicker' => 'Evangelical Oriental Protestant Parish',
 ])
 
 <section {{ $attributes->merge(['class' => 'page-band page-section']) }}>

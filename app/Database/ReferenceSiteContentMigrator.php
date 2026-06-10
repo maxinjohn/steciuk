@@ -4,6 +4,7 @@ namespace App\Database;
 
 use App\Models\ContentBlock;
 use App\Models\Page;
+use App\Models\Service;
 use App\Models\Setting;
 use App\Services\SiteCache;
 use App\Support\ReferenceSiteContent;
@@ -16,6 +17,7 @@ class ReferenceSiteContentMigrator
         static::applySettings();
         static::applyPages();
         static::applyHomeContentBlocks();
+        static::applyServices();
 
         SiteCache::forgetAfterReferenceDataChange();
     }
@@ -73,6 +75,20 @@ class ReferenceSiteContentMigrator
 
             $content = array_merge($block->content ?? [], $patch);
             $block->update(['content' => $content]);
+        }
+    }
+
+    private static function applyServices(): void
+    {
+        if (! Schema::hasTable('services')) {
+            return;
+        }
+
+        foreach (ReferenceSiteContent::services() as $service) {
+            Service::query()->updateOrCreate(
+                ['location' => $service['location']],
+                $service,
+            );
         }
     }
 }

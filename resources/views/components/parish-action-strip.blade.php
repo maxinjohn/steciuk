@@ -27,7 +27,7 @@
         ],
         [
             'label' => 'Our Beliefs',
-            'desc' => 'Evangelical Episcopal faith',
+            'desc' => 'Evangelical Oriental Protestant faith',
             'href' => url('/our-church'),
             'icon' => '⛪',
             'tone' => 'violet',

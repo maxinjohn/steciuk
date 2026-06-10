@@ -16,19 +16,20 @@ use Illuminate\Support\Facades\Cache;
 
 class HomePageData
 {
-    private const CACHE_KEY = 'home.page.data.v5';
+    private const CACHE_KEY = 'home.page.data.v6';
 
     private const CACHE_TTL_SECONDS = 3600;
+
+    /** @var array<string, mixed>|null */
+    private static ?array $resolved = null;
 
     /**
      * @return array<string, mixed>
      */
     public static function resolve(): array
     {
-        static $resolved = null;
-
-        if ($resolved !== null) {
-            return $resolved;
+        if (static::$resolved !== null) {
+            return static::$resolved;
         }
 
         $packed = Cache::remember(
@@ -37,9 +38,9 @@ class HomePageData
             static fn (): array => static::pack(static::build()),
         );
 
-        $resolved = static::unpack($packed);
+        static::$resolved = static::unpack($packed);
 
-        return $resolved;
+        return static::$resolved;
     }
 
     /**
@@ -67,7 +68,10 @@ class HomePageData
         return [
             'page' => $page,
             'services' => Service::query()
-                ->select(['id', 'title', 'location', 'service_day', 'service_time', 'sort_order', 'status'])
+                ->select([
+                    'id', 'title', 'location', 'address', 'service_day', 'service_time',
+                    'frequency', 'description', 'map_link', 'sort_order', 'status',
+                ])
                 ->where('status', 'active')
                 ->orderBy('sort_order')
                 ->get(),
@@ -189,7 +193,9 @@ class HomePageData
 
     public static function forget(): void
     {
-        foreach (['home.page.data.v4', 'home.page.data.v3', 'home.page.data.v2', 'home.page.data.v1'] as $key) {
+        static::$resolved = null;
+
+        foreach ([self::CACHE_KEY, 'home.page.data.v5', 'home.page.data.v4', 'home.page.data.v3', 'home.page.data.v2', 'home.page.data.v1'] as $key) {
             Cache::forget($key);
         }
     }

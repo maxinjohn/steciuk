@@ -7,7 +7,7 @@
     <x-page-shell :page="$page" suppress-content>
         <x-page-intro
             title="Holy Communion & Worship"
-            subtitle="Monthly evangelical Episcopal services across five UK cities"
+            subtitle="Monthly evangelical Oriental Protestant worship across five UK cities"
             kicker="Plan your visit"
             scripture="God is spirit, and his worshipers must worship in the Spirit and in truth."
             scripture-ref="John 4:24"

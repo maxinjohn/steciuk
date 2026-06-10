@@ -7,7 +7,7 @@
         ['label' => 'Holy Scripture', 'desc' => 'The authoritative Word of God', 'ref' => '2 Tim 3:16'],
         ['label' => 'Jesus Christ', 'desc' => 'Lord and Saviour', 'ref' => 'John 14:6'],
         ['label' => 'Grace & Faith', 'desc' => 'Salvation in Christ alone', 'ref' => 'Eph 2:8–9'],
-        ['label' => 'Worship & Communion', 'desc' => 'Evangelical Episcopal liturgy', 'ref' => '1 Cor 11:26'],
+        ['label' => 'Worship & Communion', 'desc' => 'Scripture-centred worship & Holy Communion', 'ref' => '1 Cor 11:26'],
         ['label' => 'Prayer & Mission', 'desc' => 'Witness to the Gospel', 'ref' => 'Matt 28:19'],
     ];
 @endphp

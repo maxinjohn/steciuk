@@ -25,7 +25,7 @@ class MinistrySeeder extends Seeder
                 'name' => 'Youth Fellowship',
                 'slug' => 'youth-fellowship',
                 'short_description' => 'Encouraging young people to grow in Christ, build friendships, and serve the church.',
-                'description' => '<p>Youth Fellowship encourages young people to grow in Christ, build friendships, study the Bible, serve the church, and participate in mission. Our youth gatherings combine worship, Bible study, discussion, and social activities designed for teenagers and young adults.</p><p>We aim to equip the next generation to live out their faith with courage and compassion in contemporary British society, rooted in the evangelical Episcopal witness of STECI.</p>',
+                'description' => '<p>Youth Fellowship encourages young people to grow in Christ, build friendships, study the Bible, serve the church, and participate in mission. Our youth gatherings combine worship, Bible study, discussion, and social activities designed for teenagers and young adults.</p><p>We aim to equip the next generation to live out their faith with courage and compassion in contemporary British society, rooted in the evangelical Oriental Protestant witness of STECI.</p>',
                 'contact_person' => 'Youth Fellowship Leader',
                 'contact_email' => 'admin@steciuk.org',
                 'meeting_time' => 'Monthly — contact parish office for schedule',

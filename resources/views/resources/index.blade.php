@@ -8,7 +8,7 @@
         <x-page-intro
             title="Liturgy & Parish Forms"
             subtitle="Worship resources, prayer guides, and parish documents"
-            kicker="Evangelical Episcopal · Resources"
+            kicker="Evangelical Oriental Protestant · Resources"
             scripture="Your word is a lamp to my feet and a light to my path."
             scripture-ref="Psalm 119:105"
         />

@@ -1,6 +1,6 @@
 @props([
     'heading' => 'Our Worship Rhythm',
-    'subheading' => 'Evangelical Episcopal gathered worship across Britain',
+    'subheading' => 'Evangelical Oriental Protestant gathered worship across Britain',
 ])
 
 <section {{ $attributes->merge(['class' => 'worship-rhythm']) }} aria-label="Worship rhythm">
@@ -8,7 +8,7 @@
         <div class="worship-rhythm-header">
             <p class="genz-kicker">
                 <span class="genz-kicker-dot" aria-hidden="true"></span>
-                Evangelical Episcopal · Monthly
+                Evangelical Oriental Protestant · Monthly
             </p>
             <h2 class="worship-rhythm-title">{{ $heading }}</h2>
             <p class="worship-rhythm-subtitle">{{ $subheading }}</p>
@@ -27,7 +27,7 @@
             <article class="worship-rhythm-card">
                 <span class="worship-rhythm-step">03</span>
                 <h3 class="worship-rhythm-card-title">Holy Communion</h3>
-                <p class="worship-rhythm-card-text">The sacrament of the Lord’s Supper in evangelical Episcopal liturgy.</p>
+                <p class="worship-rhythm-card-text">The sacrament of the Lord’s Supper in STECI’s Scripture-centred worship.</p>
             </article>
             <article class="worship-rhythm-card">
                 <span class="worship-rhythm-step">04</span>
