@@ -9,7 +9,7 @@
     --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --color-ink: #1c1917;
-    --color-ink-muted: #574f45;
+    --color-ink-muted: #4a4238;
     --color-surface: #e0d5c4;
     --color-surface-muted: #cfc2ae;
     --color-brand: #1a2332;
@@ -36,7 +36,7 @@
     --site-surface: #e0d5c4;
     --site-surface-2: #cfc2ae;
     --site-ink: #1c1917;
-    --site-ink-muted: #574f45;
+    --site-ink-muted: #4a4238;
     --site-muted: var(--site-ink-muted);
     --site-border: #b8a992;
     --site-border-strong: #9f8f78;
@@ -984,18 +984,6 @@ html.dark {
         background: color-mix(in srgb, var(--site-accent) 16%, transparent);
     }
 
-    .mobile-dock-item.is-active::before {
-        content: '✝';
-        position: absolute;
-        top: 0.1875rem;
-        right: 0.375rem;
-        font-size: 0.4375rem;
-        line-height: 1;
-        color: color-mix(in srgb, var(--site-accent) 70%, transparent);
-        opacity: 0.85;
-        pointer-events: none;
-    }
-
     .mobile-dock-item.is-active svg {
         stroke: var(--site-accent);
     }
@@ -1604,6 +1592,31 @@ html.dark {
     html.dark .location-tab.is-active {
         background: color-mix(in srgb, var(--site-accent) 14%, var(--site-surface));
         border-color: color-mix(in srgb, var(--site-accent) 35%, var(--site-border));
+        color: var(--site-ink);
+    }
+
+    html.dark .bento-tile,
+    html.dark .feed-card,
+    html.dark .resource-row,
+    html.dark .sermon-card,
+    html.dark .parish-action-card,
+    html.dark .worship-rhythm-card,
+    html.dark .location-card,
+    html.dark .location-panel {
+        background: var(--site-surface);
+        border-color: var(--site-border);
+    }
+
+    html.dark .bento-tile-desc,
+    html.dark .feed-card-desc,
+    html.dark .sermon-card-desc,
+    html.dark .resource-row-desc,
+    html.dark .parish-action-desc,
+    html.dark .worship-rhythm-card-text {
+        color: var(--site-ink-muted);
+    }
+
+    html.dark .bento-tile-link {
         color: var(--site-accent);
     }
 
@@ -1736,7 +1749,7 @@ html.dark {
     .location-tab.is-active {
         border-color: color-mix(in srgb, var(--site-accent) 50%, var(--site-border));
         background: color-mix(in srgb, var(--site-accent) 16%, var(--site-surface));
-        color: var(--site-accent);
+        color: var(--site-brand);
         box-shadow: 0 4px 16px color-mix(in srgb, var(--site-accent) 20%, transparent);
         transform: scale(1.02);
     }
@@ -1815,6 +1828,7 @@ html.dark {
 
     html:not(.dark) .card-modern,
     html:not(.dark) .feed-card,
+    html:not(.dark) .bento-tile,
     html:not(.dark) .form-gen-z,
     html:not(.dark) .location-panel,
     html:not(.dark) .location-card,
@@ -3210,15 +3224,29 @@ html.dark {
     }
 
     .bento-tile {
-        border-radius: 24px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
         overflow: hidden;
-        min-height: 220px;
+        min-height: 0;
+        border-radius: 22px;
+        border: 1px solid var(--site-border);
+        background: var(--site-surface);
+        box-shadow: var(--site-shadow);
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .bento-tile:hover {
+        transform: translateY(-3px);
+        border-color: color-mix(in srgb, var(--site-accent) 30%, var(--site-border));
+        box-shadow: var(--site-shadow-lg);
     }
 
     .bento-tile-media {
         position: relative;
-        aspect-ratio: 4 / 3;
+        aspect-ratio: 16 / 10;
         overflow: hidden;
+        border-bottom: 1px solid var(--site-border);
     }
 
     .bento-tile-image {
@@ -3229,7 +3257,7 @@ html.dark {
     }
 
     .bento-tile:hover .bento-tile-image {
-        transform: scale(1.08);
+        transform: scale(1.06);
     }
 
     .bento-tile-fallback {
@@ -3237,55 +3265,55 @@ html.dark {
         height: 100%;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, color-mix(in srgb, var(--site-brand) 15%, var(--site-surface)), color-mix(in srgb, var(--site-accent) 20%, var(--site-surface)));
-        font-size: 2.5rem;
+        background: linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--site-brand) 12%, var(--site-surface)),
+            color-mix(in srgb, var(--site-accent) 14%, var(--site-surface-2))
+        );
+        font-size: 2.25rem;
         font-weight: 800;
-        color: var(--site-accent);
+        color: color-mix(in srgb, var(--site-brand) 72%, var(--site-accent));
     }
 
     .bento-tile-shade {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, rgba(12, 10, 9, 0.75) 0%, transparent 55%);
+        display: none;
     }
 
     .bento-tile-body {
-        position: absolute;
-        inset-inline: 0;
-        bottom: 0;
-        padding: 1.125rem;
-        color: white;
-    }
-
-    .bento-tile-media + .bento-tile-body,
-    .bento-tile .bento-tile-body {
-        position: absolute;
-    }
-
-    .bento-tile {
-        position: relative;
+        position: static;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        padding: 1rem 1.125rem 1.25rem;
+        color: var(--site-ink);
     }
 
     .bento-tile-title {
-        font-size: 1.125rem;
+        font-size: 1.0625rem;
         font-weight: 800;
         letter-spacing: -0.03em;
-        line-height: 1.2;
+        line-height: 1.25;
+        color: var(--site-ink);
     }
 
     .bento-tile-desc {
         margin-top: 0.375rem;
         font-size: 0.8125rem;
-        line-height: 1.45;
-        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.5;
+        color: var(--site-ink-muted);
     }
 
     .bento-tile-link {
         display: inline-flex;
-        margin-top: 0.625rem;
-        font-size: 0.75rem;
+        margin-top: auto;
+        padding-top: 0.75rem;
+        font-size: 0.8125rem;
         font-weight: 800;
-        color: var(--site-accent-hover);
+        color: var(--site-brand);
+    }
+
+    .bento-tile:hover .bento-tile-link {
+        color: var(--site-accent);
     }
 
     .gallery-mosaic {
@@ -3360,12 +3388,13 @@ html.dark {
         font-weight: 800;
         letter-spacing: -0.02em;
         line-height: 1.2;
+        color: var(--site-hero-ink);
     }
 
     .gallery-tile-desc {
         margin-top: 0.25rem;
         font-size: 0.8125rem;
-        color: rgba(255, 255, 255, 0.78);
+        color: var(--site-hero-muted);
     }
 
     .sermon-stack {
@@ -4639,4 +4668,57 @@ html.dark .heavenly-comfort-card {
     .page-section {
         padding-block: 2.5rem;
     }
+
+    .feed-card-cta,
+    .parish-action-arrow {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Readable text on light & dark surfaces — card titles override global heading colour */
+.bento-tile-title,
+.feed-card-title,
+.location-card-title,
+.sermon-card-title,
+.worship-rhythm-card-title,
+.heavenly-comfort-card-title,
+.resource-row-title,
+.parish-action-label,
+.gallery-tile-title {
+    color: inherit;
+}
+
+.bento-tile-title { color: var(--site-ink); }
+.feed-card-title { color: var(--site-ink); }
+.location-card-title { color: var(--site-ink); }
+.sermon-card-title { color: var(--site-ink); }
+.worship-rhythm-card-title { color: var(--site-ink); }
+.heavenly-comfort-card-title { color: var(--site-ink); }
+.resource-row-title { color: var(--site-ink); }
+.parish-action-label { color: var(--site-ink); }
+
+.gallery-tile-overlay .gallery-tile-title {
+    color: var(--site-hero-ink);
+}
+
+.gallery-tile-overlay .gallery-tile-desc {
+    color: var(--site-hero-muted);
+}
+
+html.dark .faith-pillars--footer .faith-pillar-desc {
+    color: rgba(250, 250, 250, 0.82);
+}
+
+html.dark .faith-pillar-ref,
+html:not(.dark) .faith-pillar-ref {
+    color: color-mix(in srgb, var(--site-accent) 88%, var(--site-brand));
+}
+
+html:not(.dark) .parish-action-arrow {
+    color: var(--site-brand);
+}
+
+html.dark .parish-action-arrow {
+    color: var(--site-accent);
 }
