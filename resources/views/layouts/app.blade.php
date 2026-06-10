@@ -193,7 +193,7 @@
 
         <footer class="site-footer md:pb-0" aria-label="Site footer">
             <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-                <div class="hidden gap-10 lg:grid lg:grid-cols-4">
+                <div class="hidden gap-8 md:grid md:grid-cols-2 md:gap-10 lg:grid-cols-4">
                     <div>
                         <h2>About</h2>
                         <p class="mt-3 text-sm leading-relaxed text-[var(--site-footer-muted)]">{{ $siteMotto }}</p>
@@ -237,7 +237,7 @@
                                 <li><a href="tel:{{ preg_replace('/\s+/', '', $sitePhone) }}" class="transition hover:text-[var(--site-accent)]">{{ $sitePhone }}</a></li>
                             @endif
                             @if ($siteEmail)
-                                <li><a href="mailto:{{ $siteEmail }}" class="transition hover:text-[var(--site-accent)]">{{ $siteEmail }}</a></li>
+                                <li><a href="mailto:{{ $siteEmail }}" class="break-all transition hover:text-[var(--site-accent)]">{{ $siteEmail }}</a></li>
                             @endif
                         </ul>
                         <div class="mt-4 flex gap-3">
@@ -256,7 +256,7 @@
                     </div>
                 </div>
 
-                <div class="space-y-2 lg:hidden" x-data="{ open: 'about' }">
+                <div class="space-y-2 md:hidden" x-data="{ open: 'about' }">
                     @foreach ([
                         ['id' => 'about', 'title' => 'About', 'slot' => 'about'],
                         ['id' => 'links', 'title' => 'Quick Links', 'slot' => 'links'],
@@ -312,7 +312,7 @@
                                     <ul class="space-y-2 pt-3 text-sm text-[var(--site-footer-muted)]" role="list">
                                         @if ($siteAddress)<li>{{ $siteAddress }}</li>@endif
                                         @if ($sitePhone)<li><a href="tel:{{ preg_replace('/\s+/', '', $sitePhone) }}" class="hover:text-[var(--site-accent)]">{{ $sitePhone }}</a></li>@endif
-                                        @if ($siteEmail)<li><a href="mailto:{{ $siteEmail }}" class="hover:text-[var(--site-accent)]">{{ $siteEmail }}</a></li>@endif
+                                        @if ($siteEmail)<li><a href="mailto:{{ $siteEmail }}" class="break-all hover:text-[var(--site-accent)]">{{ $siteEmail }}</a></li>@endif
                                     </ul>
                                 @endif
                             </div>

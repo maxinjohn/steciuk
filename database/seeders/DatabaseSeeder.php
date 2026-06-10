@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         if (! SeedConfig::isActive()) {
-            $this->command?->warn('Seeding skipped (SEED_MODE=off). Use site:bootstrap or site:sync-reference-data.');
+            $this->command?->warn('Seeding skipped (SEED_MODE=off). Run php artisan migrate to apply reference content.');
 
             return;
         }

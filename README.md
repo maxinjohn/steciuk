@@ -11,7 +11,7 @@ Production-ready church website for **steciuk.org**, built with Laravel 13, Fila
 - **Secure forms** — contact, prayer request, new member, event enquiry, volunteer (honeypot + rate limiting)
 - **SEO ready** — dynamic meta tags, Open Graph, JSON-LD, sitemap.xml, robots.txt
 - **Role-based admin** — Super Admin, Editor, Viewer roles with policies
-- **Env-configurable** — data paths, seeding behaviour, and security flags via `.env`
+- **Migrate-driven reference content** — parish copy, menus, and services ship via `php artisan migrate`
 
 ## Requirements
 
@@ -33,7 +33,6 @@ mkdir -p storage/database
 touch storage/database/database.sqlite
 
 php artisan migrate
-php artisan site:bootstrap --force
 php artisan storage:link
 npm install && npm run build
 
@@ -51,6 +50,8 @@ Or run server, queue, logs, and Vite together:
 composer dev
 ```
 
+On first `migrate`, the app provisions pages, menus, settings, services, and an admin account if they are missing.
+
 ### Default admin credentials
 
 Change these immediately before any public deployment.
@@ -58,7 +59,6 @@ Change these immediately before any public deployment.
 | Email | Password | Role |
 |-------|----------|------|
 | admin@steciuk.org | password | Super Admin |
-| editor@steciuk.org | password | Editor |
 
 ## Environment configuration
 
@@ -80,7 +80,6 @@ php artisan key:generate
 | `FILESYSTEM_DISK` | `public` | `public` |
 | `CACHE_STORE` | `file` | `file` |
 | `FORCE_HTTPS` | `false` | `true` |
-| `SEED_MODE` | `bootstrap` | `off` |
 | `EXPOSE_EXCEPTION_DETAILS` | `false` | `false` |
 
 ### Site data paths (optional)
@@ -95,15 +94,7 @@ DB_DATABASE=/var/lib/steciuk/database/database.sqlite
 PUBLIC_STORAGE_URL=/storage
 ```
 
-| Variable | What it is |
-|----------|------------|
-| `APP_STORAGE_PATH` | Laravel storage (logs, cache, framework) |
-| `PUBLIC_STORAGE_PATH` | Upload folder on disk |
-| `PRIVATE_STORAGE_PATH` | Private/Filament media folder |
-| `DB_DATABASE` | SQLite file path |
-| `PUBLIC_STORAGE_URL` | Browser URL path only (`/storage`) — **not** a folder path |
-
-Relative paths like `../site_data/storage` resolve from the project root. After changing paths, run `php artisan storage:link` and ensure folders exist.
+After changing paths, run `php artisan storage:link` and ensure folders exist.
 
 ### Security variables
 
@@ -118,123 +109,47 @@ Relative paths like `../site_data/storage` resolve from the project root. After 
 | `TRUSTED_PROXIES` | *(empty)* | Set to `*` behind nginx/load balancer |
 | `EXPOSE_EXCEPTION_DETAILS` | `false` | Never enable on production |
 
-## Reference data & seeding
+## Reference content & deploy
 
-All parish content (pages, menus, events, news, services, etc.) lives in `database/seeders/` as **idempotent reference data**.
+Canonical parish copy lives in `app/Support/ReferenceSiteContent.php` and is applied by **migrations** via `ReferenceSiteContentMigrator` (settings, pages, home blocks, worship services, menus). On a fresh database, migrate also provisions core structure (roles, admin, pages).
 
-| `SEED_MODE` | Behaviour |
-|-------------|-----------|
-| `bootstrap` | First install — creates all reference pages, menus, settings, sample content |
-| `sync` | Optional full reseed — upserts all seeded records by slug/key; **never deletes prod-only data** |
-| `off` | No seeding (default production after bootstrap) |
-
-### Commands
+### Every deploy (local or production)
 
 ```bash
-# First install only (local or production)
-php artisan site:bootstrap --force
+git pull
+composer install --optimize-autoloader   # production only
+npm install && npm run build             # when frontend changed
+php artisan migrate --force
 ```
 
-**Important:** Run `site:bootstrap` once on a new server.
+Production may also cache config/routes/views after migrate:
 
-### Content updates on deploy
-
-Canonical parish copy (settings, all reference page bodies, home hero/location blocks, and five UK worship services) lives in `app/Support/ReferenceSiteContent.php` and is applied by **migrations** via `ReferenceSiteContentMigrator`.
-
-**Routine deploy = `php artisan migrate` only.** You do **not** need `site:sync-reference-data` for text, settings, or service-time corrections.
-
-When you change reference copy, add a migration that calls `ReferenceSiteContentMigrator::apply()` (or extend `ReferenceSiteContent` and add a new migration).
-
-`site:sync-reference-data` is optional — only if you need to re-upsert menus, events, sample news, and other full reference seed data without a fresh bootstrap.
-
-### What sync preserves
-
-- News, events, pages created only in production (no matching slug)
-- Custom menu links added in admin (no `seed_key`)
-- Admin passwords (unless `SEED_OVERWRITE_USER_PASSWORDS=true`)
-- Settings edited in production (unless `SEED_OVERWRITE_SETTINGS=true`)
-
-## Production hosting (PHP / cPanel / VPS)
-
-Place the Laravel app **outside** the web root. Only `public/` should be web-accessible.
-
-```
-/home/steciuk/steciuk.org/     ← app root (NOT web accessible)
-/home/steciuk/public_html/     ← document root → symlink or copy of public/
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 ```
 
-### First deploy
+When you change reference copy in code, add a migration that calls `ReferenceSiteContentMigrator::apply()`.
+
+### First production server
+
+Same as routine deploy — **`php artisan migrate --force` is sufficient**. Ensure `.env` is configured, `storage/` is writable, and `public/` is the web root.
 
 ```bash
 git clone git@github.com:maxinjohn/steciuk.git /home/steciuk/steciuk.org
 cd /home/steciuk/steciuk.org
-
 cp .env.example .env
-# Edit .env: APP_ENV=production, APP_DEBUG=false, APP_URL=https://steciuk.org, etc.
+# Edit .env: APP_ENV=production, APP_DEBUG=false, APP_URL=https://steciuk.org
 php artisan key:generate
-
 composer install --optimize-autoloader
-npm install
-npm run build
-
-mkdir -p storage/database
-touch storage/database/database.sqlite
+npm install && npm run build
+mkdir -p storage/database && touch storage/database/database.sqlite
 chmod -R 775 storage bootstrap/cache
-
 php artisan migrate --force
-php artisan site:bootstrap --force
 php artisan storage:link
-
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-chown -R steciuk:steciuk /home/steciuk/steciuk.org
+php artisan config:cache && php artisan route:cache && php artisan view:cache
 ```
-
-Set in `.env` after bootstrap:
-
-```env
-SEED_MODE=off
-```
-
-### Routine deploy (after git pull / merge to main)
-
-Run this on the server whenever you release new code. **No seeding** — migrations only.
-
-```bash
-cd /home/steciuk/steciuk.org
-git pull origin main
-
-composer install --optimize-autoloader
-
-npm install
-npm run build
-
-chmod -R 775 storage bootstrap/cache
-
-php artisan config:clear
-php artisan cache:clear
-php artisan route:clear
-php artisan view:clear
-
-php artisan migrate --force
-
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-chown -R steciuk:steciuk /home/steciuk/steciuk.org
-```
-
-Optional after deploy:
-
-```bash
-php artisan site:ensure-roles
-php artisan site:ensure-admin
-```
-
-Do **not** run `site:sync-reference-data` on every deploy. Content and settings corrections are applied by `php artisan migrate`.
 
 ### Production `.env` example
 
@@ -251,7 +166,6 @@ FILESYSTEM_DISK=public
 CACHE_STORE=file
 
 FORCE_HTTPS=true
-SEED_MODE=off
 TRUSTED_PROXIES=*
 ```
 
@@ -261,26 +175,16 @@ TRUSTED_PROXIES=*
 * * * * * cd /home/steciuk/steciuk.org && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-This runs scheduled SQLite maintenance automatically:
-
-| Schedule | Command | Purpose |
-|----------|---------|---------|
-| Daily 03:15 | `db:optimize-sqlite --light` | WAL checkpoint + incremental vacuum |
-| Weekly Sun 04:00 | `db:optimize-sqlite` | ANALYZE + query planner optimize |
-| Monthly 1st 04:30 | `db:optimize-sqlite --reclaim` | Full VACUUM + incremental auto-vacuum |
-
-Run once manually after deploy: `php artisan db:optimize-sqlite --reclaim`
+Scheduled SQLite maintenance runs automatically (daily light optimize, weekly analyze, monthly reclaim).
 
 ### Production checklist
 
-- [ ] Change default admin passwords
+- [ ] Change default admin password after first sign-in
 - [ ] `APP_DEBUG=false` and `EXPOSE_EXCEPTION_DETAILS=false`
 - [ ] SQLite file **not** inside `public/`
 - [ ] Block `.env` and `storage/` in web server config
 - [ ] HTTPS enabled (Let's Encrypt)
-- [ ] Cron enabled for `php artisan schedule:run` (SQLite maintenance)
-- [ ] `php artisan db:optimize-sqlite --reclaim` once after first deploy
-- [ ] `SEED_MODE=off` after first bootstrap
+- [ ] Cron enabled for `php artisan schedule:run`
 - [ ] Enable MFA for super admin (`REQUIRE_MFA_SUPER_ADMIN=true`)
 
 ## Admin panel
@@ -309,7 +213,7 @@ Contact forms and admin notifications are configured in **Admin → Site Setting
 2. Set the from address and save.
 3. Use **Send test email** to verify delivery.
 
-Do not add `MAIL_*` variables to `.env` — they are ignored once the site is bootstrapped. All delivery settings live in the admin panel.
+Do not add `MAIL_*` variables to `.env` — they are ignored once the site is configured. All delivery settings live in the admin panel.
 
 ## Backup
 
@@ -344,19 +248,20 @@ Enable MFA: Admin → Profile → Two-factor authentication.
 
 ```
 app/
-├── Console/Commands/   site:bootstrap, site:sync-reference-data, site:ensure-admin
+├── Database/           ReferenceSiteContentMigrator, menu applicator, provisioner
 ├── Filament/           Admin panel resources
 ├── Http/Controllers/   Public site
 ├── Livewire/Forms/     Secure public forms
 ├── Models/             Eloquent models
 ├── Services/           Caching, SEO, mail, SQLite optimiser
-└── Support/            SeedConfig, embed sanitiser
+└── Support/            ReferenceSiteContent, SeedConfig
 
 config/
 ├── site.php            Paths and seeding behaviour
 └── security.php        Security flags
 
-database/seeders/       Idempotent reference parish content
+database/migrations/    Schema + reference content updates
+app/Support/ReferenceSiteContent.php   Canonical parish copy
 ```
 
 ## Tech stack

@@ -26,7 +26,11 @@ class PageSeeder extends Seeder
             unset($pageData['content_blocks']);
 
             $slug = $pageData['slug'];
-            $existingPage = Page::query()->where('slug', $slug)->first();
+            $existingPage = Page::withTrashed()->where('slug', $slug)->first();
+
+            if ($existingPage?->trashed()) {
+                $existingPage->restore();
+            }
 
             if ($existingPage && ! SeedConfig::shouldOverwritePages()) {
                 if (array_key_exists('show_hero', $pageData)) {

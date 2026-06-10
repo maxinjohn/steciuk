@@ -24,11 +24,11 @@ return [
     | Reference data seeding
     |--------------------------------------------------------------------------
     |
-    | bootstrap — first install: create all reference records and defaults
-    | sync      — deploy updates: upsert seeded records by stable key/slug;
-    |             never delete prod-only records; preserve admin passwords
-    |             and settings unless overwrite flags are enabled
-    | off       — skip seeding (default production)
+    | Reference parish copy is applied by migrations. These modes apply only when
+    | running database/seeders manually (e.g. local development).
+    | bootstrap — create all reference records
+    | sync      — upsert seeded records; preserve admin passwords unless overwrite flags are set
+    | off       — skip seeding (default; production)
     |
     */
 
