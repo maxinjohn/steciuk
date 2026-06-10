@@ -22,9 +22,9 @@ class ErrorResponse
         return response()->view($view, array_merge(['status' => $status], $data), $status);
     }
 
-    public static function json(int $status): Response
+    public static function json(int $status, bool $reload = false): Response
     {
-        return response()->json([
+        $payload = [
             'message' => match ($status) {
                 401 => 'Sign in required.',
                 403 => 'Forbidden.',
@@ -34,6 +34,12 @@ class ErrorResponse
                 503 => 'Service unavailable.',
                 default => 'Server error.',
             },
-        ], $status);
+        ];
+
+        if ($reload) {
+            $payload['reload'] = true;
+        }
+
+        return response()->json($payload, $status);
     }
 }

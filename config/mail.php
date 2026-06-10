@@ -78,7 +78,7 @@ return [
 
         'sendmail' => [
             'transport' => 'sendmail',
-            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
+            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -t -i'),
             'timeout' => (int) env('MAIL_SENDMAIL_TIMEOUT', 15),
         ],
 

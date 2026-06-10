@@ -1,6 +1,6 @@
 @props([
     'text' => null,
-    'reference' => 'Revelation 19:10',
+    'reference' => 'Revelation 1:9',
 ])
 
 @php

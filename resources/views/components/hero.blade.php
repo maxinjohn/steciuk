@@ -75,7 +75,7 @@
                         {{ $subtitle }}
                     </p>
                     @if ($style !== 'minimal' && str_contains($subtitle, 'Word of God'))
-                        <p class="hero-scripture-ref">Revelation 19:10</p>
+                        <p class="hero-scripture-ref">{{ $gospelReminderReference ?? 'Revelation 1:9' }}</p>
                     @endif
                 @endif
 
@@ -103,7 +103,7 @@
                         <div class="hero-panel-sticker">Monthly worship</div>
                         <p class="hero-panel-kicker">UK Parish · STECI</p>
                         <h2 class="hero-panel-title">Scripture · Gospel · Sacraments</h2>
-                        <p class="hero-panel-text">Monthly Holy Communion, expository preaching, and intercessory prayer across five cities — confessing Christ as Lord in the evangelical Episcopal tradition of the Saint Thomas Christian Church.</p>
+                        <p class="hero-panel-text">Monthly worship, expository preaching, and intercessory prayer across five cities — confessing Christ as Lord in the evangelical Oriental Protestant tradition of the Saint Thomas Christian Church.</p>
                         <a href="{{ url('/our-church') }}" class="hero-panel-link">
                             Our beliefs
                             <span aria-hidden="true">→</span>

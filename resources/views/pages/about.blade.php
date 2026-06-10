@@ -8,7 +8,7 @@
         :title="$page->hero_title ?? $page->title"
         :subtitle="$page->hero_subtitle"
         :image="$page->featured_image"
-        badge="Evangelical Episcopal"
+        badge="Evangelical Oriental Protestant"
         size="small"
     />
     <x-parish-action-strip class="!py-3" />

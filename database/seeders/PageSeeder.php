@@ -7,6 +7,7 @@ use App\Enums\PublishStatus;
 use App\Models\ContentBlock;
 use App\Models\Page;
 use App\Models\User;
+use App\Support\ReferenceSiteContent;
 use App\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 
@@ -71,12 +72,12 @@ class PageSeeder extends Seeder
     {
         return [
             $this->homePage(),
-            $this->simplePage('Welcome', 'welcome', 'about', 'Welcome to Our Parish', 'A warm invitation to worship and fellowship', $this->welcomeContent()),
-            $this->simplePage('Our Church', 'our-church', 'about', 'Our Church', 'Who we are and what we believe', $this->ourChurchContent()),
-            $this->simplePage('STECI Heritage', 'steci-heritage', 'about', 'STECI Heritage', 'Rooted in the Saint Thomas Christian tradition', $this->heritageContent()),
-            $this->simplePage('Mission & Vision', 'mission-vision', 'about', 'Mission & Vision', 'Our calling to worship, witness, and service', $this->missionVisionContent()),
-            $this->simplePage('Leadership', 'leadership', 'about', 'Parish Leadership', 'Those who serve our UK Parish community', $this->leadershipContent()),
-            $this->simplePage('UK Locations', 'uk-locations', 'about', 'UK Parish Locations', 'Five worship locations across the United Kingdom', $this->locationsContent()),
+            $this->simplePage('Welcome', 'welcome', 'about', 'Welcome to Our Parish', 'A warm invitation to worship and fellowship', ReferenceSiteContent::welcome()),
+            $this->simplePage('Our Church', 'our-church', 'about', 'Our Church', 'Who we are and what we believe', ReferenceSiteContent::ourChurch()),
+            $this->simplePage('STECI Heritage', 'steci-heritage', 'about', 'STECI Heritage', 'Rooted in the Saint Thomas Christian tradition', ReferenceSiteContent::heritage()),
+            $this->simplePage('Mission & Vision', 'mission-vision', 'about', 'Mission & Vision', 'Our calling to worship, witness, and service', ReferenceSiteContent::missionVision()),
+            $this->simplePage('Leadership', 'leadership', 'about', 'Parish Leadership', 'Those who serve our UK Parish community', ReferenceSiteContent::leadership()),
+            $this->simplePage('UK Locations', 'uk-locations', 'about', 'UK Parish Locations', 'Five worship locations across the United Kingdom', ReferenceSiteContent::locations()),
             $this->simplePage('Service Times', 'service-times', 'default', 'Service Times', 'Find worship near you', $this->serviceTimesContent()),
             $this->simplePage('Online Worship', 'online-worship', 'default', 'Online Worship', 'Join us from wherever you are', $this->onlineWorshipContent()),
             $this->simplePage('Sermons', 'sermons', 'default', 'Sermons & Messages', 'Biblical teaching from our parish', $this->sermonsContent()),
@@ -134,7 +135,7 @@ class PageSeeder extends Seeder
             'show_hero' => false,
             'content' => null,
             'seo_title' => 'St. Thomas Evangelical Church of India – UK Parish',
-            'seo_description' => 'Welcome to the UK Parish of STECI. Join us for worship in Manchester, Leicester, Dartford, Sunderland, and Bristol.',
+            'seo_description' => ReferenceSiteContent::pageFields()['home']['seo_description'],
             'template' => 'home',
             'sort_order' => 0,
             'is_home' => true,
@@ -181,7 +182,7 @@ class PageSeeder extends Seeder
                     'title' => 'Welcome Message',
                     'sort_order' => 3,
                     'content' => [
-                        'quote' => 'We welcome you to worship centred on Scripture, the Gospel of Jesus Christ, and the sacraments of the Church — in the warm fellowship of an evangelical Episcopal parish rooted in the Saint Thomas Christian tradition.',
+                        'quote' => ReferenceSiteContent::homeContentBlockPatches()['welcome-quote']['quote'],
                         'attribution' => 'St. Thomas Evangelical Church of India – UK Parish',
                         'link_url' => '/welcome',
                         'link_label' => 'Read Full Welcome Message',
@@ -279,129 +280,6 @@ class PageSeeder extends Seeder
                 ],
             ],
         ];
-    }
-
-    private function welcomeContent(): string
-    {
-        return <<<'HTML'
-<p>Welcome to the UK Parish of the <strong>St. Thomas Evangelical Church of India</strong> (STECI). We are delighted that you are visiting our website and hope you will feel drawn to join us in worship, prayer, and fellowship.</p>
-
-<p>Our parish serves approximately <strong>ninety families</strong> spread across the United Kingdom, gathering for monthly worship at five locations: <strong>Manchester, Leicester, Dartford, Sunderland, and Bristol</strong>. Though geographically dispersed, we are united by our faith in Jesus Christ, our commitment to the authority of the Holy Bible, and our heritage in the Saint Thomas Christian tradition of Kerala, India.</p>
-
-<p>STECI was founded in <strong>1961</strong> and is headquartered in <strong>Thiruvalla, Kerala</strong>. As an evangelical Episcopal church, we uphold historic Christian faith, episcopal oversight, and a missionary calling to proclaim the Gospel. The UK Parish is a registered charity (No. <strong>1143030</strong>) and exists to worship God, nurture disciples, care for families, and witness to Christ in British society.</p>
-
-<p>Whether you are exploring Christianity for the first time, reconnecting with your faith, or seeking a spiritual home within the Saint Thomas Christian tradition, you are warmly welcome. Please explore our service times, ministries, and events — or <a href="/contact">contact us</a> directly. We would love to hear from you.</p>
-
-<p><em>"For the Word of God and for the testimony of Jesus Christ."</em></p>
-HTML;
-    }
-
-    private function ourChurchContent(): string
-    {
-        return <<<'HTML'
-<h2>Who We Are</h2>
-<p>The St. Thomas Evangelical Church of India – UK Parish is part of a global missionary church with deep roots in the Saint Thomas Christian community of Kerala. We are an <strong>evangelical Episcopal church</strong> — holding to the authority of Scripture, celebrating the sacraments, and living under episcopal spiritual oversight connected with STECI headquarters in Thiruvalla.</p>
-
-<h2>What We Believe</h2>
-<ul>
-<li>The Holy Bible is the inspired and authoritative Word of God</li>
-<li>Jesus Christ is Lord and Saviour — fully God and fully human</li>
-<li>Salvation is by grace through faith in Christ alone</li>
-<li>The Church is called to worship, fellowship, discipleship, evangelism, and service</li>
-<li>We honour the heritage of the Saint Thomas Christian tradition while engaging faithfully with life in the United Kingdom</li>
-</ul>
-
-<h2>How We Worship</h2>
-<p>Our worship blends Anglican-Episcopal liturgy with evangelical preaching and the warm fellowship characteristic of Indian Christian communities. Services include Scripture readings, hymns, prayers, a sermon, and Holy Communion. Worship is conducted primarily in English, with Malayalam hymns and readings at many gatherings.</p>
-
-<h2>Our UK Parish</h2>
-<p>With worship locations in five cities, our parish brings together families from diverse backgrounds who share a common faith and cultural heritage. We support one another through pastoral care, Sunday School, youth and women's fellowships, choir, prayer groups, and community events — both in person and online.</p>
-HTML;
-    }
-
-    private function heritageContent(): string
-    {
-        return <<<'HTML'
-<h2>The Saint Thomas Christian Tradition</h2>
-<p>The Saint Thomas Christians trace their origins to the missionary activity of the Apostle Thomas in India in the first century. This ancient community in Kerala has maintained a distinctive witness to Christ across centuries, blending Indian culture with Christian faith.</p>
-
-<h2>Founding of STECI</h2>
-<p>The <strong>St. Thomas Evangelical Church of India</strong> was founded in <strong>1961</strong>, emerging from a renewal movement within the Saint Thomas Christian community that emphasised biblical authority, evangelical faith, and missionary outreach. The church's headquarters is located in <strong>Thiruvalla, Kerala</strong>, from which episcopal oversight, theological training, and mission work are coordinated.</p>
-
-<h2>Evangelical Episcopal Identity</h2>
-<p>STECI identifies as an <strong>evangelical Episcopal church</strong>. We uphold:</p>
-<ul>
-<li>The supreme authority of the Holy Bible in faith and practice</li>
-<li>Historic Christian creeds and Episcopal church order</li>
-<li>The priesthood of all believers and the call to personal conversion</li>
-<li>A missionary vision to proclaim the Gospel in India and among diaspora communities worldwide</li>
-</ul>
-
-<h2>STECI in the United Kingdom</h2>
-<p>The UK Parish serves the STECI diaspora community across Britain, providing spiritual home, pastoral care, and worship for families who have settled in the United Kingdom while maintaining connection with their church heritage. Our parish is part of STECI's wider global fellowship and shares in its mission and values.</p>
-HTML;
-    }
-
-    private function missionVisionContent(): string
-    {
-        return <<<'HTML'
-<h2>Our Mission</h2>
-<p>To glorify God through worship, proclaim the Gospel of Jesus Christ, nurture believers in discipleship, and serve our community — in the United Kingdom and in partnership with the wider STECI fellowship — as a missionary Episcopal church rooted in the Saint Thomas Christian tradition.</p>
-
-<h2>Our Vision</h2>
-<p>A vibrant, spiritually mature parish community across the United Kingdom where families of all generations:</p>
-<ul>
-<li>Worship God in spirit and truth</li>
-<li>Grow deep in knowledge of Scripture</li>
-<li>Build strong Christian homes and friendships</li>
-<li>Reach neighbours and nations with the love of Christ</li>
-<li>Remain connected to the heritage and mission of STECI</li>
-</ul>
-
-<h2>Our Values</h2>
-<ul>
-<li><strong>Scripture</strong> — The Bible shapes our beliefs, worship, and daily living</li>
-<li><strong>Worship</strong> — Gathered praise, prayer, and sacrament at the centre of parish life</li>
-<li><strong>Fellowship</strong> — Authentic community across our five UK locations</li>
-<li><strong>Discipleship</strong> — Equipping every member to follow Christ faithfully</li>
-<li><strong>Evangelism</strong> — Sharing the Good News locally and supporting global mission</li>
-<li><strong>Service</strong> — Caring for one another and serving those in need</li>
-</ul>
-HTML;
-    }
-
-    private function leadershipContent(): string
-    {
-        return <<<'HTML'
-<p>The UK Parish operates under the constitution of the St. Thomas Evangelical Church of India – UK Parish (Registered Charity No. 1143030). A parish committee supports the Vicar in planning worship, coordinating ministries, and overseeing parish affairs across our five locations — always under the Word of God and for the testimony of Jesus Christ.</p>
-
-<p>Contact the parish office at <a href="mailto:admin@steciuk.org">admin@steciuk.org</a> if you need to reach any member of the leadership team.</p>
-HTML;
-    }
-
-    private function locationsContent(): string
-    {
-        return <<<'HTML'
-<h2>Five Locations Across the UK</h2>
-<p>Our parish family of approximately ninety households gathers for monthly worship at five locations across the United Kingdom. Each congregation enjoys local fellowship while sharing in parish-wide events, prayer, and mission.</p>
-
-<h3>Manchester</h3>
-<p>Serving families across Greater Manchester and the North West of England.</p>
-
-<h3>Leicester</h3>
-<p>Serving families across Leicestershire and the East Midlands.</p>
-
-<h3>Dartford</h3>
-<p>Serving families across Kent and South East London.</p>
-
-<h3>Sunderland</h3>
-<p>Serving families across the North East of England.</p>
-
-<h3>Bristol</h3>
-<p>Serving families across the South West of England.</p>
-
-<p>For addresses, contact details, and current service schedules, please visit our <a href="/service-times">Service Times</a> page or contact the parish office at <a href="mailto:admin@steciuk.org">admin@steciuk.org</a>.</p>
-HTML;
     }
 
     private function serviceTimesContent(): string

@@ -565,11 +565,66 @@
 
 /* Login page */
 .fi-simple-layout {
-    @apply bg-gradient-to-br from-[#f5f0e8] via-[#faf7f2] to-[#ebe4d8];
+    @apply relative overflow-hidden bg-gradient-to-br from-[#f5f0e8] via-[#faf7f2] to-[#ebe4d8];
+}
+
+.fi-simple-layout::before {
+    content: '';
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    opacity: 0.7;
+    background:
+        radial-gradient(ellipse 70% 45% at 15% 0%, rgba(251, 191, 36, 0.18), transparent 55%),
+        radial-gradient(ellipse 55% 40% at 85% 100%, rgba(180, 83, 9, 0.1), transparent 50%);
 }
 
 .dark .fi-simple-layout {
     @apply from-slate-950 via-indigo-950 to-slate-950;
+}
+
+.dark .fi-simple-layout::before {
+    opacity: 0.85;
+    background:
+        radial-gradient(ellipse 70% 45% at 15% 0%, rgba(251, 191, 36, 0.14), transparent 55%),
+        radial-gradient(ellipse 55% 40% at 85% 100%, rgba(99, 102, 241, 0.12), transparent 50%);
+}
+
+.admin-login-banner {
+    @apply relative rounded-2xl border border-amber-200/70 bg-white/70 px-4 py-4 shadow-sm shadow-amber-900/5 backdrop-blur-sm;
+}
+
+.dark .admin-login-banner {
+    @apply border-amber-500/20 bg-slate-900/50 shadow-black/20;
+}
+
+.admin-login-kicker {
+    @apply text-[0.65rem] font-bold uppercase tracking-[0.22em] text-amber-800/80;
+}
+
+.dark .admin-login-kicker {
+    @apply text-amber-300/85;
+}
+
+.admin-login-verse {
+    @apply mt-2 font-serif text-base italic leading-relaxed text-stone-700;
+    font-family: var(--font-sans), ui-serif, Georgia, 'Times New Roman', serif;
+}
+
+.dark .admin-login-verse {
+    @apply text-slate-200;
+}
+
+.admin-login-ref {
+    @apply mt-1 block text-xs not-italic font-sans text-stone-500;
+}
+
+.dark .admin-login-ref {
+    @apply text-slate-400;
+}
+
+.admin-session-notice {
+    @apply backdrop-blur-sm;
 }
 
 .fi-simple-main {
@@ -620,6 +675,28 @@
 
     .fi-section-content {
         @apply p-4;
+    }
+
+    .admin-sanctuary-banner {
+        @apply px-4 py-5;
+    }
+
+    .admin-quick-card {
+        @apply min-h-[7.5rem];
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .fi-wi-stats-overview-stats-ctn {
+        @apply grid-cols-2;
+    }
+
+    .fi-main-ctn {
+        @apply px-5 py-5;
+    }
+
+    .fi-simple-main {
+        @apply max-w-md;
     }
 }
 

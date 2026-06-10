@@ -14,6 +14,6 @@
             @endif
             <p class="gospel-reminder-text">{{ $siteMotto ?? 'For the Word of God and for the testimony of Jesus Christ' }}</p>
         </div>
-        <span class="gospel-reminder-ref">{{ $reference ?? ($gospelReminderReference ?? 'Revelation 19:10') }}</span>
+        <span class="gospel-reminder-ref">{{ $reference ?? ($gospelReminderReference ?? 'Revelation 1:9') }}</span>
     </div>
 </aside>

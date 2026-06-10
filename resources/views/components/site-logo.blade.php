@@ -25,12 +25,16 @@
         height="48"
         loading="eager"
         decoding="async"
+        fetchpriority="high"
         aria-hidden="true"
     >
     <span class="site-logo-stack">
-        <span class="site-logo-line">
-            <span class="min-[480px]:hidden">St. Thomas Evangelical Church</span>
-            <span class="hidden min-[480px]:inline lg:hidden">{{ $logoMain }}</span>
+        <span class="site-logo-line site-logo-line--title">
+            <span class="site-logo-full min-[520px]:hidden" aria-hidden="false">
+                <span class="site-logo-row">St. Thomas Evangelical</span>
+                <span class="site-logo-row">Church of India</span>
+            </span>
+            <span class="hidden min-[520px]:inline lg:hidden">{{ $logoMain }}</span>
             <span class="hidden lg:inline xl:hidden">STECI</span>
             <span class="hidden xl:inline">{{ $logoMain }}</span>
         </span>

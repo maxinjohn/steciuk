@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Process\Exception\ProcessTimedOutException;
-use Symfony\Component\Process\Process;
 
 class MailConfigService
 {
@@ -75,6 +74,10 @@ class MailConfigService
         }
 
         if ($mailer === 'sendmail') {
+            if (static::canUsePhpMail()) {
+                return null;
+            }
+
             return static::validateSendmailPath((string) config('mail.mailers.sendmail.path', ''));
         }
 
@@ -119,7 +122,7 @@ class MailConfigService
         $fromName ??= (string) config('mail.from.name');
 
         if ($mailer === 'sendmail') {
-            static::deliverViaSendmailProcess($to, $subject, $body, $fromAddress, $fromName);
+            static::deliverViaSendmail($to, $subject, $body, $fromAddress, $fromName);
 
             return;
         }
@@ -138,11 +141,15 @@ class MailConfigService
         $message = trim($exception->getMessage());
 
         if ($exception instanceof ProcessTimedOutException) {
-            return 'PHP mail (sendmail) timed out. Check the sendmail command in Email Setup or switch to SMTP.';
+            return 'PHP mail timed out. Try SMTP in Email Setup or ask your host to enable server mail.';
         }
 
         if ($message === '') {
             return 'Mail could not be sent. Check Email Setup and try again.';
+        }
+
+        if (str_contains(strtolower($message), 'proc_open')) {
+            return 'This server blocks subprocess mail. PHP mail() fallback was used — if it still fails, switch to SMTP in Email Setup.';
         }
 
         if (str_contains(strtolower($message), 'connection could not be established')) {
@@ -154,11 +161,11 @@ class MailConfigService
         }
 
         if (str_contains(strtolower($message), 'timed out') || str_contains(strtolower($message), 'timeout')) {
-            return 'Mail delivery timed out. For PHP mail, check sendmail/local MTA. For SMTP, check host, port, and encryption.';
+            return 'Mail delivery timed out. For PHP mail, check with your host. For SMTP, check host, port, and encryption.';
         }
 
-        if (str_contains(strtolower($message), 'sendmail')) {
-            return 'PHP mail (sendmail) failed. Verify the sendmail command in Email Setup.';
+        if (str_contains(strtolower($message), 'sendmail') || str_contains(strtolower($message), 'php mail')) {
+            return $message;
         }
 
         return $message;
@@ -201,6 +208,32 @@ class MailConfigService
         $parts = static::parseSendmailCommand($command);
 
         return $parts[0] ?? null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function defaultSendmailCommands(): array
+    {
+        return [
+            '/usr/sbin/sendmail -t -i',
+            '/bin/sendmail -t -i',
+            '/usr/sbin/sendmail -bs -i',
+            '/bin/sendmail -bs -i',
+        ];
+    }
+
+    public static function detectSendmailCommand(): ?string
+    {
+        foreach (static::defaultSendmailCommands() as $command) {
+            $binary = static::sendmailBinary($command);
+
+            if ($binary !== null && $binary !== '' && file_exists($binary)) {
+                return $command;
+            }
+        }
+
+        return null;
     }
 
     private static function applyAdminMailerFromSettings(): void
@@ -323,42 +356,87 @@ class MailConfigService
         }
     }
 
-    private static function deliverViaSendmailProcess(
+    private static function deliverViaSendmail(
         string $to,
         string $subject,
         string $body,
         string $fromAddress,
         string $fromName,
     ): void {
-        $command = static::parseSendmailCommand();
+        if (static::canUsePhpMail()) {
+            static::deliverViaPhpMail($to, $subject, $body, $fromAddress, $fromName);
 
-        if ($command === []) {
-            throw new \RuntimeException('Sendmail command is not configured.');
+            return;
+        }
+
+        if (static::canUseSubprocess()) {
+            Mail::mailer('sendmail')->raw(
+                $body,
+                fn ($message) => $message
+                    ->to($to)
+                    ->subject($subject)
+                    ->from($fromAddress, $fromName !== '' ? $fromName : null),
+            );
+
+            return;
+        }
+
+        throw new \RuntimeException('Neither PHP mail() nor sendmail subprocess is available on this server. Use SMTP in Email Setup.');
+    }
+
+    private static function deliverViaPhpMail(
+        string $to,
+        string $subject,
+        string $body,
+        string $fromAddress,
+        string $fromName,
+    ): void {
+        if (! static::canUsePhpMail()) {
+            throw new \RuntimeException('PHP mail() is not available on this server.');
         }
 
         $fromHeader = $fromName !== ''
-            ? sprintf('%s <%s>', static::encodeHeaderValue($fromName), $fromAddress)
+            ? static::encodeHeaderValue($fromName).' <'.$fromAddress.'>'
             : $fromAddress;
 
-        $payload = implode("\r\n", [
-            'To: '.$to,
+        $headers = implode("\r\n", [
             'From: '.$fromHeader,
-            'Subject: '.static::encodeHeaderValue($subject),
+            'Reply-To: '.$fromAddress,
             'MIME-Version: 1.0',
             'Content-Type: text/plain; charset=UTF-8',
             'Content-Transfer-Encoding: 8bit',
-            '',
-            $body,
-        ])."\r\n";
+            'X-Mailer: STECI-UK-Parish',
+        ]);
 
-        $process = new Process($command);
-        $process->setInput($payload);
-        $process->setTimeout(static::sendmailTimeout());
-        $process->run();
+        $parameters = sprintf('-f%s', $fromAddress);
 
-        if (! $process->isSuccessful()) {
-            throw new \RuntimeException(trim($process->getErrorOutput() ?: $process->getOutput() ?: 'Sendmail failed to send the message.'));
+        $sent = @mail($to, static::encodeHeaderValue($subject), $body, $headers, $parameters);
+
+        if (! $sent) {
+            throw new \RuntimeException('PHP mail() could not send the message. Your host may require SMTP instead of PHP mail.');
         }
+    }
+
+    private static function canUsePhpMail(): bool
+    {
+        if (! function_exists('mail')) {
+            return false;
+        }
+
+        $disabled = array_filter(array_map('trim', explode(',', (string) ini_get('disable_functions'))));
+
+        return ! in_array('mail', $disabled, true);
+    }
+
+    private static function canUseSubprocess(): bool
+    {
+        if (! function_exists('proc_open')) {
+            return false;
+        }
+
+        $disabled = array_filter(array_map('trim', explode(',', (string) ini_get('disable_functions'))));
+
+        return ! in_array('proc_open', $disabled, true);
     }
 
     private static function validateSendmailPath(?string $command = null): ?string
@@ -366,21 +444,21 @@ class MailConfigService
         $command = trim($command ?? static::resolveSendmailPath());
 
         if ($command === '') {
-            return 'Sendmail command is missing. Enter it in Email Setup (e.g. /usr/sbin/sendmail -bs -i).';
+            $command = static::detectSendmailCommand() ?? '';
+        }
+
+        if ($command === '') {
+            return 'PHP mail() is not available and no sendmail binary was found. Use SMTP in Email Setup or ask your host to enable PHP mail.';
         }
 
         $binary = static::sendmailBinary($command);
 
         if ($binary === null || $binary === '') {
-            return 'Sendmail command is invalid. Example: /usr/sbin/sendmail -bs -i';
+            return 'Sendmail command is invalid. Example: /usr/sbin/sendmail -t -i';
         }
 
         if (! file_exists($binary)) {
-            return "Sendmail binary not found at {$binary}. Check the sendmail command in Email Setup.";
-        }
-
-        if (! is_executable($binary)) {
-            return "Sendmail at {$binary} is not executable. Check permissions or use SMTP instead.";
+            return "Sendmail binary not found at {$binary}. Try /usr/sbin/sendmail -t -i or use SMTP.";
         }
 
         return null;
@@ -399,7 +477,7 @@ class MailConfigService
         }
 
         if ($path === '') {
-            $path = '/usr/sbin/sendmail -bs -i';
+            $path = static::detectSendmailCommand() ?? '/usr/sbin/sendmail -t -i';
         }
 
         return $path;
@@ -423,20 +501,25 @@ class MailConfigService
         ]);
     }
 
-    private static function sendmailTimeout(): int
-    {
-        static::ensureTransportTimeouts();
-
-        $timeout = (int) config('mail.mailers.sendmail.timeout', 15);
-
-        return $timeout > 0 ? $timeout : 15;
-    }
-
     private static function encodeHeaderValue(string $value): string
     {
-        return str_contains($value, "\r") || str_contains($value, "\n")
-            ? mb_encode_mimeheader($value, 'UTF-8')
-            : $value;
+        if ($value === '') {
+            return $value;
+        }
+
+        if (str_contains($value, "\r") || str_contains($value, "\n")) {
+            return function_exists('mb_encode_mimeheader')
+                ? mb_encode_mimeheader($value, 'UTF-8')
+                : $value;
+        }
+
+        if (function_exists('mb_check_encoding') && ! mb_check_encoding($value, 'ASCII')) {
+            return function_exists('mb_encode_mimeheader')
+                ? mb_encode_mimeheader($value, 'UTF-8')
+                : $value;
+        }
+
+        return $value;
     }
 
     private static function settingsTableReady(): bool

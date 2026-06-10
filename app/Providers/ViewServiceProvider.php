@@ -44,7 +44,7 @@ class ViewServiceProvider extends ServiceProvider
                     'themeColor' => $settings['theme_color'] ?? '#d4cabb',
                     'pwaShortName' => $settings['pwa_short_name'] ?? 'STECI UK',
                     'gospelReminderKicker' => $settings['gospel_reminder_kicker'] ?? null,
-                    'gospelReminderReference' => $settings['gospel_reminder_reference'] ?? 'Revelation 19:10',
+                    'gospelReminderReference' => $settings['gospel_reminder_reference'] ?? 'Revelation 1:9',
                     'siteAnnouncementEnabled' => ($settings['site_announcement_enabled'] ?? '0') === '1',
                     'siteAnnouncementText' => $settings['site_announcement_text'] ?? null,
                     'siteAnnouncementLink' => $settings['site_announcement_link'] ?? null,

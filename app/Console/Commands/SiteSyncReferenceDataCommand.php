@@ -12,7 +12,7 @@ class SiteSyncReferenceDataCommand extends Command
     protected $signature = 'site:sync-reference-data
                             {--force : Run without confirmation in production}';
 
-    protected $description = 'Sync dev reference data to prod: upsert seeded records, preserve prod-only data';
+    protected $description = 'Optional full reference reseed (menus, events, sample news). Routine content updates ship via migrations — not this command.';
 
     public function handle(): int
     {

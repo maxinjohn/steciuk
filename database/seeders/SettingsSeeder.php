@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
+use App\Support\ReferenceSiteContent;
 use App\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 
@@ -23,15 +24,15 @@ class SettingsSeeder extends Seeder
             ['key' => 'twitter', 'value' => 'https://twitter.com/steciuk', 'group' => 'social'],
             ['key' => 'google_maps_embed', 'value' => '', 'group' => 'contact'],
             ['key' => 'donation_link', 'value' => 'https://steciuk.org/give', 'group' => 'general'],
-            ['key' => 'footer_text', 'value' => 'Confessing Christ as Lord — Word, worship, and witness across the United Kingdom.', 'group' => 'general'],
+            ['key' => 'footer_text', 'value' => ReferenceSiteContent::settings()['footer_text']['value'], 'group' => 'general'],
             ['key' => 'seo_default_title', 'value' => 'St. Thomas Evangelical Church of India – UK Parish', 'group' => 'seo'],
-            ['key' => 'seo_default_description', 'value' => 'An evangelical Episcopal parish rooted in the Saint Thomas Christian tradition. Join us for Holy Communion, expository preaching, and prayer across Manchester, Leicester, Dartford, Sunderland, and Bristol.', 'group' => 'seo'],
+            ['key' => 'seo_default_description', 'value' => ReferenceSiteContent::settings()['seo_default_description']['value'], 'group' => 'seo'],
             ['key' => 'seo_default_og_image', 'value' => '', 'group' => 'seo'],
             ['key' => 'theme_color', 'value' => '#d4cabb', 'group' => 'branding'],
             ['key' => 'pwa_short_name', 'value' => 'STECI UK', 'group' => 'branding'],
             ['key' => 'admin_use_church_logo', 'value' => '1', 'group' => 'branding'],
             ['key' => 'gospel_reminder_kicker', 'value' => 'For the Word of God · and the testimony of Jesus Christ', 'group' => 'general'],
-            ['key' => 'gospel_reminder_reference', 'value' => 'Revelation 19:10', 'group' => 'general'],
+            ['key' => 'gospel_reminder_reference', 'value' => ReferenceSiteContent::settings()['gospel_reminder_reference']['value'], 'group' => 'general'],
             ['key' => 'admin_welcome_heading', 'value' => 'Welcome — manage your parish with peace', 'group' => 'admin'],
             ['key' => 'admin_welcome_body', 'value' => 'Tap a sidebar section to expand it — only one group stays open at a time, and every link inside should appear. Edit pages, worship, photos, messages, and settings from here.', 'group' => 'admin'],
             ['key' => 'admin_dashboard_verse', 'value' => 'Be still, and know that I am God.', 'group' => 'admin'],
@@ -73,10 +74,10 @@ class SettingsSeeder extends Seeder
             ['key' => 'prayer_request_intro', 'value' => 'Share your need confidentially — our parish family will pray with you.', 'group' => 'general'],
             ['key' => 'give_button_label', 'value' => 'Give', 'group' => 'general'],
             ['key' => 'give_page_intro', 'value' => 'Support the work of the gospel through faithful giving.', 'group' => 'general'],
-            ['key' => 'footer_tagline', 'value' => 'Confessing Christ as Lord — Word, worship, and witness.', 'group' => 'general'],
+            ['key' => 'footer_tagline', 'value' => ReferenceSiteContent::settings()['footer_tagline']['value'], 'group' => 'general'],
             ['key' => 'footer_copyright', 'value' => '', 'group' => 'general'],
             ['key' => 'mail_mailer', 'value' => 'sendmail', 'group' => 'mail'],
-            ['key' => 'mail_sendmail_path', 'value' => '/usr/sbin/sendmail -bs -i', 'group' => 'mail'],
+            ['key' => 'mail_sendmail_path', 'value' => '/usr/sbin/sendmail -t -i', 'group' => 'mail'],
             ['key' => 'mail_sendmail_timeout', 'value' => '15', 'group' => 'mail'],
             ['key' => 'mail_smtp_timeout', 'value' => '10', 'group' => 'mail'],
             ['key' => 'mail_from_address', 'value' => 'admin@steciuk.org', 'group' => 'mail'],

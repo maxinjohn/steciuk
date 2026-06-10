@@ -59,12 +59,26 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarWidth('18rem')
             ->maxContentWidth(Width::Full)
             ->spa()
+            ->spaUrlExceptions([
+                AdminPanelConfig::url('login'),
+                AdminPanelConfig::url('logout'),
+                AdminPanelConfig::url('password-reset/*'),
+                AdminPanelConfig::url('profile'),
+            ])
             ->darkMode(true)
             ->defaultThemeMode(ThemeMode::Light)
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.admin.scripts'),
+            )
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
+                fn () => view('filament.admin.login-banner'),
+            )
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
+                fn () => view('filament.admin.session-notice'),
             )
             ->renderHook(
                 PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
