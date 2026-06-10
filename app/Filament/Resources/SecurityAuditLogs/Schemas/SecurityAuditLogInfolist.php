@@ -21,7 +21,8 @@ class SecurityAuditLogInfolist
                             ->dateTime('d M Y H:i:s'),
                         TextEntry::make('severity')
                             ->badge()
-                            ->color(fn (string $state): string => match ($state) {
+                            ->formatStateUsing(fn (?string $state): string => filled($state) ? (string) $state : 'info')
+                            ->color(fn (?string $state): string => match ($state) {
                                 'critical' => 'danger',
                                 'warning' => 'warning',
                                 default => 'gray',
@@ -71,14 +72,9 @@ class SecurityAuditLogInfolist
                     ->schema([
                         TextEntry::make('metadata')
                             ->label('Context')
-                            ->formatStateUsing(function (?array $state): string {
-                                if ($state === null || $state === []) {
-                                    return '—';
-                                }
-
-                                return json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '—';
-                            })
-                            ->columnSpanFull(),
+                            ->state(fn (SecurityAuditLog $record): string => $record->formattedMetadata())
+                            ->columnSpanFull()
+                            ->fontFamily('mono'),
                     ]),
             ]);
     }

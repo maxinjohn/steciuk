@@ -22,7 +22,8 @@ class SecurityAuditLogsTable
                     ->sortable(),
                 TextColumn::make('severity')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn (?string $state): string => filled($state) ? (string) $state : 'info')
+                    ->color(fn (?string $state): string => match ($state) {
                         'critical' => 'danger',
                         'warning' => 'warning',
                         default => 'gray',

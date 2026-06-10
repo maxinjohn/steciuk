@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Services\MemberRegistrationService;
 use App\Services\SecurityAuditLogService;
 use App\Services\SecurityLogger;
+use App\Support\AdminPanelConfig;
 use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class SecurityAuditLogTest extends TestCase
@@ -178,5 +180,51 @@ class SecurityAuditLogTest extends TestCase
             $editor,
             now()->subDays(31),
         );
+    }
+
+    public function test_super_admin_can_view_audit_log_with_array_metadata(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+
+        $log = SecurityAuditLog::query()->create([
+            'action' => 'user_login',
+            'summary' => 'Signed in to parish admin panel',
+            'severity' => 'info',
+            'metadata' => [
+                'portal' => SecurityLogger::adminPortalLabel(),
+                'actor_email' => 'admin@example.com',
+            ],
+            'created_at' => now(),
+        ]);
+
+        $this->actingAs($admin)
+            ->get(AdminPanelConfig::url("security-audit-logs/{$log->id}"))
+            ->assertOk()
+            ->assertSee('parish admin panel', false);
+    }
+
+    public function test_super_admin_can_view_audit_log_with_legacy_string_metadata(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+
+        $log = SecurityAuditLog::query()->create([
+            'action' => 'user_login',
+            'summary' => 'Legacy metadata entry',
+            'severity' => 'info',
+            'created_at' => now(),
+        ]);
+
+        DB::table('security_audit_logs')
+            ->where('id', $log->id)
+            ->update([
+                'metadata' => json_encode([
+                    'portal' => SecurityLogger::adminPortalLabel(),
+                ]),
+            ]);
+
+        $this->actingAs($admin)
+            ->get(AdminPanelConfig::url("security-audit-logs/{$log->id}"))
+            ->assertOk()
+            ->assertSee('Legacy metadata entry', false);
     }
 }
