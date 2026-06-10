@@ -12,7 +12,6 @@
 
 @if ($showStrips)
     <x-parish-action-strip />
-    <x-evangelical-trust-bar />
 @endif
 
 @if ($showScripture)

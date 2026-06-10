@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Pages\RelationManagers;
 
+use App\Filament\Support\CompactTableActions;
 use App\Filament\Support\ContentBlockFormBuilder;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
@@ -68,11 +68,12 @@ class ContentBlocksRelationManager extends RelationManager
                     ->label('Add section'),
             ])
             ->recordActions([
-                EditAction::make()
+                CompactTableActions::editButton()
                     ->slideOver(),
-                DeleteAction::make(),
+                CompactTableActions::overflowMenu([
+                    DeleteAction::make(),
+                ]),
             ], RecordActionsPosition::AfterColumns)
-            ->actionsColumnLabel('Actions')
             ->emptyStateHeading('No page sections yet')
             ->emptyStateDescription('Add hero banners, location tabs, CTAs, and other layout blocks that appear on the public page.');
     }

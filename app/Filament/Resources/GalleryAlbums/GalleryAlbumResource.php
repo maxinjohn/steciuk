@@ -23,7 +23,7 @@ class GalleryAlbumResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Media;
 
-    protected static ?string $navigationLabel = 'Gallery Albums';
+    protected static ?string $navigationLabel = 'Gallery albums';
 
     protected static ?string $modelLabel = 'Gallery Album';
 

@@ -3,10 +3,9 @@
 namespace App\Filament\Resources\Pages\RelationManagers;
 
 use App\Enums\MenuLocation;
+use App\Filament\Support\CompactTableActions;
 use App\Models\MenuItem;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -14,6 +13,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Table;
 
 class MenuItemsRelationManager extends RelationManager
@@ -104,9 +104,6 @@ class MenuItemsRelationManager extends RelationManager
                         return $data;
                     }),
             ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ]);
+            ->recordActions(CompactTableActions::editWithDelete(), RecordActionsPosition::AfterColumns);
     }
 }

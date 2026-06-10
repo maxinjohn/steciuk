@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\AdminPermission;
 use App\Enums\UserRole;
 use App\Models\Role;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\PermissionService;
 use App\Support\AdminPanelConfig;
@@ -44,7 +45,7 @@ class CustomRolesTest extends TestCase
             ],
         ]);
 
-        \App\Models\Setting::forgetCache();
+        Setting::forgetCache();
 
         $user = User::factory()->create(['role' => $role->slug]);
         $service = app(PermissionService::class);
@@ -71,5 +72,15 @@ class CustomRolesTest extends TestCase
             ->assertOk()
             ->assertSee('Super Admin', false)
             ->assertSee('Editor', false);
+    }
+
+    public function test_roles_admin_screen_is_available_to_admin(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin->value]);
+
+        $this->actingAs($admin)
+            ->get(AdminPanelConfig::url('roles'))
+            ->assertOk()
+            ->assertSee('Admin', false);
     }
 }

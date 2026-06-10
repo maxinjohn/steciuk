@@ -1,18 +1,20 @@
 <?php
 
+use App\Http\Controllers\DonationReportController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\ManifestController;
 use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\OfflineController;
 use App\Http\Controllers\PageController;
-use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SermonController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ServiceWorkerController;
-use App\Http\Controllers\SermonController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +43,21 @@ Route::get('/service-times', [ServiceController::class, 'index'])->name('service
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', RobotsController::class)->name('robots');
+
+Route::middleware('guest')->group(function (): void {
+    Route::view('/register', 'auth.register')->name('register');
+    Route::view('/login', 'auth.login')->name('login');
+    Route::view('/forgot-password', 'auth.forgot-password')->name('password.request');
+    Route::get('/reset-password/{token}', fn (string $token) => view('auth.reset-password', ['token' => $token]))->name('password.reset');
+});
+
+Route::view('/registration/pending', 'auth.registration-pending')->name('registration.pending');
+
+Route::middleware(['auth', 'member.approved'])->group(function (): void {
+    Route::view('/account', 'auth.account')->name('account');
+    Route::get('/account/giving/export', DonationReportController::class)->name('account.giving.export');
+    Route::post('/logout', LogoutController::class)->name('logout');
+});
 
 Route::get('/.well-known/security.txt', function () {
     $contact = config('security.security_contact', 'admin@steciuk.org');

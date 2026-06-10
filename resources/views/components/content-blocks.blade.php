@@ -68,8 +68,7 @@
                     </x-button>
                 @endif
             </x-hero>
-            <x-faith-pillars />
-            <x-scripture-ribbon text="God is spirit, and his worshipers must worship in the Spirit and in truth." reference="John 4:24" />
+            <x-scripture-ribbon text="God is spirit, and his worshippers must worship in the Spirit and in truth." reference="John 4:24" />
             <x-heavenly-comfort
                 :heading="$faithComfortHeading ?? null"
                 :subheading="$faithComfortSubheading ?? null"
@@ -436,7 +435,7 @@
                                     </div>
                                 </div>
 
-                                @if ($service && ($service->service_day || $service->service_time || $service->address))
+                                @if ($service && ($service->service_day || $service->service_time || $service->formattedAddress()))
                                     <dl class="mt-6 grid gap-3 sm:grid-cols-2">
                                         @if ($service->service_day || $service->service_time)
                                             <div class="rounded-xl bg-[var(--site-surface-2)] px-4 py-3">
@@ -446,10 +445,10 @@
                                                 </dd>
                                             </div>
                                         @endif
-                                        @if ($service->address)
+                                        @if ($service->formattedAddress())
                                             <div class="rounded-xl bg-[var(--site-surface-2)] px-4 py-3 sm:col-span-2">
                                                 <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Address</dt>
-                                                <dd class="mt-1 text-sm text-ink">{{ $service->address }}</dd>
+                                                <dd class="mt-1 text-sm text-ink">{{ $service->formattedAddress() }}</dd>
                                             </div>
                                         @endif
                                     </dl>

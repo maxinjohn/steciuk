@@ -559,6 +559,12 @@
     @apply transition hover:border-amber-300/60 hover:shadow-amber-900/5;
 }
 
+@media (max-width: 639px) {
+    .admin-quick-card {
+        @apply p-4;
+    }
+}
+
 .dark .admin-quick-card {
     @apply hover:border-amber-500/25 hover:shadow-amber-500/5;
 }
@@ -680,10 +686,6 @@
     .admin-sanctuary-banner {
         @apply px-4 py-5;
     }
-
-    .admin-quick-card {
-        @apply min-h-[7.5rem];
-    }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
@@ -716,5 +718,143 @@
 
     .fi-fo-rich-editor-content {
         @apply min-h-[12rem];
+    }
+}
+
+/* Worship service editor */
+.service-form-section {
+    @apply overflow-hidden rounded-[1.35rem] border border-amber-200/70 bg-white/85 shadow-lg shadow-amber-950/5 backdrop-blur-sm;
+}
+
+.dark .service-form-section {
+    @apply border-amber-500/15 bg-slate-900/70 shadow-black/20;
+}
+
+.service-form-section--hero {
+    @apply bg-gradient-to-br from-amber-50/90 via-white to-orange-50/70;
+}
+
+.dark .service-form-section--hero {
+    @apply from-amber-500/10 via-slate-900 to-indigo-950/30;
+}
+
+.service-form-section--schedule .fi-fo-toggle-buttons {
+    @apply gap-3;
+}
+
+.service-form-section--schedule .fi-fo-toggle-buttons-btn {
+    @apply min-h-[4.75rem] rounded-2xl border border-amber-100/80 px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md;
+}
+
+.dark .service-form-section--schedule .fi-fo-toggle-buttons-btn {
+    @apply border-white/10 hover:border-amber-400/30;
+}
+
+.service-form-section--location .service-map-preview {
+    @apply col-span-full;
+}
+
+.service-map-preview__frame {
+    @apply border-0;
+}
+
+.service-form-section--schedule .fi-fo-placeholder {
+    @apply rounded-2xl border border-dashed border-amber-300/70 bg-amber-50/50 px-4 py-3 text-sm font-medium leading-relaxed text-stone-700;
+}
+
+.dark .service-form-section--schedule .fi-fo-placeholder {
+    @apply border-amber-500/25 bg-amber-500/10 text-amber-50;
+}
+
+/* Tabbed admin forms — vertical inner menu */
+.admin-form-tabs.fi-sc-tabs.fi-vertical {
+    @apply grid gap-6 lg:grid-cols-[minmax(11rem,14rem)_minmax(0,1fr)] lg:items-start;
+}
+
+.admin-form-tabs > .fi-tabs {
+    @apply sticky top-24 rounded-[1.35rem] border border-amber-200/70 bg-white/80 p-2 shadow-lg shadow-amber-950/5 backdrop-blur-xl;
+}
+
+.dark .admin-form-tabs > .fi-tabs {
+    @apply border-amber-500/15 bg-slate-900/75 shadow-black/20;
+}
+
+.admin-form-tabs > .fi-tabs .fi-tabs-item {
+    @apply w-full justify-start rounded-2xl border border-transparent px-3 py-2.5 text-sm font-medium text-stone-600 transition duration-200;
+}
+
+.dark .admin-form-tabs > .fi-tabs .fi-tabs-item {
+    @apply text-slate-400;
+}
+
+.admin-form-tabs > .fi-tabs .fi-tabs-item:hover {
+    @apply border-amber-200/80 bg-amber-50/80 text-amber-950;
+}
+
+.dark .admin-form-tabs > .fi-tabs .fi-tabs-item:hover {
+    @apply border-amber-500/20 bg-amber-500/10 text-amber-100;
+}
+
+.admin-form-tabs > .fi-tabs .fi-tabs-item-active,
+.admin-form-tabs > .fi-tabs .fi-tabs-item[aria-selected='true'] {
+    @apply border-amber-300/80 bg-gradient-to-r from-amber-100/90 to-orange-50/80 text-amber-950 shadow-sm;
+}
+
+.dark .admin-form-tabs > .fi-tabs .fi-tabs-item-active,
+.dark .admin-form-tabs > .fi-tabs .fi-tabs-item[aria-selected='true'] {
+    @apply border-amber-400/30 bg-gradient-to-r from-amber-500/20 to-indigo-500/10 text-amber-100;
+}
+
+.admin-form-tabs > .fi-tabs .fi-tabs-item .fi-icon {
+    @apply text-amber-700/80;
+}
+
+.dark .admin-form-tabs > .fi-tabs .fi-tabs-item .fi-icon {
+    @apply text-amber-300/80;
+}
+
+.admin-form-tabs > .fi-sc-tabs-tab {
+    @apply min-w-0 rounded-[1.35rem];
+}
+
+.resource-form-tabs > .fi-sc-tabs-tab + .fi-sc-tabs-tab,
+.resource-form-tabs > div[x-show] + div[x-show] {
+    @apply mt-0;
+}
+
+@media (max-width: 1023px) {
+    .admin-form-tabs.fi-sc-tabs.fi-vertical {
+        @apply grid-cols-1;
+    }
+
+    .admin-form-tabs > .fi-tabs {
+        @apply sticky z-[2] flex gap-1.5 overflow-x-auto overscroll-x-contain rounded-2xl p-1.5;
+        top: calc(3.5rem + env(safe-area-inset-top, 0px));
+        scroll-padding-inline: max(0.75rem, env(safe-area-inset-left)) max(0.75rem, env(safe-area-inset-right));
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .admin-form-tabs > .fi-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .admin-form-tabs > .fi-tabs .fi-tabs-item {
+        @apply min-h-11 w-auto shrink-0 whitespace-nowrap px-3.5 py-2.5;
+    }
+
+    .fi-sidebar-group-btn,
+    .fi-sidebar-item-button {
+        @apply min-h-11;
+    }
+
+    .fi-sidebar-nav {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+}
+
+@media (max-width: 639px) {
+    .service-form-section--schedule .fi-fo-toggle-buttons-btn {
+        @apply min-h-[3.5rem];
     }
 }

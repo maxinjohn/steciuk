@@ -23,7 +23,7 @@ class MenuItemResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Website;
 
-    protected static ?string $navigationLabel = 'Menus & Links';
+    protected static ?string $navigationLabel = 'Menus & links';
 
     protected static ?string $modelLabel = 'Menu Item';
 

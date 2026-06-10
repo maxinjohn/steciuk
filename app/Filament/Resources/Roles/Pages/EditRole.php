@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Roles\Pages;
 
+use App\Enums\AdminPermission;
 use App\Filament\Resources\Roles\RoleResource;
+use App\Models\Setting;
 use App\Services\PermissionService;
 use App\Services\SecurityLogger;
 use Filament\Actions\DeleteAction;
@@ -44,7 +46,7 @@ class EditRole extends EditRecord
             ->map(fn () => true)
             ->all();
 
-        $labels = array_keys(\App\Enums\AdminPermission::labels());
+        $labels = array_keys(AdminPermission::labels());
         $matrix = [
             $this->record->slug => collect($labels)
                 ->mapWithKeys(fn (string $key) => [$key => isset($selected[$key])])
@@ -52,7 +54,7 @@ class EditRole extends EditRecord
         ];
 
         app(PermissionService::class)->saveRolePermissions($matrix);
-        \App\Models\Setting::forgetCache();
+        Setting::forgetCache();
 
         SecurityLogger::info('role_permissions_updated', auth()->id(), [
             'role' => $this->record->slug,

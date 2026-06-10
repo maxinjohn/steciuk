@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LeadershipMember;
 use App\Models\Page;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -26,10 +25,6 @@ class PageController extends Controller
             default => 'pages.show',
         };
 
-        $leadershipMembers = $page->slug === 'leadership'
-            ? LeadershipMember::query()->where('is_visible', true)->orderBy('sort_order')->get()
-            : collect();
-
-        return view($template, compact('page', 'leadershipMembers'));
+        return view($template, compact('page'));
     }
 }

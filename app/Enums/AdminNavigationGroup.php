@@ -10,23 +10,27 @@ use Filament\Support\Icons\Heroicon;
 enum AdminNavigationGroup: string implements Collapsible, HasIcon, HasLabel
 {
     case Overview = 'overview';
+    case People = 'people';
+    case Giving = 'giving';
+    case Messages = 'messages';
     case Website = 'website';
     case Worship = 'worship';
     case Media = 'media';
-    case Messages = 'messages';
     case SiteSettings = 'site_settings';
-    case TeamSecurity = 'team_security';
+    case Security = 'security';
 
     public function getLabel(): string
     {
         return match ($this) {
             self::Overview => 'Overview',
-            self::Website => 'Website Content',
-            self::Worship => 'Worship & Parish',
-            self::Media => 'Photos & Media',
-            self::Messages => 'Messages & Forms',
-            self::SiteSettings => 'Site Settings',
-            self::TeamSecurity => 'Team & Security',
+            self::People => 'People & households',
+            self::Giving => 'Giving & donations',
+            self::Messages => 'Messages & forms',
+            self::Website => 'Website content',
+            self::Worship => 'Worship & parish',
+            self::Media => 'Photos & media',
+            self::SiteSettings => 'Site settings',
+            self::Security => 'Security & access',
         };
     }
 
@@ -34,12 +38,14 @@ enum AdminNavigationGroup: string implements Collapsible, HasIcon, HasLabel
     {
         return match ($this) {
             self::Overview => Heroicon::OutlinedHomeModern,
+            self::People => Heroicon::OutlinedUserGroup,
+            self::Giving => Heroicon::OutlinedBanknotes,
+            self::Messages => Heroicon::OutlinedInbox,
             self::Website => Heroicon::OutlinedDocumentText,
             self::Worship => Heroicon::OutlinedBuildingLibrary,
             self::Media => Heroicon::OutlinedPhoto,
-            self::Messages => Heroicon::OutlinedInbox,
             self::SiteSettings => Heroicon::OutlinedCog6Tooth,
-            self::TeamSecurity => Heroicon::OutlinedShieldCheck,
+            self::Security => Heroicon::OutlinedShieldCheck,
         };
     }
 

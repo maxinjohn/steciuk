@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\AccountStatus;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Support\SeedConfig;
@@ -39,6 +40,13 @@ class SiteEnsureAdminCommand extends Command
             'role' => UserRole::SuperAdmin,
             'email_verified_at' => $user->email_verified_at ?? now(),
         ]);
+
+        if (Schema::hasColumn('users', 'account_status')) {
+            $user->fill([
+                'account_status' => AccountStatus::Approved->value,
+                'approved_at' => $user->approved_at ?? now(),
+            ]);
+        }
 
         $shouldResetPassword = $this->option('reset-password')
             || ! $user->exists

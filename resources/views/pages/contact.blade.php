@@ -12,10 +12,10 @@
         scripture-ref="Psalm 145:18"
     />
 
-    <section class="page-section py-10 sm:py-14">
-        <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid gap-12 lg:grid-cols-5">
-                <div class="lg:col-span-2 space-y-6">
+    <section class="page-section py-8 sm:py-14">
+        <div class="page-section-inner mx-auto max-w-7xl">
+            <div class="contact-layout grid gap-8 lg:grid-cols-5 lg:gap-12">
+                <div class="lg:col-span-2 space-y-5 sm:space-y-6">
                     <x-card class="contact-office-card">
                         <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand">We are here for you</p>
                         <h2 class="mt-2 font-bold text-2xl font-semibold text-ink">{{ $contactOfficeHeading }}</h2>
@@ -42,12 +42,15 @@
                             @if ($charityNumber)
                                 <li class="flex gap-3 text-sm">
                                     <span class="mt-0.5 font-semibold text-brand">Charity</span>
-                                    <span>{{ $charityNumber }}</span>
+                                    <span>
+                                        {{ $charityNumber }} ·
+                                        <a href="https://register-of-charities.charitycommission.gov.uk/en/charity-search/-/charity-details/5016600" class="text-brand hover:underline" target="_blank" rel="noopener noreferrer">Charity Commission</a>
+                                    </span>
                                 </li>
                             @endif
                         </ul>
 
-                        <div class="mt-8 flex flex-wrap gap-3">
+                        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                             <x-button href="{{ url('/prayer-request') }}" variant="outline" class="!text-sm">Submit a Prayer Request</x-button>
                             <x-button href="{{ url('/service-times') }}" variant="outline" class="!text-sm">Service Times</x-button>
                         </div>
@@ -95,7 +98,7 @@
             </div>
 
             @if ($googleMapsEmbed)
-                <div class="mt-12 overflow-hidden rounded-2xl shadow-lg ring-1 border border-[var(--site-border)]">
+                <div class="contact-map mt-8 overflow-hidden rounded-2xl shadow-lg ring-1 border border-[var(--site-border)] sm:mt-12">
                     <div class="aspect-video [&>iframe]:h-full [&>iframe]:w-full">{!! safeEmbed($googleMapsEmbed) !!}</div>
                 </div>
             @endif

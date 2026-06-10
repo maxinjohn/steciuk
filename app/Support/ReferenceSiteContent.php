@@ -40,6 +40,30 @@ class ReferenceSiteContent
                 'value' => self::CHARITY_NUMBER,
                 'group' => 'contact',
             ],
+            'contact_address_line_1' => [
+                'value' => '',
+                'group' => 'contact',
+            ],
+            'contact_address_line_2' => [
+                'value' => '',
+                'group' => 'contact',
+            ],
+            'contact_city' => [
+                'value' => '',
+                'group' => 'contact',
+            ],
+            'contact_county' => [
+                'value' => '',
+                'group' => 'contact',
+            ],
+            'contact_postcode' => [
+                'value' => '',
+                'group' => 'contact',
+            ],
+            'contact_country' => [
+                'value' => 'United Kingdom',
+                'group' => 'contact',
+            ],
             'main_address' => [
                 'value' => 'United Kingdom',
                 'group' => 'contact',
@@ -49,7 +73,7 @@ class ReferenceSiteContent
                 'group' => 'general',
             ],
             'gospel_reminder_kicker' => [
-                'value' => 'For the Word of God · and the testimony of Jesus Christ',
+                'value' => 'STECI worldwide motto',
                 'group' => 'general',
             ],
             'seo_default_title' => [
@@ -319,6 +343,7 @@ class ReferenceSiteContent
                 'children' => [
                     ['label' => 'Contact Us', 'slug' => 'contact', 'seed_key' => 'contact.contact-us'],
                     ['label' => 'Prayer Request', 'slug' => 'prayer-request', 'seed_key' => 'contact.prayer-request'],
+                    ['label' => 'Register', 'slug' => 'register', 'seed_key' => 'contact.register'],
                     ['label' => 'New Member', 'slug' => 'new-member', 'seed_key' => 'contact.new-member'],
                 ],
             ],
@@ -414,9 +439,7 @@ class ReferenceSiteContent
 
 <p>Our parish serves approximately <strong>ninety families</strong> spread across the United Kingdom, gathering for <strong>monthly worship</strong> at five locations: <strong>Manchester, Leicester, Dartford, Sunderland, and Bristol</strong>. Church members attend services <strong>both in person and online</strong>. Though geographically dispersed, we are united by our faith in Jesus Christ, our commitment to the authority of the Holy Bible, and our heritage in the Saint Thomas Christian tradition of Kerala, India.</p>
 
-<p>The <strong>St. Thomas Evangelical Church of India</strong> was founded on <strong>26 January 1961</strong> and is headquartered at <strong>Manjadi, Thiruvalla, Kerala</strong>. STECI is an evangelical <strong>Oriental Protestant</strong> church in the Saint Thomas Syrian Christian tradition — episcopal in church order, democratic in governance, and missionary in calling. The UK Parish is a registered charity (No. <strong>1143030</strong>) and a <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" target="_blank" rel="noopener noreferrer">member of the Evangelical Alliance</a>.</p>
-
-<p>Whether you are exploring Christianity for the first time, reconnecting with your faith, or seeking a spiritual home within the Saint Thomas Christian tradition, you are warmly welcome. Please explore our service times, ministries, and events — or <a href="/contact">contact us</a> directly. We would love to hear from you.</p>
+<p>Whether you are exploring Christianity for the first time, reconnecting with your faith, or seeking a spiritual home within the Saint Thomas Christian tradition, you are warmly welcome. Please explore our <a href="/service-times">service times</a>, <a href="/ministries">ministries</a>, and <a href="/events">events</a> — or read about <a href="/our-church">what we believe</a> and <a href="/steci-heritage">STECI heritage</a>. We would love to hear from you through our <a href="/contact">contact page</a>.</p>
 
 <p><em>"For the Word of God and for the testimony of Jesus Christ."</em> — Revelation 1:9</p>
 HTML;
@@ -590,9 +613,9 @@ HTML;
 <li><a href="/womens-fellowship">Women's Fellowship</a> — Prayer, fellowship, and service</li>
 <li><a href="/choir">Choir</a> — Leading worship through music</li>
 <li><a href="/prayer-groups">Prayer Groups</a> — United intercession across the UK</li>
-<li>Evangelism &amp; Mission — Gospel outreach and mission support</li>
-<li>Pastoral Care — Spiritual support for families</li>
-<li>Community Fellowship — Building friendships between worship gatherings</li>
+<li><a href="/ministries/evangelism-mission">Evangelism &amp; Mission</a> — Gospel outreach and mission support</li>
+<li><a href="/ministries/pastoral-care">Pastoral Care</a> — Spiritual support for families</li>
+<li><a href="/ministries/community-fellowship">Community Fellowship</a> — Building friendships between worship gatherings</li>
 </ul>
 HTML;
     }
@@ -724,18 +747,11 @@ HTML;
     {
         return <<<'HTML'
 <h2>Get in Touch</h2>
-<p>We would love to hear from you. Whether you have a question about monthly worship, want pastoral support, or are interested in joining our parish, please reach out using the contact form below or the details listed.</p>
+<p>We would love to hear from you. Whether you have a question about monthly worship, want pastoral support, or are interested in joining our parish, please use the contact form or the parish office details shown on this page.</p>
 
-<h3>Parish Office</h3>
-<p><strong>Email:</strong> <a href="mailto:admin@steciuk.org">admin@steciuk.org</a><br>
-<strong>Phone:</strong> 07578 189530<br>
-<strong>Charity No:</strong> 1143030<br>
-<strong>Registered with:</strong> <a href="https://register-of-charities.charitycommission.gov.uk/en/charity-search/-/charity-details/5016600" target="_blank" rel="noopener noreferrer">Charity Commission for England &amp; Wales</a><br>
-<strong>Evangelical Alliance:</strong> <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" target="_blank" rel="noopener noreferrer">Member church listing</a><br>
-<strong>Address:</strong> United Kingdom</p>
+<p>Our UK Parish gathers for monthly worship in <strong>Manchester, Leicester, Dartford, Sunderland, and Bristol</strong>. For current dates and venues, visit <a href="/service-times">Service Times</a>.</p>
 
-<h3>Monthly Worship Locations</h3>
-<p>Manchester · Leicester · Dartford · Sunderland · Bristol</p>
+<p>We are a registered charity (No. <strong>1143030</strong>) and a <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" target="_blank" rel="noopener noreferrer">member of the Evangelical Alliance</a>.</p>
 HTML;
     }
 
@@ -752,7 +768,7 @@ HTML;
     {
         return <<<'HTML'
 <h2>Register as a New Member</h2>
-<p>Welcome! If you would like to join the St. Thomas Evangelical Church of India – UK Parish, please complete the registration form below. A member of our leadership team will be in touch to welcome you and help you connect with worship and fellowship in your area.</p>
+<p>Welcome! If you would like to join the St. Thomas Evangelical Church of India – UK Parish, you can <a href="/register">create a parish member account</a> with your UK address and worship location, or complete the enquiry form below if you prefer to speak with the leadership team first.</p>
 <p>Membership is open to those who profess faith in Jesus Christ and wish to participate in the life and mission of our parish.</p>
 HTML;
     }
@@ -761,30 +777,73 @@ HTML;
     {
         return <<<'HTML'
 <h2>Privacy Policy</h2>
-<p><em>Last updated: placeholder — please review with legal counsel before publication.</em></p>
+<p><em>Last updated: June 2026 (version 2026-06-v2).</em></p>
 
-<h3>Who We Are</h3>
-<p>The St. Thomas Evangelical Church of India – UK Parish (Registered Charity No. 1143030) operates the website steciuk.org.</p>
+<h3>Who we are</h3>
+<p>The <strong>St. Thomas Evangelical Church of India – UK Parish</strong> (Registered Charity No. 1143030) is the data controller for personal data collected through steciuk.org and our parish membership systems. For data protection enquiries contact <a href="mailto:admin@steciuk.org">admin@steciuk.org</a>.</p>
 
-<h3>Information We Collect</h3>
-<p>We may collect personal information when you submit contact forms, prayer requests, membership registrations, or event enquiries. This may include your name, email address, phone number, and any information you choose to provide.</p>
-
-<h3>How We Use Your Information</h3>
+<h3>What personal data we collect</h3>
+<p>Depending on how you interact with us, we may collect:</p>
 <ul>
-<li>To respond to your enquiries and requests</li>
-<li>To provide pastoral care and parish communications</li>
-<li>To administer events and membership</li>
-<li>To improve our website and services</li>
+<li><strong>Account & membership:</strong> name, email, phone, date of birth, UK address, preferred worship location, profile photo, family/household relationship, and account status.</li>
+<li><strong>Household members:</strong> names and details of spouses, children, and other household members you register or manage (including children without email addresses).</li>
+<li><strong>Giving records:</strong> donation amounts, dates, payment method, bank references, and optional notes (for example Gift Aid declarations).</li>
+<li><strong>Website forms:</strong> contact enquiries, prayer requests, and new member enquiries you submit voluntarily.</li>
+<li><strong>Technical data:</strong> IP address and security logs when you register, sign in, or use protected areas of the site.</li>
 </ul>
 
-<h3>Data Security</h3>
-<p>We take appropriate measures to protect your personal data. We do not sell or share your information with third parties for marketing purposes.</p>
+<h3>How and why we use your data (lawful bases)</h3>
+<p>Under UK GDPR and the Data Protection Act 2018 we rely on the following lawful bases:</p>
+<ul>
+<li><strong>Contract / steps at your request:</strong> creating and administering your parish member account, household profiles, and portal access.</li>
+<li><strong>Legitimate interests:</strong> parish administration, pastoral care, communications about worship and parish life, fraud prevention, and keeping our community safe — balanced against your rights.</li>
+<li><strong>Legal obligation:</strong> charity accounting, Gift Aid and financial record-keeping, and responding to lawful requests from regulators.</li>
+<li><strong>Consent:</strong> optional marketing emails about parish news and events; you may withdraw consent at any time in your account or by emailing us.</li>
+</ul>
+<p>Where you register household members (including children), we process their data on the basis that you have authority to provide it and have confirmed this when registering or adding them.</p>
 
-<h3>Your Rights</h3>
-<p>Under UK data protection law, you have rights to access, correct, or request deletion of your personal data. Contact <a href="mailto:admin@steciuk.org">admin@steciuk.org</a> to exercise these rights.</p>
+<h3>Children</h3>
+<p>Children may be listed on a family account by a parent or guardian with parish approval. We collect only what is needed for parish membership and pastoral care. Children without their own email are not given independent login access unless approved separately.</p>
+
+<h3>Who we share data with</h3>
+<p>We do not sell personal data. We may share limited information with:</p>
+<ul>
+<li>Parish leadership and authorised administrators who need it for membership, pastoral care, or finance.</li>
+<li>Service providers who host or support our website (under data processing agreements).</li>
+<li>HMRC, auditors, or regulators where required by law (for example Gift Aid or charity reporting).</li>
+</ul>
+
+<h3>International transfers</h3>
+<p>Our website and email services may use providers outside the UK. Where this occurs, we ensure appropriate safeguards (such as UK adequacy regulations or standard contractual clauses) are in place.</p>
+
+<h3>How long we keep data</h3>
+<ul>
+<li><strong>Inactive member accounts:</strong> reviewed after 24 months of inactivity; we may anonymise or delete data that is no longer needed.</li>
+<li><strong>Giving & finance records:</strong> retained for at least 6 years to meet UK charity and tax requirements; amounts may be kept in anonymised form after account deletion.</li>
+<li><strong>Form submissions:</strong> typically retained for up to 24 months unless a longer period is needed for pastoral follow-up.</li>
+<li><strong>Security logs:</strong> kept for a limited period for fraud prevention and audit.</li>
+</ul>
+
+<h3>Your rights</h3>
+<p>You have the right to:</p>
+<ul>
+<li>Access a copy of your personal data (download available in your member account).</li>
+<li>Rectify inaccurate data (update your profile or contact us).</li>
+<li>Request erasure in certain circumstances (request deletion in your account; some financial records may be retained in anonymised form where the law requires).</li>
+<li>Restrict or object to processing in certain cases.</li>
+<li>Withdraw marketing consent at any time.</li>
+<li>Lodge a complaint with the <a href="https://ico.org.uk/make-a-complaint/" target="_blank" rel="noopener noreferrer">Information Commissioner's Office (ICO)</a>.</li>
+</ul>
+<p>To exercise your rights, sign in to your account or email <a href="mailto:admin@steciuk.org">admin@steciuk.org</a>. We will respond within one month.</p>
+
+<h3>Security</h3>
+<p>We use access controls, encryption in transit, approval workflows, and audit logging to protect personal data. Only authorised parish staff can access member and giving records.</p>
 
 <h3>Cookies</h3>
-<p>This website may use essential cookies for functionality. Analytics cookies, if used, will be disclosed here.</p>
+<p>Essential cookies and session storage are used so you can sign in and use the member portal. If we introduce non-essential analytics cookies, we will update this policy and ask for consent where required.</p>
+
+<h3>Changes</h3>
+<p>We may update this policy when our practices or the law change. Material changes will be reflected on this page with a new version date; continued use of member services after notice may require renewed consent where applicable.</p>
 HTML;
     }
 
@@ -792,7 +851,7 @@ HTML;
     {
         return <<<'HTML'
 <h2>Terms of Use</h2>
-<p><em>Last updated: placeholder — please review with legal counsel before publication.</em></p>
+<p><em>Last updated: June 2026.</em></p>
 
 <h3>Acceptance of Terms</h3>
 <p>By accessing steciuk.org, you agree to these terms of use. If you do not agree, please do not use this website.</p>

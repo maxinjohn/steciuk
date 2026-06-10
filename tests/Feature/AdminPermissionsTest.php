@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\AdminPermission;
 use App\Enums\UserRole;
 use App\Models\Page;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\PermissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,14 +15,70 @@ class AdminPermissionsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_viewer_can_access_admin_with_read_only_permissions(): void
+    public function test_admin_has_full_panel_permissions(): void
     {
-        $viewer = User::factory()->create(['role' => UserRole::Viewer]);
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
         $service = app(PermissionService::class);
 
-        $this->assertTrue($service->canAccessAdmin($viewer));
-        $this->assertTrue($service->can($viewer, AdminPermission::PagesViewAny));
-        $this->assertFalse($service->can($viewer, AdminPermission::PagesCreate));
+        $this->assertTrue($service->canAccessAdmin($admin));
+        $this->assertTrue($service->can($admin, AdminPermission::SettingsPermissions));
+        $this->assertTrue($service->can($admin, AdminPermission::UsersCreate));
+        $this->assertTrue($service->can($admin, AdminPermission::PagesCreate));
+    }
+
+    public function test_admin_cannot_change_own_role(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+
+        $this->actingAs($admin);
+
+        $admin->role = UserRole::Member->value;
+        $admin->save();
+
+        $admin->refresh();
+
+        $this->assertSame(UserRole::Admin->value, $admin->roleSlug());
+        $this->assertFalse($admin->canChangeRoleOf($admin));
+    }
+
+    public function test_admin_cannot_assign_super_admin_role(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $member = User::factory()->create(['role' => UserRole::Member]);
+
+        $this->actingAs($admin);
+
+        $member->role = UserRole::SuperAdmin->value;
+        $member->save();
+
+        $member->refresh();
+
+        $this->assertSame(UserRole::Member->value, $member->roleSlug());
+    }
+
+    public function test_super_admin_can_assign_super_admin_role(): void
+    {
+        $superAdmin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        $member = User::factory()->create(['role' => UserRole::Member]);
+
+        $this->actingAs($superAdmin);
+
+        $member->role = UserRole::SuperAdmin->value;
+        $member->save();
+
+        $member->refresh();
+
+        $this->assertSame(UserRole::SuperAdmin->value, $member->roleSlug());
+    }
+
+    public function test_admin_cannot_manage_super_admin_account(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $superAdmin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+
+        $this->assertFalse($admin->can('update', $superAdmin));
+        $this->assertFalse($admin->can('delete', $superAdmin));
+        $this->assertTrue($admin->can('view', $superAdmin));
     }
 
     public function test_editor_defaults_allow_content_management(): void
@@ -36,10 +93,10 @@ class AdminPermissionsTest extends TestCase
         $this->assertFalse($service->can($editor, AdminPermission::SettingsPermissions));
     }
 
-    public function test_page_mutations_require_super_admin(): void
+    public function test_page_mutations_require_elevated_access(): void
     {
         $editor = User::factory()->create(['role' => UserRole::Editor]);
-        $viewer = User::factory()->create(['role' => UserRole::Viewer]);
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
         $superAdmin = User::factory()->create(['role' => UserRole::SuperAdmin]);
         $page = Page::factory()->create();
 
@@ -47,8 +104,8 @@ class AdminPermissionsTest extends TestCase
         $this->assertFalse($editor->can('update', $page));
         $this->assertFalse($editor->can('delete', $page));
 
-        $this->assertFalse($viewer->can('update', $page));
-        $this->assertTrue($viewer->can('view', $page));
+        $this->assertTrue($admin->can('update', $page));
+        $this->assertTrue($admin->can('delete', $page));
 
         $this->assertTrue($superAdmin->can('update', $page));
         $this->assertTrue($superAdmin->can('delete', $page));
@@ -71,7 +128,7 @@ class AdminPermissionsTest extends TestCase
             UserRole::Editor->value => $permissions,
         ]);
 
-        \App\Models\Setting::forgetCache();
+        Setting::forgetCache();
 
         $this->assertFalse(app(PermissionService::class)->can($editor, AdminPermission::PagesCreate));
     }

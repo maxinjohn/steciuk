@@ -9,7 +9,7 @@
             title="Holy Communion & Worship"
             subtitle="Monthly evangelical Oriental Protestant worship across five UK cities"
             kicker="Plan your visit"
-            scripture="God is spirit, and his worshipers must worship in the Spirit and in truth."
+            scripture="God is spirit, and his worshippers must worship in the Spirit and in truth."
             scripture-ref="John 4:24"
         />
         <x-worship-rhythm />
@@ -18,6 +18,7 @@
             <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="location-grid">
                     @forelse ($services as $service)
+                        @php($schedule = $service->publicScheduleBlocks())
                         <x-card class="location-card">
                             <div class="location-card-header">
                                 <div class="location-card-icon" aria-hidden="true">
@@ -26,6 +27,9 @@
                                 <div class="min-w-0 flex-1">
                                     <span class="feed-sticker feed-sticker--inline">{{ $service->location ?: 'UK Location' }}</span>
                                     <h2 class="location-card-title">{{ $service->title }}</h2>
+                                    @if ($service->language)
+                                        <p class="location-card-language">{{ $service->language }}</p>
+                                    @endif
                                 </div>
                             </div>
 
@@ -34,19 +38,49 @@
                             @endif
 
                             <dl class="location-card-meta">
-                                @if ($service->service_day || $service->service_time)
+                                @if ($schedule['date_lines'] !== [] || $schedule['headline'] || $schedule['details'] !== [])
                                     <div class="location-meta-item">
                                         <dt>When</dt>
-                                        <dd>{{ trim(($service->service_day ?? '') . ' · ' . ($service->service_time ?? ''), ' ·') }}</dd>
-                                        @if ($service->frequency)
-                                            <dd class="location-meta-sub">{{ $service->frequency }}</dd>
+                                        @if ($schedule['date_lines'] !== [])
+                                            <dd>
+                                                <ul class="location-date-list">
+                                                    @foreach ($schedule['date_lines'] as $dateLine)
+                                                        <li>{{ $dateLine }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </dd>
+                                        @else
+                                            <dd class="location-schedule-line">
+                                                {{ collect([$schedule['headline'], ...$schedule['details']])->filter()->implode(' · ') }}
+                                            </dd>
+                                            @if ($schedule['frequency'])
+                                                <dd class="location-meta-sub">{{ $schedule['frequency'] }}</dd>
+                                            @endif
                                         @endif
                                     </div>
                                 @endif
-                                @if ($service->address)
+                                @if ($service->formattedAddress())
                                     <div class="location-meta-item location-meta-item--wide">
                                         <dt>Address</dt>
-                                        <dd>{{ $service->address }}</dd>
+                                        <dd class="location-address-line">{{ $service->formattedAddress() }}</dd>
+                                    </div>
+                                @endif
+                                @if ($service->contact_person || $service->contact_email || $service->contact_phone)
+                                    <div class="location-meta-item">
+                                        <dt>Contact</dt>
+                                        @if ($service->contact_person)
+                                            <dd>{{ $service->contact_person }}</dd>
+                                        @endif
+                                        @if ($service->contact_email)
+                                            <dd class="location-meta-sub">
+                                                <a href="mailto:{{ $service->contact_email }}" class="location-contact-link">{{ $service->contact_email }}</a>
+                                            </dd>
+                                        @endif
+                                        @if ($service->contact_phone)
+                                            <dd class="location-meta-sub">
+                                                <a href="tel:{{ preg_replace('/\s+/', '', $service->contact_phone) }}" class="location-contact-link">{{ $service->contact_phone }}</a>
+                                            </dd>
+                                        @endif
                                     </div>
                                 @endif
                             </dl>

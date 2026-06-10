@@ -4,7 +4,8 @@ namespace App\Filament\Resources\Resources\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
+use App\Filament\Support\CompactTableActions;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -43,8 +44,8 @@ class ResourcesTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
-            ])
+                CompactTableActions::editButton(),
+            ], RecordActionsPosition::AfterColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

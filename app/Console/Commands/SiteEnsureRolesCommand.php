@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Role;
+use App\Models\Setting;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
@@ -35,9 +36,9 @@ class SiteEnsureRolesCommand extends Command
             '--force' => $this->option('force') || app()->environment('production'),
         ]);
 
-        \App\Models\Setting::forgetCache();
+        Setting::forgetCache();
 
-        $this->components->info('Built-in roles created: Super Admin, Editor, Viewer.');
+        $this->components->info('Built-in roles created: Super Admin, Admin, Editor, Member.');
 
         return self::SUCCESS;
     }

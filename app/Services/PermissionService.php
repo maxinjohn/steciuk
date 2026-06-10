@@ -12,7 +12,6 @@ use App\Policies\EventPolicy;
 use App\Policies\FormSubmissionPolicy;
 use App\Policies\GalleryAlbumPolicy;
 use App\Policies\GalleryPhotoPolicy;
-use App\Policies\LeadershipMemberPolicy;
 use App\Policies\MenuItemPolicy;
 use App\Policies\MinistryPolicy;
 use App\Policies\NewsPolicy;
@@ -21,6 +20,7 @@ use App\Policies\ResourcePolicy;
 use App\Policies\SermonPolicy;
 use App\Policies\ServicePolicy;
 use App\Policies\UserPolicy;
+use Illuminate\Support\Facades\Schema;
 
 class PermissionService
 {
@@ -40,7 +40,6 @@ class PermissionService
         GalleryAlbumPolicy::class => 'gallery_albums',
         GalleryPhotoPolicy::class => 'gallery_photos',
         ResourcePolicy::class => 'parish_resources',
-        LeadershipMemberPolicy::class => 'leadership_members',
         ServicePolicy::class => 'services',
         FormSubmissionPolicy::class => 'form_submissions',
         UserPolicy::class => 'users',
@@ -53,7 +52,7 @@ class PermissionService
 
     public function can(User $user, AdminPermission|string $permission): bool
     {
-        if ($user->isSuperAdmin()) {
+        if ($user->hasFullPanelAccess()) {
             return true;
         }
 
@@ -123,16 +122,17 @@ class PermissionService
      */
     public function manageableRoleSlugs(): array
     {
-        if (! \Illuminate\Support\Facades\Schema::hasTable('roles')) {
-            return [UserRole::Editor->value, UserRole::Viewer->value];
+        if (! Schema::hasTable('roles')) {
+            return [UserRole::Editor->value, UserRole::Admin->value];
         }
 
         return Role::query()
             ->where('grants_full_access', false)
+            ->whereNotIn('slug', [UserRole::Member->value])
             ->orderBy('sort_order')
             ->orderBy('name')
             ->pluck('slug')
-            ->all() ?: [UserRole::Editor->value, UserRole::Viewer->value];
+            ->all() ?: [UserRole::Editor->value, UserRole::Admin->value];
     }
 
     /**
@@ -148,12 +148,16 @@ class PermissionService
             return collect($all)->map(fn () => true)->all();
         }
 
+        if ($role === UserRole::Admin->value) {
+            return collect($all)->map(fn () => true)->all();
+        }
+
         if ($role === UserRole::Editor->value) {
             return array_merge($all, $this->editorDefaults());
         }
 
-        if ($role === UserRole::Viewer->value) {
-            return array_merge($all, $this->viewerDefaults());
+        if ($role === UserRole::Member->value) {
+            return $all;
         }
 
         return $all;
@@ -180,7 +184,7 @@ class PermissionService
             AdminPermission::SettingsChurch->value => true,
         ];
 
-        foreach (['pages', 'events', 'news', 'sermons', 'ministries', 'menu_items', 'content_blocks', 'gallery_albums', 'gallery_photos', 'parish_resources', 'leadership_members', 'services'] as $resource) {
+        foreach (['pages', 'events', 'news', 'sermons', 'ministries', 'menu_items', 'content_blocks', 'gallery_albums', 'gallery_photos', 'parish_resources', 'services'] as $resource) {
             foreach (['viewAny', 'view', 'create', 'update', 'delete', 'restore'] as $action) {
                 $enabled["{$resource}.{$action}"] = true;
             }
@@ -188,23 +192,6 @@ class PermissionService
 
         foreach (['viewAny', 'view', 'update', 'delete'] as $action) {
             $enabled["form_submissions.{$action}"] = true;
-        }
-
-        return $enabled;
-    }
-
-    /**
-     * @return array<string, bool>
-     */
-    private function viewerDefaults(): array
-    {
-        $enabled = [
-            AdminPermission::AdminAccess->value => true,
-        ];
-
-        foreach (['pages', 'events', 'news', 'sermons', 'ministries', 'menu_items', 'content_blocks', 'gallery_albums', 'gallery_photos', 'parish_resources', 'leadership_members', 'services', 'form_submissions'] as $resource) {
-            $enabled["{$resource}.viewAny"] = true;
-            $enabled["{$resource}.view"] = true;
         }
 
         return $enabled;

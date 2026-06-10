@@ -76,7 +76,7 @@
                         role="menu"
                         data-menu-panel
                     >
-                        <div @class(['menu-mega-grid' => $useMega])>
+                        <div @class(['menu-dropdown-body menu-mega-grid' => $useMega, 'menu-dropdown-body' => ! $useMega])>
                             @foreach ($item->children as $child)
                                 <a
                                     href="{{ $resolveUrl($child) }}"

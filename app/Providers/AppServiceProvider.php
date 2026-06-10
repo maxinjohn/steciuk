@@ -2,13 +2,29 @@
 
 namespace App\Providers;
 
+use App\Filament\Auth\Login;
 use App\Http\Middleware\ThrottleAdminLogin;
+use App\Listeners\FilamentAdminAuditListener;
+use App\Models\User;
 use App\Services\MailConfigService;
+use App\Services\SecurityLogger;
 use App\Services\SqliteOptimizer;
 use App\Support\SitePaths;
+use Filament\Facades\Filament;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Resources\Events\RecordCreated;
+use Filament\Resources\Events\RecordUpdated;
+use Illuminate\Auth\Events\Attempting;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,20 +50,44 @@ class AppServiceProvider extends ServiceProvider
                 ->symbols();
         });
 
-        Gate::before(function ($user, $ability) {
-            return $user?->isSuperAdmin() ? true : null;
+        ResetPassword::createUrlUsing(function (object $notifiable, string $token): string {
+            return route('password.reset', [
+                'token' => $token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ]);
         });
 
-        \Illuminate\Support\Facades\Event::listen(
-            \Illuminate\Auth\Events\Attempting::class,
-            function (\Illuminate\Auth\Events\Attempting $event): void {
-                $email = \App\Filament\Auth\Login::normalizeEmail($event->credentials['email'] ?? '');
+        Gate::before(function ($user, $ability, $arguments) {
+            if (! $user instanceof User || ! $user->hasFullPanelAccess()) {
+                return null;
+            }
+
+            if ($user->isSuperAdmin()) {
+                return true;
+            }
+
+            $target = collect($arguments)->first(fn ($argument) => $argument instanceof User);
+
+            if ($target instanceof User && $target->isSuperAdmin()) {
+                return match ($ability) {
+                    'delete', 'forceDelete', 'update', 'restore' => false,
+                    default => true,
+                };
+            }
+
+            return true;
+        });
+
+        Event::listen(
+            Attempting::class,
+            function (Attempting $event): void {
+                $email = Login::normalizeEmail($event->credentials['email'] ?? '');
 
                 if (! ThrottleAdminLogin::isLocked(request(), $email !== '' ? $email : null)) {
                     return;
                 }
 
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'data.email' => ThrottleAdminLogin::lockoutMessage(
                         ThrottleAdminLogin::secondsUntilUnlocked(request(), $email !== '' ? $email : null),
                     ),
@@ -55,34 +95,38 @@ class AppServiceProvider extends ServiceProvider
             }
         );
 
-        \Illuminate\Support\Facades\Event::listen(
+        Event::listen(
             \Illuminate\Auth\Events\Login::class,
             function (\Illuminate\Auth\Events\Login $event): void {
                 if ($event->user) {
                     ThrottleAdminLogin::clear(
                         request(),
-                        \App\Filament\Auth\Login::normalizeEmail($event->user->email ?? ''),
+                        Login::normalizeEmail($event->user->email ?? ''),
                     );
                     session(['admin_last_activity' => time()]);
-                    \App\Services\SecurityLogger::info('user_login', $event->user->id);
+                    SecurityLogger::audit('user_login', actor: $event->user, context: [
+                        'portal' => SecurityLogger::adminPortalLabel(),
+                    ]);
                 }
             }
         );
 
-        \Illuminate\Support\Facades\Event::listen(
-            \Illuminate\Auth\Events\Failed::class,
-            function (\Illuminate\Auth\Events\Failed $event): void {
-                $email = \App\Filament\Auth\Login::normalizeEmail($event->credentials['email'] ?? '');
+        Event::listen(
+            Failed::class,
+            function (Failed $event): void {
+                $email = Login::normalizeEmail($event->credentials['email'] ?? '');
 
                 if (
-                    $event->user instanceof \Filament\Models\Contracts\FilamentUser
-                    && \Illuminate\Support\Facades\Hash::check($event->credentials['password'] ?? '', $event->user->password)
-                    && ! $event->user->canAccessPanel(\Filament\Facades\Filament::getCurrentOrDefaultPanel())
+                    $event->user instanceof FilamentUser
+                    && Hash::check($event->credentials['password'] ?? '', $event->user->password)
+                    && ! $event->user->canAccessPanel(Filament::getCurrentOrDefaultPanel())
                 ) {
                     request()->attributes->set('admin_login_panel_denied', true);
 
-                    \App\Services\SecurityLogger::warning('login_panel_denied', $event->user->id ?? null, [
+                    SecurityLogger::audit('login_panel_denied', 'warning', actor: $event->user instanceof User ? $event->user : null, context: [
                         'email' => $email !== '' ? $email : 'unknown',
+                        'target_user_id' => $event->user->id ?? null,
+                        'portal' => SecurityLogger::adminPortalLabel(),
                         'ip' => request()->ip(),
                     ]);
 
@@ -102,26 +146,39 @@ class AppServiceProvider extends ServiceProvider
                     ]);
                 }
 
-                \App\Services\SecurityLogger::warning('login_failed', null, [
+                SecurityLogger::warning('login_failed', null, [
                     'email' => $email !== '' ? $email : 'unknown',
+                    'portal' => SecurityLogger::detectPortal(),
                     'ip' => request()->ip(),
                 ]);
             }
         );
 
-        \Illuminate\Support\Facades\Event::listen(
-            \Illuminate\Auth\Events\Logout::class,
-            function (\Illuminate\Auth\Events\Logout $event): void {
+        Event::listen(
+            Logout::class,
+            function (Logout $event): void {
                 session()->forget('admin_last_activity');
 
                 if ($event->user) {
-                    \App\Services\SecurityLogger::info('user_logout', $event->user->id);
+                    SecurityLogger::audit('user_logout', actor: $event->user, context: [
+                        'portal' => SecurityLogger::detectPortal(),
+                    ]);
                 }
             }
         );
 
-        \Illuminate\Pagination\Paginator::defaultView('vendor.pagination.heavenly');
-        \Illuminate\Pagination\Paginator::defaultSimpleView('vendor.pagination.heavenly');
+        Paginator::defaultView('vendor.pagination.heavenly');
+        Paginator::defaultSimpleView('vendor.pagination.heavenly');
+
+        Event::listen(
+            RecordCreated::class,
+            [FilamentAdminAuditListener::class, 'recordCreated'],
+        );
+
+        Event::listen(
+            RecordUpdated::class,
+            [FilamentAdminAuditListener::class, 'recordUpdated'],
+        );
     }
 
     private function applyCustomDataPaths(): void

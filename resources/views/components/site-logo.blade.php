@@ -35,8 +35,8 @@
                 <span class="site-logo-row">Church of India</span>
             </span>
             <span class="hidden min-[520px]:inline lg:hidden">{{ $logoMain }}</span>
-            <span class="hidden lg:inline xl:hidden">STECI</span>
-            <span class="hidden xl:inline">{{ $logoMain }}</span>
+            <span class="hidden lg:inline 2xl:hidden">STECI</span>
+            <span class="hidden 2xl:inline">{{ $logoMain }}</span>
         </span>
         <span class="site-logo-sub">UK Parish</span>
     </span>

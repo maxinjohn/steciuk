@@ -49,7 +49,6 @@
         badge="UK Parish"
     />
     <x-parish-action-strip />
-    <x-evangelical-trust-bar />
 @endif
 
 @if ($page && $page->contentBlocks->isNotEmpty())

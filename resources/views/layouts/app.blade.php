@@ -40,10 +40,7 @@
             'url' => url('/'),
             'email' => $siteEmail ?: null,
             'telephone' => $sitePhone ?: null,
-            'address' => $siteAddress ? [
-                '@type' => 'PostalAddress',
-                'streetAddress' => $siteAddress,
-            ] : null,
+            'address' => $siteAddressSchema ?? null,
             'identifier' => $charityNumber ?: null,
             'sameAs' => array_values(array_filter([
                 $socialYoutube ?? null,
@@ -59,7 +56,10 @@
 
     @stack('head')
 </head>
-<body class="site-body site-mesh has-mobile-dock min-h-screen flex flex-col md:pb-0">
+<body @class([
+    'site-body site-mesh has-mobile-dock min-h-screen flex flex-col md:pb-0',
+    'is-home' => request()->routeIs('home'),
+])>
     @php
         $navMenu = ($mobileMenu ?? collect())->isNotEmpty() ? $mobileMenu : $headerMenu;
     @endphp
@@ -71,13 +71,13 @@
 
         <x-site-announcement />
 
-        <header class="site-header sticky top-0 z-[200] pt-safe">
+        <header id="site-header" class="site-header sticky top-0 z-[200] pt-safe">
             <div class="site-header-inner">
                 <a href="{{ route('home') }}" class="site-logo-link" aria-label="{{ $siteName }} — Home">
                     <x-site-logo />
                 </a>
 
-                <nav class="site-header-nav hidden md:flex md:justify-center" aria-label="Main navigation">
+                <nav class="site-header-nav hidden lg:flex lg:min-w-0 lg:items-center" aria-label="Main navigation">
                     <x-menu :items="$headerMenu" variant="desktop" />
                 </nav>
 
@@ -88,32 +88,46 @@
                     </button>
 
                     @if ($donationLink)
-                        <x-button href="{{ $donationLink }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm md:inline-flex" target="_blank" rel="noopener noreferrer">
+                        <x-button href="{{ $donationLink }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm lg:inline-flex" target="_blank" rel="noopener noreferrer">
                             Give
                         </x-button>
                     @else
-                        <x-button href="{{ url('/service-times') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm md:inline-flex">
+                        <x-button href="{{ url('/service-times') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm lg:inline-flex">
                             Visit
                         </x-button>
                     @endif
+
+                    @auth
+                        <a href="{{ route('account') }}" class="hidden lg:inline-flex items-center rounded-xl px-3 py-2 text-sm font-semibold text-[var(--site-ink)] transition hover:bg-[var(--site-surface)]">
+                            Account
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="hidden lg:inline-flex items-center rounded-xl px-3 py-2 text-sm font-semibold text-[var(--site-ink)] transition hover:bg-[var(--site-surface)]">
+                            Sign in
+                        </a>
+                    @endauth
                 </div>
             </div>
         </header>
 
         <div
             id="mobile-menu-overlay"
-            class="mobile-overlay fixed inset-0 z-[65] md:hidden"
+            class="mobile-overlay fixed md:hidden"
             aria-hidden="true"
         ></div>
 
         <nav
             id="mobile-menu"
-            class="mobile-sheet fixed z-[70] md:hidden"
+            class="mobile-sheet fixed md:hidden"
             aria-label="Mobile navigation"
             aria-hidden="true"
         >
             <div class="mobile-sheet-header">
-                <div>
+                <div class="min-w-0 flex-1">
+                    <span class="mobile-sheet-badge">
+                        <span class="mobile-sheet-badge-dot" aria-hidden="true"></span>
+                        UK Parish
+                    </span>
                     <p class="mobile-sheet-title">Parish menu</p>
                     <p class="mobile-sheet-subtitle">{{ $siteMotto }}</p>
                 </div>
@@ -175,6 +189,30 @@
                             </span>
                         </a>
                     @endif
+                    @auth
+                        <a href="{{ route('account') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--navy">
+                            <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg></span>
+                            <span>
+                                <span class="mobile-quick-label">My Account</span>
+                                <span class="mobile-quick-desc">Profile & parish links</span>
+                            </span>
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--navy">
+                            <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg></span>
+                            <span>
+                                <span class="mobile-quick-label">Sign In</span>
+                                <span class="mobile-quick-desc">Member account</span>
+                            </span>
+                        </a>
+                        <a href="{{ route('register') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--gold">
+                            <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg></span>
+                            <span>
+                                <span class="mobile-quick-label">Register</span>
+                                <span class="mobile-quick-desc">Create parish account</span>
+                            </span>
+                        </a>
+                    @endauth
                 </div>
                 </div>
             </div>

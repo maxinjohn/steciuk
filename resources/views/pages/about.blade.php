@@ -12,22 +12,14 @@
         size="small"
     />
     <x-parish-action-strip class="!py-3" />
-    <x-evangelical-trust-bar />
 
-    @if ($page->slug === 'leadership')
-        <x-leadership-grid :members="$leadershipMembers ?? collect()" />
-    @endif
-
-    @if ($page->content && $page->slug !== 'leadership')
+    @if ($page->content)
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
             <div class="page-section-inner mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                <div class="prose-church prose-church--page">{!! safeHtml($page->content) !!}</div>
-            </div>
-        </section>
-    @elseif ($page->slug === 'leadership' && $page->content)
-        <section class="page-section page-section--article py-8 sm:py-10">
-            <div class="page-section-inner mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                <div class="prose-church prose-church--page prose-church--compact text-center">{!! safeHtml($page->content) !!}</div>
+                <div @class([
+                    'prose-church prose-church--page',
+                    'prose-church--compact sm:text-center' => $page->slug === 'leadership',
+                ])>{!! safeHtml($page->content) !!}</div>
             </div>
         </section>
     @endif

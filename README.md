@@ -10,7 +10,7 @@ Production-ready church website for **steciuk.org**, built with Laravel 13, Fila
 - **Mobile-first UI** — hero narrative, bento layouts, sticky dock navigation, gradient titles, PWA install
 - **Secure forms** — contact, prayer request, new member, event enquiry, volunteer (honeypot + rate limiting)
 - **SEO ready** — dynamic meta tags, Open Graph, JSON-LD, sitemap.xml, robots.txt
-- **Role-based admin** — Super Admin, Editor, Viewer roles with policies
+- **Role-based admin** — Super Admin, Admin, Editor, and Member roles with custom roles for limited access
 - **Migrate-driven reference content** — parish copy, menus, and services ship via `php artisan migrate`
 
 ## Requirements

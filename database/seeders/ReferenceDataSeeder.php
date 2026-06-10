@@ -24,7 +24,6 @@ class ReferenceDataSeeder extends Seeder
             SettingsSeeder::class,
             ServiceSeeder::class,
             MinistrySeeder::class,
-            LeadershipSeeder::class,
             PageSeeder::class,
             MenuSeeder::class,
             EventSeeder::class,

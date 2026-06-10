@@ -21,9 +21,9 @@ class RoleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
-    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::TeamSecurity;
+    protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::Security;
 
-    protected static ?string $navigationLabel = 'Roles & Permissions';
+    protected static ?string $navigationLabel = 'Roles';
 
     protected static ?string $modelLabel = 'Role';
 

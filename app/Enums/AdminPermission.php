@@ -86,14 +86,6 @@ enum AdminPermission: string
     case ParishResourcesRestore = 'parish_resources.restore';
     case ParishResourcesForceDelete = 'parish_resources.forceDelete';
 
-    case LeadershipMembersViewAny = 'leadership_members.viewAny';
-    case LeadershipMembersView = 'leadership_members.view';
-    case LeadershipMembersCreate = 'leadership_members.create';
-    case LeadershipMembersUpdate = 'leadership_members.update';
-    case LeadershipMembersDelete = 'leadership_members.delete';
-    case LeadershipMembersRestore = 'leadership_members.restore';
-    case LeadershipMembersForceDelete = 'leadership_members.forceDelete';
-
     case ServicesViewAny = 'services.viewAny';
     case ServicesView = 'services.view';
     case ServicesCreate = 'services.create';
@@ -207,13 +199,6 @@ enum AdminPermission: string
             self::ParishResourcesDelete => 'Parish resources — delete',
             self::ParishResourcesRestore => 'Parish resources — restore',
             self::ParishResourcesForceDelete => 'Parish resources — permanently delete',
-            self::LeadershipMembersViewAny => 'Leadership — list',
-            self::LeadershipMembersView => 'Leadership — view',
-            self::LeadershipMembersCreate => 'Leadership — create',
-            self::LeadershipMembersUpdate => 'Leadership — edit',
-            self::LeadershipMembersDelete => 'Leadership — delete',
-            self::LeadershipMembersRestore => 'Leadership — restore',
-            self::LeadershipMembersForceDelete => 'Leadership — permanently delete',
             self::ServicesViewAny => 'Services — list',
             self::ServicesView => 'Services — view',
             self::ServicesCreate => 'Services — create',
@@ -250,7 +235,7 @@ enum AdminPermission: string
         return [
             'Administration' => [self::AdminAccess, self::UsersViewAny, self::UsersView, self::UsersCreate, self::UsersUpdate, self::UsersDelete, self::UsersRestore, self::UsersForceDelete, self::SettingsChurch, self::SettingsMail, self::SettingsPermissions, self::SecurityAuditLog],
             'Pages & blocks' => array_values(array_filter(self::cases(), fn (self $p) => str_starts_with($p->value, 'pages.') || str_starts_with($p->value, 'content_blocks.') || str_starts_with($p->value, 'menu_items.'))),
-            'Worship & media' => array_values(array_filter(self::cases(), fn (self $p) => str_starts_with($p->value, 'events.') || str_starts_with($p->value, 'news.') || str_starts_with($p->value, 'sermons.') || str_starts_with($p->value, 'ministries.') || str_starts_with($p->value, 'services.') || str_starts_with($p->value, 'leadership_members.'))),
+            'Worship & media' => array_values(array_filter(self::cases(), fn (self $p) => str_starts_with($p->value, 'events.') || str_starts_with($p->value, 'news.') || str_starts_with($p->value, 'sermons.') || str_starts_with($p->value, 'ministries.') || str_starts_with($p->value, 'services.'))),
             'Gallery & resources' => array_values(array_filter(self::cases(), fn (self $p) => str_starts_with($p->value, 'gallery_') || str_starts_with($p->value, 'parish_resources.'))),
             'Forms' => array_values(array_filter(self::cases(), fn (self $p) => str_starts_with($p->value, 'form_submissions.'))),
         ];

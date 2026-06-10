@@ -15,7 +15,7 @@ class EditPage extends EditRecord
 {
     protected static string $resource = PageResource::class;
 
-    public function getSubheading(): string | Htmlable | null
+    public function getSubheading(): string|Htmlable|null
     {
         /** @var Page $page */
         $page = $this->getRecord();
@@ -41,11 +41,11 @@ class EditPage extends EditRecord
                 ->url(fn (): string => $this->getRecord()->publicUrl())
                 ->openUrlInNewTab(),
             DeleteAction::make()
-                ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
+                ->visible(fn (): bool => auth()->user()?->hasFullPanelAccess() ?? false),
             ForceDeleteAction::make()
-                ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
+                ->visible(fn (): bool => auth()->user()?->hasFullPanelAccess() ?? false),
             RestoreAction::make()
-                ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
+                ->visible(fn (): bool => auth()->user()?->hasFullPanelAccess() ?? false),
         ];
     }
 }

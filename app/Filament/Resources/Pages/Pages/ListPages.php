@@ -14,12 +14,12 @@ class ListPages extends ListRecords
 
     protected static ?string $title = 'Pages';
 
-    public function getHeading(): string | Htmlable
+    public function getHeading(): string|Htmlable
     {
         return static::$title ?? PageResource::getPluralModelLabel();
     }
 
-    public function getSubheading(): string | Htmlable | null
+    public function getSubheading(): string|Htmlable|null
     {
         return 'Manage site pages, URLs, and published content.';
     }

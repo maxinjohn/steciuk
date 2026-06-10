@@ -1,9 +1,25 @@
 <?php
 
+use App\Http\Middleware\AdminSessionTimeout;
+use App\Http\Middleware\BlockSuspiciousRequests;
+use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\CheckSiteMaintenance;
+use App\Http\Middleware\EnsureApprovedMemberAccount;
+use App\Http\Middleware\ForceHttps;
+use App\Http\Middleware\SecureHeaders;
+use App\Http\Middleware\ThrottlePublicForms;
+use App\Support\AdminPanelConfig;
+use App\Support\ErrorResponse;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,15 +29,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => \App\Http\Middleware\CheckRole::class,
+            'role' => CheckRole::class,
+            'member.approved' => EnsureApprovedMemberAccount::class,
         ]);
 
-        $middleware->prepend(\App\Http\Middleware\ForceHttps::class);
-        $middleware->prepend(\App\Http\Middleware\BlockSuspiciousRequests::class);
-        $middleware->append(\App\Http\Middleware\SecureHeaders::class);
-        $middleware->append(\App\Http\Middleware\CheckSiteMaintenance::class);
-        $middleware->append(\App\Http\Middleware\ThrottlePublicForms::class);
-        $middleware->appendToGroup('web', \App\Http\Middleware\AdminSessionTimeout::class);
+        $middleware->prepend(ForceHttps::class);
+        $middleware->prepend(BlockSuspiciousRequests::class);
+        $middleware->append(SecureHeaders::class);
+        $middleware->append(CheckSiteMaintenance::class);
+        $middleware->append(ThrottlePublicForms::class);
+        $middleware->appendToGroup('web', AdminSessionTimeout::class);
 
         $middleware->encryptCookies(except: [
             // Livewire needs some cookies readable
@@ -58,53 +75,53 @@ return Application::configure(basePath: dirname(__DIR__))
             'request_id' => (string) str()->uuid(),
         ]);
 
-        $exceptions->render(function (\Throwable $e, Request $request) {
+        $exceptions->render(function (Throwable $e, Request $request) {
             if (config('security.expose_exception_details')) {
                 return null;
             }
 
-            if ($e instanceof \Illuminate\Validation\ValidationException
-                || $e instanceof \Illuminate\Http\Exceptions\HttpResponseException) {
+            if ($e instanceof ValidationException
+                || $e instanceof HttpResponseException) {
                 return null;
             }
 
-            if ($e instanceof \Illuminate\Auth\AuthenticationException) {
+            if ($e instanceof AuthenticationException) {
                 if ($request->expectsJson()) {
-                    return \App\Support\ErrorResponse::json(401);
+                    return ErrorResponse::json(401);
                 }
 
-                if (! $request->is(\App\Support\AdminPanelConfig::pathPattern())) {
-                    return \App\Support\ErrorResponse::view(401, $request);
+                if (! $request->is(AdminPanelConfig::pathPattern())) {
+                    return ErrorResponse::view(401, $request);
                 }
 
                 return null;
             }
 
-            if ($e instanceof \Illuminate\Session\TokenMismatchException) {
+            if ($e instanceof TokenMismatchException) {
                 $reload = $request->hasHeader('X-Livewire')
-                    || \App\Support\AdminPanelConfig::isAdminRequest($request);
+                    || AdminPanelConfig::isAdminRequest($request);
 
                 if ($request->expectsJson() || $request->hasHeader('X-Livewire')) {
-                    return \App\Support\ErrorResponse::json(419, reload: $reload);
+                    return ErrorResponse::json(419, reload: $reload);
                 }
             }
 
-            $status = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
+            $status = $e instanceof HttpExceptionInterface
                 ? $e->getStatusCode()
                 : 500;
 
             if ($request->expectsJson() || $request->hasHeader('X-Livewire')) {
-                $reload = $status === 419 && \App\Support\AdminPanelConfig::isAdminRequest($request);
+                $reload = $status === 419 && AdminPanelConfig::isAdminRequest($request);
 
-                return \App\Support\ErrorResponse::json($status, reload: $reload);
+                return ErrorResponse::json($status, reload: $reload);
             }
 
             $data = [];
 
-            if ($status === 429 && $e instanceof \Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException) {
+            if ($status === 429 && $e instanceof TooManyRequestsHttpException) {
                 $data['retryAfter'] = $e->getHeaders()['Retry-After'] ?? null;
             }
 
-            return \App\Support\ErrorResponse::view($status, $request, $data);
+            return ErrorResponse::view($status, $request, $data);
         });
     })->create();

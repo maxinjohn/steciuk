@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\Sermons\Tables;
 
+use App\Filament\Support\CompactTableActions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Table;
 
 class SermonsTable
@@ -13,44 +14,33 @@ class SermonsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('preached_at', 'desc')
             ->columns([
                 TextColumn::make('title')
-                    ->searchable(),
-                TextColumn::make('speaker')
-                    ->searchable(),
+                    ->searchable()
+                    ->wrap()
+                    ->description(fn ($record): ?string => $record->speaker),
                 TextColumn::make('preached_at')
-                    ->date()
+                    ->label('Preached')
+                    ->date('d M Y')
                     ->sortable(),
-                TextColumn::make('bible_passage')
-                    ->searchable(),
-                TextColumn::make('youtube_url')
-                    ->searchable(),
-                TextColumn::make('category')
-                    ->searchable(),
                 TextColumn::make('status')
                     ->badge()
                     ->searchable(),
-                TextColumn::make('created_by')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('updated_by')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('bible_passage')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('category')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
             ])
             ->recordActions([
-                EditAction::make(),
-            ])
+                CompactTableActions::editButton(),
+            ], RecordActionsPosition::AfterColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

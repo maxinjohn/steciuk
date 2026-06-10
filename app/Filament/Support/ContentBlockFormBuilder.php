@@ -5,6 +5,7 @@ namespace App\Filament\Support;
 use App\Enums\ContentBlockType;
 use App\Models\ContentBlock;
 use Closure;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 class ContentBlockFormBuilder
 {
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     public static function fields(): array
     {
@@ -45,7 +46,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function contentFields(): array
     {
@@ -65,7 +66,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function heroFields(): array
     {
@@ -115,7 +116,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function headingFields(): array
     {
@@ -157,7 +158,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function bodyFields(): array
     {
@@ -173,7 +174,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function mediaFields(): array
     {
@@ -193,7 +194,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function linkFields(): array
     {
@@ -220,7 +221,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function ctaFields(): array
     {
@@ -242,7 +243,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function listFields(): array
     {
@@ -263,7 +264,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function quoteFields(): array
     {
@@ -277,7 +278,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function faqFields(): array
     {
@@ -295,7 +296,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function locationFields(): array
     {
@@ -308,7 +309,7 @@ class ContentBlockFormBuilder
     }
 
     /**
-     * @return list<\Filament\Forms\Components\Component>
+     * @return list<Component>
      */
     private static function embedFields(): array
     {
@@ -325,9 +326,6 @@ class ContentBlockFormBuilder
         ];
     }
 
-    /**
-     * @param  ContentBlockType  ...$types
-     */
     private static function whenType(ContentBlockType ...$types): Closure
     {
         return fn (Get $get, ?Model $record = null): bool => self::typeIs($get, $record, ...$types);

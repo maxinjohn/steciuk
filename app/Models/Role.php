@@ -67,8 +67,9 @@ class Role extends Model
     {
         return match ($slug) {
             UserRole::SuperAdmin->value => 'Super Admin',
+            UserRole::Admin->value => 'Admin',
             UserRole::Editor->value => 'Editor',
-            UserRole::Viewer->value => 'Viewer',
+            UserRole::Member->value => 'Member',
             default => Str::headline(str_replace('_', ' ', $slug)),
         };
     }
@@ -102,8 +103,9 @@ class Role extends Model
     {
         return [
             UserRole::SuperAdmin->value => 'Super Admin',
+            UserRole::Admin->value => 'Admin',
             UserRole::Editor->value => 'Editor',
-            UserRole::Viewer->value => 'Viewer',
+            UserRole::Member->value => 'Member',
         ];
     }
 

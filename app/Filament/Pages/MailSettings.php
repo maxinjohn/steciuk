@@ -4,8 +4,10 @@ namespace App\Filament\Pages;
 
 use App\Enums\AdminNavigationGroup;
 use App\Enums\AdminPermission;
+use App\Filament\Support\SettingsFormTabs;
 use App\Models\Setting;
 use App\Services\MailConfigService;
+use App\Services\SecurityLogger;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -18,6 +20,7 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Validation\ValidationException;
@@ -28,9 +31,9 @@ class MailSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
 
-    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::SiteSettings;
+    protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::SiteSettings;
 
-    protected static ?string $navigationLabel = 'Email Setup';
+    protected static ?string $navigationLabel = 'Email setup';
 
     protected static ?int $navigationSort = 3;
 
@@ -47,7 +50,7 @@ class MailSettings extends Page
     {
         $user = auth()->user();
 
-        return $user?->isSuperAdmin()
+        return $user?->hasFullPanelAccess()
             || $user?->hasAdminPermission(AdminPermission::SettingsMail);
     }
 
@@ -98,6 +101,8 @@ class MailSettings extends Page
             MailConfigService::applyFromSettings();
 
             $this->commitDatabaseTransaction();
+
+            SecurityLogger::logSettingsSaved('Email & SMTP settings');
 
             Notification::make()
                 ->success()
@@ -183,87 +188,97 @@ class MailSettings extends Page
     {
         return $schema
             ->components([
-                Section::make('Delivery method')
-                    ->description('All mail is configured here — nothing is read from server .env. Toggle between PHP sendmail and SMTP, or log only for testing.')
-                    ->schema([
-                        Toggle::make('mail_log_only')
-                            ->label('Log only (development)')
-                            ->helperText('Writes messages to storage/logs/laravel.log instead of sending email.')
-                            ->live()
-                            ->afterStateUpdated(function ($state, callable $set): void {
-                                if ($state) {
-                                    $set('mail_use_smtp', false);
-                                }
-                            }),
-                        Toggle::make('mail_use_smtp')
-                            ->label('Use SMTP server')
-                            ->helperText('Turn off to use PHP sendmail on this server (typical shared hosting).')
-                            ->live()
-                            ->disabled(fn ($get) => (bool) $get('mail_log_only'))
-                            ->afterStateUpdated(fn ($state, callable $set) => $state ? $set('mail_log_only', false) : null),
-                    ]),
-                Section::make('PHP sendmail')
-                    ->description('Server mail — uses the sendmail binary on your host.')
-                    ->visible(fn ($get) => ! $get('mail_log_only') && ! $get('mail_use_smtp'))
-                    ->schema([
-                        TextInput::make('mail_sendmail_path')
-                            ->label('Sendmail command')
-                            ->placeholder('/usr/sbin/sendmail -t -i')
-                            ->helperText('Only needed if PHP mail() is disabled. cPanel default: /usr/sbin/sendmail -t -i'),
-                        TextInput::make('mail_sendmail_timeout')
-                            ->label('Timeout (seconds)')
-                            ->numeric()
-                            ->default(15)
-                            ->minValue(5)
-                            ->maxValue(60),
-                    ]),
-                Section::make('SMTP server')
-                    ->description('External mail server — Gmail, Office 365, hosting SMTP, etc.')
-                    ->visible(fn ($get) => ! $get('mail_log_only') && (bool) $get('mail_use_smtp'))
-                    ->schema([
-                        TextInput::make('mail_host')
-                            ->label('SMTP host')
-                            ->placeholder('smtp.example.com')
-                            ->required(fn ($get) => (bool) $get('mail_use_smtp') && ! $get('mail_log_only')),
-                        TextInput::make('mail_port')
-                            ->label('Port')
-                            ->numeric()
-                            ->default(587),
-                        Select::make('mail_encryption')
-                            ->label('Encryption')
-                            ->options([
-                                'tls' => 'TLS',
-                                'ssl' => 'SSL',
-                                'none' => 'None',
-                            ])
-                            ->default('tls'),
-                        TextInput::make('mail_username')
-                            ->label('Username'),
-                        TextInput::make('mail_password')
-                            ->label('Password')
-                            ->password()
-                            ->revealable()
-                            ->helperText(MailConfigService::passwordIsConfigured() ? 'Leave blank to keep the current password.' : 'Enter your SMTP password.'),
-                        TextInput::make('mail_smtp_timeout')
-                            ->label('Timeout (seconds)')
-                            ->numeric()
-                            ->default(10)
-                            ->minValue(5)
-                            ->maxValue(60),
-                    ]),
-                Section::make('Sender identity')
-                    ->schema([
-                        TextInput::make('mail_from_address')
-                            ->label('From address')
-                            ->email()
-                            ->required(),
-                        TextInput::make('mail_from_name')
-                            ->label('From name'),
-                        TextInput::make('mail_test_recipient')
-                            ->label('Test recipient')
-                            ->email()
-                            ->helperText('Send a test message to verify delivery before going live.'),
-                    ]),
+                SettingsFormTabs::make('Email settings', [
+                    Tab::make('Delivery')
+                        ->icon('heroicon-o-paper-airplane')
+                        ->schema([
+                            Section::make('Delivery method')
+                                ->description('All mail is configured here — nothing is read from server .env. Toggle between PHP sendmail and SMTP, or log only for testing.')
+                                ->schema([
+                                    Toggle::make('mail_log_only')
+                                        ->label('Log only (development)')
+                                        ->helperText('Writes messages to storage/logs/laravel.log instead of sending email.')
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, callable $set): void {
+                                            if ($state) {
+                                                $set('mail_use_smtp', false);
+                                            }
+                                        }),
+                                    Toggle::make('mail_use_smtp')
+                                        ->label('Use SMTP server')
+                                        ->helperText('Turn off to use PHP sendmail on this server (typical shared hosting).')
+                                        ->live()
+                                        ->disabled(fn ($get) => (bool) $get('mail_log_only'))
+                                        ->afterStateUpdated(fn ($state, callable $set) => $state ? $set('mail_log_only', false) : null),
+                                ]),
+                            Section::make('PHP sendmail')
+                                ->description('Server mail — uses the sendmail binary on your host.')
+                                ->visible(fn ($get) => ! $get('mail_log_only') && ! $get('mail_use_smtp'))
+                                ->schema([
+                                    TextInput::make('mail_sendmail_path')
+                                        ->label('Sendmail command')
+                                        ->placeholder('/usr/sbin/sendmail -t -i')
+                                        ->helperText('Only needed if PHP mail() is disabled. cPanel default: /usr/sbin/sendmail -t -i'),
+                                    TextInput::make('mail_sendmail_timeout')
+                                        ->label('Timeout (seconds)')
+                                        ->numeric()
+                                        ->default(15)
+                                        ->minValue(5)
+                                        ->maxValue(60),
+                                ]),
+                            Section::make('SMTP server')
+                                ->description('External mail server — Gmail, Office 365, hosting SMTP, etc.')
+                                ->visible(fn ($get) => ! $get('mail_log_only') && (bool) $get('mail_use_smtp'))
+                                ->schema([
+                                    TextInput::make('mail_host')
+                                        ->label('SMTP host')
+                                        ->placeholder('smtp.example.com')
+                                        ->required(fn ($get) => (bool) $get('mail_use_smtp') && ! $get('mail_log_only')),
+                                    TextInput::make('mail_port')
+                                        ->label('Port')
+                                        ->numeric()
+                                        ->default(587),
+                                    Select::make('mail_encryption')
+                                        ->label('Encryption')
+                                        ->options([
+                                            'tls' => 'TLS',
+                                            'ssl' => 'SSL',
+                                            'none' => 'None',
+                                        ])
+                                        ->default('tls'),
+                                    TextInput::make('mail_username')
+                                        ->label('Username'),
+                                    TextInput::make('mail_password')
+                                        ->label('Password')
+                                        ->password()
+                                        ->revealable()
+                                        ->helperText(MailConfigService::passwordIsConfigured() ? 'Leave blank to keep the current password.' : 'Enter your SMTP password.'),
+                                    TextInput::make('mail_smtp_timeout')
+                                        ->label('Timeout (seconds)')
+                                        ->numeric()
+                                        ->default(10)
+                                        ->minValue(5)
+                                        ->maxValue(60),
+                                ]),
+                        ]),
+                    Tab::make('Sender')
+                        ->icon('heroicon-o-at-symbol')
+                        ->schema([
+                            Section::make('Sender identity')
+                                ->schema([
+                                    TextInput::make('mail_from_address')
+                                        ->label('From address')
+                                        ->email()
+                                        ->required(),
+                                    TextInput::make('mail_from_name')
+                                        ->label('From name'),
+                                    TextInput::make('mail_test_recipient')
+                                        ->label('Test recipient')
+                                        ->email()
+                                        ->helperText('Send a test message to verify delivery before going live.'),
+                                ]),
+                        ]),
+                ], 'mail-tab'),
             ]);
     }
 
