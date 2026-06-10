@@ -9,7 +9,7 @@
         ['label' => 'Grace by Faith', 'ref' => 'Eph 2:8–9'],
         ['label' => 'Holy Communion', 'ref' => '1 Cor 11:26'],
         ['label' => 'Prayer & Mission', 'ref' => 'Matt 28:19'],
-        ['label' => 'Saint Thomas Heritage', 'ref' => 'Rev 19:10'],
+        ['label' => 'STECI Motto', 'ref' => 'Rev 1:9'],
     ];
 @endphp
 

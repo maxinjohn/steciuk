@@ -8,6 +8,7 @@
         ['label' => 'Jesus Christ', 'desc' => 'Lord and Saviour', 'ref' => 'John 14:6'],
         ['label' => 'Grace & Faith', 'desc' => 'Salvation in Christ alone', 'ref' => 'Eph 2:8–9'],
         ['label' => 'Worship & Communion', 'desc' => 'Scripture-centred worship & Holy Communion', 'ref' => '1 Cor 11:26'],
+        ['label' => 'Sound Doctrine', 'desc' => 'For the Word of God & testimony of Christ', 'ref' => 'Rev 1:9'],
         ['label' => 'Prayer & Mission', 'desc' => 'Witness to the Gospel', 'ref' => 'Matt 28:19'],
     ];
 @endphp
@@ -16,7 +17,7 @@
     <div class="faith-pillars-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p class="faith-pillars-kicker">
             <span class="genz-kicker-dot" aria-hidden="true"></span>
-            Evangelical faith · Saint Thomas heritage
+            STECI evangelical faith · Revelation 1:9
         </p>
         <div class="faith-pillars-track" role="list">
             @foreach ($pillars as $pillar)

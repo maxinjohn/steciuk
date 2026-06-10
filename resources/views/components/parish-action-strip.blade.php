@@ -27,7 +27,7 @@
         ],
         [
             'label' => 'Our Beliefs',
-            'desc' => 'Evangelical Oriental Protestant faith',
+            'desc' => 'Grace, Scripture & STECI faith',
             'href' => url('/our-church'),
             'icon' => '⛪',
             'tone' => 'violet',
@@ -46,7 +46,7 @@
     <div class="parish-action-strip-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p class="parish-action-strip-kicker">
             <span class="genz-kicker-dot" aria-hidden="true"></span>
-            Word · Worship · Witness
+            Draw near · Worship · Pray
         </p>
         <div class="parish-action-strip-track" role="list">
             @foreach ($actions as $action)

@@ -1427,12 +1427,23 @@ html.dark {
 
     .prose-church blockquote {
         margin: 1.5rem 0;
-        padding: 1rem 1.25rem;
-        border-left: 4px solid var(--site-brand);
-        border-radius: 0 14px 14px 0;
-        background: var(--site-surface-2);
+        padding: 1.125rem 1.375rem;
+        border-left: 4px solid var(--site-accent);
+        border-radius: 0 16px 16px 0;
+        background: linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--site-surface-2) 88%, var(--site-surface)) 0%,
+            color-mix(in srgb, var(--site-accent) 6%, var(--site-surface-2)) 100%
+        );
+        font-family: var(--site-scripture-serif);
         font-style: italic;
         color: var(--site-ink-muted);
+        box-shadow: 0 6px 24px color-mix(in srgb, var(--site-accent) 5%, transparent);
+    }
+
+    .prose-church em {
+        font-style: italic;
+        color: color-mix(in srgb, var(--site-accent) 85%, var(--site-ink));
     }
 
     .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
@@ -2151,8 +2162,14 @@ html.dark {
 
     @media (min-width: 1024px) {
         .faith-pillars-track {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 1rem;
+        }
+    }
+
+    @media (min-width: 1280px) {
+        .faith-pillars-track {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
         }
     }
 
@@ -2160,9 +2177,13 @@ html.dark {
         position: relative;
         padding: 1rem 1.125rem;
         border-radius: 18px;
-        background: var(--site-surface);
-        border: 1px solid var(--site-border);
-        box-shadow: 0 4px 20px rgba(26, 35, 50, 0.04);
+        background: linear-gradient(
+            165deg,
+            var(--site-surface) 0%,
+            color-mix(in srgb, var(--site-accent) 5%, var(--site-surface-2)) 100%
+        );
+        border: 1px solid color-mix(in srgb, var(--site-accent) 14%, var(--site-border));
+        box-shadow: 0 4px 22px color-mix(in srgb, var(--site-brand) 6%, transparent);
         transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
@@ -2212,7 +2233,11 @@ html.dark {
     .scripture-ribbon {
         position: relative;
         padding: 1.75rem 0 2rem;
-        background: color-mix(in srgb, var(--site-brand) 96%, black);
+        background: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--site-brand) 94%, black) 0%,
+            color-mix(in srgb, var(--site-brand) 98%, black) 100%
+        );
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
@@ -2571,7 +2596,11 @@ html.dark {
         position: relative;
         overflow: hidden;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
-        background: linear-gradient(180deg, color-mix(in srgb, var(--site-brand) 90%, black), color-mix(in srgb, var(--site-brand) 96%, black));
+        background: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--site-brand) 86%, #141820) 0%,
+            color-mix(in srgb, var(--site-brand) 94%, black) 100%
+        );
         color: var(--site-hero-ink);
     }
 
@@ -2633,9 +2662,10 @@ html.dark {
     }
 
     .gospel-reminder-text {
-        font-size: clamp(0.9375rem, 2vw, 1.0625rem);
+        font-family: var(--site-scripture-serif);
+        font-size: clamp(0.9375rem, 2vw, 1.125rem);
         font-style: italic;
-        line-height: 1.6;
+        line-height: 1.65;
         text-wrap: balance;
     }
 
@@ -2721,6 +2751,19 @@ html.dark {
 
     .sanctuary-peace-quote {
         margin: 0;
+        position: relative;
+        padding: 1.125rem 1.25rem;
+        border-radius: 1.125rem;
+        background: color-mix(in srgb, var(--site-surface) 72%, transparent);
+        border: 1px solid color-mix(in srgb, var(--site-accent) 16%, var(--site-border));
+        box-shadow: 0 10px 36px color-mix(in srgb, var(--site-accent) 7%, transparent);
+    }
+
+    @media (min-width: 768px) {
+        .sanctuary-peace-quote {
+            padding: 1.375rem 1.75rem;
+            border-radius: 1.25rem;
+        }
     }
 
     .sanctuary-peace-quote p {
@@ -3994,7 +4037,14 @@ html.dark {
 
 .gospel-reminder-cross,
 .sanctuary-peace-cross {
-    box-shadow: 0 0 28px color-mix(in srgb, var(--site-accent) 35%, transparent);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--site-accent) 22%, transparent);
+}
+
+@media (min-width: 768px) {
+    .gospel-reminder-cross,
+    .sanctuary-peace-cross {
+        box-shadow: 0 0 28px color-mix(in srgb, var(--site-accent) 35%, transparent);
+    }
 }
 
 .heavenly-comfort-card {
@@ -4377,4 +4427,216 @@ html.dark .heavenly-comfort-card {
 
 .prose-church--compact {
     font-size: 0.9375rem;
+}
+
+/* Mobile: quieter decorative crosses, lighter effects, faster paint */
+@media (max-width: 767px) {
+    .page-band-cross {
+        display: none;
+    }
+
+    .page-band {
+        padding: 1.75rem 0 1.5rem;
+    }
+
+    .page-band-orb,
+    .page-band-grid {
+        opacity: 0.3;
+    }
+
+    .page-band-orb {
+        filter: blur(28px);
+    }
+
+    .hero-cross-mark {
+        opacity: 0.15;
+        font-size: 1.625rem;
+        top: 0.625rem;
+        right: 0.75rem;
+    }
+
+    .hero-glow {
+        display: none;
+    }
+
+    .hero-pattern {
+        opacity: 0.035;
+    }
+
+    .hero-evangelical::after {
+        opacity: 0.65;
+    }
+
+    .gospel-reminder-cross,
+    .sanctuary-peace-cross,
+    .scripture-ribbon-cross,
+    .leadership-card-cross {
+        box-shadow: none;
+    }
+
+    .heavenly-comfort-glow {
+        display: none;
+    }
+
+    .site-header {
+        backdrop-filter: blur(10px) saturate(140%);
+        -webkit-backdrop-filter: blur(10px) saturate(140%);
+    }
+
+    .page-band,
+    .hero-modern,
+    .scripture-ribbon {
+        contain: layout style paint;
+    }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+    .hero-glow-left,
+    .hero-glow-right {
+        animation: none;
+    }
+}
+
+/* Heavenly UI polish — tablet, desktop, mobile speed */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .page-band {
+        padding: 2.125rem 0 1.875rem;
+    }
+
+    .page-band-subtitle {
+        max-width: 32rem;
+    }
+
+    .heavenly-comfort-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .faith-pillars {
+        padding: 2.25rem 0 2.5rem;
+    }
+
+    .sanctuary-peace-inner {
+        max-width: 40rem;
+    }
+
+    .gospel-reminder-inner {
+        padding: 1.75rem 0 2rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .heavenly-comfort {
+        padding: 3rem 0 3.5rem;
+    }
+
+    .sanctuary-peace-inner {
+        max-width: 44rem;
+    }
+
+    .gospel-reminder-inner {
+        padding: 2rem 0 2.25rem;
+    }
+
+    .prose-church {
+        font-size: 1.09375rem;
+        line-height: 1.8;
+    }
+}
+
+.heavenly-comfort-card {
+    background: linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--site-surface) 94%, white) 0%,
+        color-mix(in srgb, var(--site-accent) 5%, var(--site-surface-2)) 100%
+    );
+    box-shadow: 0 8px 28px color-mix(in srgb, var(--site-brand) 5%, transparent);
+}
+
+.heavenly-comfort-card-ref {
+    font-family: var(--site-scripture-serif);
+    font-style: italic;
+    letter-spacing: 0.06em;
+    text-transform: none;
+}
+
+.parish-action-card {
+    border: 1px solid color-mix(in srgb, var(--site-accent) 12%, var(--site-border));
+    background: linear-gradient(
+        165deg,
+        var(--site-surface) 0%,
+        color-mix(in srgb, var(--site-accent) 4%, var(--site-surface-2)) 100%
+    );
+}
+
+.page-band {
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--site-brand) 90%, #121820) 0%,
+        var(--site-hero-bg) 100%
+    );
+}
+
+@media (max-width: 767px) {
+    .animate-fade-up,
+    .glass-card,
+    .bento-grid > *,
+    .page-section,
+    .feed-card,
+    .gallery-tile,
+    .sermon-card,
+    .location-card,
+    .resource-row,
+    .past-event-chip,
+    .faith-pillar,
+    .scripture-ribbon,
+    .parish-action-card,
+    .worship-rhythm-card,
+    .evangelical-trust-chip,
+    .heavenly-comfort-card {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .heavenly-comfort {
+        padding: 2rem 0 2.5rem;
+    }
+
+    .heavenly-comfort-grid {
+        gap: 0.75rem;
+    }
+
+    .heavenly-comfort-card {
+        padding: 1.125rem 1rem;
+    }
+
+    .faith-pillars {
+        padding: 1.75rem 0 2rem;
+    }
+
+    .faith-pillar {
+        padding: 0.875rem 1rem;
+    }
+
+    .parish-action-strip {
+        padding: 1rem 0 1.25rem;
+    }
+
+    .scripture-ribbon {
+        padding: 1.375rem 0 1.625rem;
+    }
+
+    .sanctuary-peace-quote {
+        padding: 1rem 1.125rem;
+    }
+
+    .prose-church h2 {
+        margin-top: 1.75rem;
+        font-size: 1.375rem;
+    }
+
+    .page-section {
+        padding-block: 2.5rem;
+    }
 }

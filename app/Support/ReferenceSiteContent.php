@@ -6,16 +6,13 @@ namespace App\Support;
  * Canonical reference copy for STECI UK Parish.
  * Applied on deploy via migrations (ReferenceSiteContentMigrator).
  *
- * Sources: Charity Commission 1143030, EAUK member listing, Wikipedia / Grokipedia (STECI),
- * and steci.org for parent-church identity.
+ * Sources: Charity Commission 1143030, EAUK member listing, Wikipedia / Grokipedia (STECI).
  */
 class ReferenceSiteContent
 {
     public const CHARITY_NUMBER = '1143030';
 
     public const EAUK_CHURCH_URL = 'https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish';
-
-    public const STECI_ORG_URL = 'https://steci.org/';
 
     /**
      * @return array<string, array{value: string, group: string}>
@@ -94,6 +91,89 @@ class ReferenceSiteContent
             'contact_form_intro' => [
                 'value' => 'Whether you need pastoral support, information about worship in your area, or wish to join our parish — write to us and we will respond as soon as we can.',
                 'group' => 'contact',
+            ],
+            'faith_sanctuary_kicker' => [
+                'value' => 'Abide in Christ',
+                'group' => 'faith',
+            ],
+            'faith_sanctuary_note' => [
+                'value' => 'Go in peace — the Lord goes with you. Grace and peace from our parish family.',
+                'group' => 'faith',
+            ],
+            'faith_sanctuary_verses' => [
+                'value' => json_encode(self::faithSanctuaryVerses(), JSON_UNESCAPED_UNICODE),
+                'group' => 'faith',
+            ],
+            'faith_comfort_kicker' => [
+                'value' => 'For every believer',
+                'group' => 'faith',
+            ],
+            'faith_comfort_heading' => [
+                'value' => 'Rest in the Lord',
+                'group' => 'faith',
+            ],
+            'faith_comfort_subheading' => [
+                'value' => 'Scripture, prayer, and Holy Communion — anchors for daily faith in Christ',
+                'group' => 'faith',
+            ],
+            'faith_comfort_cards' => [
+                'value' => json_encode(self::faithComfortCards(), JSON_UNESCAPED_UNICODE),
+                'group' => 'faith',
+            ],
+        ];
+    }
+
+    /**
+     * @return list<array{text: string, ref: string}>
+     */
+    public static function faithSanctuaryVerses(): array
+    {
+        return [
+            ['text' => 'Be still, and know that I am God.', 'ref' => 'Psalm 46:10'],
+            ['text' => 'Come to me, all you who are weary and burdened, and I will give you rest.', 'ref' => 'Matthew 11:28'],
+            ['text' => 'Peace I leave with you; my peace I give you.', 'ref' => 'John 14:27'],
+            ['text' => 'The Lord is my shepherd; I shall not want.', 'ref' => 'Psalm 23:1'],
+            ['text' => 'Cast all your anxiety on him because he cares for you.', 'ref' => '1 Peter 5:7'],
+            ['text' => 'Trust in the Lord with all your heart and lean not on your own understanding.', 'ref' => 'Proverbs 3:5'],
+            ['text' => 'The Lord bless you and keep you; the Lord make his face shine on you.', 'ref' => 'Numbers 6:24–25'],
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function faithComfortCards(): array
+    {
+        return [
+            [
+                'icon' => '🕊',
+                'title' => 'Peace in Christ',
+                'text' => 'His peace guards heart and mind — a gift for every believer who draws near in worship and prayer.',
+                'ref' => 'Philippians 4:7',
+            ],
+            [
+                'icon' => '🙏',
+                'title' => 'Rest in Prayer',
+                'text' => 'Bring every burden to the Lord. Our parish family intercedes with you in faith.',
+                'ref' => 'Matthew 11:28',
+                'link' => '/prayer-request',
+                'linkLabel' => 'Submit a prayer request',
+            ],
+            [
+                'icon' => '📖',
+                'title' => 'Hope in Scripture',
+                'text' => 'Holy Scripture nourishes faith — through preaching, reading, and Holy Communion at the Lord\'s table.',
+                'ref' => 'Romans 15:4',
+                'link' => '/sermons',
+                'linkLabel' => 'Listen to a sermon',
+            ],
+            [
+                'icon' => '✝',
+                'title' => 'Assurance in Grace',
+                'text' => 'Salvation is by grace through faith in Christ alone — not by works, but by the mercy of God.',
+                'ref' => 'Ephesians 2:8–9',
+                'link' => '/our-church',
+                'linkLabel' => 'Read our beliefs',
             ],
         ];
     }
@@ -174,7 +254,7 @@ class ReferenceSiteContent
                 'link_label' => 'View All Service Times',
             ],
             'welcome-quote' => [
-                'quote' => 'We welcome you to worship centred on Scripture, the Gospel of Jesus Christ, and the sacraments of the Church — in the warm fellowship of an evangelical Oriental Protestant parish rooted in the Saint Thomas Christian tradition.',
+                'quote' => 'Draw near to God in worship, Word, and prayer — united as believers in Christ across our UK parish family, rooted in the evangelical Oriental Protestant faith of STECI.',
             ],
         ];
     }
@@ -334,7 +414,7 @@ class ReferenceSiteContent
 
 <p>Our parish serves approximately <strong>ninety families</strong> spread across the United Kingdom, gathering for <strong>monthly worship</strong> at five locations: <strong>Manchester, Leicester, Dartford, Sunderland, and Bristol</strong>. Church members attend services <strong>both in person and online</strong>. Though geographically dispersed, we are united by our faith in Jesus Christ, our commitment to the authority of the Holy Bible, and our heritage in the Saint Thomas Christian tradition of Kerala, India.</p>
 
-<p>The <strong>St. Thomas Evangelical Church of India</strong> was founded on <strong>26 January 1961</strong> and is headquartered at <strong>Manjadi, Thiruvalla, Kerala</strong>. STECI is an evangelical <strong>Oriental Protestant</strong> church in the Saint Thomas Syrian Christian tradition, with episcopal church order and a missionary calling to proclaim the Gospel in India and among diaspora communities worldwide. The UK Parish is a registered charity (No. <strong>1143030</strong>) and a <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" target="_blank" rel="noopener noreferrer">member of the Evangelical Alliance</a>.</p>
+<p>The <strong>St. Thomas Evangelical Church of India</strong> was founded on <strong>26 January 1961</strong> and is headquartered at <strong>Manjadi, Thiruvalla, Kerala</strong>. STECI is an evangelical <strong>Oriental Protestant</strong> church in the Saint Thomas Syrian Christian tradition — episcopal in church order, democratic in governance, and missionary in calling. The UK Parish is a registered charity (No. <strong>1143030</strong>) and a <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" target="_blank" rel="noopener noreferrer">member of the Evangelical Alliance</a>.</p>
 
 <p>Whether you are exploring Christianity for the first time, reconnecting with your faith, or seeking a spiritual home within the Saint Thomas Christian tradition, you are warmly welcome. Please explore our service times, ministries, and events — or <a href="/contact">contact us</a> directly. We would love to hear from you.</p>
 
@@ -346,22 +426,25 @@ HTML;
     {
         return <<<'HTML'
 <h2>Who We Are</h2>
-<p>The St. Thomas Evangelical Church of India – UK Parish is part of <strong>STECI</strong>, a global evangelical Oriental Protestant church with episcopal church order and deep roots in the Saint Thomas Christian community of Kerala. Founded on <strong>26 January 1961</strong>, STECI emerged from a reform movement within the <strong>Malankara Mar Thoma Syrian Church</strong>, seeking stricter adherence to biblical authority, <em>sola scriptura</em>, and evangelical doctrine. Our UK Parish gathers families across Britain under episcopal oversight from STECI headquarters at <strong>Manjadi, Thiruvalla, Kerala</strong>, and is a <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" target="_blank" rel="noopener noreferrer">member of the Evangelical Alliance</a>. Learn more about the parent church at <a href="https://steci.org/" target="_blank" rel="noopener noreferrer">steci.org</a>.</p>
+<p>The St. Thomas Evangelical Church of India – UK Parish is part of <strong>STECI</strong>, a global evangelical Oriental Protestant church with deep roots in the Saint Thomas Christian community of Kerala. Founded on <strong>26 January 1961</strong>, STECI emerged from a reform movement within the <strong>Malankara Mar Thoma Syrian Church</strong>, seeking stricter adherence to biblical authority, <em>sola scriptura</em>, and evangelical doctrine. Our UK Parish gathers approximately ninety families across Britain for monthly worship — in person and online — under episcopal oversight from STECI headquarters at <strong>Manjadi, Thiruvalla, Kerala</strong>. We are a <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" target="_blank" rel="noopener noreferrer">member of the Evangelical Alliance</a> (Registered Charity No. <strong>1143030</strong>).</p>
 
 <h2>What We Believe</h2>
-<p>STECI confesses the historic Christian faith as revealed in Holy Scripture and summarised in the <strong>Nicene Creed</strong>. Our core convictions include:</p>
+<p>We confess the evangelical Oriental Protestant faith of STECI — the historic Christian faith as revealed in Holy Scripture and summarised in the <strong>Nicene Creed</strong>. Our motto is <em>For the Word of God and for the testimony of Jesus Christ</em> (Revelation 1:9). Core convictions include:</p>
 <ul>
-<li>The <strong>Holy Trinity</strong> — Father, Son, and Holy Spirit</li>
+<li>The <strong>Holy Trinity</strong> — one God: Father, Son, and Holy Spirit</li>
 <li><strong>Sola Scriptura</strong> — the sixty-six books of the Bible as the inspired, supreme authority for faith and practice</li>
-<li>Jesus Christ as Lord and Saviour; salvation by <strong>grace through faith in Christ alone</strong>, not by works</li>
-<li>The <strong>Second Coming</strong> of Christ, the resurrection of the dead, and the call to holy living</li>
+<li><strong>Salvation by grace through faith</strong> in Jesus Christ alone — not by human works</li>
+<li>Jesus Christ as <strong>Lord and Saviour</strong>; his <strong>second coming</strong>, the resurrection of the dead, and the call to holy living</li>
 <li>The <strong>priesthood of all believers</strong> — prayer to God through Christ alone, without veneration of saints or prayers for the dead</li>
-<li>Two sacraments instituted by Christ: <strong>Baptism</strong> (a sign of spiritual rebirth for professing believers and for children of Christian parents) and the <strong>Lord's Supper</strong> (a memorial of Christ's sacrifice)</li>
-<li>The <strong>Great Commission</strong> — every member called to evangelise and make disciples in the United Kingdom and beyond</li>
+<li>Two sacraments instituted by Christ: <strong>Baptism</strong> (including the baptism of children born to Christian parents) and the <strong>Lord's Supper</strong> — Holy Communion observed as a memorial of Christ's sacrifice</li>
+<li>The <strong>Great Commission</strong> — safeguarding sound doctrine, living a holy life, and making disciples in the United Kingdom and beyond</li>
 </ul>
 
+<h3>What We Reject</h3>
+<p>In continuity with the reform vision of <strong>Abraham Malpan</strong> and the founding of STECI, we do not practise veneration of saints, prayers for the dead, auricular confession, idolatry, or worship directed to icons or statues. Our faith is centred on Christ and Scripture alone.</p>
+
 <h2>How We Worship</h2>
-<p>Our worship follows STECI's evangelical, Scripture-centred pattern: Bible readings, preaching, congregational hymns, prayer, and the Lord's Supper — without elaborate ritual. In the UK Parish, services are conducted primarily in <strong>English</strong>, with Malayalam hymns and readings at many gatherings, reflecting the diaspora context described in STECI parishes worldwide.</p>
+<p>Our worship follows STECI's evangelical, Scripture-centred pattern: Bible readings, expository preaching, congregational hymns, prayer, and Holy Communion — without elaborate ritual or ceremonial excess. In the UK Parish, services are conducted primarily in <strong>English</strong>, with Malayalam hymns and readings at many gatherings.</p>
 
 <h2>Our UK Parish</h2>
 <p>With worship locations in five cities, our parish brings together families from diverse backgrounds who share a common faith and cultural heritage. We support one another through pastoral care, Sunday School, youth and women's fellowships, choir, prayer groups, and community events — both in person and online.</p>
@@ -387,7 +470,7 @@ HTML;
 <p>Today STECI serves more than <strong>350 congregations</strong> and approximately <strong>100,000 members</strong> worldwide, with extensive missionary work and institutions such as <strong>Jubilee Memorial Bible College</strong> (Chennai) and the church publication <em>Suvishesha Prakasini</em>. The church is united by the motto: <em>For the Word of God and for the testimony of Jesus Christ</em> (Revelation 1:9).</p>
 
 <h2>STECI in the United Kingdom</h2>
-<p>The UK Parish serves the STECI diaspora community across Britain — approximately <strong>ninety families</strong> gathering monthly in five cities, in person and online — providing spiritual home, pastoral care, and worship while remaining part of STECI's global fellowship. Official information about the parent church is available at <a href="https://steci.org/" target="_blank" rel="noopener noreferrer">steci.org</a>.</p>
+<p>The UK Parish serves the STECI diaspora community across Britain — approximately <strong>ninety families</strong> gathering monthly in five cities, in person and online — providing spiritual home, pastoral care, and worship while remaining part of STECI's global fellowship under episcopal oversight from headquarters at <strong>Manjadi, Thiruvalla, Kerala</strong>.</p>
 HTML;
     }
 
@@ -395,7 +478,7 @@ HTML;
     {
         return <<<'HTML'
 <h2>Our Mission</h2>
-<p>As the UK Parish of STECI, we share in the church's founding mission: to <strong>safeguard sound doctrine</strong>, encourage <strong>holy living</strong>, and fulfil the <strong>Great Commission</strong> — glorifying God through worship, proclaiming the Gospel of Jesus Christ, nurturing believers in discipleship, and serving our community across the United Kingdom in partnership with the wider STECI fellowship.</p>
+<p>As the UK Parish of the St. Thomas Evangelical Church of India, we share STECI's founding mission — to <strong>safeguard sound doctrine</strong>, encourage <strong>holy living</strong>, and fulfil the <strong>Great Commission</strong> — glorifying God through Scripture-centred worship, proclaiming the Gospel of Jesus Christ, nurturing believers in discipleship, and serving our community across the United Kingdom.</p>
 
 <h2>Our Vision</h2>
 <p>A vibrant, spiritually mature parish community across the United Kingdom where families of all generations:</p>
@@ -404,7 +487,7 @@ HTML;
 <li>Grow deep in knowledge of Scripture</li>
 <li>Build strong Christian homes and friendships</li>
 <li>Reach neighbours and nations with the love of Christ</li>
-<li>Remain connected to the heritage and mission of STECI</li>
+<li>Remain faithful to STECI's evangelical Oriental Protestant identity and Saint Thomas Christian heritage</li>
 </ul>
 
 <h2>Our Values</h2>
