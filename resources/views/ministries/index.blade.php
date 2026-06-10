@@ -8,7 +8,7 @@
         <x-page-intro
             title="Ministries & Mission"
             subtitle="Sunday School, prayer, choir, and outreach — serving Christ together"
-            kicker="Evangelical Episcopal · Serve"
+            kicker="Evangelical Oriental Protestant · Serve"
             scripture="To equip his people for works of service, so that the body of Christ may be built up."
             scripture-ref="Ephesians 4:12"
         />

@@ -1,6 +1,12 @@
 @props([
     'page' => null,
     'suppressContent' => false,
+    'services' => collect(),
+    'ministries' => collect(),
+    'events' => collect(),
+    'news' => collect(),
+    'sermons' => collect(),
+    'albums' => collect(),
 ])
 
 @if ($page?->custom_css)

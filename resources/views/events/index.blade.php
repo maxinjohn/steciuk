@@ -8,7 +8,7 @@
         <x-page-intro
             title="Parish Events"
             subtitle="Worship gatherings, prayer meetings, and fellowship in Christ"
-            kicker="Evangelical Episcopal · Parish life"
+            kicker="Evangelical Oriental Protestant · Parish life"
             scripture="Let us not give up meeting together, as some are in the habit of doing, but let us encourage one another."
             scripture-ref="Hebrews 10:25"
         />

@@ -24,7 +24,7 @@
     <x-page-intro
         :title="$page->hero_title ?? $page->title"
         :subtitle="$page->hero_subtitle"
-        kicker="Evangelical Episcopal · Connect"
+        kicker="Evangelical Oriental Protestant · Connect"
         :scripture="$scripture"
         :scripture-ref="$scriptureRef"
         :show-strips="true"

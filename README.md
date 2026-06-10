@@ -139,9 +139,9 @@ php artisan site:bootstrap --force
 
 ### Content updates on deploy
 
-Canonical parish copy (settings, Welcome, Our Church, STECI Heritage, etc.) lives in `app/Support/ReferenceSiteContent.php` and is applied by **migrations** via `ReferenceSiteContentMigrator`.
+Canonical parish copy (settings, all reference page bodies, home hero/location blocks, and five UK worship services) lives in `app/Support/ReferenceSiteContent.php` and is applied by **migrations** via `ReferenceSiteContentMigrator`.
 
-**Routine deploy = `php artisan migrate` only.** You do **not** need `site:sync-reference-data` for text or settings corrections.
+**Routine deploy = `php artisan migrate` only.** You do **not** need `site:sync-reference-data` for text, settings, or service-time corrections.
 
 When you change reference copy, add a migration that calls `ReferenceSiteContentMigrator::apply()` (or extend `ReferenceSiteContent` and add a new migration).
 

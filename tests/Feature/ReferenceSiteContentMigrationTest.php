@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Database\ReferenceSiteContentMigrator;
+use App\Models\ContentBlock;
 use App\Models\Page;
+use App\Models\Service;
 use App\Models\Setting;
 use App\Support\ReferenceSiteContent;
 use Database\Seeders\ReferenceDataSeeder;
@@ -34,5 +36,49 @@ class ReferenceSiteContentMigrationTest extends TestCase
             ReferenceSiteContent::pageFields()['home']['seo_description'],
             Page::query()->where('slug', 'home')->value('seo_description'),
         );
+    }
+
+    public function test_migrator_updates_reference_services(): void
+    {
+        Service::query()->where('location', 'Manchester')->update([
+            'description' => 'Outdated description',
+            'frequency' => 'Outdated frequency',
+        ]);
+
+        ReferenceSiteContentMigrator::apply();
+
+        $manchester = Service::query()->where('location', 'Manchester')->first();
+
+        $this->assertNotNull($manchester);
+        $this->assertSame('Monthly worship service', $manchester->frequency);
+        $this->assertStringContainsString('Greater Manchester', (string) $manchester->description);
+        $this->assertSame(5, Service::query()->where('status', 'active')->count());
+        $this->assertStringContainsString('admin@steciuk.org', (string) Service::query()->where('location', 'Manchester')->value('service_time'));
+    }
+
+    public function test_migrator_updates_all_reference_pages_settings_and_home_blocks(): void
+    {
+        Setting::set('charity_number', '0000000', 'contact');
+        Page::query()->where('slug', 'service-times')->update(['content' => '<p>Outdated</p>']);
+        Page::query()->where('slug', 'contact')->update(['content' => '<p>Outdated</p>']);
+
+        $homeId = Page::query()->where('slug', 'home')->value('id');
+        ContentBlock::query()
+            ->where('page_id', $homeId)
+            ->where('seed_key', 'hero')
+            ->update(['content' => ['headline' => 'Old headline']]);
+
+        ReferenceSiteContentMigrator::apply();
+
+        $this->assertSame(ReferenceSiteContent::CHARITY_NUMBER, Setting::get('charity_number'));
+        $this->assertStringContainsString('Charity Commission', (string) Page::query()->where('slug', 'service-times')->value('content'));
+        $this->assertStringContainsString('eauk.org', (string) Page::query()->where('slug', 'contact')->value('content'));
+
+        $hero = ContentBlock::query()
+            ->where('page_id', $homeId)
+            ->where('seed_key', 'hero')
+            ->value('content');
+
+        $this->assertSame('Word · Worship · Witness', $hero['headline'] ?? null);
     }
 }

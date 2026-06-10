@@ -41,6 +41,7 @@ class NavigationTest extends TestCase
         $response->assertSee('data-location-tabs', false);
         $response->assertSee('data-location-tab', false);
         $response->assertSee('Manchester', false);
+        $response->assertSee('Monthly worship service', false);
         $response->assertSee('data-location-panel', false);
 
         $html = $response->getContent();

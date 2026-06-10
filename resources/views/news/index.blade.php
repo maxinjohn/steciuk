@@ -8,7 +8,7 @@
         <x-page-intro
             title="Parish News"
             subtitle="Gospel-centred news — worship, prayer, mission, and fellowship across Britain"
-            kicker="Evangelical Episcopal · UK"
+            kicker="Evangelical Oriental Protestant · UK"
             scripture="They devoted themselves to the apostles' teaching and to fellowship, to the breaking of bread and to prayer."
             scripture-ref="Acts 2:42"
         />
