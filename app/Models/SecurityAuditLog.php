@@ -57,6 +57,44 @@ class SecurityAuditLog extends Model
     }
 
     /**
+     * @return array<string, mixed>|null
+     */
+    public function normalizedMetadata(): ?array
+    {
+        $metadata = $this->metadata;
+
+        if ($metadata === null || $metadata === []) {
+            return null;
+        }
+
+        if (is_string($metadata)) {
+            $decoded = json_decode($metadata, true);
+
+            return is_array($decoded) ? $decoded : ['value' => $metadata];
+        }
+
+        if (is_array($metadata)) {
+            return $metadata;
+        }
+
+        return ['value' => (string) $metadata];
+    }
+
+    public function formattedMetadata(): string
+    {
+        $metadata = $this->normalizedMetadata();
+
+        if ($metadata === null) {
+            return '—';
+        }
+
+        return json_encode(
+            $metadata,
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
+        ) ?: '—';
+    }
+
+    /**
      * @param  array<string, mixed>  $payload
      */
     public static function record(array $payload): void
