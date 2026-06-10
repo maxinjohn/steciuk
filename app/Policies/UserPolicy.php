@@ -24,21 +24,37 @@ class UserPolicy
 
     public function update(User $user, User $model): bool
     {
+        if (! $user->canManageSuperAdminAccount($model)) {
+            return false;
+        }
+
         return app(PermissionService::class)->canResource($user, 'users', 'update');
     }
 
     public function delete(User $user, User $model): bool
     {
+        if (! $user->canManageSuperAdminAccount($model)) {
+            return false;
+        }
+
         return app(PermissionService::class)->canResource($user, 'users', 'delete');
     }
 
     public function restore(User $user, User $model): bool
     {
+        if (! $user->canManageSuperAdminAccount($model)) {
+            return false;
+        }
+
         return app(PermissionService::class)->canResource($user, 'users', 'restore');
     }
 
     public function forceDelete(User $user, User $model): bool
     {
+        if (! $user->canManageSuperAdminAccount($model)) {
+            return false;
+        }
+
         return app(PermissionService::class)->canResource($user, 'users', 'forceDelete');
     }
 }

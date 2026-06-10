@@ -4,12 +4,14 @@ namespace App\Livewire\Forms;
 
 use App\Enums\FormType;
 use App\Livewire\Concerns\HandlesChurchForm;
+use App\Livewire\Concerns\PrefillsAuthenticatedMember;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class PrayerRequestForm extends Component
 {
     use HandlesChurchForm;
+    use PrefillsAuthenticatedMember;
 
     #[Validate('required|string|max:255')]
     public string $name = '';
@@ -22,6 +24,11 @@ class PrayerRequestForm extends Component
 
     #[Validate('boolean')]
     public bool $confidential = true;
+
+    public function mount(): void
+    {
+        $this->prefillFromAuthenticatedUser();
+    }
 
     protected function formType(): FormType
     {

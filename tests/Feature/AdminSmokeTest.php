@@ -49,11 +49,13 @@ class AdminSmokeTest extends TestCase
             AdminPanelConfig::url('sermons'),
             AdminPanelConfig::url('events'),
             AdminPanelConfig::url('ministries'),
-            AdminPanelConfig::url('leadership-members'),
             AdminPanelConfig::url('gallery-albums'),
             AdminPanelConfig::url('gallery-photos'),
             AdminPanelConfig::url('form-submissions'),
             AdminPanelConfig::url('users'),
+            AdminPanelConfig::url('families'),
+            AdminPanelConfig::url('families/create'),
+            AdminPanelConfig::url('donations'),
             AdminPanelConfig::url('security-audit-logs'),
         ];
     }
@@ -86,11 +88,11 @@ class AdminSmokeTest extends TestCase
         $this->actingAs($editor)->get(AdminPanelConfig::url('pages/1/edit'))->assertForbidden();
     }
 
-    public function test_viewer_cannot_access_role_permissions(): void
+    public function test_editor_cannot_access_role_permissions(): void
     {
-        $viewer = User::factory()->create(['role' => UserRole::Viewer]);
+        $editor = User::factory()->create(['role' => UserRole::Editor]);
 
-        $this->actingAs($viewer)->get(AdminPanelConfig::url('role-permissions'))->assertForbidden();
+        $this->actingAs($editor)->get(AdminPanelConfig::url('role-permissions'))->assertForbidden();
     }
 
     public function test_super_admin_can_open_admin_create_forms(): void
@@ -107,9 +109,10 @@ class AdminSmokeTest extends TestCase
             'gallery-albums/create',
             'gallery-photos/create',
             'resources/create',
-            'leadership-members/create',
             'roles/create',
             'users/create',
+            'families/create',
+            'donations/create',
         ];
 
         foreach ($createPaths as $suffix) {
@@ -133,7 +136,6 @@ class AdminSmokeTest extends TestCase
             'gallery-albums/1/edit',
             'gallery-photos/1/edit',
             'resources/1/edit',
-            'leadership-members/1/edit',
             'roles/1/edit',
         ];
 

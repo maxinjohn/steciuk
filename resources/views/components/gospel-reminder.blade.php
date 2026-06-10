@@ -9,8 +9,6 @@
         <div class="gospel-reminder-copy">
             @if ($gospelReminderKicker ?? null)
                 <p class="gospel-reminder-kicker">{{ $gospelReminderKicker }}</p>
-            @else
-                <p class="gospel-reminder-kicker">For the Word of God · and the testimony of Jesus Christ</p>
             @endif
             <p class="gospel-reminder-text">{{ $siteMotto ?? 'For the Word of God and for the testimony of Jesus Christ' }}</p>
         </div>

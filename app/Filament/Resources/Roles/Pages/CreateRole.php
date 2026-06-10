@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Roles\Pages;
 
+use App\Enums\AdminPermission;
 use App\Filament\Resources\Roles\RoleResource;
+use App\Models\Setting;
 use App\Services\PermissionService;
 use App\Services\SecurityLogger;
 use Filament\Resources\Pages\CreateRecord;
@@ -31,7 +33,7 @@ class CreateRole extends CreateRecord
             ->map(fn () => true)
             ->all();
 
-        $labels = array_keys(\App\Enums\AdminPermission::labels());
+        $labels = array_keys(AdminPermission::labels());
         $matrix = [
             $this->record->slug => collect($labels)
                 ->mapWithKeys(fn (string $key) => [$key => isset($selected[$key])])
@@ -39,7 +41,7 @@ class CreateRole extends CreateRecord
         ];
 
         app(PermissionService::class)->saveRolePermissions($matrix);
-        \App\Models\Setting::forgetCache();
+        Setting::forgetCache();
 
         SecurityLogger::info('role_created', auth()->id(), [
             'role' => $this->record->slug,

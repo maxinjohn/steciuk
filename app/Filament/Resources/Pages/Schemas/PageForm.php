@@ -37,7 +37,7 @@ class PageForm
                                         }
 
                                         if ($record?->contentBlocks()->exists()) {
-                                            return 'This page is built from '. $record->contentBlocks()->count() .' section(s). Edit each section in the Page Sections panel below — headlines, buttons, stats, and quotes live there.';
+                                            return 'This page is built from '.$record->contentBlocks()->count().' section(s). Edit each section in the Page Sections panel below — headlines, buttons, stats, and quotes live there.';
                                         }
 
                                         if ($record?->is_home || $record?->template === 'home') {
@@ -131,7 +131,7 @@ class PageForm
                                     ->rows(4)
                                     ->helperText('Stored for reference only. Public custom JS is blocked for security.')
                                     ->visible(fn (): bool => (bool) config('security.allow_page_custom_js')
-                                        && auth()->user()?->isSuperAdmin()),
+                                        && auth()->user()?->hasFullPanelAccess()),
                             ]),
                         Tab::make('SEO')
                             ->icon('heroicon-o-magnifying-glass')

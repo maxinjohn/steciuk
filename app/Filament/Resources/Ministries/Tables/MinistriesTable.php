@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Ministries\Tables;
 
+use App\Filament\Support\CompactTableActions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Table;
 
 class MinistriesTable
@@ -14,38 +14,34 @@ class MinistriesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('sort_order')
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('slug')
-                    ->searchable(),
-                ImageColumn::make('featured_image'),
-                TextColumn::make('contact_person')
-                    ->searchable(),
-                TextColumn::make('contact_email')
-                    ->searchable(),
-                TextColumn::make('meeting_time')
+                    ->searchable()
+                    ->wrap()
+                    ->description(fn ($record): ?string => $record->meeting_time),
+                TextColumn::make('status')
+                    ->badge()
                     ->searchable(),
                 TextColumn::make('sort_order')
+                    ->label('Order')
                     ->numeric()
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->searchable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('slug')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('contact_person')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
             ])
             ->recordActions([
-                EditAction::make(),
-            ])
+                CompactTableActions::editButton(),
+            ], RecordActionsPosition::AfterColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

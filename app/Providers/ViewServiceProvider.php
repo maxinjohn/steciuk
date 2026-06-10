@@ -5,7 +5,9 @@ namespace App\Providers;
 use App\Enums\MenuLocation;
 use App\Models\Setting;
 use App\Services\MenuCache;
+use App\Services\ServiceLocations;
 use App\Support\FaithContent;
+use App\Support\UkAddressFormatter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,7 +30,8 @@ class ViewServiceProvider extends ServiceProvider
                     'siteMotto' => $settings['motto'] ?? 'For the Word of God and for the testimony of Jesus Christ',
                     'siteEmail' => $settings['contact_email'] ?? null,
                     'sitePhone' => $settings['phone'] ?? null,
-                    'siteAddress' => $settings['main_address'] ?? null,
+                    'siteAddress' => UkAddressFormatter::fromSettings($settings),
+                    'siteAddressSchema' => UkAddressFormatter::schemaOrgFromSettings($settings),
                     'charityNumber' => $settings['charity_number'] ?? null,
                     'siteLogo' => $settings['logo'] ?? null,
                     'siteFavicon' => $settings['favicon'] ?? null,
@@ -66,7 +69,7 @@ class ViewServiceProvider extends ServiceProvider
                     'contactOfficeIntro' => $settings['contact_office_intro'] ?? 'Questions about worship, Holy Communion, prayer, or joining our parish family — we would love to hear from you.',
                     'contactFormHeading' => $settings['contact_form_heading'] ?? 'Send a Message',
                     'contactFormIntro' => $settings['contact_form_intro'] ?? 'Whether you need pastoral support, information about Holy Communion, or wish to join our parish — write to us and we will respond as soon as we can.',
-                    'serviceLocations' => \App\Services\ServiceLocations::names(),
+                    'serviceLocations' => ServiceLocations::names(),
                     'headerMenu' => MenuCache::load(MenuLocation::Header),
                     'footerMenu' => MenuCache::load(MenuLocation::Footer),
                     'mobileMenu' => MenuCache::load(MenuLocation::Mobile),

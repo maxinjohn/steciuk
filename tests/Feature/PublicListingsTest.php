@@ -38,15 +38,15 @@ class PublicListingsTest extends TestCase
             ->assertOk();
     }
 
-    public function test_leadership_page_shows_directory(): void
+    public function test_leadership_page_shows_content(): void
     {
         config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
         $this->seed(ReferenceDataSeeder::class);
 
         $this->get('/leadership')
             ->assertOk()
-            ->assertSee('UK Parish Vicar', false)
-            ->assertSee('leadership-grid', false);
+            ->assertSee('parish committee', false)
+            ->assertDontSee('leadership-grid', false);
     }
 
     public function test_listing_pages_include_scripture_ribbon(): void

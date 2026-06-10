@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Setting;
 use App\Support\ReferenceSiteContent;
 use App\Support\SeedConfig;
+use App\Support\UkAddressFormatter;
 use Illuminate\Database\Seeder;
 
 class SettingsSeeder extends Seeder
@@ -12,6 +13,14 @@ class SettingsSeeder extends Seeder
     public function run(): void
     {
         $reference = ReferenceSiteContent::settings();
+        $contactAddress = [
+            'contact_address_line_1' => $reference['contact_address_line_1']['value'],
+            'contact_address_line_2' => $reference['contact_address_line_2']['value'],
+            'contact_city' => $reference['contact_city']['value'],
+            'contact_county' => $reference['contact_county']['value'],
+            'contact_postcode' => $reference['contact_postcode']['value'],
+            'contact_country' => $reference['contact_country']['value'],
+        ];
 
         $settings = [
             ['key' => 'church_name', 'value' => $reference['church_name']['value'], 'group' => 'general'],
@@ -19,7 +28,13 @@ class SettingsSeeder extends Seeder
             ['key' => 'contact_email', 'value' => $reference['contact_email']['value'], 'group' => 'contact'],
             ['key' => 'phone', 'value' => $reference['phone']['value'], 'group' => 'contact'],
             ['key' => 'charity_number', 'value' => $reference['charity_number']['value'], 'group' => 'contact'],
-            ['key' => 'main_address', 'value' => $reference['main_address']['value'], 'group' => 'contact'],
+            ['key' => 'contact_address_line_1', 'value' => $contactAddress['contact_address_line_1'], 'group' => 'contact'],
+            ['key' => 'contact_address_line_2', 'value' => $contactAddress['contact_address_line_2'], 'group' => 'contact'],
+            ['key' => 'contact_city', 'value' => $contactAddress['contact_city'], 'group' => 'contact'],
+            ['key' => 'contact_county', 'value' => $contactAddress['contact_county'], 'group' => 'contact'],
+            ['key' => 'contact_postcode', 'value' => $contactAddress['contact_postcode'], 'group' => 'contact'],
+            ['key' => 'contact_country', 'value' => $contactAddress['contact_country'], 'group' => 'contact'],
+            ['key' => 'main_address', 'value' => UkAddressFormatter::fromSettings($contactAddress) ?? $reference['main_address']['value'], 'group' => 'contact'],
             ['key' => 'facebook', 'value' => 'https://facebook.com/steciuk', 'group' => 'social'],
             ['key' => 'instagram', 'value' => 'https://instagram.com/steciuk', 'group' => 'social'],
             ['key' => 'youtube', 'value' => 'https://youtube.com/@steciuk', 'group' => 'social'],

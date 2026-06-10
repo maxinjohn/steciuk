@@ -3,18 +3,20 @@
 namespace Tests\Feature;
 
 use App\Enums\UserRole;
+use App\Filament\Pages\RolePermissions;
+use App\Filament\Resources\Roles\Pages\EditRole;
+use App\Filament\Resources\Roles\Pages\ListRoles;
+use App\Filament\Resources\Users\Pages\EditUser;
+use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\AdminPanelConfig;
 use App\Support\SeedConfig;
 use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
-use App\Filament\Resources\Roles\Pages\EditRole;
-use App\Filament\Resources\Roles\Pages\ListRoles;
-use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Filament\Pages\RolePermissions;
 use Tests\TestCase;
 
 class TeamAdminPagesTest extends TestCase
@@ -54,8 +56,12 @@ class TeamAdminPagesTest extends TestCase
         $this->artisan('site:ensure-roles', ['--force' => true])
             ->assertSuccessful();
 
-        $this->assertGreaterThanOrEqual(3, Role::query()->count());
+        $this->assertSame(4, Role::query()->count());
         $this->assertDatabaseHas('roles', ['slug' => UserRole::SuperAdmin->value]);
+        $this->assertDatabaseHas('roles', ['slug' => UserRole::Member->value]);
+        $this->assertDatabaseHas('roles', ['slug' => UserRole::Admin->value]);
+        $this->assertDatabaseHas('roles', ['slug' => UserRole::Editor->value]);
+        $this->assertDatabaseMissing('roles', ['slug' => 'viewer']);
     }
 
     public function test_users_list_works_when_roles_table_is_empty(): void
@@ -67,7 +73,8 @@ class TeamAdminPagesTest extends TestCase
         $this->actingAs($admin)
             ->get(AdminPanelConfig::url('users'))
             ->assertOk()
-            ->assertSee('Site Administrator', false);
+            ->assertSee('Site', false)
+            ->assertSee('Administrator', false);
 
         Livewire::actingAs($admin)->test(ListUsers::class)->assertOk();
     }
@@ -101,7 +108,7 @@ class TeamAdminPagesTest extends TestCase
         ]);
 
         Livewire::actingAs($admin)
-            ->test(\App\Filament\Resources\Users\Pages\EditUser::class, ['record' => $admin->getRouteKey()])
+            ->test(EditUser::class, ['record' => $admin->getRouteKey()])
             ->fillForm([
                 'password' => 'NewSecurePass1!',
             ])
@@ -110,6 +117,6 @@ class TeamAdminPagesTest extends TestCase
 
         $admin->refresh();
 
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('NewSecurePass1!', $admin->password));
+        $this->assertTrue(Hash::check('NewSecurePass1!', $admin->password));
     }
 }

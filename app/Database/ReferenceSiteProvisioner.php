@@ -2,6 +2,7 @@
 
 namespace App\Database;
 
+use App\Enums\AccountStatus;
 use App\Enums\UserRole;
 use App\Models\Page;
 use App\Models\User;
@@ -46,11 +47,18 @@ class ReferenceSiteProvisioner
 
         $user = User::query()->firstOrNew(['email' => $email]);
 
-        $user->fill([
+        $attributes = [
             'name' => $user->name ?: 'Site Administrator',
             'role' => UserRole::SuperAdmin,
             'email_verified_at' => $user->email_verified_at ?? now(),
-        ]);
+        ];
+
+        if (Schema::hasColumn('users', 'account_status')) {
+            $attributes['account_status'] = AccountStatus::Approved->value;
+            $attributes['approved_at'] = $user->approved_at ?? now();
+        }
+
+        $user->fill($attributes);
 
         if (! $user->exists) {
             $user->password = 'password';

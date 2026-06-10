@@ -23,7 +23,7 @@ class ServiceResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Worship;
 
-    protected static ?string $navigationLabel = 'Worship Services';
+    protected static ?string $navigationLabel = 'Worship services';
 
     protected static ?string $modelLabel = 'Worship Service';
 

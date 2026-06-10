@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\User;
 use App\Support\AdminPanelConfig;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Tests\TestCase;
 
@@ -33,9 +34,9 @@ class ErrorPagesTest extends TestCase
 
     public function test_403_uses_fancy_error_page(): void
     {
-        $viewer = User::factory()->create(['role' => UserRole::Viewer]);
+        $editor = User::factory()->create(['role' => UserRole::Editor]);
 
-        $response = $this->actingAs($viewer)->get(AdminPanelConfig::url('role-permissions'));
+        $response = $this->actingAs($editor)->get(AdminPanelConfig::url('role-permissions'));
 
         $response->assertForbidden();
         $response->assertSee('Access denied', false);
@@ -44,7 +45,7 @@ class ErrorPagesTest extends TestCase
 
     public function test_401_uses_fancy_error_page_for_protected_public_route(): void
     {
-        \Illuminate\Support\Facades\Route::get('/__test/unauthorized', function () {
+        Route::get('/__test/unauthorized', function () {
             abort(401);
         });
 
@@ -57,7 +58,7 @@ class ErrorPagesTest extends TestCase
 
     public function test_419_uses_fancy_error_page(): void
     {
-        \Illuminate\Support\Facades\Route::get('/__test/page-expired', function () {
+        Route::get('/__test/page-expired', function () {
             abort(419);
         });
 
@@ -70,7 +71,7 @@ class ErrorPagesTest extends TestCase
 
     public function test_429_uses_fancy_error_page_with_retry_hint(): void
     {
-        \Illuminate\Support\Facades\Route::get('/__test/rate-limited', function () {
+        Route::get('/__test/rate-limited', function () {
             throw new TooManyRequestsHttpException(90, 'Slow down');
         });
 
@@ -83,7 +84,7 @@ class ErrorPagesTest extends TestCase
 
     public function test_500_uses_fancy_error_page_without_leaking_details(): void
     {
-        \Illuminate\Support\Facades\Route::get('/__test/broken', function () {
+        Route::get('/__test/broken', function () {
             throw new \RuntimeException('Secret internals');
         });
 
@@ -97,7 +98,7 @@ class ErrorPagesTest extends TestCase
 
     public function test_503_uses_fancy_error_page(): void
     {
-        \Illuminate\Support\Facades\Route::get('/__test/maintenance', function () {
+        Route::get('/__test/maintenance', function () {
             abort(503);
         });
 

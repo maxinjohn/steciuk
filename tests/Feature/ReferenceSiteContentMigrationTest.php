@@ -129,6 +129,15 @@ class ReferenceSiteContentMigrationTest extends TestCase
         $this->assertStringContainsString('What We Reject', $ourChurch);
         $this->assertStringContainsString('sola scriptura', strtolower($ourChurch));
         $this->assertSame('Abide in Christ', Setting::get('faith_sanctuary_kicker'));
+        $this->assertSame('STECI worldwide motto', Setting::get('gospel_reminder_kicker'));
         $this->assertStringContainsString('Assurance in Grace', Setting::get('faith_comfort_cards') ?? '');
+
+        $welcome = ReferenceSiteContent::welcome();
+        $this->assertStringNotContainsString('headquartered at', $welcome);
+        $this->assertStringContainsString('/our-church', $welcome);
+
+        $contact = ReferenceSiteContent::contact();
+        $this->assertStringNotContainsString('admin@steciuk.org', $contact);
+        $this->assertStringContainsString('1143030', $contact);
     }
 }

@@ -6,6 +6,7 @@ use App\Enums\AdminNavigationGroup;
 use App\Enums\AdminPermission;
 use App\Models\Role;
 use App\Services\PermissionService;
+use App\Services\SecurityLogger;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
@@ -27,9 +28,9 @@ class RolePermissions extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
-    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::TeamSecurity;
+    protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::Security;
 
-    protected static ?string $navigationLabel = 'Who Can Edit What';
+    protected static ?string $navigationLabel = 'Access permissions';
 
     protected static ?int $navigationSort = 3;
 
@@ -48,7 +49,7 @@ class RolePermissions extends Page
     {
         $user = auth()->user();
 
-        return $user?->isSuperAdmin()
+        return $user?->hasFullPanelAccess()
             || $user?->hasAdminPermission(AdminPermission::SettingsPermissions);
     }
 
@@ -89,14 +90,14 @@ class RolePermissions extends Page
 
             $service->saveRolePermissions($matrix);
 
-            \App\Services\SecurityLogger::info('role_permissions_updated', auth()->id());
+            SecurityLogger::info('role_permissions_updated', auth()->id());
 
             $this->commitDatabaseTransaction();
 
             Notification::make()
                 ->success()
                 ->title('Role permissions saved')
-                ->body('Editors and viewers will receive these privileges on their next request.')
+                ->body('Editors and custom roles will receive these privileges on their next request.')
                 ->send();
         } catch (\Throwable $exception) {
             $this->rollBackDatabaseTransaction();
@@ -132,7 +133,7 @@ class RolePermissions extends Page
         return $schema
             ->components([
                 Section::make('Super Admin')
-                    ->description('Super admins always have full access. Configure privileges for other roles below, or use Roles & Permissions for custom roles.')
+                    ->description('Super admins always have full access. Configure privileges for other roles below, or use Roles for custom roles.')
                     ->schema([]),
                 Tabs::make('Roles')
                     ->tabs($tabs),

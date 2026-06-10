@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Filament\Support;
+
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+
+class ResourceFormTabs
+{
+    /**
+     * Vertical, query-persisted tabs for large create/edit resource forms.
+     *
+     * @param  array<Tab>  $tabs
+     */
+    public static function make(string $label, array $tabs, string $queryKey = 'tab'): Tabs
+    {
+        return Tabs::make($label)
+            ->tabs($tabs)
+            ->vertical()
+            ->contained(false)
+            ->persistTabInQueryString($queryKey)
+            ->extraAttributes(['class' => 'admin-form-tabs resource-form-tabs'])
+            ->columnSpanFull();
+    }
+}

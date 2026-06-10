@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources\Roles\Tables;
 
+use App\Filament\Support\CompactTableActions;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\RecordActionsPosition;
@@ -21,30 +20,32 @@ class RolesTable
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->wrap(),
+                    ->wrap()
+                    ->description(fn ($record): ?string => $record->description),
                 TextColumn::make('slug')
                     ->badge()
                     ->color('gray')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('description')
                     ->limit(50)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_system')
                     ->label('Built-in')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('grants_full_access')
                     ->label('Full access')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('users_count')
                     ->counts('users')
                     ->label('Members')
-                    ->sortable(),
+                    ->sortable()
+                    ->badge()
+                    ->color('gray'),
             ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ], RecordActionsPosition::AfterColumns)
-            ->actionsColumnLabel('Actions')
+            ->recordActions(CompactTableActions::editWithDelete(), RecordActionsPosition::AfterColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

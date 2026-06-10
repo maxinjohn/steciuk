@@ -18,6 +18,14 @@
                 <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{{ $message }}</div>
             @enderror
 
+            @guest
+                <p class="rounded-xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-ink-muted">
+                    Already part of the parish online community?
+                    <a href="{{ route('register') }}" class="text-brand hover:underline">Create a member account</a>
+                    or <a href="{{ route('login') }}" class="text-brand hover:underline">sign in</a> to pre-fill this form.
+                </p>
+            @endguest
+
             <div>
                 <label for="member-name" class="form-label">Full Name <span class="text-red-600" aria-hidden="true">*</span></label>
                 <input type="text" id="member-name" wire:model.blur="name" class="form-input" required autocomplete="name" aria-required="true" @error('name') aria-invalid="true" aria-describedby="member-name-error" @enderror>
@@ -38,20 +46,26 @@
             </div>
 
             <div>
-                <label for="member-address" class="form-label">Address</label>
-                <input type="text" id="member-address" wire:model.blur="address" class="form-input" autocomplete="street-address" @error('address') aria-invalid="true" aria-describedby="member-address-error" @enderror>
-                @error('address')<p id="member-address-error" class="form-error" role="alert">{{ $message }}</p>@enderror
+                <label for="member-dob" class="form-label">Date of birth</label>
+                <input type="date" id="member-dob" wire:model.blur="date_of_birth" class="form-input" @error('date_of_birth') aria-invalid="true" aria-describedby="member-dob-error" @enderror>
+                @error('date_of_birth')<p id="member-dob-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
+
+            <x-uk-address-fields
+                id-prefix="member"
+                :postcode-lookup-message="$postcodeLookupMessage"
+                :postcode-lookup-error="$postcodeLookupError"
+                :postcode-address-options="$postcodeAddressOptions"
+                :selected-address-id="$selectedAddressId"
+            />
 
             <div>
                 <label for="member-location" class="form-label">Preferred Worship Location</label>
                 <select id="member-location" wire:model.blur="location" class="form-input" @error('location') aria-invalid="true" aria-describedby="member-location-error" @enderror>
                     <option value="">Select a location</option>
-                    <option value="Manchester">Manchester</option>
-                    <option value="Leicester">Leicester</option>
-                    <option value="Dartford">Dartford</option>
-                    <option value="Sunderland">Sunderland</option>
-                    <option value="Bristol">Bristol</option>
+                    @foreach ($worshipLocations as $value => $label)
+                        <option value="{{ $value }}">{{ $label }}</option>
+                    @endforeach
                 </select>
                 @error('location')<p id="member-location-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>

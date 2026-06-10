@@ -10,7 +10,7 @@ class RolePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isSuperAdmin()
+        return $user->hasFullPanelAccess()
             || $user->hasAdminPermission(AdminPermission::SettingsPermissions);
     }
 

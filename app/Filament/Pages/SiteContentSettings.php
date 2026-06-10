@@ -4,7 +4,10 @@ namespace App\Filament\Pages;
 
 use App\Enums\AdminNavigationGroup;
 use App\Enums\AdminPermission;
+use App\Filament\Support\SettingsFormTabs;
 use App\Models\Setting;
+use App\Services\SecurityLogger;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -16,9 +19,9 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use BackedEnum;
 
 class SiteContentSettings extends Page
 {
@@ -26,9 +29,9 @@ class SiteContentSettings extends Page
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::SiteSettings;
+    protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::SiteSettings;
 
-    protected static ?string $navigationLabel = 'Public Site Copy';
+    protected static ?string $navigationLabel = 'Public site copy';
 
     protected static ?int $navigationSort = 2;
 
@@ -40,7 +43,7 @@ class SiteContentSettings extends Page
     {
         $user = auth()->user();
 
-        return $user?->isSuperAdmin()
+        return $user?->hasFullPanelAccess()
             || $user?->hasAdminPermission(AdminPermission::SettingsChurch);
     }
 
@@ -92,6 +95,8 @@ class SiteContentSettings extends Page
 
             $this->commitDatabaseTransaction();
 
+            SecurityLogger::logSettingsSaved('Public site content settings');
+
             Notification::make()
                 ->success()
                 ->title('Public site copy saved')
@@ -112,65 +117,83 @@ class SiteContentSettings extends Page
     {
         return $schema
             ->components([
-                Section::make('Announcement ribbon')
-                    ->description('Optional banner at the top of every public page — great for Holy Week, guest preachers, or parish news.')
-                    ->schema([
-                        Toggle::make('site_announcement_enabled')
-                            ->label('Show announcement ribbon')
-                            ->live(),
-                        TextInput::make('site_announcement_text')
-                            ->label('Announcement text')
-                            ->maxLength(240)
-                            ->columnSpanFull(),
-                        TextInput::make('site_announcement_link')
-                            ->label('Link URL')
-                            ->url(),
-                        TextInput::make('site_announcement_link_label')
-                            ->label('Link label')
-                            ->default('Learn more'),
-                    ]),
-                Section::make('Worship & listings')
-                    ->schema([
-                        TextInput::make('service_times_heading')
-                            ->default('Service Times'),
-                        Textarea::make('service_times_intro')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                        TextInput::make('events_list_heading')
-                            ->default('Upcoming Events'),
-                        Textarea::make('events_list_intro')
-                            ->rows(2)
-                            ->columnSpanFull(),
-                        TextInput::make('sermons_list_heading')
-                            ->default('Sermons & Preaching'),
-                        Textarea::make('sermons_list_intro')
-                            ->rows(2)
-                            ->columnSpanFull(),
-                    ]),
-                Section::make('Prayer & giving')
-                    ->schema([
-                        TextInput::make('prayer_request_heading')
-                            ->default('Prayer Request'),
-                        Textarea::make('prayer_request_intro')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                        TextInput::make('give_button_label')
-                            ->default('Give')
-                            ->maxLength(40),
-                        Textarea::make('give_page_intro')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                    ]),
-                Section::make('Footer extras')
-                    ->schema([
-                        TextInput::make('footer_tagline')
-                            ->label('Footer tagline')
-                            ->columnSpanFull(),
-                        TextInput::make('footer_copyright')
-                            ->label('Copyright line')
-                            ->placeholder('© {year} St. Thomas Evangelical Church of India – UK Parish')
-                            ->columnSpanFull(),
-                    ]),
+                SettingsFormTabs::make('Public site copy', [
+                    Tab::make('Announcement')
+                        ->icon('heroicon-o-megaphone')
+                        ->schema([
+                            Section::make('Announcement ribbon')
+                                ->description('Optional banner at the top of every public page — great for Holy Week, guest preachers, or parish news.')
+                                ->schema([
+                                    Toggle::make('site_announcement_enabled')
+                                        ->label('Show announcement ribbon')
+                                        ->live(),
+                                    TextInput::make('site_announcement_text')
+                                        ->label('Announcement text')
+                                        ->maxLength(240)
+                                        ->columnSpanFull(),
+                                    TextInput::make('site_announcement_link')
+                                        ->label('Link URL')
+                                        ->url(),
+                                    TextInput::make('site_announcement_link_label')
+                                        ->label('Link label')
+                                        ->default('Learn more'),
+                                ]),
+                        ]),
+                    Tab::make('Worship')
+                        ->icon('heroicon-o-calendar-days')
+                        ->schema([
+                            Section::make('Worship & listings')
+                                ->schema([
+                                    TextInput::make('service_times_heading')
+                                        ->default('Service Times'),
+                                    Textarea::make('service_times_intro')
+                                        ->rows(3)
+                                        ->columnSpanFull(),
+                                    TextInput::make('events_list_heading')
+                                        ->default('Upcoming Events'),
+                                    Textarea::make('events_list_intro')
+                                        ->rows(2)
+                                        ->columnSpanFull(),
+                                    TextInput::make('sermons_list_heading')
+                                        ->default('Sermons & Preaching'),
+                                    Textarea::make('sermons_list_intro')
+                                        ->rows(2)
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                    Tab::make('Prayer & giving')
+                        ->icon('heroicon-o-hand-raised')
+                        ->schema([
+                            Section::make('Prayer & giving')
+                                ->schema([
+                                    TextInput::make('prayer_request_heading')
+                                        ->default('Prayer Request'),
+                                    Textarea::make('prayer_request_intro')
+                                        ->rows(3)
+                                        ->columnSpanFull(),
+                                    TextInput::make('give_button_label')
+                                        ->default('Give')
+                                        ->maxLength(40),
+                                    Textarea::make('give_page_intro')
+                                        ->rows(3)
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                    Tab::make('Footer')
+                        ->icon('heroicon-o-bars-3-bottom-left')
+                        ->schema([
+                            Section::make('Footer extras')
+                                ->schema([
+                                    TextInput::make('footer_tagline')
+                                        ->label('Footer tagline')
+                                        ->columnSpanFull(),
+                                    TextInput::make('footer_copyright')
+                                        ->label('Copyright line')
+                                        ->placeholder('© {year} St. Thomas Evangelical Church of India – UK Parish')
+                                        ->columnSpanFull(),
+                                ]),
+                        ]),
+                ], 'content-tab'),
             ]);
     }
 

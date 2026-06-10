@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\Services\Tables;
 
+use App\Filament\Support\CompactTableActions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Table;
 
 class ServicesTable
@@ -13,51 +14,34 @@ class ServicesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('sort_order')
             ->columns([
                 TextColumn::make('title')
-                    ->searchable(),
-                TextColumn::make('location')
-                    ->searchable(),
-                TextColumn::make('address')
-                    ->searchable(),
-                TextColumn::make('service_day')
-                    ->searchable(),
-                TextColumn::make('service_time')
-                    ->searchable(),
-                TextColumn::make('frequency')
-                    ->searchable(),
-                TextColumn::make('language')
-                    ->searchable(),
-                TextColumn::make('map_link')
-                    ->searchable(),
-                TextColumn::make('online_stream_link')
-                    ->searchable(),
-                TextColumn::make('contact_person')
-                    ->searchable(),
-                TextColumn::make('contact_email')
-                    ->searchable(),
-                TextColumn::make('contact_phone')
+                    ->searchable()
+                    ->wrap()
+                    ->description(fn ($record): ?string => collect([
+                        $record->scheduleSummary(),
+                        $record->location,
+                    ])->filter()->implode(' · ')),
+                TextColumn::make('status')
+                    ->badge()
                     ->searchable(),
                 TextColumn::make('sort_order')
+                    ->label('Order')
                     ->numeric()
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->searchable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('language')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
             ])
             ->recordActions([
-                EditAction::make(),
-            ])
+                CompactTableActions::editButton(),
+            ], RecordActionsPosition::AfterColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

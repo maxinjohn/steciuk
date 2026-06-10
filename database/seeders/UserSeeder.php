@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AccountStatus;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Support\SeedConfig;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class UserSeeder extends Seeder
 {
@@ -33,6 +35,13 @@ class UserSeeder extends Seeder
             'role' => $role,
             'email_verified_at' => $user->email_verified_at ?? now(),
         ]);
+
+        if (Schema::hasColumn('users', 'account_status')) {
+            $user->fill([
+                'account_status' => AccountStatus::Approved->value,
+                'approved_at' => $user->approved_at ?? now(),
+            ]);
+        }
 
         if (! $user->exists || SeedConfig::shouldOverwritePasswords()) {
             $user->password = 'password';
