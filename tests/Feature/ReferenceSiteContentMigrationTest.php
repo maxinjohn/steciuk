@@ -112,4 +112,23 @@ class ReferenceSiteContentMigrationTest extends TestCase
                 ->exists(),
         );
     }
+
+    public function test_reference_content_has_no_steci_org_links(): void
+    {
+        ReferenceSiteContentMigrator::apply();
+
+        foreach (ReferenceSiteContent::pageBodies() as $slug => $body) {
+            $this->assertStringNotContainsString(
+                'steci.org',
+                $body,
+                "Page [{$slug}] must not link to steci.org",
+            );
+        }
+
+        $ourChurch = (string) Page::query()->where('slug', 'our-church')->value('content');
+        $this->assertStringContainsString('What We Reject', $ourChurch);
+        $this->assertStringContainsString('sola scriptura', strtolower($ourChurch));
+        $this->assertSame('Abide in Christ', Setting::get('faith_sanctuary_kicker'));
+        $this->assertStringContainsString('Assurance in Grace', Setting::get('faith_comfort_cards') ?? '');
+    }
 }

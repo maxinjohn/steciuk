@@ -21,8 +21,8 @@
     }
 
     $verse = $pool[(int) now()->format('w') % $pool->count()];
-    $kickerText = $kicker ?: 'In Christ\'s peace';
-    $noteText = $note ?: 'A quiet moment before you go — the Lord is near.';
+    $kickerText = $kicker ?: 'Abide in Christ';
+    $noteText = $note ?: 'Go in peace — the Lord goes with you. Grace and peace from our parish family.';
 @endphp
 
 <aside {{ $attributes->merge(['class' => 'sanctuary-peace']) }} aria-label="Scripture of peace">

@@ -10,13 +10,13 @@
         [
             'icon' => '🕊',
             'title' => 'Peace in Christ',
-            'text' => 'His peace guards heart and mind as you draw near in worship and prayer.',
+            'text' => 'His peace guards heart and mind — a gift for every believer who draws near in worship and prayer.',
             'ref' => 'Philippians 4:7',
         ],
         [
             'icon' => '🙏',
             'title' => 'Rest in Prayer',
-            'text' => 'Bring every burden to the Lord — our parish family prays with you.',
+            'text' => 'Bring every burden to the Lord. Our parish family intercedes with you in faith.',
             'ref' => 'Matthew 11:28',
             'link' => url('/prayer-request'),
             'linkLabel' => 'Submit a prayer request',
@@ -24,10 +24,18 @@
         [
             'icon' => '📖',
             'title' => 'Hope in Scripture',
-            'text' => 'Holy Scripture nourishes faith — through preaching, reading, and Holy Communion.',
+            'text' => 'Holy Scripture nourishes faith — through preaching, reading, and Holy Communion at the Lord\'s table.',
             'ref' => 'Romans 15:4',
             'link' => url('/sermons'),
             'linkLabel' => 'Listen to a sermon',
+        ],
+        [
+            'icon' => '✝',
+            'title' => 'Assurance in Grace',
+            'text' => 'Salvation is by grace through faith in Christ alone — not by works, but by the mercy of God.',
+            'ref' => 'Ephesians 2:8–9',
+            'link' => url('/our-church'),
+            'linkLabel' => 'Read our beliefs',
         ],
     ];
 
@@ -44,10 +52,10 @@
         <div class="heavenly-comfort-header">
             <p class="heavenly-comfort-kicker">
                 <span class="genz-kicker-dot" aria-hidden="true"></span>
-                {{ $kicker ?: 'Sanctuary for believers' }}
+                {{ $kicker ?: 'For every believer' }}
             </p>
-            <h2 class="heavenly-comfort-title">{{ $heading ?: 'Rest for the soul' }}</h2>
-            <p class="heavenly-comfort-subtitle">{{ $subheading ?: 'Gentle reminders of Christ’s presence — for worship, prayer, and daily faith' }}</p>
+            <h2 class="heavenly-comfort-title">{{ $heading ?: 'Rest in the Lord' }}</h2>
+            <p class="heavenly-comfort-subtitle">{{ $subheading ?: 'Scripture, prayer, and Holy Communion — anchors for daily faith in Christ' }}</p>
         </div>
         <div class="heavenly-comfort-grid" role="list">
             @foreach ($comforts as $item)
