@@ -14,7 +14,7 @@
         />
 
         <section class="page-section py-10 sm:py-14">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="bento-grid bento-grid--ministries">
                     @forelse ($ministries as $ministry)
                         <x-card
@@ -30,7 +30,6 @@
                                         <span>{{ strtoupper(substr($ministry->name, 0, 1)) }}</span>
                                     </div>
                                 @endif
-                                <div class="bento-tile-shade"></div>
                             </div>
                             <div class="bento-tile-body">
                                 <h2 class="bento-tile-title">{{ $ministry->name }}</h2>

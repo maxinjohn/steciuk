@@ -14,7 +14,7 @@
         />
 
         <section class="page-section py-10 sm:py-14">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="feed-grid feed-grid--news">
                     @forelse ($articles as $article)
                         <x-card
@@ -57,7 +57,7 @@
                 </div>
 
                 @if ($articles->hasPages())
-                    <div class="mt-10">{{ $articles->links() }}</div>
+                    <div class="site-pagination">{{ $articles->links() }}</div>
                 @endif
             </div>
         </section>

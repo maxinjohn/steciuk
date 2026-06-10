@@ -37,7 +37,7 @@
             </div>
 
             <div class="flex items-start gap-3">
-                <input type="checkbox" id="prayer-confidential" wire:model="confidential" class="mt-1 h-5 w-5 rounded border-navy/20 text-brand focus:ring-royal/20">
+                <input type="checkbox" id="prayer-confidential" wire:model="confidential" class="mt-1 h-5 w-5 rounded border-[var(--site-border)] text-brand focus:ring-[color-mix(in_srgb,var(--site-brand)_20%,transparent)]">
                 <label for="prayer-confidential" class="text-sm text-ink-muted">
                     Keep this request confidential (only shared with the prayer team)
                 </label>

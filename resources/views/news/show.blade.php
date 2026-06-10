@@ -33,21 +33,21 @@
     <article>
         <x-hero :title="$article->title" :subtitle="$article->excerpt" :image="$article->featured_image" size="small">
             @if ($article->published_at)
-                <time datetime="{{ $article->published_at->toIso8601String() }}" class="inline-flex items-center rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
+                <time datetime="{{ $article->published_at->toIso8601String() }}" class="hero-meta-chip">
                     {{ $article->published_at->format('j F Y') }}
                 </time>
             @endif
         </x-hero>
 
-        <section class="py-12 sm:py-16">
-            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
+            <div class="page-section-inner mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 @if ($article->category)
-                    <span class="mb-6 inline-block rounded-full bg-gold/15 px-4 py-1 text-sm font-medium text-brand-dark">{{ $article->category }}</span>
+                    <span class="site-category-pill">{{ $article->category }}</span>
                 @endif
 
-                <div class="prose-church">{!! safeHtml($article->content) !!}</div>
+                <div class="prose-church prose-church--page">{!! safeHtml($article->content) !!}</div>
 
-                <div class="mt-10 border-t border-navy/10 pt-8">
+                <div class="site-divider mt-10 pt-8">
                     <x-button href="{{ route('news.index') }}" variant="outline">← Back to News</x-button>
                 </div>
             </div>

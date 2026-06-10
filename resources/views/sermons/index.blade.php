@@ -14,7 +14,7 @@
         />
 
         <section class="page-section py-10 sm:py-14">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="sermon-stack">
                     @forelse ($sermons as $sermon)
                         <x-card class="sermon-card">
@@ -53,7 +53,7 @@
                 </div>
 
                 @if ($sermons->hasPages())
-                    <div class="mt-10">{{ $sermons->links() }}</div>
+                    <div class="site-pagination">{{ $sermons->links() }}</div>
                 @endif
             </div>
         </section>

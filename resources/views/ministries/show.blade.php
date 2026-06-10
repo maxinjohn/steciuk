@@ -14,35 +14,35 @@
         />
         <x-parish-action-strip class="!py-3" />
 
-        <section class="py-12 sm:py-16">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="grid gap-12 lg:grid-cols-3">
-                    <div class="lg:col-span-2">
+        <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
+            <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="article-layout">
+                    <div>
                         @if ($ministry->description)
-                            <div class="prose-church">{!! safeHtml($ministry->description) !!}</div>
+                            <div class="prose-church prose-church--page">{!! safeHtml($ministry->description) !!}</div>
                         @endif
                     </div>
 
-                    <aside class="space-y-6">
+                    <aside class="article-sidebar">
                         <x-card>
                             <h2 class="font-bold text-xl font-semibold text-ink">Ministry Details</h2>
-                            <dl class="mt-4 space-y-4 text-sm">
+                            <dl class="detail-dl mt-4">
                                 @if ($ministry->meeting_time)
                                     <div>
-                                        <dt class="font-medium text-ink-muted">Meeting Time</dt>
-                                        <dd class="mt-1 text-ink">{{ $ministry->meeting_time }}</dd>
+                                        <dt>Meeting Time</dt>
+                                        <dd>{{ $ministry->meeting_time }}</dd>
                                     </div>
                                 @endif
                                 @if ($ministry->contact_person)
                                     <div>
-                                        <dt class="font-medium text-ink-muted">Contact Person</dt>
-                                        <dd class="mt-1 text-ink">{{ $ministry->contact_person }}</dd>
+                                        <dt>Contact Person</dt>
+                                        <dd>{{ $ministry->contact_person }}</dd>
                                     </div>
                                 @endif
                                 @if ($ministry->contact_email)
                                     <div>
-                                        <dt class="font-medium text-ink-muted">Email</dt>
-                                        <dd class="mt-1"><a href="mailto:{{ $ministry->contact_email }}" class="text-brand hover:underline">{{ $ministry->contact_email }}</a></dd>
+                                        <dt>Email</dt>
+                                        <dd><a href="mailto:{{ $ministry->contact_email }}" class="text-brand hover:underline">{{ $ministry->contact_email }}</a></dd>
                                     </div>
                                 @endif
                             </dl>
@@ -59,7 +59,7 @@
                     </aside>
                 </div>
 
-                <div class="mt-10">
+                <div class="site-divider mt-10 pt-8">
                     <x-button href="{{ route('ministries.index') }}" variant="outline">← Back to Ministries</x-button>
                 </div>
             </div>

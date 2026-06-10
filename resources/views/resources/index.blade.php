@@ -14,7 +14,7 @@
         />
 
         <section class="page-section py-10 sm:py-14">
-            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="page-section-inner mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 @forelse ($resources as $category => $items)
                     <div class="resource-group">
                         <div class="genz-kicker mb-4">
