@@ -2405,15 +2405,14 @@ html.dark {
         flex-shrink: 0;
         font-size: 0.875rem;
         font-weight: 700;
-        color: var(--site-accent);
-        opacity: 0;
-        transform: translateX(-4px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        color: var(--site-brand);
+        opacity: 1;
+        transform: none;
+        transition: color 0.2s ease;
     }
 
     .parish-action-card:hover .parish-action-arrow {
-        opacity: 1;
-        transform: translateX(0);
+        color: var(--site-accent);
     }
 
     @media (min-width: 768px) and (max-width: 1023px) {
@@ -3193,15 +3192,14 @@ html.dark {
         font-size: 0.8125rem;
         font-weight: 800;
         letter-spacing: -0.01em;
-        color: var(--site-accent);
-        opacity: 0;
-        transform: translateX(-4px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        color: var(--site-brand);
+        opacity: 1;
+        transform: none;
+        transition: color 0.2s ease;
     }
 
     .feed-card:hover .feed-card-cta {
-        opacity: 1;
-        transform: translateX(0);
+        color: var(--site-accent);
     }
 
     .feed-empty {
@@ -4721,4 +4719,394 @@ html:not(.dark) .parish-action-arrow {
 
 html.dark .parish-action-arrow {
     color: var(--site-accent);
+}
+
+/* Site-wide page rhythm — heavenly sections, articles, pagination, FAQ */
+.page-section {
+    position: relative;
+    isolation: isolate;
+}
+
+.page-section::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--site-accent) 28%, var(--site-border)),
+        transparent
+    );
+    pointer-events: none;
+}
+
+.page-section-inner {
+    position: relative;
+    z-index: 1;
+}
+
+.page-section--blessed {
+    background:
+        radial-gradient(ellipse 90% 70% at 50% 0%, color-mix(in srgb, var(--site-accent) 7%, transparent), transparent 58%),
+        linear-gradient(180deg, color-mix(in srgb, var(--site-surface-2) 55%, var(--site-surface)), var(--site-surface));
+}
+
+.page-section--article .prose-church--page {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border-radius: 1.5rem;
+    border: 1px solid var(--site-border);
+    background: color-mix(in srgb, var(--site-surface) 94%, var(--site-surface-2));
+    box-shadow: var(--site-shadow-lg);
+}
+
+html.dark .page-section--article .prose-church--page {
+    background: color-mix(in srgb, var(--site-surface) 88%, black);
+}
+
+.prose-church--page {
+    font-size: clamp(1rem, 0.35vw + 0.95rem, 1.0625rem);
+}
+
+.prose-church--page > :first-child {
+    margin-top: 0;
+}
+
+.site-divider {
+    border-top: 1px solid var(--site-border);
+}
+
+.hero-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--site-hero-ink);
+    background: color-mix(in srgb, var(--site-hero-ink) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--site-hero-ink) 18%, transparent);
+    backdrop-filter: blur(8px);
+}
+
+.site-category-pill {
+    display: inline-flex;
+    margin-bottom: 1.25rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--site-brand) 88%, var(--site-ink));
+    background: color-mix(in srgb, var(--site-accent) 16%, var(--site-surface-2));
+    border: 1px solid color-mix(in srgb, var(--site-accent) 28%, var(--site-border));
+}
+
+html.dark .site-category-pill {
+    color: var(--site-hero-ink);
+    background: color-mix(in srgb, var(--site-accent) 14%, var(--site-surface-2));
+}
+
+.article-layout {
+    display: grid;
+    gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+    .article-layout {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        gap: 3rem;
+        align-items: start;
+    }
+}
+
+.article-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.detail-dl dt {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--site-accent);
+}
+
+.detail-dl dd {
+    margin-top: 0.25rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--site-ink);
+}
+
+.detail-dl > div + div {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--site-border);
+}
+
+.faq-heavenly-item {
+    overflow: hidden;
+    border-radius: 1.125rem;
+    border: 1px solid var(--site-border);
+    background: var(--site-surface);
+    box-shadow: var(--site-shadow-sm);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.faq-heavenly-item:has(.faq-heavenly-trigger[aria-expanded='true']) {
+    border-color: color-mix(in srgb, var(--site-accent) 35%, var(--site-border));
+    box-shadow: var(--site-shadow-lg);
+}
+
+.faq-heavenly-trigger {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.125rem 1.25rem;
+    text-align: left;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--site-ink);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.faq-heavenly-panel {
+    border-top: 1px solid var(--site-border);
+    padding: 0 1.25rem 1.125rem;
+}
+
+.gallery-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .gallery-photo-grid {
+        gap: 1rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .gallery-photo-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .gallery-photo-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.gallery-photo-btn {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 1.125rem;
+    border: 1px solid var(--site-border);
+    background: var(--site-surface-2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.gallery-photo-btn:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--site-accent) 35%, var(--site-border));
+    box-shadow: var(--site-shadow-lg);
+}
+
+.gallery-photo-btn:focus-visible {
+    outline: 2px solid var(--site-accent);
+    outline-offset: 2px;
+}
+
+.gallery-photo-btn img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+
+.gallery-photo-btn:hover img {
+    transform: scale(1.05);
+}
+
+.contact-office-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-office-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--site-accent), transparent);
+}
+
+.contact-form-card {
+    position: relative;
+}
+
+.site-pagination {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--site-border);
+}
+
+.site-pagination-nav {
+    width: 100%;
+}
+
+.site-pagination-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .site-pagination-mobile {
+        display: none;
+    }
+}
+
+.site-pagination-desktop {
+    display: none;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+@media (min-width: 640px) {
+    .site-pagination-desktop {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.site-pagination-summary {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--site-ink-muted);
+}
+
+.site-pagination-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    padding: 0.25rem;
+    background: color-mix(in srgb, var(--site-surface-2) 70%, var(--site-surface));
+    border: 1px solid var(--site-border);
+    box-shadow: var(--site-shadow-sm);
+}
+
+.site-pagination-btn,
+.site-pagination-page,
+.site-pagination-icon,
+.site-pagination-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: 0 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.site-pagination-btn {
+    flex: 1 1 0;
+    color: var(--site-ink);
+    background: var(--site-surface);
+    border: 1px solid var(--site-border);
+}
+
+.site-pagination-btn:hover {
+    color: var(--site-brand);
+    border-color: color-mix(in srgb, var(--site-accent) 35%, var(--site-border));
+}
+
+.site-pagination-btn--disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.site-pagination-page {
+    min-width: 2.5rem;
+    color: var(--site-ink-muted);
+}
+
+.site-pagination-page:hover {
+    color: var(--site-ink);
+    background: color-mix(in srgb, var(--site-accent) 10%, var(--site-surface));
+}
+
+.site-pagination-page--active {
+    color: var(--site-hero-ink);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--site-accent) 92%, white), var(--site-accent));
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--site-accent) 28%, transparent);
+}
+
+.site-pagination-icon {
+    min-width: 2.5rem;
+    padding: 0;
+    color: var(--site-ink-muted);
+}
+
+.site-pagination-icon:hover {
+    color: var(--site-brand);
+    background: color-mix(in srgb, var(--site-accent) 8%, var(--site-surface));
+}
+
+.site-pagination-icon--disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.site-pagination-ellipsis {
+    min-width: 2rem;
+    color: var(--site-ink-muted);
+    cursor: default;
+}
+
+.cta-gen-z--primary .section-title,
+.cta-gen-z--primary .section-subtitle {
+    position: relative;
+    z-index: 1;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .page-section--article .prose-church--page {
+        padding: 1.5rem;
+    }
+
+    .article-layout {
+        gap: 2rem;
+    }
+
+    .site-pagination-desktop {
+        flex-wrap: wrap;
+    }
 }

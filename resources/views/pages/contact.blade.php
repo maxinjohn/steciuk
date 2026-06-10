@@ -13,7 +13,7 @@
     />
 
     <section class="page-section py-10 sm:py-14">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid gap-12 lg:grid-cols-5">
                 <div class="lg:col-span-2 space-y-6">
                     <x-card class="contact-office-card">
@@ -81,7 +81,7 @@
 
                 <div class="lg:col-span-3">
                     @if ($page->content)
-                        <div class="prose-church mb-10">{!! safeHtml($page->content) !!}</div>
+                        <div class="prose-church prose-church--page mb-10">{!! safeHtml($page->content) !!}</div>
                     @endif
 
                     <x-card class="contact-form-card shadow-lg ring-1 ring-[var(--site-border)]">

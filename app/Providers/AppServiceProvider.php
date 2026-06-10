@@ -119,6 +119,9 @@ class AppServiceProvider extends ServiceProvider
                 }
             }
         );
+
+        \Illuminate\Pagination\Paginator::defaultView('vendor.pagination.heavenly');
+        \Illuminate\Pagination\Paginator::defaultSimpleView('vendor.pagination.heavenly');
     }
 
     private function applyCustomDataPaths(): void

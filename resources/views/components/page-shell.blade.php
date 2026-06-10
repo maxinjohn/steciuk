@@ -68,14 +68,14 @@
 {{ $slot }}
 
 @if ($showPageContent)
-    <section class="page-section py-10 sm:py-12 md:py-16 lg:py-20">
+    <section class="page-section page-section--article py-10 sm:py-12 md:py-16 lg:py-20">
         <div @class([
-            'mx-auto px-4 sm:px-6 lg:px-8',
+            'page-section-inner mx-auto px-4 sm:px-6 lg:px-8',
             'max-w-3xl' => ($page->layout_variant ?? 'standard') === 'standard',
             'max-w-5xl' => ($page->layout_variant ?? 'standard') === 'minimal',
             'max-w-7xl' => in_array($page->layout_variant ?? 'standard', ['bento', 'immersive'], true),
         ])>
-            <div class="prose-church animate-fade-up">{!! safeHtml($page->content) !!}</div>
+            <div class="prose-church prose-church--page animate-fade-up">{!! safeHtml($page->content) !!}</div>
         </div>
     </section>
 @endif

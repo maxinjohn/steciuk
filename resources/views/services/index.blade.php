@@ -15,7 +15,7 @@
         <x-worship-rhythm />
 
         <section class="page-section py-10 sm:py-14">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="location-grid">
                     @forelse ($services as $service)
                         <x-card class="location-card">

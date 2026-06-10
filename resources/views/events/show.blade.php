@@ -40,7 +40,7 @@
 @section('content')
     <article>
         <x-hero :title="$event->title" :subtitle="$event->location" :image="$event->featured_image" size="small">
-            <time datetime="{{ $event->starts_at->toIso8601String() }}" class="inline-flex items-center rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
+            <time datetime="{{ $event->starts_at->toIso8601String() }}" class="hero-meta-chip">
                 {{ $event->starts_at->format('l, j F Y · g:i A') }}
                 @if ($event->ends_at)
                     – {{ $event->ends_at->format('g:i A') }}
@@ -48,39 +48,39 @@
             </time>
         </x-hero>
 
-        <section class="py-12 sm:py-16">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="grid gap-12 lg:grid-cols-3">
-                    <div class="lg:col-span-2">
+        <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
+            <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="article-layout">
+                    <div>
                         @if ($event->description)
-                            <div class="prose-church">{!! safeHtml($event->description) !!}</div>
+                            <div class="prose-church prose-church--page">{!! safeHtml($event->description) !!}</div>
                         @endif
                     </div>
 
-                    <aside class="space-y-6">
+                    <aside class="article-sidebar">
                         <x-card>
                             <h2 class="font-bold text-xl font-semibold text-ink">Event Details</h2>
-                            <dl class="mt-4 space-y-4 text-sm">
+                            <dl class="detail-dl mt-4">
                                 <div>
-                                    <dt class="font-medium text-ink-muted">Date & Time</dt>
-                                    <dd class="mt-1 text-ink">{{ $event->starts_at->format('l, j F Y') }}<br>{{ $event->starts_at->format('g:i A') }}</dd>
+                                    <dt>Date & Time</dt>
+                                    <dd>{{ $event->starts_at->format('l, j F Y') }}<br>{{ $event->starts_at->format('g:i A') }}</dd>
                                 </div>
                                 @if ($event->location)
                                     <div>
-                                        <dt class="font-medium text-ink-muted">Location</dt>
-                                        <dd class="mt-1 text-ink">{{ $event->location }}</dd>
+                                        <dt>Location</dt>
+                                        <dd>{{ $event->location }}</dd>
                                     </div>
                                 @endif
                                 @if ($event->address)
                                     <div>
-                                        <dt class="font-medium text-ink-muted">Address</dt>
-                                        <dd class="mt-1 text-ink">{{ $event->address }}</dd>
+                                        <dt>Address</dt>
+                                        <dd>{{ $event->address }}</dd>
                                     </div>
                                 @endif
                                 @if ($event->category)
                                     <div>
-                                        <dt class="font-medium text-ink-muted">Category</dt>
-                                        <dd class="mt-1"><span class="rounded-full bg-gold/15 px-3 py-0.5 text-brand-dark">{{ $event->category }}</span></dd>
+                                        <dt>Category</dt>
+                                        <dd><span class="site-category-pill !mb-0">{{ $event->category }}</span></dd>
                                     </div>
                                 @endif
                             </dl>
@@ -102,7 +102,7 @@
                     </aside>
                 </div>
 
-                <div class="mt-10">
+                <div class="site-divider mt-10 pt-8">
                     <x-button href="{{ route('events.index') }}" variant="outline">← Back to Events</x-button>
                 </div>
             </div>

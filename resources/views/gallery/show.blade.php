@@ -13,14 +13,14 @@
     <x-parish-action-strip class="!py-3" />
 
     <section
-        class="py-12 sm:py-16"
+        class="page-section page-section--article py-10 sm:py-12 md:py-16"
         x-data="galleryLightbox()"
         @keydown.escape.window="lightbox = false"
         @keydown.arrow-right.window="if (lightbox) next()"
         @keydown.arrow-left.window="if (lightbox) prev()"
     >
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="gallery-photo-grid">
                 @foreach ($album->photos as $index => $photo)
                     @php
                         $variant = str_contains(strtolower($photo->title ?? ''), 'communion') ? 'communion' : (str_contains(strtolower($album->slug ?? ''), 'fellowship') ? 'fellowship' : 'worship');
@@ -29,7 +29,7 @@
                     @endphp
                     <button
                         type="button"
-                        class="group relative aspect-square overflow-hidden rounded-2xl bg-[var(--site-surface-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                        class="gallery-photo-btn group focus:outline-none"
                         data-gallery-photo
                         data-src="{{ $src }}"
                         data-title="{{ $photo->title ?? '' }}"
@@ -53,7 +53,7 @@
                 <p class="rounded-2xl bg-surface p-10 text-center text-ink-muted shadow-sm">No photos in this album yet.</p>
             @endif
 
-            <div class="mt-10">
+            <div class="site-divider mt-10 pt-8">
                 <x-button href="{{ route('gallery.index') }}" variant="outline">← Back to Gallery</x-button>
             </div>
         </div>

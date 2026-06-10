@@ -81,8 +81,8 @@
         @case('text_image')
         @case('image_text')
             @php $imageFirst = $type === 'image_text'; @endphp
-            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+            <section class="page-section py-12 sm:py-16 md:py-20 lg:py-24">
+                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16 {{ $imageFirst ? '' : '' }}">
                         @if ($imageFirst)
                             <div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--site-surface-2)] shadow-lg">
@@ -130,7 +130,7 @@
                 $isPrimary = $style === 'primary';
             @endphp
             <section class="page-section py-12 sm:py-16 md:py-20">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <div @class([
                         'cta-gen-z overflow-hidden rounded-3xl px-6 py-12 text-center sm:px-12 sm:py-16',
                         'cta-gen-z--primary' => $isPrimary,
@@ -158,7 +158,7 @@
         @case('ministry_cards')
             @php $items = $ministries->take($data['limit'] ?? 4); @endphp
             <section class="page-section py-12 sm:py-16 md:py-20">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <x-section-heading :title="$data['heading'] ?? 'Our Ministries'" :subtitle="$data['subheading'] ?? null" />
                     <div class="bento-grid bento-grid--ministries mt-8">
                         @forelse ($items as $ministry)
@@ -169,7 +169,6 @@
                                     @else
                                         <div class="bento-tile-fallback"><span>{{ substr($ministry->name, 0, 1) }}</span></div>
                                     @endif
-                                    <div class="bento-tile-shade"></div>
                                 </div>
                                 <div class="bento-tile-body">
                                     <span class="feed-sticker feed-sticker--inline">Ministry</span>
@@ -198,7 +197,7 @@
         @case('event_list')
             @php $items = $events->take($data['limit'] ?? 3); @endphp
             <section class="page-section py-12 sm:py-16 md:py-20">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <x-section-heading :title="$data['heading'] ?? 'Upcoming Events'" />
                     <div class="feed-grid mt-8">
                         @forelse ($items as $event)
@@ -247,7 +246,7 @@
         @case('sermon_list')
             @php $items = $sermons->take($data['limit'] ?? 3); @endphp
             <section class="page-section py-12 sm:py-16 md:py-20">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <x-section-heading :title="$data['heading'] ?? 'Recent Sermons'" />
                     <div class="sermon-stack mt-8">
                         @forelse ($items as $sermon)
@@ -288,7 +287,7 @@
         @case('gallery')
             @php $items = $albums->take($data['limit'] ?? 6); @endphp
             <section class="page-section py-12 sm:py-16 md:py-20">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     <x-section-heading :title="$data['heading'] ?? 'Gallery'" />
                     <div class="gallery-mosaic mt-8">
                         @forelse ($items as $album)
@@ -341,17 +340,17 @@
             @break
 
         @case('faq')
-            <section class="py-16 sm:py-20">
-                <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <section class="page-section page-section--blessed py-12 sm:py-16 md:py-20">
+                <div class="page-section-inner mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                     @if (! empty($data['heading']))
                         <x-section-heading :title="$data['heading']" />
                     @endif
-                    <div class="space-y-3" x-data="{ open: 0 }">
+                    <div class="faq-heavenly space-y-3" x-data="{ open: 0 }">
                         @foreach ($data['items'] ?? [] as $index => $item)
-                            <div class="overflow-hidden rounded-xl bg-surface shadow-sm ring-1 border border-[var(--site-border)]">
+                            <div class="faq-heavenly-item">
                                 <button
                                     type="button"
-                                    class="flex w-full items-center justify-between px-5 py-4 text-left font-medium text-ink"
+                                    class="faq-heavenly-trigger"
                                     @click="open = open === {{ $index }} ? null : {{ $index }}"
                                     :aria-expanded="open === {{ $index }}"
                                 >
@@ -363,10 +362,10 @@
                                     x-transition:enter="transition ease-out duration-200"
                                     x-transition:enter-start="opacity-0"
                                     x-transition:enter-end="opacity-100"
-                                    class="border-t border-navy/5 px-5 pb-4"
+                                    class="faq-heavenly-panel"
                                     x-cloak
                                 >
-                                    <div class="prose-church pt-3">{!! safeHtml($item['answer'] ?? '') !!}</div>
+                                    <div class="prose-church prose-church--compact pt-1">{!! safeHtml($item['answer'] ?? '') !!}</div>
                                 </div>
                             </div>
                         @endforeach
@@ -390,7 +389,7 @@
                 })->values();
             @endphp
             @if ($locationsData->isNotEmpty())
-                <section class="bg-surface py-12 sm:py-16 md:py-20" data-location-tabs>
+                <section class="page-section page-section--blessed py-12 sm:py-16 md:py-20" data-location-tabs>
                     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <x-section-heading :title="$data['heading'] ?? 'Locations'" :subtitle="$data['subheading'] ?? null" />
 
@@ -474,8 +473,8 @@
         @case('youtube')
             @php $embed = $youtubeEmbed($data['url'] ?? null); @endphp
             @if ($embed)
-                <section class="py-16 sm:py-20">
-                    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <section class="page-section py-16 sm:py-20">
+                    <div class="page-section-inner mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                         @if (! empty($data['heading']))
                             <x-section-heading :title="$data['heading']" :subtitle="$data['subheading'] ?? null" />
                         @endif
@@ -495,8 +494,8 @@
             @break
 
         @case('map')
-            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+            <section class="page-section py-12 sm:py-16 md:py-20 lg:py-24">
+                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     @if (! empty($data['heading']))
                         <x-section-heading :title="$data['heading']" />
                     @endif
@@ -514,8 +513,8 @@
             @break
 
         @case('contact')
-            <section class="py-16 sm:py-20">
-                <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+            <section class="page-section py-16 sm:py-20">
+                <div class="page-section-inner mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
                     @if (! empty($data['heading']))
                         <x-section-heading :title="$data['heading']" />
                     @endif
@@ -525,8 +524,8 @@
             @break
 
         @case('downloads')
-            <section class="py-12 sm:py-16 md:py-20 lg:py-24">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+            <section class="page-section py-12 sm:py-16 md:py-20 lg:py-24">
+                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
                     @if (! empty($data['heading']))
                         <x-section-heading :title="$data['heading']" />
                     @endif
@@ -542,10 +541,10 @@
         @default
             @if ($block->title)
                 <section class="py-12">
-                    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <x-section-heading :title="$block->title" />
                         @if (is_array($data) && ! empty($data['body']))
-                            <div class="prose-church mx-auto max-w-3xl">{!! safeHtml($data['body']) !!}</div>
+                            <div class="prose-church prose-church--page mx-auto max-w-3xl">{!! safeHtml($data['body']) !!}</div>
                         @endif
                     </div>
                 </section>
