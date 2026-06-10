@@ -14,10 +14,13 @@ class ReferenceSiteContentMigrator
 {
     public static function apply(): void
     {
+        ReferenceSiteProvisioner::ensureStructure();
+
         static::applySettings();
         static::applyPages();
         static::applyHomeContentBlocks();
         static::applyServices();
+        ReferenceMenuApplicator::apply();
 
         SiteCache::forgetAfterReferenceDataChange();
     }

@@ -19,10 +19,13 @@ class ChurchFormTest extends TestCase
     {
         parent::setUp();
 
-        User::factory()->create([
-            'email' => 'admin@steciuk.org',
-            'role' => UserRole::SuperAdmin,
-        ]);
+        User::query()->firstOrCreate(
+            ['email' => 'admin@steciuk.org'],
+            User::factory()->make([
+                'email' => 'admin@steciuk.org',
+                'role' => UserRole::SuperAdmin,
+            ])->getAttributes(),
+        );
 
         Setting::set('contact_email', 'admin@steciuk.org', 'contact');
     }

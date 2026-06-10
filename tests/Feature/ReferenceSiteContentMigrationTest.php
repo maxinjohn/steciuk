@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Database\ReferenceSiteContentMigrator;
+use App\Enums\MenuLocation;
 use App\Models\ContentBlock;
+use App\Models\MenuItem;
 use App\Models\Page;
 use App\Models\Service;
 use App\Models\Setting;
@@ -80,5 +82,34 @@ class ReferenceSiteContentMigrationTest extends TestCase
             ->value('content');
 
         $this->assertSame('Word · Worship · Witness', $hero['headline'] ?? null);
+    }
+
+    public function test_migrator_provisions_home_page_when_missing(): void
+    {
+        Page::query()->forceDelete();
+        ContentBlock::query()->delete();
+
+        ReferenceSiteContentMigrator::apply();
+
+        $this->assertTrue(Page::query()->where('slug', 'home')->where('is_home', true)->exists());
+        $this->assertSame('admin@steciuk.org', Setting::get('contact_email'));
+    }
+
+    public function test_migrator_ensures_footer_quick_links(): void
+    {
+        MenuItem::query()->where('menu_location', MenuLocation::Footer)->delete();
+
+        ReferenceSiteContentMigrator::apply();
+
+        $this->assertGreaterThanOrEqual(
+            5,
+            MenuItem::query()->where('menu_location', MenuLocation::Footer)->where('is_visible', true)->count(),
+        );
+        $this->assertTrue(
+            MenuItem::query()
+                ->where('menu_location', MenuLocation::Footer)
+                ->where('seed_key', 'service-times')
+                ->exists(),
+        );
     }
 }

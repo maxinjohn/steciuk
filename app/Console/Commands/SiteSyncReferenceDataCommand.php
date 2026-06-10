@@ -12,7 +12,7 @@ class SiteSyncReferenceDataCommand extends Command
     protected $signature = 'site:sync-reference-data
                             {--force : Run without confirmation in production}';
 
-    protected $description = 'Optional full reference reseed (menus, events, sample news). Routine content updates ship via migrations — not this command.';
+    protected $description = 'Legacy optional reseed. Prefer php artisan migrate for reference content updates.';
 
     public function handle(): int
     {

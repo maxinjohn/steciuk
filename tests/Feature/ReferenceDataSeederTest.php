@@ -131,10 +131,12 @@ class ReferenceDataSeederTest extends TestCase
 
     public function test_database_seeder_skips_when_mode_off(): void
     {
+        $pageCount = \App\Models\Page::query()->count();
+
         config(['site.seed.mode' => SeedConfig::MODE_OFF]);
 
         $this->seed();
 
-        $this->assertDatabaseCount('pages', 0);
+        $this->assertSame($pageCount, \App\Models\Page::query()->count());
     }
 }
