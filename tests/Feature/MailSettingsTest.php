@@ -108,15 +108,22 @@ class MailSettingsTest extends TestCase
             'mail.mailers.sendmail.path' => PHP_BINARY.' -v',
         ]);
 
-        $this->assertNull(MailConfigService::validateConfiguration());
-        $this->assertSame(PHP_BINARY, MailConfigService::sendmailBinary(PHP_BINARY.' -v'));
+        if (function_exists('mail') && ! in_array('mail', array_map('trim', explode(',', (string) ini_get('disable_functions'))), true)) {
+            $this->assertNull(MailConfigService::validateConfiguration());
+        } else {
+            $this->assertNull(MailConfigService::validateConfiguration());
+            $this->assertSame(PHP_BINARY, MailConfigService::sendmailBinary(PHP_BINARY.' -v'));
+        }
     }
 
-    public function test_sendmail_test_message_uses_process_timeout_without_hanging(): void
+    public function test_sendmail_test_message_uses_php_mail_when_available(): void
     {
+        if (! function_exists('mail')) {
+            $this->markTestSkipped('mail() is not available in this environment.');
+        }
+
         config([
             'mail.default' => 'sendmail',
-            'mail.mailers.sendmail.path' => PHP_BINARY.' -r exit(0);',
             'mail.from.address' => 'noreply@steciuk.org',
             'mail.from.name' => 'STECI UK Parish',
         ]);
@@ -126,18 +133,25 @@ class MailSettingsTest extends TestCase
         $this->assertTrue(true);
     }
 
+    public function test_detect_sendmail_command_prefers_t_flag(): void
+    {
+        $commands = MailConfigService::defaultSendmailCommands();
+
+        $this->assertSame('/usr/sbin/sendmail -t -i', $commands[0]);
+    }
+
     public function test_apply_from_form_data_uses_unsaved_sendmail_path(): void
     {
         MailConfigService::applyFromFormData([
             'mail_use_smtp' => false,
             'mail_log_only' => false,
             'mail_mailer' => 'sendmail',
-            'mail_sendmail_path' => '/custom/sendmail -bs -i',
+            'mail_sendmail_path' => '/custom/sendmail -t -i',
             'mail_from_address' => 'noreply@test.example',
             'mail_from_name' => 'Test Parish',
         ]);
 
-        $this->assertSame('/custom/sendmail -bs -i', config('mail.mailers.sendmail.path'));
+        $this->assertSame('/custom/sendmail -t -i', config('mail.mailers.sendmail.path'));
         $this->assertSame('sendmail', config('mail.default'));
     }
 

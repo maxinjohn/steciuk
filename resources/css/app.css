@@ -59,7 +59,8 @@
     --site-footer-bg: #1a2332;
     --site-footer-ink: #f5efe6;
     --site-footer-muted: rgba(245, 239, 230, 0.72);
-    --mobile-dock-height: calc(5.5rem + env(safe-area-inset-bottom));
+    --mobile-dock-bar-height: 3.875rem;
+    --mobile-dock-height: calc(var(--mobile-dock-bar-height) + env(safe-area-inset-bottom, 0px));
     color-scheme: light;
 }
 
@@ -205,6 +206,18 @@ html.dark {
         overflow: visible;
     }
 
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .site-header-nav {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .site-header-nav::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
     .site-logo-text {
         font-weight: 700;
         letter-spacing: -0.03em;
@@ -215,18 +228,30 @@ html.dark {
     .site-logo-stack {
         display: flex;
         flex-direction: column;
-        align-items: stretch;
-        gap: 0.3125rem;
+        align-items: flex-start;
+        gap: 0.1875rem;
         min-width: 0;
+        flex: 1;
     }
 
     .site-logo-line {
-        font-size: clamp(0.8125rem, 2.8vw, 1.125rem);
-        line-height: 1.1;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--site-ink);
+        font-size: clamp(0.6875rem, 3.1vw, 1.125rem);
+        line-height: 1.12;
         white-space: normal;
     }
 
-    @media (min-width: 480px) {
+    .site-logo-row {
+        display: block;
+    }
+
+    .site-logo-sub {
+        align-self: flex-start;
+    }
+
+    @media (min-width: 520px) {
         .site-logo-line {
             white-space: nowrap;
         }
@@ -242,10 +267,9 @@ html.dark {
     }
 
     .site-logo-sub {
-        align-self: center;
-        font-size: 0.75rem;
+        font-size: 0.625rem;
         font-weight: 700;
-        letter-spacing: 0.14em;
+        letter-spacing: 0.16em;
         text-transform: uppercase;
         color: var(--site-accent);
         line-height: 1;
@@ -881,7 +905,7 @@ html.dark {
         z-index: 100;
         inset-inline: 0;
         bottom: 0;
-        padding: 0 0.875rem calc(0.625rem + env(safe-area-inset-bottom));
+        padding: 0;
         pointer-events: none;
     }
 
@@ -889,34 +913,58 @@ html.dark {
         position: relative;
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        border-radius: 22px;
-        border: 1px solid var(--site-border);
-        background: color-mix(in srgb, var(--site-glass) 94%, transparent);
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        box-shadow: 0 12px 40px rgba(12, 10, 9, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        align-items: stretch;
+        min-height: var(--mobile-dock-bar-height);
+        margin: 0;
+        padding: 0.125rem 0.25rem env(safe-area-inset-bottom, 0px);
+        border: none;
+        border-top: 1px solid color-mix(in srgb, var(--site-accent) 30%, var(--site-border));
+        border-radius: 0;
+        background: color-mix(in srgb, var(--site-glass) 97%, var(--site-surface));
+        backdrop-filter: blur(18px) saturate(180%);
+        -webkit-backdrop-filter: blur(18px) saturate(180%);
+        box-shadow:
+            0 -12px 36px rgba(12, 10, 9, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
         pointer-events: auto;
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
+        contain: layout style paint;
+    }
+
+    .mobile-dock::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: 10%;
+        right: 10%;
+        height: 2px;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, transparent, var(--site-accent), transparent);
+        opacity: 0.92;
+        pointer-events: none;
     }
 
     .mobile-dock-item {
         position: relative;
+        z-index: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 0.25rem;
-        min-height: 3.625rem;
-        padding: 0.4375rem 0.25rem;
-        border-radius: 16px;
-        margin: 0.25rem 0.125rem;
+        gap: 0.1875rem;
+        min-height: calc(var(--mobile-dock-bar-height) - 0.25rem);
+        padding: 0.3125rem 0.125rem;
+        margin: 0;
+        border-radius: 14px;
         font-size: 0.625rem;
         font-weight: 700;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
         color: var(--site-ink-muted);
         transition: color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
     }
 
     .mobile-dock-item:active {
@@ -925,11 +973,19 @@ html.dark {
 
     .mobile-dock-item.is-active {
         color: var(--site-accent);
-        background: color-mix(in srgb, var(--site-accent) 14%, transparent);
+        background: color-mix(in srgb, var(--site-accent) 16%, transparent);
     }
 
     .mobile-dock-item.is-active::before {
-        display: none;
+        content: '✝';
+        position: absolute;
+        top: 0.1875rem;
+        right: 0.375rem;
+        font-size: 0.4375rem;
+        line-height: 1;
+        color: color-mix(in srgb, var(--site-accent) 70%, transparent);
+        opacity: 0.85;
+        pointer-events: none;
     }
 
     .mobile-dock-item.is-active svg {
@@ -945,7 +1001,7 @@ html.dark {
         padding-bottom: var(--mobile-dock-height);
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 768px) {
         .has-mobile-dock {
             padding-bottom: 0;
         }
@@ -955,7 +1011,7 @@ html.dark {
         padding-bottom: var(--mobile-dock-height);
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 768px) {
         .pb-dock {
             padding-bottom: 0;
         }
@@ -1509,9 +1565,11 @@ html.dark {
     }
 
     html.dark .mobile-dock {
-        background: color-mix(in srgb, var(--site-glass) 96%, transparent);
-        border-color: rgba(255, 255, 255, 0.1);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        background: color-mix(in srgb, var(--site-glass) 98%, var(--site-surface));
+        border-top-color: color-mix(in srgb, var(--site-accent) 35%, rgba(255, 255, 255, 0.08));
+        box-shadow:
+            0 -12px 40px rgba(0, 0, 0, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
     html.dark .mobile-dock-item.is-active {
@@ -1811,9 +1869,11 @@ html.dark {
     }
 
     html:not(.dark) .mobile-dock {
-        background: color-mix(in srgb, var(--site-glass) 94%, var(--site-surface-2));
-        border-color: var(--site-border);
-        box-shadow: 0 10px 32px rgba(28, 25, 23, 0.12), inset 0 1px 0 var(--site-inset-highlight);
+        background: color-mix(in srgb, var(--site-glass) 98%, var(--site-surface));
+        border-top-color: color-mix(in srgb, var(--site-accent) 28%, var(--site-border));
+        box-shadow:
+            0 -10px 32px rgba(28, 25, 23, 0.12),
+            inset 0 1px 0 var(--site-inset-highlight);
     }
 
     html:not(.dark) .pwa-install-banner {
@@ -2303,6 +2363,19 @@ html.dark {
         transform: translateX(0);
     }
 
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .parish-action-strip-track {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            overflow: visible;
+            scroll-snap-type: none;
+        }
+
+        .parish-action-card {
+            min-width: 0;
+        }
+    }
+
     @media (min-width: 1024px) {
         .parish-action-strip-track {
             display: grid;
@@ -2332,6 +2405,18 @@ html.dark {
 
     .evangelical-trust-bar-track::-webkit-scrollbar {
         display: none;
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .evangelical-trust-bar-track {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            overflow: visible;
+        }
+
+        .evangelical-trust-chip {
+            white-space: normal;
+        }
     }
 
     .evangelical-trust-chip {
@@ -2713,7 +2798,14 @@ html.dark {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .heavenly-comfort-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.125rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
         .heavenly-comfort-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 1.125rem;
@@ -3564,7 +3656,13 @@ html.dark {
     .sermon-card,
     .location-card,
     .resource-row,
-    .past-event-chip {
+    .past-event-chip,
+    .faith-pillar,
+    .scripture-ribbon,
+    .parish-action-card,
+    .worship-rhythm-card,
+    .evangelical-trust-chip,
+    .heavenly-comfort-card {
         opacity: 0;
         transform: translateY(1rem);
         transition: opacity 0.45s ease, transform 0.45s ease;
@@ -3579,7 +3677,13 @@ html.dark {
     .sermon-card.is-visible,
     .location-card.is-visible,
     .resource-row.is-visible,
-    .past-event-chip.is-visible {
+    .past-event-chip.is-visible,
+    .faith-pillar.is-visible,
+    .scripture-ribbon.is-visible,
+    .parish-action-card.is-visible,
+    .worship-rhythm-card.is-visible,
+    .evangelical-trust-chip.is-visible,
+    .heavenly-comfort-card.is-visible {
         opacity: 1;
         transform: translateY(0);
     }
@@ -3679,7 +3783,23 @@ html.dark {
     }
 
     .mobile-dock {
-        background: color-mix(in srgb, var(--site-glass) 98%, var(--site-surface));
+        background: color-mix(in srgb, var(--site-glass) 99%, var(--site-surface));
+        contain: layout style paint;
+    }
+
+    .hero-evangelical,
+    .hero-gen-z,
+    .gospel-reminder,
+    .sanctuary-peace,
+    .parish-action-strip,
+    .faith-pillars,
+    .site-footer {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 240px;
+    }
+
+    .hero-stat,
+    .hero-actions .btn {
         contain: layout style;
     }
 
@@ -3795,11 +3915,10 @@ html.dark {
 
 .mobile-dock-item.is-active {
     color: var(--site-accent);
-    transform: translateY(-2px);
 }
 
 .mobile-dock-item.is-active svg {
-    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--site-accent) 50%, transparent));
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--site-accent) 45%, transparent));
 }
 
 /* Heavenly editorial — scripture typography, soft light, calm sections */
@@ -3902,28 +4021,63 @@ html.dark .heavenly-comfort-card {
 
 @media (max-width: 1023px) {
     .site-header-inner {
-        min-height: 3.75rem;
-        padding-inline: 1rem;
+        min-height: 3.625rem;
+        padding: 0.625rem 0.875rem;
+        gap: 0.5rem;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .site-logo-link {
+        max-width: calc(100% - 2.5rem);
+    }
+
+    .site-logo {
+        gap: 0.625rem;
+        width: 100%;
     }
 
     .site-logo-mark {
-        width: 2.625rem;
-        height: 2.625rem;
-        border-radius: 14px;
-        box-shadow: 0 6px 18px color-mix(in srgb, var(--site-brand) 18%, transparent);
+        width: 2.375rem;
+        height: 2.375rem;
+        border-radius: 11px;
+        box-shadow: 0 4px 14px color-mix(in srgb, var(--site-brand) 16%, transparent);
     }
 
-    .site-logo-title {
-        font-size: 0.9375rem;
-        line-height: 1.15;
+    .site-header-actions {
+        gap: 0.25rem;
+        margin-inline-end: 0;
+    }
+
+    .site-header-actions .icon-btn {
+        width: 2.5rem;
+        height: 2.5rem;
+        padding: 0;
+    }
+
+    .mobile-dock-wrap {
+        padding: 0;
+    }
+
+    .mobile-dock {
+        border-top-color: color-mix(in srgb, var(--site-accent) 38%, var(--site-border));
+    }
+
+    .mobile-dock-item {
+        min-height: calc(var(--mobile-dock-bar-height) - 0.125rem);
+        font-size: 0.6875rem;
+    }
+
+    .mobile-dock-item svg {
+        height: 1.4375rem;
+        width: 1.4375rem;
     }
 
     .hero-gen-z {
-        border-bottom: 1px solid color-mix(in srgb, var(--site-accent) 18%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--site-accent) 22%, transparent);
     }
 
     .hero-badge {
-        box-shadow: 0 8px 24px color-mix(in srgb, var(--site-accent) 22%, transparent);
+        box-shadow: 0 8px 24px color-mix(in srgb, var(--site-accent) 24%, transparent);
     }
 
     .hero-title-gradient {
@@ -3956,28 +4110,31 @@ html.dark .heavenly-comfort-card {
         border-width: 1.5px;
     }
 
-    .mobile-dock-wrap {
-        padding-inline: 0.75rem;
+    .hero-stat {
+        border-color: color-mix(in srgb, var(--site-accent) 24%, rgba(255, 255, 255, 0.12));
+        background: color-mix(in srgb, var(--site-hero-bg) 88%, var(--site-accent) 12%);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
 
-    .mobile-dock {
-        border-radius: 24px;
-        border-color: color-mix(in srgb, var(--site-accent) 22%, var(--site-border));
-        box-shadow:
-            0 16px 40px rgba(12, 10, 9, 0.16),
-            inset 0 1px 0 rgba(255, 255, 255, 0.42),
-            0 -1px 0 color-mix(in srgb, var(--site-accent) 35%, transparent);
+    .hero-stat-value {
+        color: var(--site-accent);
     }
 
-    .mobile-dock-item {
-        min-height: 3.75rem;
-        font-size: 0.6875rem;
-        letter-spacing: 0.04em;
+    .hero-actions .btn-primary,
+    .hero-actions .btn[class*='primary'] {
+        background: linear-gradient(135deg, var(--site-accent) 0%, color-mix(in srgb, var(--site-accent) 82%, white) 100%);
+        color: #1a1208;
+        font-weight: 800;
+        letter-spacing: 0.02em;
     }
 
-    .mobile-dock-item svg {
-        height: 1.5rem;
-        width: 1.5rem;
+    .site-header {
+        border-bottom: 1px solid color-mix(in srgb, var(--site-accent) 16%, var(--site-border));
+        box-shadow: 0 4px 20px rgba(12, 10, 9, 0.06);
+    }
+
+    html.dark .site-header {
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
     }
 
     .mobile-sheet.is-open {
@@ -4031,6 +4188,26 @@ html.dark .heavenly-comfort-card {
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+
+    .animate-fade-up,
+    .glass-card,
+    .bento-grid > *,
+    .page-section,
+    .feed-card,
+    .gallery-tile,
+    .sermon-card,
+    .location-card,
+    .resource-row,
+    .past-event-chip,
+    .faith-pillar,
+    .scripture-ribbon,
+    .parish-action-card,
+    .worship-rhythm-card,
+    .evangelical-trust-chip,
+    .heavenly-comfort-card {
+        opacity: 1 !important;
+        transform: none !important;
+    }
 }
 
 .leadership-grid-section {

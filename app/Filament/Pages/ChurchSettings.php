@@ -82,7 +82,7 @@ class ChurchSettings extends Page
             'maintenance_mode_message' => Setting::get('maintenance_mode_message'),
             'admin_use_church_logo' => Setting::get('admin_use_church_logo', '1') !== '0',
             'gospel_reminder_kicker' => Setting::get('gospel_reminder_kicker'),
-            'gospel_reminder_reference' => Setting::get('gospel_reminder_reference', 'Revelation 19:10'),
+            'gospel_reminder_reference' => Setting::get('gospel_reminder_reference', 'Revelation 1:9'),
             'admin_welcome_heading' => Setting::get('admin_welcome_heading'),
             'admin_welcome_body' => Setting::get('admin_welcome_body'),
             'admin_dashboard_verse' => Setting::get('admin_dashboard_verse'),
@@ -245,7 +245,7 @@ class ChurchSettings extends Page
                             ->placeholder('For the Word of God · and the testimony of Jesus Christ'),
                         TextInput::make('gospel_reminder_reference')
                             ->label('Scripture reference')
-                            ->default('Revelation 19:10'),
+                            ->default('Revelation 1:9'),
                     ]),
                 Section::make('Admin dashboard copy')
                     ->description('Welcome banner on the admin home screen — keep it warm and encouraging.')

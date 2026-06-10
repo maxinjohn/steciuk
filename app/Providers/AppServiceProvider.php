@@ -63,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
                         request(),
                         \App\Filament\Auth\Login::normalizeEmail($event->user->email ?? ''),
                     );
+                    session(['admin_last_activity' => time()]);
                     \App\Services\SecurityLogger::info('user_login', $event->user->id);
                 }
             }
@@ -111,6 +112,8 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Event::listen(
             \Illuminate\Auth\Events\Logout::class,
             function (\Illuminate\Auth\Events\Logout $event): void {
+                session()->forget('admin_last_activity');
+
                 if ($event->user) {
                     \App\Services\SecurityLogger::info('user_logout', $event->user->id);
                 }

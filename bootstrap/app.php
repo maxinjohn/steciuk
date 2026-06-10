@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\SecureHeaders::class);
         $middleware->append(\App\Http\Middleware\CheckSiteMaintenance::class);
         $middleware->append(\App\Http\Middleware\ThrottlePublicForms::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\AdminSessionTimeout::class);
 
         $middleware->encryptCookies(except: [
             // Livewire needs some cookies readable
@@ -79,12 +80,23 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            if ($e instanceof \Illuminate\Session\TokenMismatchException) {
+                $reload = $request->hasHeader('X-Livewire')
+                    || \App\Support\AdminPanelConfig::isAdminRequest($request);
+
+                if ($request->expectsJson() || $request->hasHeader('X-Livewire')) {
+                    return \App\Support\ErrorResponse::json(419, reload: $reload);
+                }
+            }
+
             $status = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
                 ? $e->getStatusCode()
                 : 500;
 
             if ($request->expectsJson() || $request->hasHeader('X-Livewire')) {
-                return \App\Support\ErrorResponse::json($status);
+                $reload = $status === 419 && \App\Support\AdminPanelConfig::isAdminRequest($request);
+
+                return \App\Support\ErrorResponse::json($status, reload: $reload);
             }
 
             $data = [];

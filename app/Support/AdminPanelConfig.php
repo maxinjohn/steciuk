@@ -38,6 +38,28 @@ class AdminPanelConfig
         return $request->is(static::pathPattern());
     }
 
+    public static function shouldTrackAdminSession(Request $request): bool
+    {
+        if (static::isAdminRequest($request)) {
+            return true;
+        }
+
+        if (! auth()->check() || ! $request->is('livewire/update')) {
+            return false;
+        }
+
+        foreach ((array) $request->input('components', []) as $component) {
+            $snapshot = json_decode((string) ($component['snapshot'] ?? ''), true);
+            $name = (string) ($snapshot['memo']['name'] ?? '');
+
+            if (str_starts_with($name, 'app.filament.')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static function url(string $suffix = ''): string
     {
         $suffix = ltrim($suffix, '/');

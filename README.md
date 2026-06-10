@@ -125,7 +125,7 @@ All parish content (pages, menus, events, news, services, etc.) lives in `databa
 | `SEED_MODE` | Behaviour |
 |-------------|-----------|
 | `bootstrap` | First install — creates all reference pages, menus, settings, sample content |
-| `sync` | Deploy update — upserts seeded records by slug/key; **never deletes prod-only data** |
+| `sync` | Optional full reseed — upserts all seeded records by slug/key; **never deletes prod-only data** |
 | `off` | No seeding (default production after bootstrap) |
 
 ### Commands
@@ -133,12 +133,19 @@ All parish content (pages, menus, events, news, services, etc.) lives in `databa
 ```bash
 # First install only (local or production)
 php artisan site:bootstrap --force
-
-# Optional: push dev reference content to production without wiping prod-only records
-php artisan site:sync-reference-data --force
 ```
 
-**Important:** Run `site:bootstrap` once on a new server. On later deploys, run **migrations only** — do not re-bootstrap unless you intentionally want to reset reference content.
+**Important:** Run `site:bootstrap` once on a new server.
+
+### Content updates on deploy
+
+Canonical parish copy (settings, Welcome, Our Church, STECI Heritage, etc.) lives in `app/Support/ReferenceSiteContent.php` and is applied by **migrations** via `ReferenceSiteContentMigrator`.
+
+**Routine deploy = `php artisan migrate` only.** You do **not** need `site:sync-reference-data` for text or settings corrections.
+
+When you change reference copy, add a migration that calls `ReferenceSiteContentMigrator::apply()` (or extend `ReferenceSiteContent` and add a new migration).
+
+`site:sync-reference-data` is optional — only if you need to re-upsert menus, events, sample news, and other full reference seed data without a fresh bootstrap.
 
 ### What sync preserves
 
@@ -225,8 +232,9 @@ Optional after deploy:
 ```bash
 php artisan site:ensure-roles
 php artisan site:ensure-admin
-php artisan site:sync-reference-data --force   # only when pushing dev content changes
 ```
+
+Do **not** run `site:sync-reference-data` on every deploy. Content and settings corrections are applied by `php artisan migrate`.
 
 ### Production `.env` example
 

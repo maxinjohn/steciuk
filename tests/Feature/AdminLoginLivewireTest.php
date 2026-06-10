@@ -63,5 +63,9 @@ class AdminLoginLivewireTest extends TestCase
             str_contains($response->headers->get('Content-Type', ''), 'json'),
             'Livewire error responses must be JSON so the UI does not hang.',
         );
+
+        if ($response->status() === 419) {
+            $response->assertJsonStructure(['message', 'reload']);
+        }
     }
 }

@@ -8,6 +8,15 @@ use SensitiveParameter;
 
 class Login extends \Filament\Auth\Pages\Login
 {
+    public function mount(): void
+    {
+        parent::mount();
+
+        if (request()->boolean('expired')) {
+            session()->regenerateToken();
+        }
+    }
+
     /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>

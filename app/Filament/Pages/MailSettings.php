@@ -113,48 +113,48 @@ class MailSettings extends Page
     public function sendTestEmail(): void
     {
         try {
-            $data = MailConfigService::normalizeFormData($this->form->getState());
-        } catch (ValidationException $exception) {
-            Notification::make()
-                ->danger()
-                ->title('Fix the form first')
-                ->body(collect($exception->errors())->flatten()->first() ?? 'Check the highlighted fields.')
-                ->send();
+            try {
+                $data = MailConfigService::normalizeFormData($this->form->getState());
+            } catch (ValidationException $exception) {
+                Notification::make()
+                    ->danger()
+                    ->title('Fix the form first')
+                    ->body(collect($exception->errors())->flatten()->first() ?? 'Check the highlighted fields.')
+                    ->send();
 
-            return;
-        }
+                return;
+            }
 
-        $recipient = $data['mail_test_recipient'] ?? null;
+            $recipient = $data['mail_test_recipient'] ?? null;
 
-        if (! $recipient) {
-            Notification::make()
-                ->danger()
-                ->title('Enter a test recipient email')
-                ->send();
+            if (! $recipient) {
+                Notification::make()
+                    ->danger()
+                    ->title('Enter a test recipient email')
+                    ->send();
 
-            return;
-        }
+                return;
+            }
 
-        MailConfigService::applyFromFormData($data);
+            MailConfigService::applyFromFormData($data);
 
-        if ($error = MailConfigService::validateConfiguration()) {
-            Notification::make()
-                ->danger()
-                ->title('Mail not configured')
-                ->body($error)
-                ->send();
+            if ($error = MailConfigService::validateConfiguration()) {
+                Notification::make()
+                    ->danger()
+                    ->title('Mail not configured')
+                    ->body($error)
+                    ->send();
 
-            return;
-        }
+                return;
+            }
 
-        try {
-            set_time_limit(25);
+            set_time_limit(30);
             MailConfigService::sendTestMessage($recipient);
 
             $mailer = (string) config('mail.default', 'log');
             $body = match ($mailer) {
                 'log' => 'Mail driver is log — check storage/logs/laravel.log instead of an inbox.',
-                'sendmail' => "Check {$recipient}. Sent using PHP mail (sendmail).",
+                'sendmail' => "Check {$recipient}. Sent using PHP mail on this server.",
                 default => "Check {$recipient}. Sent using SMTP.",
             };
 
@@ -164,6 +164,8 @@ class MailSettings extends Page
                 ->body($body)
                 ->send();
         } catch (\Throwable $exception) {
+            report($exception);
+
             Notification::make()
                 ->danger()
                 ->title('Test email failed')
@@ -206,8 +208,8 @@ class MailSettings extends Page
                     ->schema([
                         TextInput::make('mail_sendmail_path')
                             ->label('Sendmail command')
-                            ->placeholder('/usr/sbin/sendmail -bs -i')
-                            ->helperText('Full command path and flags, e.g. /usr/sbin/sendmail -bs -i'),
+                            ->placeholder('/usr/sbin/sendmail -t -i')
+                            ->helperText('Only needed if PHP mail() is disabled. cPanel default: /usr/sbin/sendmail -t -i'),
                         TextInput::make('mail_sendmail_timeout')
                             ->label('Timeout (seconds)')
                             ->numeric()

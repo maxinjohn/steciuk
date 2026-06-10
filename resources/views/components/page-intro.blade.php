@@ -1,7 +1,7 @@
 @props([
     'title',
     'subtitle' => null,
-    'kicker' => 'Evangelical Episcopal Parish',
+    'kicker' => 'Evangelical Oriental Protestant Parish',
     'showStrips' => true,
     'showScripture' => true,
     'scripture' => 'Your word is a lamp to my feet and a light to my path.',

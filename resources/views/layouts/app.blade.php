@@ -25,6 +25,9 @@
     <link rel="apple-touch-icon" href="{{ asset('images/steci-mark.svg') }}">
     <meta name="mobile-web-app-capable" content="yes">
 
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.bunny.net">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
@@ -56,7 +59,7 @@
 
     @stack('head')
 </head>
-<body class="site-body site-mesh has-mobile-dock min-h-screen flex flex-col lg:pb-0">
+<body class="site-body site-mesh has-mobile-dock min-h-screen flex flex-col md:pb-0">
     @php
         $navMenu = ($mobileMenu ?? collect())->isNotEmpty() ? $mobileMenu : $headerMenu;
     @endphp
@@ -74,7 +77,7 @@
                     <x-site-logo />
                 </a>
 
-                <nav class="site-header-nav hidden lg:flex lg:justify-center" aria-label="Main navigation">
+                <nav class="site-header-nav hidden md:flex md:justify-center" aria-label="Main navigation">
                     <x-menu :items="$headerMenu" variant="desktop" />
                 </nav>
 
@@ -85,11 +88,11 @@
                     </button>
 
                     @if ($donationLink)
-                        <x-button href="{{ $donationLink }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm lg:inline-flex" target="_blank" rel="noopener noreferrer">
+                        <x-button href="{{ $donationLink }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm md:inline-flex" target="_blank" rel="noopener noreferrer">
                             Give
                         </x-button>
                     @else
-                        <x-button href="{{ url('/service-times') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm lg:inline-flex">
+                        <x-button href="{{ url('/service-times') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm md:inline-flex">
                             Visit
                         </x-button>
                     @endif
@@ -99,13 +102,13 @@
 
         <div
             id="mobile-menu-overlay"
-            class="mobile-overlay fixed inset-0 z-[65] lg:hidden"
+            class="mobile-overlay fixed inset-0 z-[65] md:hidden"
             aria-hidden="true"
         ></div>
 
         <nav
             id="mobile-menu"
-            class="mobile-sheet fixed z-[70] lg:hidden"
+            class="mobile-sheet fixed z-[70] md:hidden"
             aria-label="Mobile navigation"
             aria-hidden="true"
         >
@@ -177,7 +180,7 @@
             </div>
         </nav>
 
-        <main id="main-content" class="flex-1 lg:pb-0">
+        <main id="main-content" class="flex-1 md:pb-0">
             @yield('content')
         </main>
 
@@ -188,7 +191,7 @@
         />
         <x-gospel-reminder />
 
-        <footer class="site-footer pb-dock lg:pb-0" aria-label="Site footer">
+        <footer class="site-footer md:pb-0" aria-label="Site footer">
             <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
                 <div class="hidden gap-10 lg:grid lg:grid-cols-4">
                     <div>
@@ -319,7 +322,10 @@
 
                 <div class="mt-10 border-t border-white/10 pt-8 text-center text-sm text-[var(--site-footer-muted)]">
                     <x-faith-pillars variant="footer" class="!py-0 !mb-8" />
-                    <p class="text-xs uppercase tracking-[0.2em] text-[var(--site-footer-muted)]/70">Evangelical Episcopal · Saint Thomas Christian heritage</p>
+                    <p class="text-xs uppercase tracking-[0.2em] text-[var(--site-footer-muted)]/70">Evangelical Oriental Protestant · Saint Thomas Christian heritage</p>
+                    <p class="mt-2 text-xs text-[var(--site-footer-muted)]/80">
+                        <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" class="site-footer-accent-link" target="_blank" rel="noopener noreferrer">Evangelical Alliance member church</a>
+                    </p>
                     <p class="mt-3">&copy; {{ date('Y') }} {{ $siteName }}. All rights reserved.</p>
                 </div>
             </div>
@@ -327,7 +333,7 @@
 
     </div>
 
-    <div class="mobile-dock-wrap lg:hidden">
+    <div class="mobile-dock-wrap md:hidden">
         <nav class="mobile-dock" aria-label="Quick navigation">
         <a href="{{ route('home') }}" class="mobile-dock-item {{ request()->routeIs('home') ? 'is-active' : '' }}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>

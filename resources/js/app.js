@@ -134,13 +134,18 @@ const initDesktopNav = () => {
 };
 
 const initScrollReveal = () => {
-    const selector = window.matchMedia('(max-width: 1023px)').matches
-        ? '.animate-fade-up, .glass-card, .page-section, .feed-card, .hero-gen-z, .parish-action-card'
-        : '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip';
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const selector = '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip, .heavenly-comfort-card, .hero-gen-z';
 
     const elements = document.querySelectorAll(selector);
 
-    if (!('IntersectionObserver' in window) || ! elements.length) return;
+    if (! elements.length) return;
+
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+        elements.forEach((el) => el.classList.add('is-visible'));
+
+        return;
+    }
 
     const observer = new IntersectionObserver(
         (entries) => {
