@@ -1,7 +1,9 @@
 /**
- * Keeps Filament admin sign-in reliable after session expiry (CSRF / Livewire stale state).
+ * Keeps Filament admin Livewire actions recoverable after session expiry, locks, or blocked requests.
  */
 (() => {
+    const reloadStatuses = new Set([401, 403, 419, 429, 500, 503]);
+
     const refreshExpiredLoginPage = () => {
         const params = new URLSearchParams(window.location.search);
 
@@ -24,11 +26,13 @@
         window.location.reload();
     };
 
-    const reloadOnSessionExpiry = () => {
+    const reloadOnFailure = () => {
         window.location.reload();
     };
 
-    const patchFetchForSessionExpiry = () => {
+    const shouldReloadFromPayload = (payload) => payload?.reload !== false;
+
+    const patchFetchForAdminFailures = () => {
         if (window.__adminSessionFetchPatched) {
             return;
         }
@@ -39,25 +43,25 @@
         window.fetch = async (...args) => {
             const response = await originalFetch(...args);
 
-            if (response.status !== 419) {
+            if (!reloadStatuses.has(response.status)) {
                 return response;
             }
 
             try {
                 const payload = await response.clone().json();
 
-                if (payload?.reload) {
-                    reloadOnSessionExpiry();
+                if (shouldReloadFromPayload(payload)) {
+                    reloadOnFailure();
                 }
             } catch {
-                reloadOnSessionExpiry();
+                reloadOnFailure();
             }
 
             return response;
         };
     };
 
-    const hookLivewireSessionExpiry = () => {
+    const hookLivewireFailures = () => {
         document.addEventListener('livewire:init', () => {
             if (!window.Livewire?.hook) {
                 return;
@@ -65,16 +69,18 @@
 
             window.Livewire.hook('request', ({ fail }) => {
                 fail(({ status, preventDefault }) => {
-                    if (status === 419) {
-                        preventDefault?.();
-                        reloadOnSessionExpiry();
+                    if (!reloadStatuses.has(status)) {
+                        return;
                     }
+
+                    preventDefault?.();
+                    reloadOnFailure();
                 });
             });
         });
     };
 
     refreshExpiredLoginPage();
-    patchFetchForSessionExpiry();
-    hookLivewireSessionExpiry();
+    patchFetchForAdminFailures();
+    hookLivewireFailures();
 })();

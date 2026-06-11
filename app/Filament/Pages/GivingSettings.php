@@ -67,12 +67,13 @@ class GivingSettings extends Page
         try {
             $this->beginDatabaseTransaction();
 
-            foreach ($this->form->getState() as $key => $value) {
-                Setting::set($key, $value ?? '', 'giving');
-            }
+            Setting::persistBatch(function (): void {
+                foreach ($this->form->getState() as $key => $value) {
+                    Setting::set($key, $value ?? '', 'giving');
+                }
 
-            Setting::set('donation_link', '/give', 'general');
-            Setting::forgetCache();
+                Setting::set('donation_link', '/give', 'general');
+            });
 
             $this->commitDatabaseTransaction();
 

@@ -80,17 +80,17 @@ class SiteContentSettings extends Page
 
             $data = $this->form->getState();
 
-            foreach ($data as $key => $value) {
-                if ($key === 'site_announcement_enabled') {
-                    Setting::set($key, ($value ?? false) ? '1' : '0', 'general');
+            Setting::persistBatch(function () use ($data): void {
+                foreach ($data as $key => $value) {
+                    if ($key === 'site_announcement_enabled') {
+                        Setting::set($key, ($value ?? false) ? '1' : '0', 'general');
 
-                    continue;
+                        continue;
+                    }
+
+                    Setting::set($key, $value ?? '', 'general');
                 }
-
-                Setting::set($key, $value ?? '', 'general');
-            }
-
-            Setting::forgetCache();
+            });
 
             $this->commitDatabaseTransaction();
 

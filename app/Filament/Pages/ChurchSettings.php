@@ -137,34 +137,34 @@ class ChurchSettings extends Page
                 country: $data['contact_country'] ?? null,
             );
 
-            foreach ($data as $key => $value) {
-                if (in_array($key, ['faith_sanctuary_verses', 'faith_comfort_cards'], true)) {
-                    Setting::set($key, json_encode($value ?? []), 'faith');
+            Setting::persistBatch(function () use ($data): void {
+                foreach ($data as $key => $value) {
+                    if (in_array($key, ['faith_sanctuary_verses', 'faith_comfort_cards'], true)) {
+                        Setting::set($key, json_encode($value ?? []), 'faith');
 
-                    continue;
+                        continue;
+                    }
+
+                    if (in_array($key, ['admin_use_church_logo', 'registration_captcha_enabled'], true)) {
+                        Setting::set($key, ($value ?? false) ? '1' : '0', $key === 'admin_use_church_logo' ? 'branding' : 'security');
+
+                        continue;
+                    }
+
+                    $group = match (true) {
+                        str_starts_with($key, 'contact_') => 'contact',
+                        str_starts_with($key, 'faith_') => 'faith',
+                        str_starts_with($key, 'gospel_') => 'general',
+                        str_starts_with($key, 'admin_') => 'admin',
+                        str_starts_with($key, 'seo_') => 'seo',
+                        in_array($key, ['theme_color', 'pwa_short_name'], true) => 'branding',
+                        in_array($key, ['twitter', 'youtube', 'facebook', 'instagram'], true) => 'social',
+                        default => 'general',
+                    };
+
+                    Setting::set($key, $value ?? '', $group);
                 }
-
-                if (in_array($key, ['admin_use_church_logo', 'registration_captcha_enabled'], true)) {
-                    Setting::set($key, ($value ?? false) ? '1' : '0', $key === 'admin_use_church_logo' ? 'branding' : 'security');
-
-                    continue;
-                }
-
-                $group = match (true) {
-                    str_starts_with($key, 'contact_') => 'contact',
-                    str_starts_with($key, 'faith_') => 'faith',
-                    str_starts_with($key, 'gospel_') => 'general',
-                    str_starts_with($key, 'admin_') => 'admin',
-                    str_starts_with($key, 'seo_') => 'seo',
-                    in_array($key, ['theme_color', 'pwa_short_name'], true) => 'branding',
-                    in_array($key, ['twitter', 'youtube', 'facebook', 'instagram'], true) => 'social',
-                    default => 'general',
-                };
-
-                Setting::set($key, $value ?? '', $group);
-            }
-
-            Setting::forgetCache();
+            });
 
             if ($maintenanceEnabled) {
                 MaintenanceModeService::enable();

@@ -82,22 +82,22 @@ class MailSettings extends Page
 
             $data = MailConfigService::normalizeFormData($this->form->getState());
 
-            Setting::set('mail_mailer', $data['mail_mailer'] ?? 'sendmail', 'mail');
-            Setting::set('mail_host', $data['mail_host'] ?? '', 'mail');
-            Setting::set('mail_port', (string) ($data['mail_port'] ?? '587'), 'mail');
-            Setting::set('mail_username', $data['mail_username'] ?? '', 'mail');
-            Setting::set('mail_encryption', $data['mail_encryption'] ?? 'tls', 'mail');
-            Setting::set('mail_smtp_timeout', (string) ($data['mail_smtp_timeout'] ?? '10'), 'mail');
-            Setting::set('mail_sendmail_path', $data['mail_sendmail_path'] ?? '', 'mail');
-            Setting::set('mail_sendmail_timeout', (string) ($data['mail_sendmail_timeout'] ?? '15'), 'mail');
-            Setting::set('mail_from_address', $data['mail_from_address'] ?? '', 'mail');
-            Setting::set('mail_from_name', $data['mail_from_name'] ?? '', 'mail');
+            Setting::persistBatch(function () use ($data): void {
+                Setting::set('mail_mailer', $data['mail_mailer'] ?? 'sendmail', 'mail');
+                Setting::set('mail_host', $data['mail_host'] ?? '', 'mail');
+                Setting::set('mail_port', (string) ($data['mail_port'] ?? '587'), 'mail');
+                Setting::set('mail_username', $data['mail_username'] ?? '', 'mail');
+                Setting::set('mail_encryption', $data['mail_encryption'] ?? 'tls', 'mail');
+                Setting::set('mail_smtp_timeout', (string) ($data['mail_smtp_timeout'] ?? '10'), 'mail');
+                Setting::set('mail_sendmail_path', $data['mail_sendmail_path'] ?? '', 'mail');
+                Setting::set('mail_sendmail_timeout', (string) ($data['mail_sendmail_timeout'] ?? '15'), 'mail');
+                Setting::set('mail_from_address', $data['mail_from_address'] ?? '', 'mail');
+                Setting::set('mail_from_name', $data['mail_from_name'] ?? '', 'mail');
 
-            if (! empty($data['mail_password'])) {
-                Setting::set('mail_password', MailConfigService::encryptPassword($data['mail_password']), 'mail');
-            }
-
-            Setting::forgetCache();
+                if (! empty($data['mail_password'])) {
+                    Setting::set('mail_password', MailConfigService::encryptPassword($data['mail_password']), 'mail');
+                }
+            });
             MailConfigService::applyFromSettings();
 
             $this->commitDatabaseTransaction();

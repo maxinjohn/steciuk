@@ -24,6 +24,10 @@ class BlockSuspiciousRequests
             return $next($request);
         }
 
+        if ($request->hasHeader('X-Livewire') && \App\Support\AdminPanelConfig::shouldTrackAdminSession($request)) {
+            return $next($request);
+        }
+
         $segments = [
             $request->getSchemeAndHttpHost(),
             $request->path(),

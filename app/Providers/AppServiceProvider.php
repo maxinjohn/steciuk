@@ -18,6 +18,7 @@ use Illuminate\Auth\Events\Attempting;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
@@ -47,6 +48,12 @@ class AppServiceProvider extends ServiceProvider
         SitePaths::ensurePublicStorageLink();
 
         SqliteOptimizer::configureConnection();
+
+        Event::listen(ConnectionEstablished::class, function (ConnectionEstablished $event): void {
+            if ($event->connection->getDriverName() === 'sqlite') {
+                SqliteOptimizer::configureConnection();
+            }
+        });
 
         MailConfigService::applyFromSettings();
 
