@@ -37,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        SitePaths::ensureConfiguredDataPaths();
         $this->applyCustomDataPaths();
 
         SqliteOptimizer::configureConnection();
