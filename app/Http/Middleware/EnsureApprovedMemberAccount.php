@@ -17,6 +17,10 @@ class EnsureApprovedMemberAccount
             return $next($request);
         }
 
+        if ($user->family_id) {
+            $user->loadMissing('family');
+        }
+
         if (! $user->isActive() || ! $user->familyIsActive()) {
             auth()->logout();
             $request->session()->invalidate();

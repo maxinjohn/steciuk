@@ -12,7 +12,8 @@
             'group' => 'Giving & donations',
             'hint' => 'Recorded gifts and monthly totals',
             'items' => [
-                ['label' => 'Donations', 'url' => \App\Filament\Resources\Donations\DonationResource::getUrl('index'), 'desc' => 'View, edit, export, and manage giving records'],
+                ['label' => 'Giving page & bank details', 'url' => \App\Filament\Pages\GivingSettings::getUrl(), 'desc' => 'Public /give page copy and parish bank account'],
+                ['label' => 'Donations', 'url' => \App\Filament\Resources\Donations\DonationResource::getUrl('index'), 'desc' => 'View, verify, export, and manage giving records'],
             ],
         ],
         [
@@ -57,6 +58,7 @@
                 ['label' => 'Church & faith', 'url' => \App\Filament\Pages\ChurchSettings::getUrl(), 'desc' => 'Name, contact, faith comfort text, footer'],
                 ['label' => 'Public site copy', 'url' => \App\Filament\Pages\SiteContentSettings::getUrl(), 'desc' => 'Announcements, listings, prayer & giving text'],
                 ['label' => 'Email setup', 'url' => \App\Filament\Pages\MailSettings::getUrl(), 'desc' => 'Contact form delivery and test email'],
+                ['label' => 'Email templates', 'url' => \App\Filament\Pages\EmailTemplatesSettings::getUrl(), 'desc' => 'Approval, welcome, and parish notification emails'],
             ],
         ],
         [

@@ -3,6 +3,7 @@
 use App\Http\Controllers\DonationReportController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\GiveController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\ManifestController;
@@ -40,6 +41,8 @@ Route::get('/gallery/{slug}', [GalleryController::class, 'show'])->name('gallery
 
 Route::get('/resources', [ResourceController::class, 'index'])->name('resources.index');
 Route::get('/service-times', [ServiceController::class, 'index'])->name('services.index');
+
+Route::get('/give', GiveController::class)->name('give');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', RobotsController::class)->name('robots');

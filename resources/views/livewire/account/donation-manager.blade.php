@@ -36,23 +36,9 @@
         @if (filled($givingBankDetails['bank_name'] ?? null) || filled($givingBankDetails['account_number'] ?? null))
             <div class="member-giving-bank mt-5 rounded-2xl border border-[var(--site-border)] bg-[var(--site-surface)] p-5">
                 <h3 class="text-sm font-semibold uppercase tracking-wide text-ink-muted">Parish bank details</h3>
-                <dl class="mt-3 grid gap-2 text-sm text-ink sm:grid-cols-2">
-                    @if (filled($givingBankDetails['bank_name']))
-                        <div><dt class="text-ink-muted">Bank</dt><dd class="font-medium">{{ $givingBankDetails['bank_name'] }}</dd></div>
-                    @endif
-                    @if (filled($givingBankDetails['account_name']))
-                        <div><dt class="text-ink-muted">Account name</dt><dd class="font-medium">{{ $givingBankDetails['account_name'] }}</dd></div>
-                    @endif
-                    @if (filled($givingBankDetails['sort_code']))
-                        <div><dt class="text-ink-muted">Sort code</dt><dd class="font-medium">{{ $givingBankDetails['sort_code'] }}</dd></div>
-                    @endif
-                    @if (filled($givingBankDetails['account_number']))
-                        <div><dt class="text-ink-muted">Account number</dt><dd class="font-medium">{{ $givingBankDetails['account_number'] }}</dd></div>
-                    @endif
-                    @if (filled($givingBankDetails['reference']))
-                        <div class="sm:col-span-2"><dt class="text-ink-muted">Reference</dt><dd class="font-medium">{{ $givingBankDetails['reference'] }}</dd></div>
-                    @endif
-                </dl>
+                <div class="mt-3">
+                    <x-giving-bank-details :bank-details="$givingBankDetails" />
+                </div>
                 @if (filled($givingBankDetails['payment_link']))
                     <a href="{{ $givingBankDetails['payment_link'] }}" class="btn btn-secondary mt-4 inline-flex" target="_blank" rel="noopener noreferrer">Pay online</a>
                 @endif

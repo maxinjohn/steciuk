@@ -143,6 +143,12 @@ class SitePaths
 
     public static function ensureConfiguredDataPaths(): void
     {
+        $verifiedFlag = storage_path('framework/.site-paths-verified');
+
+        if (app()->environment('production') && is_file($verifiedFlag)) {
+            return;
+        }
+
         $mode = self::directoryMode();
 
         self::ensureLaravelStorageLayout(
@@ -163,6 +169,10 @@ class SitePaths
         );
 
         self::ensureCommonUploadDirectories($mode);
+
+        if (app()->environment('production')) {
+            @file_put_contents($verifiedFlag, now()->toIso8601String());
+        }
     }
 
     public static function ensureCommonUploadDirectories(?int $mode = null): void

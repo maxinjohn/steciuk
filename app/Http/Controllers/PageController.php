@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Page;
+use App\Services\PageContext;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -15,11 +17,15 @@ class PageController extends Controller
             return redirect()->route('register', status: 301);
         }
 
-        $page = Page::query()
-            ->where('slug', $slug)
-            ->published()
-            ->with(['contentBlocks' => fn ($q) => $q->where('is_visible', true)])
-            ->firstOrFail();
+        if ($slug === 'give') {
+            return redirect()->route('give', status: 301);
+        }
+
+        $page = PageContext::resolve($slug);
+
+        if ($page === null) {
+            throw (new ModelNotFoundException)->setModel(Page::class);
+        }
 
         $template = match ($page->template) {
             'home' => 'pages.home',

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\MenuLocation;
 use App\Models\MenuItem;
 use App\Models\Page;
+use App\Support\GivingUrl;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -12,12 +13,48 @@ class MenuCache
 {
     private const TTL_SECONDS = 3600;
 
+    private const ALL_TREES_CACHE_KEY = 'menu.trees.all.v3';
+
     public static function load(MenuLocation $location): Collection
     {
-        $key = 'menu.tree.'.$location->value.'.v2';
+        return self::loadAll()[$location->value];
+    }
 
-        $tree = Cache::remember($key, self::TTL_SECONDS, fn (): array => static::buildTree($location));
+    /**
+     * @return array<string, Collection<int, object>>
+     */
+    public static function loadAll(): array
+    {
+        $trees = Cache::remember(self::ALL_TREES_CACHE_KEY, self::TTL_SECONDS, function (): array {
+            $packed = [];
 
+            foreach (MenuLocation::cases() as $location) {
+                $packed[$location->value] = static::buildTree($location);
+            }
+
+            return $packed;
+        });
+
+        return collect($trees)
+            ->map(fn (array $tree): Collection => static::hydrateTree($tree))
+            ->all();
+    }
+
+    public static function forgetAll(): void
+    {
+        Cache::forget(self::ALL_TREES_CACHE_KEY);
+
+        foreach (MenuLocation::cases() as $location) {
+            Cache::forget('menu.tree.'.$location->value.'.v2');
+        }
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $tree
+     * @return Collection<int, object>
+     */
+    private static function hydrateTree(array $tree): Collection
+    {
         return collect($tree)->map(static fn (array $item): object => (object) [
             'label' => $item['label'],
             'url' => $item['url'],
@@ -25,13 +62,6 @@ class MenuCache
             'is_external' => $item['is_external'],
             'children' => collect($item['children'] ?? [])->map(static fn (array $child): object => (object) $child),
         ]);
-    }
-
-    public static function forgetAll(): void
-    {
-        foreach (MenuLocation::cases() as $location) {
-            Cache::forget('menu.tree.'.$location->value.'.v2');
-        }
     }
 
     /**
@@ -89,10 +119,18 @@ class MenuCache
                 return route('home');
             }
 
+            if ($slug === 'give') {
+                return GivingUrl::route();
+            }
+
             return $slug ? route('pages.show', $slug) : '#';
         }
 
         if ($item->url) {
+            if (GivingUrl::pointsToGivePage($item->url)) {
+                return GivingUrl::route();
+            }
+
             if ($item->is_external || str_starts_with($item->url, 'http')) {
                 return $item->url;
             }

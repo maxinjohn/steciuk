@@ -82,7 +82,6 @@ class ChurchSettings extends Page
             'instagram' => Setting::get('instagram'),
             'twitter' => Setting::get('twitter'),
             'google_maps_embed' => Setting::get('google_maps_embed'),
-            'donation_link' => Setting::get('donation_link'),
             'footer_text' => Setting::get('footer_text'),
             'seo_default_title' => Setting::get('seo_default_title'),
             'seo_default_description' => Setting::get('seo_default_description'),
@@ -260,8 +259,6 @@ class ChurchSettings extends Page
                                         ->url(),
                                     TextInput::make('twitter')
                                         ->label('X / Twitter')
-                                        ->url(),
-                                    TextInput::make('donation_link')
                                         ->url(),
                                     Textarea::make('google_maps_embed')
                                         ->label('Google Maps embed code')

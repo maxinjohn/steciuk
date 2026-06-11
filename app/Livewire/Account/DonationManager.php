@@ -4,8 +4,8 @@ namespace App\Livewire\Account;
 
 use App\Enums\DonationMethod;
 use App\Models\Donation;
-use App\Models\Setting;
 use App\Models\User;
+use App\Support\GivingPageConfig;
 use App\Services\DonationService;
 use App\Support\GdprConfig;
 use Illuminate\Support\Facades\Auth;
@@ -165,14 +165,7 @@ class DonationManager extends Component
             'methodOptions' => DonationMethod::options(),
             'canViewHousehold' => $user?->canManageHouseholdOnPortal() ?? false,
             'privacyPolicyUrl' => GdprConfig::privacyPolicyUrl(),
-            'givingBankDetails' => [
-                'bank_name' => Setting::text('give_bank_name'),
-                'account_name' => Setting::text('give_account_name'),
-                'sort_code' => Setting::text('give_sort_code'),
-                'account_number' => Setting::text('give_account_number'),
-                'reference' => Setting::text('give_payment_reference'),
-                'payment_link' => Setting::text('give_payment_link'),
-            ],
+            'givingBankDetails' => GivingPageConfig::bankDetails(),
         ]);
     }
 }
