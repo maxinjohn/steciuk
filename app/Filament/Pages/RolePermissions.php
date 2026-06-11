@@ -11,9 +11,9 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Notifications\Notification;
-use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
+use Illuminate\Support\Facades\DB;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
@@ -24,8 +24,6 @@ use Filament\Support\Icons\Heroicon;
 
 class RolePermissions extends Page
 {
-    use CanUseDatabaseTransactions;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
     protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::Security;
@@ -68,42 +66,32 @@ class RolePermissions extends Page
 
     public function save(): void
     {
-        try {
-            $this->beginDatabaseTransaction();
+        $state = $this->form->getState();
+        $labels = AdminPermission::labels();
+        $allKeys = array_keys($labels);
+        $matrix = [];
+        $service = app(PermissionService::class);
 
-            $state = $this->form->getState();
-            $labels = AdminPermission::labels();
-            $allKeys = array_keys($labels);
-            $matrix = [];
-            $service = app(PermissionService::class);
+        foreach ($service->manageableRoleSlugs() as $roleSlug) {
+            $selected = collect($state[$roleSlug] ?? [])
+                ->flip()
+                ->map(fn () => true)
+                ->all();
 
-            foreach ($service->manageableRoleSlugs() as $roleSlug) {
-                $selected = collect($state[$roleSlug] ?? [])
-                    ->flip()
-                    ->map(fn () => true)
-                    ->all();
-
-                $matrix[$roleSlug] = collect($allKeys)
-                    ->mapWithKeys(fn (string $key) => [$key => isset($selected[$key])])
-                    ->all();
-            }
-
-            $service->saveRolePermissions($matrix);
-
-            SecurityLogger::info('role_permissions_updated', auth()->id());
-
-            $this->commitDatabaseTransaction();
-
-            Notification::make()
-                ->success()
-                ->title('Role permissions saved')
-                ->body('Editors and custom roles will receive these privileges on their next request.')
-                ->send();
-        } catch (\Throwable $exception) {
-            $this->rollBackDatabaseTransaction();
-
-            throw $exception;
+            $matrix[$roleSlug] = collect($allKeys)
+                ->mapWithKeys(fn (string $key) => [$key => isset($selected[$key])])
+                ->all();
         }
+
+        DB::transaction(fn () => $service->saveRolePermissions($matrix));
+
+        SecurityLogger::info('role_permissions_updated', auth()->id());
+
+        Notification::make()
+            ->success()
+            ->title('Role permissions saved')
+            ->body('Editors and custom roles will receive these privileges on their next request.')
+            ->send();
     }
 
     public function defaultForm(Schema $schema): Schema

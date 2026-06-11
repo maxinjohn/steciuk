@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PanelResource extends Resource
 {
@@ -40,6 +41,14 @@ class PanelResource extends Resource
     public static function canCreate(): bool
     {
         return auth()->user()?->can('create', Panel::class) ?? false;
+    }
+
+    /**
+     * @return Builder<Panel>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withCount('members');
     }
 
     public static function form(Schema $schema): Schema

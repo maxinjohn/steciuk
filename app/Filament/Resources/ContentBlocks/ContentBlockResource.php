@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ContentBlockResource extends Resource
 {
@@ -21,6 +22,14 @@ class ContentBlockResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquares2x2;
 
     protected static bool $shouldRegisterNavigation = false;
+
+    /**
+     * @return Builder<ContentBlock>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['page']);
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -11,9 +11,13 @@ use App\Models\Page;
 use App\Models\Sermon;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ContentApprovalService
 {
+    private const PENDING_COUNT_CACHE_KEY = 'admin.content_approvals.pending_count.v1';
+
+    private const PENDING_COUNT_TTL_SECONDS = 30;
     /**
      * @return Collection<int, array{
      *     key: string,
@@ -42,7 +46,44 @@ class ContentApprovalService
 
     public function pendingCount(): int
     {
-        return $this->pendingItems()->count();
+        return (int) Cache::remember(
+            self::PENDING_COUNT_CACHE_KEY,
+            self::PENDING_COUNT_TTL_SECONDS,
+            fn (): int => $this->countPendingReview(),
+        );
+    }
+
+    public function forgetPendingCountCache(): void
+    {
+        Cache::forget(self::PENDING_COUNT_CACHE_KEY);
+    }
+
+    private function countPendingReview(): int
+    {
+        $total = 0;
+
+        foreach ($this->reviewableModelClasses() as $modelClass) {
+            $total += $modelClass::query()
+                ->where('status', PublishStatus::PendingReview->value)
+                ->count();
+        }
+
+        return $total;
+    }
+
+    /**
+     * @return list<class-string>
+     */
+    private function reviewableModelClasses(): array
+    {
+        return [
+            Page::class,
+            News::class,
+            Event::class,
+            Sermon::class,
+            GalleryAlbum::class,
+            GalleryPhoto::class,
+        ];
     }
 
     public function approve(string $modelClass, int $modelId, User $approver): void
@@ -59,6 +100,8 @@ class ContentApprovalService
             'content_id' => $modelId,
             'title' => $this->titleFor($record),
         ]);
+
+        $this->forgetPendingCountCache();
     }
 
     public function returnToDraft(string $modelClass, int $modelId, User $approver): void
@@ -75,6 +118,8 @@ class ContentApprovalService
             'content_id' => $modelId,
             'title' => $this->titleFor($record),
         ]);
+
+        $this->forgetPendingCountCache();
     }
 
     /**
@@ -125,14 +170,7 @@ class ContentApprovalService
      */
     private function findRecord(string $modelClass, int $modelId): object
     {
-        abort_unless(in_array($modelClass, [
-            Page::class,
-            News::class,
-            Event::class,
-            Sermon::class,
-            GalleryAlbum::class,
-            GalleryPhoto::class,
-        ], true), 404);
+        abort_unless(in_array($modelClass, $this->reviewableModelClasses(), true), 404);
 
         return $modelClass::query()->findOrFail($modelId);
     }

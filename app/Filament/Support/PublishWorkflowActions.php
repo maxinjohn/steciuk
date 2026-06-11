@@ -104,6 +104,8 @@ class PublishWorkflowActions
                     'title' => (string) ($record->title ?? $record->getKey()),
                 ]);
 
+                app(\App\Services\ContentApprovalService::class)->forgetPendingCountCache();
+
                 Notification::make()
                     ->title('Submitted for review')
                     ->body('Parish leadership will review this before publishing.')

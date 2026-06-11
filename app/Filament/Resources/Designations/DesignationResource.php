@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DesignationResource extends Resource
 {
@@ -39,6 +40,14 @@ class DesignationResource extends Resource
     public static function canCreate(): bool
     {
         return auth()->user()?->can('create', Designation::class) ?? false;
+    }
+
+    /**
+     * @return Builder<Designation>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withCount('users');
     }
 
     public static function form(Schema $schema): Schema

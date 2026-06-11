@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class GalleryPhotoResource extends Resource
 {
@@ -30,6 +31,14 @@ class GalleryPhotoResource extends Resource
     protected static ?string $pluralModelLabel = 'Gallery Photos';
 
     protected static ?int $navigationSort = 2;
+
+    /**
+     * @return Builder<GalleryPhoto>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['album']);
+    }
 
     public static function form(Schema $schema): Schema
     {
