@@ -26,4 +26,24 @@ class FormSubmission extends Model
             'is_read' => 'boolean',
         ];
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function normalizedData(): array
+    {
+        $data = $this->data;
+
+        if (is_array($data)) {
+            return $data;
+        }
+
+        if (is_string($data) && $data !== '') {
+            $decoded = json_decode($data, true);
+
+            return is_array($decoded) ? $decoded : ['value' => $data];
+        }
+
+        return [];
+    }
 }

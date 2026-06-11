@@ -119,7 +119,9 @@ Canonical parish copy lives in `app/Support/ReferenceSiteContent.php` and is app
 git pull
 composer install --optimize-autoloader   # production only
 npm install && npm run build             # when frontend changed
+php artisan site:ensure-paths --link
 php artisan migrate --force
+php artisan site:doctor
 ```
 
 Production may also cache config/routes/views after migrate:
@@ -129,6 +131,8 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ```
+
+Run `php artisan site:doctor` any time admin uploads or SQLite paths fail on the server.
 
 When you change reference copy in code, add a migration that calls `ReferenceSiteContentMigrator::apply()`.
 

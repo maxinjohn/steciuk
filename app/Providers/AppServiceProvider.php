@@ -18,6 +18,7 @@ use Illuminate\Auth\Events\Attempting;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -30,14 +31,20 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        if ($storagePath = SitePaths::resolve(env('APP_STORAGE_PATH'))) {
+        $this->applyCustomDataPaths();
+
+        if ($storagePath = SitePaths::configuredPath('storage')) {
             $this->app->useStoragePath($storagePath);
         }
     }
 
     public function boot(): void
     {
-        $this->applyCustomDataPaths();
+        $this->configureTrustedProxies();
+
+        SitePaths::ensureConfiguredDataPaths();
+        SitePaths::ensureSqliteDatabaseFile();
+        SitePaths::ensurePublicStorageLink();
 
         SqliteOptimizer::configureConnection();
 
@@ -183,15 +190,15 @@ class AppServiceProvider extends ServiceProvider
 
     private function applyCustomDataPaths(): void
     {
-        if ($database = SitePaths::resolve(env('DB_DATABASE'))) {
+        if ($database = SitePaths::configuredPath('database')) {
             config(['database.connections.sqlite.database' => $database]);
         }
 
-        if ($private = SitePaths::resolve(env('PRIVATE_STORAGE_PATH'))) {
+        if ($private = SitePaths::configuredPath('private_uploads')) {
             config(['filesystems.disks.local.root' => $private]);
         }
 
-        if ($public = SitePaths::resolve(env('PUBLIC_STORAGE_PATH'))) {
+        if ($public = SitePaths::configuredPath('public_uploads')) {
             config([
                 'filesystems.disks.public.root' => $public,
                 'filesystems.links' => [
@@ -199,5 +206,26 @@ class AppServiceProvider extends ServiceProvider
                 ],
             ]);
         }
+    }
+
+    private function configureTrustedProxies(): void
+    {
+        $trustedProxies = config('security.trusted_proxies');
+
+        if (! filled($trustedProxies)) {
+            return;
+        }
+
+        $proxies = trim((string) $trustedProxies) === '*'
+            ? '*'
+            : array_map('trim', explode(',', (string) $trustedProxies));
+
+        Request::setTrustedProxies(
+            $proxies,
+            Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO,
+        );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\FormSubmissions\Schemas;
 
+use App\Models\FormSubmission;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -19,6 +20,7 @@ class FormSubmissionInfolist
                     ->boolean()
                     ->label('Read'),
                 KeyValueEntry::make('data')
+                    ->state(fn (FormSubmission $record): array => $record->normalizedData())
                     ->columnSpanFull(),
                 TextEntry::make('ip_address'),
                 TextEntry::make('user_agent')
