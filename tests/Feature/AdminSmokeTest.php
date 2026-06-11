@@ -51,7 +51,7 @@ class AdminSmokeTest extends TestCase
             AdminPanelConfig::url('ministries'),
             AdminPanelConfig::url('gallery-albums'),
             AdminPanelConfig::url('gallery-photos'),
-            AdminPanelConfig::url('form-submissions'),
+            AdminPanelConfig::url('conversations'),
             AdminPanelConfig::url('users'),
             AdminPanelConfig::url('families'),
             AdminPanelConfig::url('families/create'),
@@ -77,7 +77,7 @@ class AdminSmokeTest extends TestCase
             AdminPanelConfig::url(),
             AdminPanelConfig::url('pages'),
             AdminPanelConfig::url('church-settings'),
-            AdminPanelConfig::url('form-submissions'),
+            AdminPanelConfig::url('conversations'),
         ];
 
         foreach ($paths as $path) {

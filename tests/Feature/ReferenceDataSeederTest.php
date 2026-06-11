@@ -126,7 +126,7 @@ class ReferenceDataSeederTest extends TestCase
         $this->seed(ReferenceDataSeeder::class);
 
         $this->assertSame(1, MenuItem::query()->where('menu_location', 'header')->whereNull('parent_id')->where('label', 'Home')->count());
-        $this->assertSame(8, MenuItem::query()->where('menu_location', 'header')->whereNull('parent_id')->count());
+        $this->assertSame(9, MenuItem::query()->where('menu_location', 'header')->whereNull('parent_id')->count());
     }
 
     public function test_database_seeder_skips_when_mode_off(): void

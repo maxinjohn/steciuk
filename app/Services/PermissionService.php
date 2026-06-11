@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Policies\ContentBlockPolicy;
 use App\Policies\EventPolicy;
+use App\Policies\ConversationPolicy;
 use App\Policies\FormSubmissionPolicy;
 use App\Policies\GalleryAlbumPolicy;
 use App\Policies\GalleryPhotoPolicy;
@@ -42,6 +43,7 @@ class PermissionService
         ResourcePolicy::class => 'parish_resources',
         ServicePolicy::class => 'services',
         FormSubmissionPolicy::class => 'form_submissions',
+        ConversationPolicy::class => 'form_submissions',
         UserPolicy::class => 'users',
     ];
 

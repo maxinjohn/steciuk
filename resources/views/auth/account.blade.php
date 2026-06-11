@@ -7,10 +7,11 @@
     @php
         $user = auth()->user();
         $family = $user->family?->loadCount('members');
-        $showFamilyTab = $user->canBelongToHousehold() && ($family || $user->isMember());
+        $showFamilyTab = $user->canBelongToHousehold();
 
         $accountTabs = [
             ['id' => 'overview', 'label' => 'Overview'],
+            ['id' => 'messages', 'label' => 'Messages'],
             ['id' => 'photo', 'label' => 'Photo'],
             ['id' => 'contact', 'label' => 'Contact'],
             ['id' => 'password', 'label' => 'Password'],
@@ -24,12 +25,17 @@
         $accountTabs[] = ['id' => 'giving', 'label' => 'Giving'];
         $accountTabs[] = ['id' => 'parish', 'label' => 'Parish life'];
 
+        $unreadMessages = \App\Models\Conversation::query()
+            ->where('user_id', $user->id)
+            ->where('unread_by_member', true)
+            ->count();
+
         $allowedTabIds = array_column($accountTabs, 'id');
         $initialTab = in_array(request('tab'), $allowedTabIds, true) ? request('tab') : 'overview';
     @endphp
 
     <section class="member-portal py-8 sm:py-12 md:py-14">
-        <div class="member-portal-shell mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="member-portal-shell mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8 xl:px-10">
             <div class="member-portal-hero" x-data="{ avatarUrl: @js($user->avatarUrl()) }" @avatar-updated.window="avatarUrl = $event.detail.url">
                 <div class="member-portal-hero-main">
                     <div class="member-portal-avatar-wrap member-portal-avatar--xl">
@@ -95,7 +101,10 @@
                             :class="tab === @js($accountTab['id']) && 'is-active'"
                             @click="tab = @js($accountTab['id'])"
                         >
-                            {{ $accountTab['label'] }}
+                            <span class="member-portal-tab__label">{{ $accountTab['label'] }}</span>
+                            @if ($accountTab['id'] === 'messages' && $unreadMessages > 0)
+                                <span class="member-portal-tab__badge" aria-label="{{ $unreadMessages }} unread">{{ $unreadMessages }}</span>
+                            @endif
                         </button>
                     @endforeach
                 </nav>
@@ -152,6 +161,10 @@
                                 <span class="member-portal-quick-desc">Liturgy, lectionary, and downloads</span>
                             </a>
                         </div>
+                    </div>
+
+                    <div x-show="tab === 'messages'" x-cloak>
+                        @livewire('account.parish-messages-manager')
                     </div>
 
                     <div x-show="tab === 'photo'" x-cloak>
@@ -214,8 +227,9 @@
                                 <li><a href="{{ url('/news') }}">Parish news</a></li>
                                 <li><a href="{{ url('/resources') }}">Resources & liturgy</a></li>
                                 <li><a href="{{ url('/prayer-request') }}">Prayer request</a></li>
-                                <li><a href="{{ url('/new-member') }}">New member enquiry</a></li>
-                                <li><a href="{{ url('/contact') }}">Contact the parish office</a></li>
+                                <li><a href="{{ url('/new-member') }}">Membership enquiry</a></li>
+                                <li><button type="button" class="member-portal-inline-link" @click="tab = 'messages'">Message the parish office</button></li>
+                                <li><a href="{{ url('/contact') }}">Public contact form</a></li>
                             </ul>
                         </div>
                     </div>

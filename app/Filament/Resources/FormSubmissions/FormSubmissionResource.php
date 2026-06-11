@@ -22,7 +22,12 @@ class FormSubmissionResource extends Resource
 
     protected static string | \UnitEnum | null $navigationGroup = AdminNavigationGroup::Messages;
 
-    protected static ?string $navigationLabel = 'Inbox';
+    protected static ?string $navigationLabel = 'Form log';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 
     protected static ?string $modelLabel = 'Form Submission';
 

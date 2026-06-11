@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Page;
 use App\Support\CustomAssetSanitizer;
 use App\Support\SafeUrl;
+use App\Support\SeedConfig;
+use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -59,10 +61,25 @@ class SecurityHardeningTest extends TestCase
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
         $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
         $response->assertHeader('Content-Security-Policy');
-        $this->assertStringContainsString(
-            'https://static.cloudflareinsights.com',
-            (string) $response->headers->get('Content-Security-Policy'),
-        );
+        $csp = (string) $response->headers->get('Content-Security-Policy');
+
+        $this->assertStringContainsString('https://static.cloudflareinsights.com', $csp);
+        $this->assertStringContainsString('https://fonts.bunny.net', $csp);
+        $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
+    }
+
+    public function test_admin_pages_allow_bunny_fonts_in_csp(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $admin = \App\Models\User::factory()->create(['role' => \App\Enums\UserRole::SuperAdmin]);
+
+        $response = $this->actingAs($admin)->get(\App\Support\AdminPanelConfig::url('church-settings'));
+
+        $response->assertOk();
+        $csp = (string) $response->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString('https://fonts.bunny.net', $csp);
     }
 
     public function test_honeypot_submission_is_logged(): void

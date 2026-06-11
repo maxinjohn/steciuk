@@ -338,13 +338,20 @@ class ReferenceSiteContent
                 ],
             ],
             [
+                'label' => 'Member area',
+                'seed_key' => 'member-area',
+                'children' => [
+                    ['label' => 'Sign in', 'url' => '/login', 'seed_key' => 'members.sign-in'],
+                    ['label' => 'Join the parish', 'url' => '/register', 'seed_key' => 'members.join'],
+                    ['label' => 'Membership enquiry', 'slug' => 'new-member', 'seed_key' => 'members.enquiry'],
+                ],
+            ],
+            [
                 'label' => 'Contact',
                 'seed_key' => 'contact',
                 'children' => [
                     ['label' => 'Contact Us', 'slug' => 'contact', 'seed_key' => 'contact.contact-us'],
                     ['label' => 'Prayer Request', 'slug' => 'prayer-request', 'seed_key' => 'contact.prayer-request'],
-                    ['label' => 'Register', 'slug' => 'register', 'seed_key' => 'contact.register'],
-                    ['label' => 'New Member', 'slug' => 'new-member', 'seed_key' => 'contact.new-member'],
                 ],
             ],
         ];
@@ -767,7 +774,7 @@ HTML;
     public static function newMember(): string
     {
         return <<<'HTML'
-<h2>Register as a New Member</h2>
+<h2>Membership enquiry</h2>
 <p>Welcome! If you would like to join the St. Thomas Evangelical Church of India – UK Parish, you can <a href="/register">create a parish member account</a> with your UK address and worship location, or complete the enquiry form below if you prefer to speak with the leadership team first.</p>
 <p>Membership is open to those who profess faith in Jesus Christ and wish to participate in the life and mission of our parish.</p>
 HTML;

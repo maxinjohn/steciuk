@@ -114,6 +114,8 @@ class MailConfigService
         string $body,
         ?string $fromAddress = null,
         ?string $fromName = null,
+        ?string $replyToAddress = null,
+        ?string $replyToName = null,
     ): void {
         static::ensureTransportTimeouts();
 
@@ -122,17 +124,23 @@ class MailConfigService
         $fromName ??= (string) config('mail.from.name');
 
         if ($mailer === 'sendmail') {
-            static::deliverViaSendmail($to, $subject, $body, $fromAddress, $fromName);
+            static::deliverViaSendmail($to, $subject, $body, $fromAddress, $fromName, $replyToAddress, $replyToName);
 
             return;
         }
 
         Mail::mailer($mailer)->raw(
             $body,
-            fn ($message) => $message
-                ->to($to)
-                ->subject($subject)
-                ->from($fromAddress, $fromName !== '' ? $fromName : null),
+            function ($message) use ($to, $subject, $fromAddress, $fromName, $replyToAddress, $replyToName): void {
+                $message
+                    ->to($to)
+                    ->subject($subject)
+                    ->from($fromAddress, $fromName !== '' ? $fromName : null);
+
+                if ($replyToAddress) {
+                    $message->replyTo($replyToAddress, $replyToName !== '' ? $replyToName : null);
+                }
+            },
         );
     }
 
@@ -362,9 +370,11 @@ class MailConfigService
         string $body,
         string $fromAddress,
         string $fromName,
+        ?string $replyToAddress = null,
+        ?string $replyToName = null,
     ): void {
         if (static::canUsePhpMail()) {
-            static::deliverViaPhpMail($to, $subject, $body, $fromAddress, $fromName);
+            static::deliverViaPhpMail($to, $subject, $body, $fromAddress, $fromName, $replyToAddress, $replyToName);
 
             return;
         }
@@ -372,10 +382,16 @@ class MailConfigService
         if (static::canUseSubprocess()) {
             Mail::mailer('sendmail')->raw(
                 $body,
-                fn ($message) => $message
-                    ->to($to)
-                    ->subject($subject)
-                    ->from($fromAddress, $fromName !== '' ? $fromName : null),
+                function ($message) use ($to, $subject, $fromAddress, $fromName, $replyToAddress, $replyToName): void {
+                    $message
+                        ->to($to)
+                        ->subject($subject)
+                        ->from($fromAddress, $fromName !== '' ? $fromName : null);
+
+                    if ($replyToAddress) {
+                        $message->replyTo($replyToAddress, $replyToName !== '' ? $replyToName : null);
+                    }
+                },
             );
 
             return;
@@ -390,6 +406,8 @@ class MailConfigService
         string $body,
         string $fromAddress,
         string $fromName,
+        ?string $replyToAddress = null,
+        ?string $replyToName = null,
     ): void {
         if (! static::canUsePhpMail()) {
             throw new \RuntimeException('PHP mail() is not available on this server.');
@@ -399,9 +417,14 @@ class MailConfigService
             ? static::encodeHeaderValue($fromName).' <'.$fromAddress.'>'
             : $fromAddress;
 
+        $replyTo = $replyToAddress ?: $fromAddress;
+        $replyToHeader = $replyToName !== null && $replyToName !== ''
+            ? static::encodeHeaderValue($replyToName).' <'.$replyTo.'>'
+            : $replyTo;
+
         $headers = implode("\r\n", [
             'From: '.$fromHeader,
-            'Reply-To: '.$fromAddress,
+            'Reply-To: '.$replyToHeader,
             'MIME-Version: 1.0',
             'Content-Type: text/plain; charset=UTF-8',
             'Content-Transfer-Encoding: 8bit',

@@ -32,6 +32,7 @@ class ReferenceMenuApplicator
             $sortOrder = 0;
 
             $this->seedMenu($structure, $menuLocation, $pages, null, $sortOrder);
+            $this->pruneOrphanedSeeds($menuLocation, $structure);
             $this->pruneLegacyDuplicates($menuLocation);
         }
     }
@@ -58,7 +59,7 @@ class ReferenceMenuApplicator
                 ],
                 [
                     'label' => $item['label'],
-                    'url' => isset($item['slug']) ? '/'.$item['slug'] : null,
+                    'url' => $item['url'] ?? (isset($item['slug']) ? '/'.$item['slug'] : null),
                     'page_id' => isset($item['slug']) ? ($pages[$item['slug']] ?? null) : null,
                     'parent_id' => $parentId,
                     'target' => '_self',
@@ -74,6 +75,40 @@ class ReferenceMenuApplicator
                 $this->seedMenu($item['children'], $location, $pages, $seedKey, $sortOrder);
             }
         }
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $structure
+     */
+    private function pruneOrphanedSeeds(MenuLocation $location, array $structure): void
+    {
+        $validKeys = $this->collectSeedKeys($structure);
+
+        MenuItem::query()
+            ->where('menu_location', $location)
+            ->whereNotNull('seed_key')
+            ->whereNotIn('seed_key', $validKeys)
+            ->get()
+            ->each(fn (MenuItem $item) => $this->deleteMenuSubtree($item));
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $structure
+     * @return list<string>
+     */
+    private function collectSeedKeys(array $structure): array
+    {
+        $keys = [];
+
+        foreach ($structure as $item) {
+            $keys[] = $item['seed_key'];
+
+            if (! empty($item['children'])) {
+                $keys = array_merge($keys, $this->collectSeedKeys($item['children']));
+            }
+        }
+
+        return $keys;
     }
 
     private function pruneLegacyDuplicates(MenuLocation $location): void

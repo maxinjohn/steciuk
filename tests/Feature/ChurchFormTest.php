@@ -44,6 +44,9 @@ class ChurchFormTest extends TestCase
         $this->assertDatabaseHas('form_submissions', [
             'form_type' => FormType::Contact->value,
         ]);
+
+        $this->assertDatabaseCount('conversations', 1);
+        $this->assertDatabaseCount('messages', 1);
     }
 
     public function test_honeypot_blocks_bot_submissions(): void

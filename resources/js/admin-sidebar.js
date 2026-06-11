@@ -196,6 +196,12 @@ document.addEventListener('click', (event) => {
 window.addEventListener('resize', () => {
     const store = window.Alpine?.store('sidebar');
 
+    if (! isDesktop()) {
+        document.querySelectorAll('.fi-sidebar-group.fi-parish-expanded').forEach((group) => {
+            group.classList.remove('fi-parish-expanded');
+        });
+    }
+
     if (store) {
         expandGroupForActivePage(store);
     }

@@ -57,7 +57,7 @@
     @stack('head')
 </head>
 <body @class([
-    'site-body site-mesh has-mobile-dock min-h-screen flex flex-col md:pb-0',
+    'site-body site-mesh has-mobile-dock min-h-screen flex flex-col lg:pb-0',
     'is-home' => request()->routeIs('home'),
 ])>
     @php
@@ -98,13 +98,14 @@
                     @endif
 
                     @auth
-                        <a href="{{ route('account') }}" class="hidden lg:inline-flex items-center rounded-xl px-3 py-2 text-sm font-semibold text-[var(--site-ink)] transition hover:bg-[var(--site-surface)]">
-                            Account
+                        <a href="{{ route('account') }}" class="site-member-chip-btn site-member-chip-btn--solo">
+                            <svg class="site-member-chip-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                            </svg>
+                            <span class="site-member-chip-label">Account</span>
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="hidden lg:inline-flex items-center rounded-xl px-3 py-2 text-sm font-semibold text-[var(--site-ink)] transition hover:bg-[var(--site-surface)]">
-                            Sign in
-                        </a>
+                        <x-site-member-chip class="lg:hidden" />
                     @endauth
                 </div>
             </div>
@@ -112,13 +113,13 @@
 
         <div
             id="mobile-menu-overlay"
-            class="mobile-overlay fixed md:hidden"
+            class="mobile-overlay fixed lg:hidden"
             aria-hidden="true"
         ></div>
 
         <nav
             id="mobile-menu"
-            class="mobile-sheet fixed md:hidden"
+            class="mobile-sheet fixed lg:hidden"
             aria-label="Mobile navigation"
             aria-hidden="true"
         >
@@ -198,18 +199,11 @@
                             </span>
                         </a>
                     @else
-                        <a href="{{ route('login') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--navy">
-                            <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg></span>
-                            <span>
-                                <span class="mobile-quick-label">Sign In</span>
-                                <span class="mobile-quick-desc">Member account</span>
-                            </span>
-                        </a>
                         <a href="{{ route('register') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--gold">
-                            <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg></span>
+                            <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg></span>
                             <span>
-                                <span class="mobile-quick-label">Register</span>
-                                <span class="mobile-quick-desc">Create parish account</span>
+                                <span class="mobile-quick-label">Member area</span>
+                                <span class="mobile-quick-desc">Sign in · Join · Enquiry</span>
                             </span>
                         </a>
                     @endauth
@@ -218,7 +212,7 @@
             </div>
         </nav>
 
-        <main id="main-content" class="flex-1 md:pb-0">
+        <main id="main-content" class="flex-1 lg:pb-0">
             @yield('content')
         </main>
 
@@ -229,7 +223,7 @@
         />
         <x-gospel-reminder />
 
-        <footer class="site-footer md:pb-0" aria-label="Site footer">
+        <footer class="site-footer lg:pb-0" aria-label="Site footer">
             <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
                 <div class="hidden gap-8 md:grid md:grid-cols-2 md:gap-10 lg:grid-cols-4">
                     <div>
@@ -371,7 +365,7 @@
 
     </div>
 
-    <div class="mobile-dock-wrap md:hidden">
+    <div class="mobile-dock-wrap lg:hidden">
         <nav class="mobile-dock" aria-label="Quick navigation">
         <a href="{{ route('home') }}" class="mobile-dock-item {{ request()->routeIs('home') ? 'is-active' : '' }}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
