@@ -47,11 +47,9 @@ class AppServiceProvider extends ServiceProvider
         SitePaths::ensureSqliteDatabaseFile();
         SitePaths::ensurePublicStorageLink();
 
-        SqliteOptimizer::configureConnection();
-
         Event::listen(ConnectionEstablished::class, function (ConnectionEstablished $event): void {
             if ($event->connection->getDriverName() === 'sqlite') {
-                SqliteOptimizer::configureConnection();
+                SqliteOptimizer::configureConnection($event->connection);
             }
         });
 

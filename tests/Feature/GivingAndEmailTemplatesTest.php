@@ -73,16 +73,19 @@ class GivingAndEmailTemplatesTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(GivingSettings::class)
-            ->fillForm([
-                'give_bank_name' => 'Barclays',
-                'give_account_name' => 'STECI UK Parish',
-                'give_sort_code' => '20-00-00',
-                'give_account_number' => '87654321',
-                'give_payment_reference' => 'Surname + Giving',
-            ])
+            ->set('data.give_page_heading', 'Support our parish')
+            ->set('data.give_bank_name', 'Barclays')
+            ->set('data.give_account_name', 'STECI UK Parish')
+            ->set('data.give_sort_code', '20-00-00')
+            ->set('data.give_account_number', '87654321')
+            ->set('data.give_payment_reference', 'Surname + Giving')
             ->call('save')
             ->assertHasNoFormErrors();
 
+        $this->assertDatabaseHas('settings', [
+            'key' => 'give_bank_name',
+            'value' => 'Barclays',
+        ]);
         $this->assertSame('Barclays', Setting::get('give_bank_name'));
         $this->assertSame('87654321', Setting::get('give_account_number'));
         $this->assertSame('/give', Setting::get('donation_link'));
