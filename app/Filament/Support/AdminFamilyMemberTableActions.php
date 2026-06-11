@@ -57,7 +57,7 @@ class AdminFamilyMemberTableActions
                     ? ''
                     : ' This member must have an email address before they can sign in.';
 
-                return "{$record->displayFullName()} will become the only household member who can sign in on behalf of this family on the member portal. The previous primary account will lose sign-in access.{$emailNote}";
+                return "{$record->displayFullName()} will become the family administrator for this household. They can manage household members on the member portal once approved.{$emailNote}";
             })
             ->action(function (User $record) use ($family, $afterAdminChange): void {
                 app(MemberRegistrationService::class)->setFamilyAdmin(auth()->user(), $family, $record);

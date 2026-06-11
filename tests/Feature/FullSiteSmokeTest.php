@@ -35,7 +35,6 @@ class FullSiteSmokeTest extends TestCase
             '/online-worship',
             '/contact',
             '/prayer-request',
-            '/new-member',
             '/register',
             '/login',
             '/registration/pending',
@@ -67,6 +66,15 @@ class FullSiteSmokeTest extends TestCase
 
         $this->get(route('gallery.show', 'parish-worship-services'))->assertOk();
         $this->get(route('ministries.show', 'sunday-school'))->assertOk();
+    }
+
+    public function test_legacy_new_member_url_redirects_to_register(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $this->get('/new-member')
+            ->assertRedirect(route('register'));
     }
 
     public function test_unknown_slug_returns_404_not_500(): void

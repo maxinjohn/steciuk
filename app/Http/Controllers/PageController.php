@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Page;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class PageController extends Controller
 {
-    public function show(string $slug): View|Response
+    public function show(string $slug): View|Response|RedirectResponse
     {
+        if ($slug === 'new-member') {
+            return redirect()->route('register', status: 301);
+        }
+
         $page = Page::query()
             ->where('slug', $slug)
             ->published()

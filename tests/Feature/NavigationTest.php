@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\AccountStatus;
+use App\Enums\UserRole;
+use App\Models\User;
 use App\Support\SeedConfig;
 use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -68,6 +71,32 @@ class NavigationTest extends TestCase
         $this->assertDatabaseHas('menu_items', ['seed_key' => 'member-area', 'label' => 'Member area']);
         $this->assertDatabaseMissing('menu_items', ['seed_key' => 'contact.register']);
         $this->assertDatabaseMissing('menu_items', ['seed_key' => 'contact.new-member']);
+    }
+
+    public function test_legacy_new_member_url_redirects_to_register(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $this->get('/new-member')
+            ->assertRedirect(route('register'));
+    }
+
+    public function test_member_account_parish_links_exclude_membership_enquiry(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $member = User::factory()->create([
+            'role' => UserRole::Member,
+            'account_status' => AccountStatus::Approved->value,
+        ]);
+
+        $this->actingAs($member)
+            ->get(route('account'))
+            ->assertOk()
+            ->assertDontSee('Membership enquiry', false)
+            ->assertDontSee('/new-member', false);
     }
 
     public function test_guest_header_shows_member_chip_on_mobile(): void

@@ -226,7 +226,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
         $familyName = $this->family?->memberPortalLabel() ?? 'your parish household';
 
-        return "You are already listed as a family member under {$familyName}. Only the primary family account can sign in on behalf of your household. Please use that account to sign in.";
+        return "An account with this email is already linked to {$familyName}. Please sign in instead of registering again.";
     }
 
     public function householdMemberRegistrationMessage(): string
@@ -235,7 +235,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
         $familyName = $this->family?->memberPortalLabel() ?? 'your parish household';
 
-        return "You are already registered as a family member under {$familyName}. Please use the primary family account to sign in instead of creating a new account.";
+        return "An account with this email is already linked to {$familyName}. Please sign in instead of creating a new registration.";
     }
 
     public function isAccountPending(): bool
