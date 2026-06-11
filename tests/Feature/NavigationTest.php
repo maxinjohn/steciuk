@@ -52,6 +52,35 @@ class NavigationTest extends TestCase
         $this->assertSame($panelCount - 1, $hiddenPanelCount);
     }
 
+    public function test_member_area_menu_is_separate_from_contact(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('Member area', false);
+        $response->assertSee('Join the parish', false);
+        $response->assertSee('Membership enquiry', false);
+        $response->assertDontSee('>Register<', false);
+        $response->assertDontSee('>New Member<', false);
+        $this->assertDatabaseHas('menu_items', ['seed_key' => 'member-area', 'label' => 'Member area']);
+        $this->assertDatabaseMissing('menu_items', ['seed_key' => 'contact.register']);
+        $this->assertDatabaseMissing('menu_items', ['seed_key' => 'contact.new-member']);
+    }
+
+    public function test_guest_header_shows_member_chip_on_mobile(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('data-member-chip', false)
+            ->assertSee('site-member-chip-label', false);
+    }
+
     public function test_mobile_menu_uses_vanilla_navigation_markup(): void
     {
         config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);

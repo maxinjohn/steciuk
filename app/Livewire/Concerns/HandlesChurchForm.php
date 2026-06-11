@@ -5,7 +5,9 @@ namespace App\Livewire\Concerns;
 use App\Enums\FormType;
 use App\Models\FormSubmission;
 use App\Models\Setting;
+use App\Models\User;
 use App\Services\MailConfigService;
+use App\Services\ParishConversationService;
 use App\Services\SecurityLogger;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Attributes\Validate;
@@ -61,18 +63,29 @@ trait HandlesChurchForm
 
         RateLimiter::hit($key, 3600);
 
-        $rules = array_merge($this->validationRules(), [
-            'website' => 'nullable|string|max:0',
-        ]);
+        $rules = array_merge(
+            $this->validationRules(),
+            $this->captchaValidationRules(),
+            ['website' => 'nullable|string|max:0'],
+        );
 
         $this->validate($rules);
 
-        FormSubmission::query()->create([
+        $submission = FormSubmission::query()->create([
             'form_type' => $this->formType(),
             'data' => $this->formData(),
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
+
+        $user = auth()->user();
+
+        app(ParishConversationService::class)->startFromFormSubmission(
+            $submission,
+            $this->formType(),
+            $this->formData(),
+            $user instanceof User ? $user : null,
+        );
 
         SecurityLogger::audit('form_submission', context: [
             'type' => $this->formType()->value,
@@ -81,9 +94,20 @@ trait HandlesChurchForm
             'ip' => request()->ip(),
         ]);
 
-        $this->notifyAdmin();
-
         $this->submitted = true;
+        $this->resetFormFields();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function captchaValidationRules(): array
+    {
+        return [];
+    }
+
+    protected function resetFormFields(): void
+    {
         $this->reset(['website']);
     }
 

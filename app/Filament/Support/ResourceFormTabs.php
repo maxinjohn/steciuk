@@ -8,7 +8,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 class ResourceFormTabs
 {
     /**
-     * Vertical, query-persisted tabs for large create/edit resource forms.
+     * Horizontal, query-persisted tabs for large create/edit resource forms.
      *
      * @param  array<Tab>  $tabs
      */
@@ -16,7 +16,7 @@ class ResourceFormTabs
     {
         return Tabs::make($label)
             ->tabs($tabs)
-            ->vertical()
+            ->scrollable()
             ->contained(false)
             ->persistTabInQueryString($queryKey)
             ->extraAttributes(['class' => 'admin-form-tabs resource-form-tabs'])

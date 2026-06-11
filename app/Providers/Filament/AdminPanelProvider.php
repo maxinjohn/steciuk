@@ -53,7 +53,6 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
                 'info' => Color::Sky,
             ])
-            ->font('Inter')
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
             ->sidebarWidth('18rem')
@@ -68,6 +67,10 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode(true)
             ->defaultThemeMode(ThemeMode::Light)
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn () => filament()->auth()->check() ? view('filament.admin.mobile-dock') : '',
+            )
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn () => view('filament.admin.scripts'),

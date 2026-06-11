@@ -45,6 +45,13 @@ class Setting extends Model
         return array_key_exists($key, $values) ? $values[$key] : $default;
     }
 
+    public static function text(string $key, string $default = ''): string
+    {
+        $value = trim((string) static::get($key, $default));
+
+        return $value !== '' ? $value : $default;
+    }
+
     public static function set(string $key, mixed $value, ?string $group = null): static
     {
         $storedValue = is_array($value) ? json_encode($value) : (string) $value;

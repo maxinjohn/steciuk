@@ -27,15 +27,17 @@ class SecureHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
         }
 
+        $fontCdn = 'https://fonts.bunny.net';
+
         if (config('security.csp_enabled') && ! \App\Support\AdminPanelConfig::isAdminRequest($request)) {
             $csp = implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com https://static.cloudflareinsights.com",
-                "style-src 'self' 'unsafe-inline'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com https://static.cloudflareinsights.com https://challenges.cloudflare.com",
+                "style-src 'self' 'unsafe-inline' {$fontCdn}",
                 "img-src 'self' data: blob: https:",
-                "font-src 'self' data:",
+                "font-src 'self' data: {$fontCdn}",
                 "connect-src 'self' https: wss:",
-                "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
+                "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com https://challenges.cloudflare.com",
                 "media-src 'self' https: blob:",
                 "object-src 'none'",
                 "base-uri 'self'",
@@ -50,9 +52,9 @@ class SecureHeaders
             $response->headers->set('Content-Security-Policy', implode('; ', [
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-                "style-src 'self' 'unsafe-inline'",
+                "style-src 'self' 'unsafe-inline' {$fontCdn}",
                 "img-src 'self' data: blob: https:",
-                "font-src 'self' data:",
+                "font-src 'self' data: {$fontCdn}",
                 "connect-src 'self' https: wss:",
                 "frame-src 'self'",
                 "object-src 'none'",

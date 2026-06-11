@@ -303,7 +303,7 @@ class ChurchSettings extends Page
                                         ->visible(fn ($get): bool => (bool) $get('maintenance_mode_enabled')),
                                     Toggle::make('registration_captcha_enabled')
                                         ->label('Registration security check (CAPTCHA)')
-                                        ->helperText('Cloudflare Turnstile on the member registration form. Turn off for local testing or if the widget is unavailable. You can also set TURNSTILE_ENABLED=false in .env to disable it on this server.')
+                                        ->helperText('Cloudflare Turnstile on member registration and the public contact form. Turn off for local testing or if the widget is unavailable. You can also set TURNSTILE_ENABLED=false in .env to disable it on this server.')
                                         ->default(true),
                                 ]),
                         ]),

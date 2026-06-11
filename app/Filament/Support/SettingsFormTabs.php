@@ -14,7 +14,7 @@ class SettingsFormTabs
     {
         return Tabs::make($label)
             ->tabs($tabs)
-            ->vertical()
+            ->scrollable()
             ->contained(false)
             ->persistTabInQueryString($queryKey)
             ->extraAttributes(['class' => 'admin-form-tabs settings-form-tabs'])

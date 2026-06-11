@@ -38,7 +38,8 @@
         str_contains(strtolower($label), 'ministr'), str_contains(strtolower($label), 'youth'), str_contains(strtolower($label), 'school'), str_contains(strtolower($label), 'choir'), str_contains(strtolower($label), 'prayer') => 'people',
         str_contains(strtolower($label), 'event'), str_contains(strtolower($label), 'news') => 'calendar',
         str_contains(strtolower($label), 'resource'), str_contains(strtolower($label), 'gallery'), str_contains(strtolower($label), 'liturgy') => 'folder',
-        str_contains(strtolower($label), 'contact'), str_contains(strtolower($label), 'member') => 'mail',
+        str_contains(strtolower($label), 'member') => 'user',
+        str_contains(strtolower($label), 'contact') => 'mail',
         default => 'link',
     };
 @endphp
@@ -154,7 +155,7 @@
                         <span class="menu-link-mobile-icon" aria-hidden="true">
                             @include('components.partials.menu-icon', ['name' => $icon])
                         </span>
-                        <span class="flex-1">{{ $item->label }}</span>
+                        <span class="min-w-0 flex-1 truncate">{{ $item->label }}</span>
                     </a>
                 @endif
             </div>

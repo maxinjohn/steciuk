@@ -344,6 +344,45 @@ const initMobileDock = () => {
     });
 };
 
+const initMemberChip = () => {
+    document.querySelectorAll('[data-member-chip]').forEach((root) => {
+        const trigger = root.querySelector('[data-member-chip-trigger]');
+        const panel = root.querySelector('[data-member-chip-panel]');
+
+        if (! trigger || ! panel) {
+            return;
+        }
+
+        const setOpen = (open) => {
+            trigger.classList.toggle('is-open', open);
+            trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+            panel.hidden = ! open;
+        };
+
+        trigger.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(panel.hidden);
+        });
+
+        panel.querySelectorAll('[data-member-chip-link]').forEach((link) => {
+            link.addEventListener('click', () => setOpen(false));
+        });
+
+        document.addEventListener('click', (event) => {
+            if (! root.contains(event.target)) {
+                setOpen(false);
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                setOpen(false);
+            }
+        });
+    });
+};
+
 const initHeaderScroll = () => {
     const header = document.getElementById('site-header');
 
@@ -421,6 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLocationTabs();
     initMobileDock();
     initMobileNav();
+    initMemberChip();
 
     const runDeferred = () => initScrollReveal();
     if ('requestIdleCallback' in window) {

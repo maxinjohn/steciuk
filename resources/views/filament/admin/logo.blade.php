@@ -20,8 +20,10 @@
             class="h-9 w-9 shrink-0 rounded-xl border border-amber-900/10 bg-white object-contain p-0.5 shadow-sm dark:border-amber-500/20 dark:bg-slate-900"
         >
     @else
-        <div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-sm font-bold text-white shadow-md shadow-amber-500/25">
-            <span aria-hidden="true">✝</span>
+        <div class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-md shadow-amber-500/25">
+            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true">
+                <path d="M12 4v16M8 8h8"/>
+            </svg>
         </div>
     @endif
     <div class="min-w-0 leading-tight">
