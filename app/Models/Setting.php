@@ -84,6 +84,10 @@ class Setting extends Model
             return asset(ltrim($path, '/'));
         }
 
-        return asset('storage/'.ltrim($path, '/'));
+        try {
+            return \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($path, '/'));
+        } catch (\Throwable) {
+            return asset('storage/'.ltrim($path, '/'));
+        }
     }
 }

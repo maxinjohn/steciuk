@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use RuntimeException;
+use Throwable;
 
 class SitePaths
 {
@@ -38,9 +39,25 @@ class SitePaths
         return (bool) preg_match('/^[A-Za-z]:[\\\\\\/]/', $path);
     }
 
+    public static function configuredRaw(string $key): ?string
+    {
+        $value = config("site.paths.{$key}");
+
+        if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        return trim($value);
+    }
+
+    public static function configuredPath(string $key, ?string $default = null): ?string
+    {
+        return self::resolve(self::configuredRaw($key) ?? $default);
+    }
+
     public static function directoryMode(): int
     {
-        $mode = env('SITE_DATA_DIR_MODE', '0775');
+        $mode = config('site.dir_mode', '0775');
 
         if (is_string($mode) && str_starts_with($mode, '0')) {
             return octdec($mode);
@@ -110,20 +127,157 @@ class SitePaths
         $mode = self::directoryMode();
 
         self::ensureLaravelStorageLayout(
-            self::resolve(env('APP_STORAGE_PATH')) ?? storage_path(),
+            self::configuredPath('storage') ?? storage_path(),
             $mode,
         );
 
-        self::ensureParentDirectoryForFile(env('DB_DATABASE'), $mode);
-
-        self::ensureDirectoryExists(
-            self::resolve(env('PRIVATE_STORAGE_PATH')) ?? storage_path('app/private'),
-            $mode,
-        );
+        self::ensureParentDirectoryForFile(self::configuredRaw('database'), $mode);
 
         self::ensureDirectoryExists(
-            self::resolve(env('PUBLIC_STORAGE_PATH')) ?? storage_path('app/public'),
+            self::configuredPath('public_uploads') ?? storage_path('app/public'),
             $mode,
         );
+
+        self::ensureDirectoryExists(
+            self::configuredPath('private_uploads') ?? storage_path('app/private'),
+            $mode,
+        );
+    }
+
+    public static function ensureSqliteDatabaseFile(): void
+    {
+        $database = config('database.connections.sqlite.database');
+
+        if (! is_string($database) || $database === '' || $database === ':memory:') {
+            return;
+        }
+
+        self::ensureParentDirectoryForFile($database);
+
+        if (file_exists($database)) {
+            return;
+        }
+
+        if (! @touch($database)) {
+            throw new RuntimeException("Unable to create SQLite database file at {$database}. Check permissions.");
+        }
+
+        @chmod($database, 0664);
+    }
+
+    public static function ensurePublicStorageLink(): bool
+    {
+        $link = public_path('storage');
+        $target = config('filesystems.disks.public.root');
+
+        if (! is_string($target) || $target === '' || ! is_dir($target)) {
+            return false;
+        }
+
+        $targetPath = realpath($target) ?: $target;
+
+        if (is_link($link)) {
+            $linked = realpath($link) ?: readlink($link);
+
+            return $linked === $targetPath;
+        }
+
+        if (file_exists($link)) {
+            return is_dir($link);
+        }
+
+        try {
+            return @symlink($targetPath, $link);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
+    }
+
+    public static function isWritableDirectory(?string $path): bool
+    {
+        $resolved = self::resolve($path);
+
+        return is_string($resolved)
+            && is_dir($resolved)
+            && is_writable($resolved);
+    }
+
+    /**
+     * @return list<array{status: string, label: string, detail: string}>
+     */
+    public static function productionChecks(): array
+    {
+        $checks = [];
+
+        $storageRoot = self::configuredPath('storage') ?? storage_path();
+        $checks[] = self::check(
+            self::isWritableDirectory($storageRoot),
+            'Storage directory',
+            $storageRoot,
+        );
+
+        $publicRoot = config('filesystems.disks.public.root');
+        $checks[] = self::check(
+            self::isWritableDirectory(is_string($publicRoot) ? $publicRoot : null),
+            'Public uploads directory',
+            is_string($publicRoot) ? $publicRoot : 'not configured',
+        );
+
+        $privateRoot = config('filesystems.disks.local.root');
+        $checks[] = self::check(
+            self::isWritableDirectory(is_string($privateRoot) ? $privateRoot : null),
+            'Private uploads directory',
+            is_string($privateRoot) ? $privateRoot : 'not configured',
+        );
+
+        $database = config('database.connections.sqlite.database');
+        $databaseOk = is_string($database)
+            && $database !== ':memory:'
+            && file_exists($database)
+            && is_readable($database)
+            && is_writable($database);
+        $checks[] = self::check(
+            $databaseOk,
+            'SQLite database file',
+            is_string($database) ? $database : 'not configured',
+        );
+
+        $link = public_path('storage');
+        $linkOk = is_link($link) || (is_dir($link) && file_exists($link));
+        $checks[] = self::check(
+            $linkOk,
+            'Public storage link',
+            is_link($link)
+                ? $link.' -> '.readlink($link)
+                : ($linkOk ? $link : 'missing — run php artisan storage:link'),
+        );
+
+        $checks[] = self::check(
+            filled(config('app.key')),
+            'Application key',
+            filled(config('app.key')) ? 'set' : 'missing — run php artisan key:generate',
+        );
+
+        $checks[] = self::check(
+            ! app()->environment('production') || ! (bool) config('app.debug'),
+            'Debug mode',
+            config('app.debug') ? 'APP_DEBUG=true (disable on production)' : 'off',
+        );
+
+        return $checks;
+    }
+
+    /**
+     * @return array{status: string, label: string, detail: string}
+     */
+    private static function check(bool $ok, string $label, string $detail): array
+    {
+        return [
+            'status' => $ok ? 'ok' : 'fail',
+            'label' => $label,
+            'detail' => $detail,
+        ];
     }
 }

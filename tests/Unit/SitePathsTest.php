@@ -24,6 +24,16 @@ class SitePathsTest extends TestCase
         $this->assertSame($path, SitePaths::resolve($path));
     }
 
+    public function test_configured_path_reads_from_site_config(): void
+    {
+        config(['site.paths.public_uploads' => '../site_data/testing/config-only']);
+
+        $this->assertSame(
+            base_path('../site_data/testing/config-only'),
+            SitePaths::configuredPath('public_uploads'),
+        );
+    }
+
     public function test_ensure_directory_exists_creates_nested_path(): void
     {
         $path = storage_path('framework/testing/site-paths-'.bin2hex(random_bytes(4)));
@@ -59,9 +69,7 @@ class SitePathsTest extends TestCase
 
         $this->assertDirectoryDoesNotExist($absolute);
 
-        putenv('PUBLIC_STORAGE_PATH='.$relative);
-        $_ENV['PUBLIC_STORAGE_PATH'] = $relative;
-        $_SERVER['PUBLIC_STORAGE_PATH'] = $relative;
+        config(['site.paths.public_uploads' => $relative]);
 
         SitePaths::ensureConfiguredDataPaths();
 
@@ -69,5 +77,21 @@ class SitePathsTest extends TestCase
 
         rmdir($absolute);
         @rmdir(dirname($absolute));
+    }
+
+    public function test_ensure_sqlite_database_file_creates_missing_database(): void
+    {
+        $database = storage_path('framework/testing/site-db-'.bin2hex(random_bytes(4)).'/database.sqlite');
+
+        config(['database.connections.sqlite.database' => $database]);
+
+        $this->assertFileDoesNotExist($database);
+
+        SitePaths::ensureSqliteDatabaseFile();
+
+        $this->assertFileExists($database);
+
+        unlink($database);
+        rmdir(dirname($database));
     }
 }

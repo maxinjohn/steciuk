@@ -30,7 +30,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        if ($storagePath = SitePaths::resolve(env('APP_STORAGE_PATH'))) {
+        $this->applyCustomDataPaths();
+
+        if ($storagePath = SitePaths::configuredPath('storage')) {
             $this->app->useStoragePath($storagePath);
         }
     }
@@ -38,7 +40,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         SitePaths::ensureConfiguredDataPaths();
-        $this->applyCustomDataPaths();
+        SitePaths::ensureSqliteDatabaseFile();
+        SitePaths::ensurePublicStorageLink();
 
         SqliteOptimizer::configureConnection();
 
@@ -184,15 +187,15 @@ class AppServiceProvider extends ServiceProvider
 
     private function applyCustomDataPaths(): void
     {
-        if ($database = SitePaths::resolve(env('DB_DATABASE'))) {
+        if ($database = SitePaths::configuredPath('database')) {
             config(['database.connections.sqlite.database' => $database]);
         }
 
-        if ($private = SitePaths::resolve(env('PRIVATE_STORAGE_PATH'))) {
+        if ($private = SitePaths::configuredPath('private_uploads')) {
             config(['filesystems.disks.local.root' => $private]);
         }
 
-        if ($public = SitePaths::resolve(env('PUBLIC_STORAGE_PATH'))) {
+        if ($public = SitePaths::configuredPath('public_uploads')) {
             config([
                 'filesystems.disks.public.root' => $public,
                 'filesystems.links' => [

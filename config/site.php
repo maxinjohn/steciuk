@@ -19,6 +19,8 @@ return [
         'database' => env('DB_DATABASE'),
     ],
 
+    'dir_mode' => env('SITE_DATA_DIR_MODE', '0775'),
+
     /*
     |--------------------------------------------------------------------------
     | Reference data seeding
