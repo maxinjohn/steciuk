@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Users\Pages;
 use App\Enums\FamilyRelationship;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Support\AdminUserPasswordActions;
+use App\Filament\Support\UserSignatureUpload;
 use App\Models\Family;
 use App\Models\User;
 use App\Services\DataProtectionService;
@@ -93,6 +94,17 @@ class EditUser extends EditRecord
         return true;
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $target = $this->getRecord();
+
+        if ($target instanceof User) {
+            $data = UserSignatureUpload::fillFormData($target, $data);
+        }
+
+        return $data;
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data = UserName::normalize($data);
@@ -121,11 +133,18 @@ class EditUser extends EditRecord
             unset($data['family_id'], $data['family_relationship'], $data['is_family_admin']);
         }
 
+        unset($data['signature_upload']);
+
         return $data;
     }
 
     protected function afterSave(): void
     {
+        /** @var User $member */
+        $member = $this->getRecord()->fresh();
+
+        UserSignatureUpload::persist($member, $this->form->getState()['signature_upload'] ?? null);
+
         if ($this->householdFormData === null) {
             return;
         }

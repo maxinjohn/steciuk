@@ -64,11 +64,22 @@ class UsersTable
                     ->color(fn (?string $state): string => match ($state) {
                         UserRole::SuperAdmin->value => 'danger',
                         UserRole::Admin->value => 'warning',
+                        UserRole::Vicar->value => 'primary',
                         UserRole::Editor->value => 'info',
                         default => 'success',
                     })
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('designation.name')
+                    ->label('Designation')
+                    ->placeholder('—')
+                    ->sortable(),
+                TextColumn::make('panels.name')
+                    ->label('Panels')
+                    ->badge()
+                    ->separator(', ')
+                    ->placeholder('—')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('member_status')
                     ->label('Status')
                     ->badge()
@@ -180,6 +191,14 @@ class UsersTable
             ->filters([
                 SelectFilter::make('role')
                     ->options(Role::options()),
+                SelectFilter::make('designation_id')
+                    ->label('Designation')
+                    ->options(fn (): array => \App\Models\Designation::options()),
+                SelectFilter::make('panels')
+                    ->label('Panel')
+                    ->relationship('panels', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('account_status')
                     ->label('Approval status')
                     ->options([

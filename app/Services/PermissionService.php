@@ -150,7 +150,7 @@ class PermissionService
             return collect($all)->map(fn () => true)->all();
         }
 
-        if ($role === UserRole::Admin->value) {
+        if ($role === UserRole::Admin->value || $role === UserRole::Vicar->value) {
             return collect($all)->map(fn () => true)->all();
         }
 

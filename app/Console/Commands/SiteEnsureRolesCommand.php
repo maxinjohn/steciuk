@@ -38,7 +38,7 @@ class SiteEnsureRolesCommand extends Command
 
         Setting::forgetCache();
 
-        $this->components->info('Built-in roles created: Super Admin, Admin, Editor, Member.');
+        $this->components->info('Built-in roles created: Super Admin, Admin, Vicar, Editor, Member.');
 
         return self::SUCCESS;
     }

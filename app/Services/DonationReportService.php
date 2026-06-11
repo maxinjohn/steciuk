@@ -118,6 +118,7 @@ class DonationReportService
             'total_approved' => (float) $donations->where('status', DonationStatus::Approved->value)->sum('amount'),
             'total_pending' => (float) $donations->where('status', DonationStatus::Pending->value)->sum('amount'),
             'total_rejected' => (float) $donations->where('status', DonationStatus::Rejected->value)->sum('amount'),
+            'verification' => app(VicarVerificationService::class)->pdfVerificationBlock(),
         ];
     }
 

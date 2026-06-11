@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Users\Pages;
 use App\Enums\AccountStatus;
 use App\Enums\UserRole;
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Support\UserSignatureUpload;
+use App\Models\User;
 use App\Support\UserName;
 use App\Support\UserProfileAttributes;
 use Filament\Resources\Pages\CreateRecord;
@@ -43,11 +45,18 @@ class CreateUser extends CreateRecord
             unset($data['family_id'], $data['family_relationship'], $data['is_family_admin']);
         }
 
+        unset($data['signature_upload']);
+
         return $data;
     }
 
     protected function afterCreate(): void
     {
+        /** @var User $member */
+        $member = $this->getRecord()->fresh();
+
+        UserSignatureUpload::persist($member, $this->form->getState()['signature_upload'] ?? null);
+
         if ($this->householdFormData === null || blank($this->householdFormData['family_id'] ?? null)) {
             return;
         }

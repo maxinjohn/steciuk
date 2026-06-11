@@ -56,10 +56,11 @@ class TeamAdminPagesTest extends TestCase
         $this->artisan('site:ensure-roles', ['--force' => true])
             ->assertSuccessful();
 
-        $this->assertSame(4, Role::query()->count());
+        $this->assertSame(5, Role::query()->count());
         $this->assertDatabaseHas('roles', ['slug' => UserRole::SuperAdmin->value]);
         $this->assertDatabaseHas('roles', ['slug' => UserRole::Member->value]);
         $this->assertDatabaseHas('roles', ['slug' => UserRole::Admin->value]);
+        $this->assertDatabaseHas('roles', ['slug' => UserRole::Vicar->value]);
         $this->assertDatabaseHas('roles', ['slug' => UserRole::Editor->value]);
         $this->assertDatabaseMissing('roles', ['slug' => 'viewer']);
     }

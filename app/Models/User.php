@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -39,6 +40,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
     'email',
     'password',
     'role',
+    'designation_id',
     'account_status',
     'is_active',
     'family_id',
@@ -311,6 +313,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('profile_photo')->singleFile();
+        $this->addMediaCollection('signature')->singleFile();
     }
 
     public function initials(): string
@@ -443,6 +446,19 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->belongsTo(Role::class, 'role', 'slug');
     }
 
+    public function designation(): BelongsTo
+    {
+        return $this->belongsTo(Designation::class);
+    }
+
+    public function panels(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\Panel::class)
+            ->withPivot(['sort_order', 'notes'])
+            ->withTimestamps()
+            ->orderByPivot('sort_order');
+    }
+
     public function isSuperAdmin(): bool
     {
         if ($this->roleSlug() === UserRole::SuperAdmin->value) {
@@ -462,6 +478,33 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->roleSlug() === UserRole::Admin->value;
     }
 
+    public function isVicar(): bool
+    {
+        return $this->roleSlug() === UserRole::Vicar->value;
+    }
+
+    public function canUploadVerificationSignature(): bool
+    {
+        return $this->isVicar();
+    }
+
+    public function hasUploadedSignature(): bool
+    {
+        return $this->hasMedia('signature');
+    }
+
+    public function signatureUrl(): ?string
+    {
+        $media = $this->getFirstMedia('signature');
+
+        return $media?->getUrl();
+    }
+
+    public function designationLabel(): ?string
+    {
+        return $this->designation?->name;
+    }
+
     public function isMember(): bool
     {
         return $this->roleSlug() === UserRole::Member->value;
@@ -469,7 +512,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     public function hasFullPanelAccess(): bool
     {
-        return $this->isSuperAdmin() || $this->isAdmin();
+        return $this->isSuperAdmin() || $this->isAdmin() || $this->isVicar();
     }
 
     public function canPublishContent(): bool

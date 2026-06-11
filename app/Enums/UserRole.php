@@ -6,6 +6,7 @@ enum UserRole: string
 {
     case SuperAdmin = 'super_admin';
     case Admin = 'admin';
+    case Vicar = 'vicar';
     case Editor = 'editor';
     case Member = 'member';
 
@@ -20,6 +21,7 @@ enum UserRole: string
             self::Member->value,
             self::Editor->value,
             self::Admin->value,
+            self::Vicar->value,
         ];
     }
 
@@ -31,6 +33,7 @@ enum UserRole: string
         return [
             self::SuperAdmin->value,
             self::Admin->value,
+            self::Vicar->value,
             self::Editor->value,
         ];
     }

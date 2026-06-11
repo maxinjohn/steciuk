@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Filament\Resources\Panels\RelationManagers;
+
+use App\Filament\Resources\Users\UserResource;
+use App\Models\Panel;
+use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Actions\DetachAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Tables\Table;
+
+class MembersRelationManager extends RelationManager
+{
+    protected static string $relationship = 'members';
+
+    protected static ?string $title = 'Panel members';
+
+    public function table(Table $table): Table
+    {
+        /** @var Panel $panel */
+        $panel = $this->getOwnerRecord();
+
+        return $table
+            ->defaultSort('last_name')
+            ->emptyStateHeading('No panel members yet')
+            ->emptyStateDescription('Add existing parish users to this panel. Every panel member must already have a site account.')
+            ->headerActions([
+                Action::make('addMember')
+                    ->label('Add parish user')
+                    ->icon('heroicon-o-user-plus')
+                    ->visible(fn (): bool => auth()->user()?->can('update', $panel) ?? false)
+                    ->form([
+                        Select::make('user_id')
+                            ->label('Parish user')
+                            ->required()
+                            ->searchable()
+                            ->getSearchResultsUsing(function (string $search) use ($panel): array {
+                                return User::query()
+                                    ->where(function ($query) use ($search): void {
+                                        $query->where('name', 'like', "%{$search}%")
+                                            ->orWhere('first_name', 'like', "%{$search}%")
+                                            ->orWhere('last_name', 'like', "%{$search}%")
+                                            ->orWhere('email', 'like', "%{$search}%");
+                                    })
+                                    ->whereDoesntHave('panels', fn ($query) => $query->where('panels.id', $panel->id))
+                                    ->orderBy('last_name')
+                                    ->orderBy('first_name')
+                                    ->limit(50)
+                                    ->get()
+                                    ->mapWithKeys(fn (User $user): array => [
+                                        $user->id => trim($user->displayFullName().' · '.($user->email ?? 'no email')),
+                                    ])
+                                    ->all();
+                            }),
+                        Textarea::make('notes')
+                            ->label('Notes')
+                            ->rows(2)
+                            ->columnSpanFull(),
+                    ])
+                    ->action(function (array $data) use ($panel): void {
+                        $member = User::query()->findOrFail((int) $data['user_id']);
+
+                        $panel->members()->syncWithoutDetaching([
+                            $member->id => [
+                                'notes' => $data['notes'] ?? null,
+                                'sort_order' => $panel->members()->count() + 1,
+                            ],
+                        ]);
+                    }),
+            ])
+            ->columns([
+                TextColumn::make('last_name')
+                    ->label('Member')
+                    ->searchable(['first_name', 'last_name', 'name', 'email'])
+                    ->sortable(['last_name', 'first_name'])
+                    ->formatStateUsing(fn (?string $state, User $record): string => $record->displayFullName())
+                    ->description(fn (User $record): ?string => $record->email),
+                TextColumn::make('designation.name')
+                    ->label('Designation')
+                    ->placeholder('—'),
+                TextColumn::make('role')
+                    ->label('Role')
+                    ->formatStateUsing(fn (?string $state, User $record): string => $record->roleRecord?->name ?? $record->roleSlug()),
+                TextColumn::make('pivot.notes')
+                    ->label('Notes')
+                    ->placeholder('—')
+                    ->wrap(),
+            ])
+            ->recordActions([
+                DetachAction::make()
+                    ->label('Remove from panel'),
+            ], RecordActionsPosition::AfterColumns)
+            ->recordUrl(fn (User $record): string => UserResource::getUrl('view', ['record' => $record]));
+    }
+}

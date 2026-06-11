@@ -30,6 +30,10 @@ class EditRole extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        if ($this->record->isNameLocked()) {
+            $data['name'] = $this->record->name;
+        }
+
         unset($data['permissions']);
 
         return $data;

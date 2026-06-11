@@ -6,8 +6,11 @@ use App\Enums\AccountStatus;
 use App\Enums\FamilyRelationship;
 use App\Enums\UserRole;
 use App\Filament\Support\ResourceFormTabs;
+use App\Filament\Support\SecureFileUpload;
 use App\Filament\Support\UkAddressFormSchema;
+use App\Models\Designation;
 use App\Models\Family;
+use App\Models\Panel;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\ParishGender;
@@ -15,6 +18,7 @@ use App\Support\ParishPronouns;
 use App\Support\ParishWorshipLocations;
 use App\Support\UserProfileAttributes;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -30,7 +34,7 @@ class UserForm
         return $schema
             ->columns(1)
             ->components([
-                ResourceFormTabs::make('Member', [
+                ResourceFormTabs::make('User', [
                     Tab::make('Account')
                         ->icon(Heroicon::OutlinedIdentification)
                         ->schema([
@@ -78,6 +82,7 @@ class UserForm
                                         ->options(fn (): array => auth()->user()?->assignableRoleOptions() ?? Role::options())
                                         ->default(UserRole::Member->value)
                                         ->required()
+                                        ->live()
                                         ->disabled(function (?User $record, string $operation): bool {
                                             $actor = auth()->user();
 
@@ -106,6 +111,22 @@ class UserForm
                                                 ? 'Members use the public website only. Only you can promote someone to Super Admin.'
                                                 : 'Members use the public website only. Only the Super Admin can promote someone to Super Admin.';
                                         }),
+                                    Select::make('designation_id')
+                                        ->label('Designation')
+                                        ->options(fn (): array => Designation::options())
+                                        ->searchable()
+                                        ->nullable()
+                                        ->native(false)
+                                        ->helperText('Office or title alongside the access role, e.g. Treasurer or Assistant Vicar.'),
+                                    Select::make('panels')
+                                        ->label('Panel membership')
+                                        ->relationship('panels', 'name')
+                                        ->multiple()
+                                        ->searchable()
+                                        ->preload()
+                                        ->visible(fn (): bool => auth()->user()?->can('update', User::class) ?? false)
+                                        ->helperText('Panel members must already be parish users. Manage panels under People → Panels.')
+                                        ->columnSpanFull(),
                                     Select::make('account_status')
                                         ->label('Account status')
                                         ->options([
@@ -120,6 +141,30 @@ class UserForm
                                         ->default(true)
                                         ->helperText('Deactivated members cannot sign in to the website or member portal.')
                                         ->visible(fn (): bool => auth()->user()?->can('update', User::class) ?? false),
+                                ]),
+                        ]),
+                    Tab::make('Verification')
+                        ->icon(Heroicon::OutlinedDocumentCheck)
+                        ->visible(fn (?User $record, callable $get): bool => ($get('role') ?? $record?->roleSlug()) === UserRole::Vicar->value)
+                        ->schema([
+                            Section::make('PDF verification signature')
+                                ->description('Upload the vicar signature used on parish giving PDF exports.')
+                                ->schema([
+                                    Placeholder::make('current_signature')
+                                        ->label('Current signature')
+                                        ->content(fn (?User $record): string => $record?->hasUploadedSignature()
+                                            ? 'A signature is already on file. Upload a new image to replace it.'
+                                            : 'No signature uploaded yet.')
+                                        ->columnSpanFull(),
+                                    SecureFileUpload::image('signature_upload', 'users/signatures', 2048, [
+                                        'image/jpeg',
+                                        'image/png',
+                                        'image/webp',
+                                    ])
+                                        ->label('Upload signature')
+                                        ->helperText('PNG or JPG on a white background works best. Used on verified giving statements.')
+                                        ->dehydrated(false)
+                                        ->columnSpanFull(),
                                 ]),
                         ]),
                     Tab::make('Profile')

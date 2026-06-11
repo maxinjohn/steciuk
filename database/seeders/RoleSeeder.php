@@ -23,10 +23,18 @@ class RoleSeeder extends Seeder
             [
                 'slug' => UserRole::Admin->value,
                 'name' => 'Admin',
-                'description' => 'Parish administrator (e.g. vicar) with full admin access. Cannot manage the Super Admin account.',
+                'description' => 'Parish administrator with full admin access. Cannot manage the Super Admin account.',
                 'is_system' => true,
                 'grants_full_access' => false,
                 'sort_order' => 2,
+            ],
+            [
+                'slug' => UserRole::Vicar->value,
+                'name' => 'Vicar',
+                'description' => 'Predefined parish vicar role. Permissions can be edited; the role name stays fixed.',
+                'is_system' => true,
+                'grants_full_access' => false,
+                'sort_order' => 3,
             ],
             [
                 'slug' => UserRole::Editor->value,
@@ -34,7 +42,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Manage parish content — pages, worship, media, and messages.',
                 'is_system' => true,
                 'grants_full_access' => false,
-                'sort_order' => 3,
+                'sort_order' => 4,
             ],
             [
                 'slug' => UserRole::Member->value,
@@ -42,7 +50,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Registered parish member with a personal account on the public website.',
                 'is_system' => true,
                 'grants_full_access' => false,
-                'sort_order' => 4,
+                'sort_order' => 5,
             ],
         ];
 
