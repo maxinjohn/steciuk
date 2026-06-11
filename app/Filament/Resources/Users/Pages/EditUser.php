@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\DataProtectionService;
 use App\Services\MemberRegistrationService;
 use App\Support\UserName;
+use App\Support\UserProfileAttributes;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -95,6 +96,7 @@ class EditUser extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data = UserName::normalize($data);
+        $data = UserProfileAttributes::normalize($data);
 
         if (auth()->user()?->canChangeRoleOf($this->getRecord())) {
             $data['role'] = auth()->user()->resolveRoleForUpdate(

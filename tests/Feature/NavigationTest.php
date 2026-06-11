@@ -62,7 +62,7 @@ class NavigationTest extends TestCase
         $response->assertOk();
         $response->assertSee('Member area', false);
         $response->assertSee('Join the parish', false);
-        $response->assertSee('Membership enquiry', false);
+        $response->assertDontSee('Membership enquiry', false);
         $response->assertDontSee('>Register<', false);
         $response->assertDontSee('>New Member<', false);
         $this->assertDatabaseHas('menu_items', ['seed_key' => 'member-area', 'label' => 'Member area']);

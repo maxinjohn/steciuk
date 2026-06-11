@@ -23,7 +23,7 @@ class GalleryController extends Controller
         $album = \App\Models\GalleryAlbum::query()
             ->where('slug', $slug)
             ->active()
-            ->with(['photos' => fn ($q) => $q->orderBy('sort_order')])
+            ->with(['photos' => fn ($q) => $q->published()->orderBy('sort_order')])
             ->firstOrFail();
 
         return view('gallery.show', compact('album'));

@@ -6288,6 +6288,12 @@ html.dark .site-category-pill {
     min-height: 65px;
 }
 
+.turnstile-mount {
+    min-height: 65px;
+    width: 100%;
+    max-width: 20rem;
+}
+
 html.dark .member-register-toggle-btn.is-active {
     background: color-mix(in srgb, var(--site-surface) 90%, transparent);
 }

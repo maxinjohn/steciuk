@@ -187,12 +187,12 @@ class PermissionService
         ];
 
         foreach (['pages', 'events', 'news', 'sermons', 'ministries', 'menu_items', 'content_blocks', 'gallery_albums', 'gallery_photos', 'parish_resources', 'services'] as $resource) {
-            foreach (['viewAny', 'view', 'create', 'update', 'delete', 'restore'] as $action) {
+            foreach (['viewAny', 'view', 'create', 'update', 'restore'] as $action) {
                 $enabled["{$resource}.{$action}"] = true;
             }
         }
 
-        foreach (['viewAny', 'view', 'update', 'delete'] as $action) {
+        foreach (['viewAny', 'view', 'update'] as $action) {
             $enabled["form_submissions.{$action}"] = true;
         }
 

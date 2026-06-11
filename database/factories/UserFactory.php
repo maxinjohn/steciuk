@@ -42,6 +42,8 @@ class UserFactory extends Factory
             'account_status' => AccountStatus::Approved->value,
             'is_active' => true,
             'approved_at' => now(),
+            'pronouns' => 'they/them',
+            'gender' => 'female',
         ];
     }
 

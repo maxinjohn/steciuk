@@ -84,8 +84,8 @@ class AdminSmokeTest extends TestCase
             $this->actingAs($editor)->get($path)->assertOk();
         }
 
-        $this->actingAs($editor)->get(AdminPanelConfig::url('pages/create'))->assertForbidden();
-        $this->actingAs($editor)->get(AdminPanelConfig::url('pages/1/edit'))->assertForbidden();
+        $this->actingAs($editor)->get(AdminPanelConfig::url('pages/create'))->assertOk();
+        $this->actingAs($editor)->get(AdminPanelConfig::url('pages/1/edit'))->assertOk();
     }
 
     public function test_editor_cannot_access_role_permissions(): void

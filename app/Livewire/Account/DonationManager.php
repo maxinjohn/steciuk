@@ -4,6 +4,7 @@ namespace App\Livewire\Account;
 
 use App\Enums\DonationMethod;
 use App\Models\Donation;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\DonationService;
 use App\Support\GdprConfig;
@@ -90,6 +91,14 @@ class DonationManager extends Component
      */
     private function exportQuery(string $scope): array
     {
+        if (blank($this->export_to)) {
+            $this->export_to = now()->format('Y-m-d');
+        }
+
+        if (blank($this->export_from)) {
+            $this->export_from = now()->startOfMonth()->format('Y-m-d');
+        }
+
         $validated = $this->validate([
             'export_from' => 'nullable|date|before_or_equal:today',
             'export_to' => 'nullable|date|before_or_equal:today|after_or_equal:export_from',
@@ -156,6 +165,14 @@ class DonationManager extends Component
             'methodOptions' => DonationMethod::options(),
             'canViewHousehold' => $user?->canManageHouseholdOnPortal() ?? false,
             'privacyPolicyUrl' => GdprConfig::privacyPolicyUrl(),
+            'givingBankDetails' => [
+                'bank_name' => Setting::text('give_bank_name'),
+                'account_name' => Setting::text('give_account_name'),
+                'sort_code' => Setting::text('give_sort_code'),
+                'account_number' => Setting::text('give_account_number'),
+                'reference' => Setting::text('give_payment_reference'),
+                'payment_link' => Setting::text('give_payment_link'),
+            ],
         ]);
     }
 }

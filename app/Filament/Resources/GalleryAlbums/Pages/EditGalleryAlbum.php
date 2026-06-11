@@ -3,7 +3,8 @@
 namespace App\Filament\Resources\GalleryAlbums\Pages;
 
 use App\Filament\Resources\GalleryAlbums\GalleryAlbumResource;
-use Filament\Actions\DeleteAction;
+use App\Filament\Support\PublishWorkflowActions;
+use App\Models\GalleryAlbum;
 use Filament\Resources\Pages\EditRecord;
 
 class EditGalleryAlbum extends EditRecord
@@ -12,8 +13,9 @@ class EditGalleryAlbum extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            DeleteAction::make(),
-        ];
+        return PublishWorkflowActions::headerActions(
+            fn (): GalleryAlbum => $this->getRecord(),
+            fn (GalleryAlbum $album): string => route('gallery.show', $album->slug),
+        );
     }
 }

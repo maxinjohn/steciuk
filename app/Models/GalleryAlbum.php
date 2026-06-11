@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PublishStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -71,6 +72,14 @@ class GalleryAlbum extends Model implements HasMedia
 
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->whereIn('status', [
+            PublishStatus::Published->value,
+            'active',
+        ]);
+    }
+
+    public function scopePublished($query)
+    {
+        return $this->scopeActive($query);
     }
 }

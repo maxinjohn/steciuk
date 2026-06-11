@@ -6,6 +6,7 @@ use App\Enums\FormType;
 use App\Livewire\Concerns\HandlesChurchForm;
 use App\Livewire\Concerns\HandlesUkAddress;
 use App\Livewire\Concerns\PrefillsAuthenticatedMember;
+use App\Livewire\Concerns\ValidatesTurnstileCaptcha;
 use App\Support\ParishWorshipLocations;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -15,6 +16,7 @@ class NewMemberForm extends Component
     use HandlesChurchForm;
     use HandlesUkAddress;
     use PrefillsAuthenticatedMember;
+    use ValidatesTurnstileCaptcha;
 
     #[Validate('required|string|max:255')]
     public string $name = '';
@@ -72,10 +74,23 @@ class NewMemberForm extends Component
         ], $this->ukAddressFormData());
     }
 
+    protected function captchaValidationRules(): array
+    {
+        return $this->turnstileValidationRules();
+    }
+
+    protected function resetFormFields(): void
+    {
+        $this->reset(['website', 'captchaToken']);
+    }
+
     public function render()
     {
-        return view('livewire.forms.new-member-form', [
-            'worshipLocations' => ParishWorshipLocations::options(),
-        ]);
+        return view('livewire.forms.new-member-form', array_merge(
+            [
+                'worshipLocations' => ParishWorshipLocations::options(),
+            ],
+            $this->turnstileViewData(),
+        ));
     }
 }

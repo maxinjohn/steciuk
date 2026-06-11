@@ -343,7 +343,6 @@ class ReferenceSiteContent
                 'children' => [
                     ['label' => 'Sign in', 'url' => '/login', 'seed_key' => 'members.sign-in'],
                     ['label' => 'Join the parish', 'url' => '/register', 'seed_key' => 'members.join'],
-                    ['label' => 'Membership enquiry', 'slug' => 'new-member', 'seed_key' => 'members.enquiry'],
                 ],
             ],
             [

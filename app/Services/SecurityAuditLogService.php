@@ -18,8 +18,8 @@ class SecurityAuditLogService
      */
     public function purgeOnOrBefore(User $actor, CarbonInterface $beforeDate): int
     {
-        if (! $actor->hasFullPanelAccess()) {
-            throw new InvalidArgumentException('Only full admin access can clean the activity log.');
+        if (! $actor->isSuperAdmin()) {
+            throw new InvalidArgumentException('Only super admins can clean the activity log.');
         }
 
         $cutoff = $beforeDate->copy()->endOfDay();

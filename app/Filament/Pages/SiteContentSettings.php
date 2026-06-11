@@ -177,6 +177,30 @@ class SiteContentSettings extends Page
                                     Textarea::make('give_page_intro')
                                         ->rows(3)
                                         ->columnSpanFull(),
+                                    TextInput::make('give_bank_name')
+                                        ->label('Bank name')
+                                        ->maxLength(120),
+                                    TextInput::make('give_account_name')
+                                        ->label('Account name')
+                                        ->maxLength(120),
+                                    TextInput::make('give_sort_code')
+                                        ->label('Sort code')
+                                        ->placeholder('00-00-00')
+                                        ->maxLength(20),
+                                    TextInput::make('give_account_number')
+                                        ->label('Account number')
+                                        ->maxLength(20),
+                                    TextInput::make('give_payment_reference')
+                                        ->label('Payment reference hint')
+                                        ->placeholder('e.g. Your surname + Giving')
+                                        ->maxLength(120)
+                                        ->columnSpanFull(),
+                                    TextInput::make('give_payment_link')
+                                        ->label('Online payment link (optional)')
+                                        ->url()
+                                        ->maxLength(255)
+                                        ->columnSpanFull()
+                                        ->helperText('Shown alongside bank transfer details on the public giving page and member portal.'),
                                 ]),
                         ]),
                     Tab::make('Footer')

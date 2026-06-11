@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Enums\FormType;
 use App\Livewire\Concerns\HandlesChurchForm;
 use App\Livewire\Concerns\PrefillsAuthenticatedMember;
+use App\Livewire\Concerns\ValidatesTurnstileCaptcha;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
@@ -12,6 +13,7 @@ class PrayerRequestForm extends Component
 {
     use HandlesChurchForm;
     use PrefillsAuthenticatedMember;
+    use ValidatesTurnstileCaptcha;
 
     #[Validate('required|string|max:255')]
     public string $name = '';
@@ -55,8 +57,18 @@ class PrayerRequestForm extends Component
         ];
     }
 
+    protected function captchaValidationRules(): array
+    {
+        return $this->turnstileValidationRules();
+    }
+
+    protected function resetFormFields(): void
+    {
+        $this->reset(['website', 'captchaToken']);
+    }
+
     public function render()
     {
-        return view('livewire.forms.prayer-request-form');
+        return view('livewire.forms.prayer-request-form', $this->turnstileViewData());
     }
 }

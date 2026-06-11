@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\SecurityAuditLogs;
 
 use App\Enums\AdminNavigationGroup;
-use App\Enums\AdminPermission;
 use App\Filament\Resources\SecurityAuditLogs\Pages\ListSecurityAuditLogs;
 use App\Filament\Resources\SecurityAuditLogs\Pages\ViewSecurityAuditLog;
 use App\Filament\Resources\SecurityAuditLogs\Schemas\SecurityAuditLogInfolist;
@@ -45,10 +44,7 @@ class SecurityAuditLogResource extends Resource
 
     public static function canViewAny(): bool
     {
-        $user = auth()->user();
-
-        return $user?->hasFullPanelAccess()
-            || $user?->hasAdminPermission(AdminPermission::SecurityAuditLog);
+        return auth()->user()?->isSuperAdmin() ?? false;
     }
 
     public static function canView(Model $record): bool

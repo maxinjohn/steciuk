@@ -23,12 +23,14 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\Support\FakesUkAddressLookup;
+use Tests\Support\RegistersTestMembers;
 use Tests\TestCase;
 
 class MemberRegistrationTest extends TestCase
 {
     use FakesUkAddressLookup;
     use RefreshDatabase;
+    use RegistersTestMembers;
 
     protected function setUp(): void
     {
@@ -67,14 +69,7 @@ class MemberRegistrationTest extends TestCase
         $this->fakeUkAddressLookup();
 
         Livewire::test(RegisterForm::class)
-            ->set('first_name', 'Parish')
-            ->set('last_name', 'Member')
-            ->set('email', 'member@example.com')
-            ->set('password', 'SecurePass!123')
-            ->set('password_confirmation', 'SecurePass!123')
-            ->set('phone', '07700900123')
-            ->set('date_of_birth', '1990-05-15')
-            ->set('postcode', 'M1 1AE')
+            ->tap(fn ($component) => $this->withRequiredRegistrationFields($component))
             ->call('lookupPostcode')
             ->set('accept_privacy', true)
             ->set('accept_terms', true)
@@ -97,13 +92,7 @@ class MemberRegistrationTest extends TestCase
         ]);
 
         Livewire::test(RegisterForm::class)
-            ->set('email', 'member@example.com')
-            ->set('name', 'Another Person')
-            ->set('password', 'SecurePass!123')
-            ->set('password_confirmation', 'SecurePass!123')
-            ->set('phone', '07700900123')
-            ->set('date_of_birth', '1990-05-15')
-            ->set('postcode', 'M1 1AE')
+            ->tap(fn ($component) => $this->withRequiredRegistrationFields($component, ['email' => 'member@example.com']))
             ->set('address_line_1', '1 Example Street')
             ->set('city', 'Manchester')
             ->set('accept_privacy', true)
@@ -150,14 +139,7 @@ class MemberRegistrationTest extends TestCase
         $this->fakeUkAddressLookup();
 
         Livewire::test(RegisterForm::class)
-            ->set('first_name', 'Parish')
-            ->set('last_name', 'Member')
-            ->set('email', 'solo@example.com')
-            ->set('password', 'SecurePass!123')
-            ->set('password_confirmation', 'SecurePass!123')
-            ->set('phone', '07700900123')
-            ->set('date_of_birth', '1990-05-15')
-            ->set('postcode', 'M1 1AE')
+            ->tap(fn ($component) => $this->withRequiredRegistrationFields($component, ['email' => 'solo@example.com']))
             ->call('lookupPostcode')
             ->set('accept_privacy', true)
             ->set('accept_terms', true)
@@ -677,14 +659,12 @@ class MemberRegistrationTest extends TestCase
         $this->fakeUkAddressLookup();
 
         Livewire::test(RegisterForm::class)
-            ->set('first_name', 'Jeena')
-            ->set('last_name', 'Joseph')
-            ->set('email', 'jeena@example.com')
-            ->set('password', 'SecurePass!123')
-            ->set('password_confirmation', 'SecurePass!123')
-            ->set('phone', '07700900123')
-            ->set('date_of_birth', '1990-01-01')
-            ->set('postcode', 'M1 1AE')
+            ->tap(fn ($component) => $this->withRequiredRegistrationFields($component, [
+                'first_name' => 'Jeena',
+                'last_name' => 'Joseph',
+                'email' => 'jeena@example.com',
+                'date_of_birth' => '1990-01-01',
+            ]))
             ->set('address_line_1', '1 Example Street')
             ->set('city', 'Manchester')
             ->set('accept_privacy', true)
@@ -694,7 +674,7 @@ class MemberRegistrationTest extends TestCase
             ->assertSee('Test-Family', false);
     }
 
-    public function test_household_member_cannot_sign_in(): void
+    public function test_household_member_can_sign_in(): void
     {
         $family = Family::query()->create(['name' => 'Test-Family']);
 
@@ -712,8 +692,8 @@ class MemberRegistrationTest extends TestCase
             ->set('email', 'jeena@example.com')
             ->set('password', 'password')
             ->call('login')
-            ->assertHasErrors(['email'])
-            ->assertSee('Test-Family', false);
+            ->assertHasNoErrors()
+            ->assertRedirect(route('account'));
     }
 
     public function test_family_admin_can_sign_in(): void
@@ -850,7 +830,8 @@ class MemberRegistrationTest extends TestCase
             ->set('email', 'head@example.com')
             ->set('password', 'password')
             ->call('login')
-            ->assertHasErrors(['email']);
+            ->assertHasNoErrors()
+            ->assertRedirect(route('account'));
 
         Livewire::test(LoginForm::class)
             ->set('email', 'spouse@example.com')

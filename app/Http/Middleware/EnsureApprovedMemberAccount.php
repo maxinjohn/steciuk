@@ -34,16 +34,6 @@ class EnsureApprovedMemberAccount
         $status = $user->accountStatus();
 
         if ($status === AccountStatus::Approved) {
-            if (! $user->canSignInToMemberPortal()) {
-                auth()->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                return redirect()
-                    ->route('login')
-                    ->withErrors(['email' => $user->householdMemberPortalMessage()]);
-            }
-
             return $next($request);
         }
 
