@@ -53,7 +53,10 @@ class EmailTemplatesSettings extends Page
 
     public function mount(): void
     {
-        $templates = app(ParishEmailService::class)->allTemplates();
+        $service = app(ParishEmailService::class);
+        $service->seedDefaultsIfMissing();
+
+        $templates = $service->allTemplates();
         $state = [];
 
         foreach ($templates as $key => $template) {
@@ -101,12 +104,14 @@ class EmailTemplatesSettings extends Page
                             TextInput::make("{$key}_subject")
                                 ->label('Subject')
                                 ->required()
+                                ->default($template['subject'])
                                 ->maxLength(255)
                                 ->columnSpanFull(),
                             Textarea::make("{$key}_body")
                                 ->label('Body')
                                 ->rows(10)
                                 ->required()
+                                ->default($template['body'])
                                 ->columnSpanFull(),
                         ]),
                 ]);

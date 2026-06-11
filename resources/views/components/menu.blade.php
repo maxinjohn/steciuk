@@ -4,8 +4,14 @@
 ])
 
 @php
+    use App\Support\GivingUrl;
+
     $resolveUrl = function ($item): string {
         if (! empty($item->url) && empty($item->page_id)) {
+            if (GivingUrl::pointsToGivePage($item->url)) {
+                return GivingUrl::route();
+            }
+
             return $item->url;
         }
 
@@ -16,10 +22,18 @@
                 return route('home');
             }
 
+            if ($slug === 'give') {
+                return GivingUrl::route();
+            }
+
             return $slug ? route('pages.show', $slug) : '#';
         }
 
         if ($item->url) {
+            if (GivingUrl::pointsToGivePage($item->url)) {
+                return GivingUrl::route();
+            }
+
             if ($item->is_external || str_starts_with($item->url, 'http')) {
                 return $item->url;
             }
@@ -30,7 +44,13 @@
         return '#';
     };
 
-    $resolveTarget = fn ($item): ?string => $item->target ?: ($item->is_external ? '_blank' : null);
+    $resolveTarget = function ($item) use ($resolveUrl): ?string {
+        if (GivingUrl::pointsToGivePage($item->url ?? null)) {
+            return null;
+        }
+
+        return $item->target ?: ($item->is_external ? '_blank' : null);
+    };
 
     $iconFor = fn (string $label): string => match (true) {
         str_contains(strtolower($label), 'about'), str_contains(strtolower($label), 'welcome'), str_contains(strtolower($label), 'heritage') => 'book',

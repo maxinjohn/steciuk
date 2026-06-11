@@ -68,7 +68,6 @@ class SiteContentSettings extends Page
             'prayer_request_heading' => Setting::get('prayer_request_heading', 'Prayer Request'),
             'prayer_request_intro' => Setting::get('prayer_request_intro'),
             'give_button_label' => Setting::get('give_button_label', 'Give'),
-            'give_page_intro' => Setting::get('give_page_intro'),
             'footer_copyright' => Setting::get('footer_copyright'),
             'footer_tagline' => Setting::get('footer_tagline'),
         ]);
@@ -173,34 +172,8 @@ class SiteContentSettings extends Page
                                         ->columnSpanFull(),
                                     TextInput::make('give_button_label')
                                         ->default('Give')
-                                        ->maxLength(40),
-                                    Textarea::make('give_page_intro')
-                                        ->rows(3)
-                                        ->columnSpanFull(),
-                                    TextInput::make('give_bank_name')
-                                        ->label('Bank name')
-                                        ->maxLength(120),
-                                    TextInput::make('give_account_name')
-                                        ->label('Account name')
-                                        ->maxLength(120),
-                                    TextInput::make('give_sort_code')
-                                        ->label('Sort code')
-                                        ->placeholder('00-00-00')
-                                        ->maxLength(20),
-                                    TextInput::make('give_account_number')
-                                        ->label('Account number')
-                                        ->maxLength(20),
-                                    TextInput::make('give_payment_reference')
-                                        ->label('Payment reference hint')
-                                        ->placeholder('e.g. Your surname + Giving')
-                                        ->maxLength(120)
-                                        ->columnSpanFull(),
-                                    TextInput::make('give_payment_link')
-                                        ->label('Online payment link (optional)')
-                                        ->url()
-                                        ->maxLength(255)
-                                        ->columnSpanFull()
-                                        ->helperText('Shown alongside bank transfer details on the public giving page and member portal.'),
+                                        ->maxLength(40)
+                                        ->helperText('Label for the header Give button — bank details are managed under Giving & donations → Giving page & bank details.'),
                                 ]),
                         ]),
                     Tab::make('Footer')

@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\ContentBlock;
 use App\Models\Page;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
@@ -30,20 +32,14 @@ class PageContext
                 return null;
             }
 
-            $hasBlocks = $page->contentBlocks()
+            $blocks = $page->contentBlocks()
+                ->select(['id', 'page_id', 'type', 'title', 'content', 'sort_order', 'is_visible'])
                 ->where('is_visible', true)
-                ->exists();
-
-            $blocks = $hasBlocks
-                ? $page->contentBlocks()
-                    ->select(['id', 'page_id', 'type', 'title', 'content', 'sort_order', 'is_visible'])
-                    ->where('is_visible', true)
-                    ->orderBy('sort_order')
-                    ->get()
-                    ->map(fn ($block) => $block->getAttributes())
-                    ->values()
-                    ->all()
-                : [];
+                ->orderBy('sort_order')
+                ->get()
+                ->map(fn ($block) => $block->getAttributes())
+                ->values()
+                ->all();
 
             return [
                 'page' => $page->getAttributes(),
@@ -57,12 +53,12 @@ class PageContext
 
         $page = (new Page)->newFromBuilder($attributes['page']);
 
-        if ($attributes['blocks'] !== []) {
-            $page->setRelation(
-                'contentBlocks',
-                new \Illuminate\Database\Eloquent\Collection(\App\Models\ContentBlock::hydrate($attributes['blocks'])),
-            );
-        }
+        $page->setRelation(
+            'contentBlocks',
+            $attributes['blocks'] === []
+                ? new EloquentCollection
+                : new EloquentCollection(ContentBlock::hydrate($attributes['blocks'])),
+        );
 
         return $page;
     }

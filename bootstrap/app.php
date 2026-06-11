@@ -7,6 +7,7 @@ use App\Http\Middleware\CheckSiteMaintenance;
 use App\Http\Middleware\EnsureApprovedMemberAccount;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\SecureHeaders;
+use App\Http\Middleware\ShareSiteLayoutData;
 use App\Http\Middleware\ThrottlePublicForms;
 use App\Support\AdminPanelConfig;
 use App\Support\ErrorResponse;
@@ -39,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(CheckSiteMaintenance::class);
         $middleware->append(ThrottlePublicForms::class);
         $middleware->appendToGroup('web', AdminSessionTimeout::class);
+        $middleware->appendToGroup('web', ShareSiteLayoutData::class);
 
         $middleware->encryptCookies(except: [
             // Livewire needs some cookies readable

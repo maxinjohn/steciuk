@@ -14,6 +14,8 @@ class SiteEnsurePathsCommand extends Command
 
     public function handle(): int
     {
+        @unlink(storage_path('framework/.site-paths-verified'));
+
         SitePaths::ensureConfiguredDataPaths();
         SitePaths::ensureSqliteDatabaseFile();
 

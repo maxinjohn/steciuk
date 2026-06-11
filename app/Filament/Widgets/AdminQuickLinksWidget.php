@@ -12,5 +12,5 @@ class AdminQuickLinksWidget extends Widget
 
     protected string $view = 'filament.widgets.admin-quick-links';
 
-    protected static bool $isLazy = false;
+    protected static bool $isLazy = true;
 }

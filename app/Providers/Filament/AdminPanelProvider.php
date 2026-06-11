@@ -57,6 +57,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarFullyCollapsibleOnDesktop()
             ->sidebarWidth('18rem')
             ->maxContentWidth(Width::Full)
+            ->spa()
             ->darkMode(true)
             ->defaultThemeMode(ThemeMode::Light)
             ->viteTheme('resources/css/filament/admin/theme.css')

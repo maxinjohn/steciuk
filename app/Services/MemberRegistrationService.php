@@ -383,6 +383,12 @@ class MemberRegistrationService
                 'portal' => SecurityLogger::detectPortal(),
             ],
         );
+
+        if (filled($user->email)) {
+            app(ParishEmailService::class)->send(ParishEmailService::ACCOUNT_REJECTED, $user->email, [
+                '{first_name}' => $user->first_name ?: $user->name ?: 'Member',
+            ]);
+        }
     }
 
     public function setPending(User $user, ?User $actor = null): void

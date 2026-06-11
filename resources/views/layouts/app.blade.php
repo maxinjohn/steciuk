@@ -87,9 +87,9 @@
                         <svg class="hidden h-5 w-5 dark:block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
                     </button>
 
-                    @if ($donationLink)
-                        <x-button href="{{ $donationLink }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm lg:inline-flex" target="_blank" rel="noopener noreferrer">
-                            Give
+                    @if ($showGiveButton ?? filled($donationLink))
+                        <x-button href="{{ $givePageUrl ?? route('give') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm lg:inline-flex">
+                            {{ $giveButtonLabel ?? 'Give' }}
                         </x-button>
                     @else
                         <x-button href="{{ url('/service-times') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm lg:inline-flex">
@@ -181,8 +181,8 @@
                             <span class="mobile-quick-desc">Latest updates</span>
                         </span>
                     </a>
-                    @if ($donationLink)
-                        <a href="{{ $donationLink }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--emerald" target="_blank" rel="noopener noreferrer">
+                    @if ($showGiveButton ?? filled($donationLink))
+                        <a href="{{ $givePageUrl ?? route('give') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--emerald">
                             <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12a2.625 2.625 0 10-2.625-2.625zM12 4.875V19.5m0 0l-3-3m3 3l3-3"/></svg></span>
                             <span>
                                 <span class="mobile-quick-label">Give</span>

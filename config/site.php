@@ -59,7 +59,7 @@ return [
     */
 
     'admin' => [
-        'path' => (static function (): string {
+        'path' => (function (): string {
             $raw = strtolower(trim((string) env('ADMIN_PATH', 'admin'), '/'));
             $sanitized = preg_replace('/[^a-z0-9\-]/', '', $raw) ?? '';
 

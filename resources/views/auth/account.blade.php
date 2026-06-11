@@ -163,11 +163,13 @@
                         </div>
                     </div>
 
-                    <div x-show="tab === 'messages'" x-cloak>
-                        @livewire('account.parish-messages-manager')
-                    </div>
+                    <template x-if="tab === 'messages'">
+                        <div>
+                            @livewire('account.parish-messages-manager')
+                        </div>
+                    </template>
 
-                    <div x-show="tab === 'photo'" x-cloak>
+                    <template x-if="tab === 'photo'">
                         <div class="member-portal-card member-portal-card--profile">
                             <h2 class="member-portal-panel-title">Photo & identity</h2>
                             <p class="member-portal-panel-intro">Make your profile feel like you — upload, replace, or remove your photo any time.</p>
@@ -175,9 +177,9 @@
                                 @livewire('account.profile-avatar-form')
                             </div>
                         </div>
-                    </div>
+                    </template>
 
-                    <div x-show="tab === 'contact'" x-cloak>
+                    <template x-if="tab === 'contact'">
                         <div class="member-portal-card">
                             <h2 class="member-portal-panel-title">Contact & address</h2>
                             <p class="member-portal-panel-intro">Keep your contact details and UK address up to date for parish communications.</p>
@@ -185,9 +187,9 @@
                                 @livewire('account.profile-form')
                             </div>
                         </div>
-                    </div>
+                    </template>
 
-                    <div x-show="tab === 'password'" x-cloak>
+                    <template x-if="tab === 'password'">
                         <div class="member-portal-card">
                             <h2 class="member-portal-panel-title">Password</h2>
                             <p class="member-portal-panel-intro">Change your sign-in password separately from your profile details.</p>
@@ -195,9 +197,9 @@
                                 @livewire('account.profile-password-form')
                             </div>
                         </div>
-                    </div>
+                    </template>
 
-                    <div x-show="tab === 'privacy'" x-cloak>
+                    <template x-if="tab === 'privacy'">
                         <div class="member-portal-card">
                             <h2 class="member-portal-panel-title">Privacy & data</h2>
                             <p class="member-portal-panel-intro">Exercise your UK data protection rights — download your data, manage marketing preferences, or request deletion.</p>
@@ -205,17 +207,21 @@
                                 @livewire('account.profile-privacy-form')
                             </div>
                         </div>
-                    </div>
+                    </template>
 
                     @if ($showFamilyTab)
-                        <div x-show="tab === 'family'" x-cloak>
-                            @livewire('account.family-members-manager')
-                        </div>
+                        <template x-if="tab === 'family'">
+                            <div>
+                                @livewire('account.family-members-manager')
+                            </div>
+                        </template>
                     @endif
 
-                    <div x-show="tab === 'giving'" x-cloak>
-                        @livewire('account.donation-manager')
-                    </div>
+                    <template x-if="tab === 'giving'">
+                        <div>
+                            @livewire('account.donation-manager')
+                        </div>
+                    </template>
 
                     <div x-show="tab === 'parish'" x-cloak class="member-portal-panel-stack">
                         <div class="member-portal-card">
@@ -226,6 +232,7 @@
                                 <li><a href="{{ url('/events') }}">Events calendar</a></li>
                                 <li><a href="{{ url('/news') }}">Parish news</a></li>
                                 <li><a href="{{ url('/resources') }}">Resources & liturgy</a></li>
+                                <li><a href="{{ route('give') }}">Support our parish (Give)</a></li>
                                 <li><a href="{{ url('/prayer-request') }}">Prayer request</a></li>
                                 <li><button type="button" class="member-portal-inline-link" @click="tab = 'messages'">Message the parish office</button></li>
                                 <li><a href="{{ url('/contact') }}">Public contact form</a></li>
