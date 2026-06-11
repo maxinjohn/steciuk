@@ -36,7 +36,7 @@ class ParishConversationService
         $subject = match ($formType) {
             FormType::Contact => 'Contact message',
             FormType::PrayerRequest => 'Prayer request',
-            FormType::NewMember => 'Membership enquiry',
+            FormType::NewMember => 'New member interest',
             FormType::EventEnquiry => 'Event enquiry',
             FormType::Volunteer => 'Volunteer enquiry',
         };

@@ -227,7 +227,6 @@
                                 <li><a href="{{ url('/news') }}">Parish news</a></li>
                                 <li><a href="{{ url('/resources') }}">Resources & liturgy</a></li>
                                 <li><a href="{{ url('/prayer-request') }}">Prayer request</a></li>
-                                <li><a href="{{ url('/new-member') }}">Membership enquiry</a></li>
                                 <li><button type="button" class="member-portal-inline-link" @click="tab = 'messages'">Message the parish office</button></li>
                                 <li><a href="{{ url('/contact') }}">Public contact form</a></li>
                             </ul>

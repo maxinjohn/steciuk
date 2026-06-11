@@ -259,9 +259,9 @@ class PageSeeder extends Seeder
                     'sort_order' => 10,
                     'content' => [
                         'heading' => 'Join Our Parish Family',
-                        'body' => 'Whether you are new to the area or exploring faith, we welcome you. Register your interest and a member of our leadership team will be in touch.',
-                        'button_label' => 'Register as a New Member',
-                        'button_url' => '/new-member',
+                        'body' => 'Whether you are new to the area or exploring faith, we welcome you. Create your parish member account to join our community.',
+                        'button_label' => 'Join the parish',
+                        'button_url' => '/register',
                         'style' => 'secondary',
                     ],
                 ],

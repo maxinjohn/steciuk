@@ -74,7 +74,7 @@ class UserPasswordManagementTest extends TestCase
         Notification::assertSentTo($member, ResetPassword::class);
     }
 
-    public function test_public_forgot_password_does_not_send_for_linked_household_member(): void
+    public function test_public_forgot_password_sends_for_linked_household_member(): void
     {
         Notification::fake();
 
@@ -92,7 +92,7 @@ class UserPasswordManagementTest extends TestCase
             ->call('sendResetLink')
             ->assertSet('sent', true);
 
-        Notification::assertNothingSent();
+        Notification::assertSentTo($member, ResetPassword::class);
     }
 
     public function test_user_can_reset_password_with_valid_token(): void

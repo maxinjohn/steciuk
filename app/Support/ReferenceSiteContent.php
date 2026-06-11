@@ -773,8 +773,8 @@ HTML;
     public static function newMember(): string
     {
         return <<<'HTML'
-<h2>Membership enquiry</h2>
-<p>Welcome! If you would like to join the St. Thomas Evangelical Church of India – UK Parish, you can <a href="/register">create a parish member account</a> with your UK address and worship location, or complete the enquiry form below if you prefer to speak with the leadership team first.</p>
+<h2>Join the parish</h2>
+<p>Welcome! To join the St. Thomas Evangelical Church of India – UK Parish, <a href="/register">create your parish member account</a> with your UK address and preferred worship location. Registrations are reviewed by the parish leadership team before your account is activated.</p>
 <p>Membership is open to those who profess faith in Jesus Christ and wish to participate in the life and mission of our parish.</p>
 HTML;
     }

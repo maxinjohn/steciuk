@@ -67,7 +67,7 @@ class UserPasswordService
 
         $user = User::query()->where('email', $normalized)->first();
 
-        if ($user?->isLinkedHouseholdMember()) {
+        if (! $user instanceof User) {
             return;
         }
 
