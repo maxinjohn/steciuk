@@ -56,6 +56,21 @@ class UserInfolist
                         TextEntry::make('role')
                             ->formatStateUsing(fn (?string $state): string => Role::labelForSlug($state))
                             ->badge(),
+                        TextEntry::make('designation.name')
+                            ->label('Designation')
+                            ->placeholder('—'),
+                        TextEntry::make('panels.name')
+                            ->label('Panels')
+                            ->badge()
+                            ->separator(', ')
+                            ->placeholder('—')
+                            ->columnSpanFull(),
+                        TextEntry::make('signature_status')
+                            ->label('Verification signature')
+                            ->state(fn (User $record): string => $record->canUploadVerificationSignature()
+                                ? ($record->hasUploadedSignature() ? 'Uploaded' : 'Not uploaded')
+                                : '—')
+                            ->visible(fn (User $record): bool => $record->canUploadVerificationSignature()),
                         TextEntry::make('account_status')
                             ->label('Approval')
                             ->formatStateUsing(fn (?string $state): string => AccountStatus::tryFrom((string) $state)?->label() ?? 'Unknown')

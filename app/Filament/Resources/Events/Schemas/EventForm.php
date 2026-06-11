@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Events\Schemas;
 
-use App\Enums\PublishStatus;
-use Filament\Forms\Components\DateTimePicker;
 use App\Filament\Support\ChurchRichEditor;
+use App\Filament\Support\PublishStatusSelect;
 use App\Filament\Support\SecureFileUpload;
 use App\Rules\SafeHttpUrl;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -36,10 +36,7 @@ class EventForm
                     ->url()
                     ->rules([new SafeHttpUrl()]),
                 TextInput::make('category'),
-                Select::make('status')
-                    ->options(PublishStatus::class)
-                    ->default('draft')
-                    ->required(),
+                PublishStatusSelect::make(),
                 Textarea::make('repeat_rule')
                     ->columnSpanFull(),
             ]);

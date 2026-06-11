@@ -57,6 +57,10 @@ class CreateUser extends CreateRecord
 
         UserSignatureUpload::persist($member, $this->form->getState()['signature_upload'] ?? null);
 
+        if (filled($member->email)) {
+            app(\App\Services\ParishEmailService::class)->sendAdminCreatedAccount($member);
+        }
+
         if ($this->householdFormData === null || blank($this->householdFormData['family_id'] ?? null)) {
             return;
         }

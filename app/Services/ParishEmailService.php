@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\Family;
 
 class ParishEmailService
 {
@@ -143,6 +144,55 @@ class ParishEmailService
 
         $this->send(self::ACCOUNT_APPROVED, $user->email, [
             '{first_name}' => $user->first_name ?: $user->name ?: 'Member',
+        ]);
+    }
+
+    public function sendRegistrationWelcome(User $user): void
+    {
+        if (! filled($user->email)) {
+            return;
+        }
+
+        $this->send(self::PARISH_WELCOME, $user->email, [
+            '{first_name}' => $user->first_name ?: $user->name ?: 'Member',
+        ]);
+    }
+
+    public function sendAdminCreatedAccount(User $user): void
+    {
+        if (! filled($user->email)) {
+            return;
+        }
+
+        $this->send(self::ACCOUNT_ADDED_BY_ADMIN, $user->email, [
+            '{first_name}' => $user->first_name ?: $user->name ?: 'Member',
+            '{email}' => (string) $user->email,
+        ]);
+    }
+
+    public function sendFamilyMemberAdded(User $member, Family $family): void
+    {
+        if (! filled($member->email)) {
+            return;
+        }
+
+        $this->send(self::FAMILY_MEMBER_ADDED, $member->email, [
+            '{first_name}' => $member->first_name ?: $member->name ?: 'Member',
+            '{family_name}' => $family->name,
+        ]);
+    }
+
+    public function sendFamilyRequestApproved(User $requester, User $member, Family $family, User $approver): void
+    {
+        if (! filled($requester->email)) {
+            return;
+        }
+
+        $this->send(self::FAMILY_REQUEST_APPROVED, $requester->email, [
+            '{first_name}' => $requester->first_name ?: $requester->name ?: 'Member',
+            '{member_name}' => $member->displayFullName(),
+            '{family_name}' => $family->name,
+            '{approver_name}' => $approver->displayFullName(),
         ]);
     }
 

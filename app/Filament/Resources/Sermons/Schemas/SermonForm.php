@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Sermons\Schemas;
 
-use App\Enums\PublishStatus;
+use App\Filament\Support\PublishStatusSelect;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -40,10 +40,7 @@ class SermonForm
                 TextInput::make('youtube_url')
                     ->url(),
                 TextInput::make('category'),
-                Select::make('status')
-                    ->options(PublishStatus::class)
-                    ->default('draft')
-                    ->required(),
+                PublishStatusSelect::make(),
             ]);
     }
 }
