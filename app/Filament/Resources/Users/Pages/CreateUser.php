@@ -7,6 +7,8 @@ use App\Enums\UserRole;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Support\UserSignatureUpload;
 use App\Models\User;
+use App\Services\ParishEmailService;
+use App\Services\PanelMembershipService;
 use App\Support\UserName;
 use App\Support\UserProfileAttributes;
 use Filament\Resources\Pages\CreateRecord;
@@ -17,6 +19,9 @@ class CreateUser extends CreateRecord
 
     /** @var array{family_id: int|null, family_relationship: string|null, is_family_admin: bool}|null */
     protected ?array $householdFormData = null;
+
+    /** @var list<int>|null */
+    protected ?array $panelIds = null;
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
@@ -47,6 +52,15 @@ class CreateUser extends CreateRecord
 
         unset($data['signature_upload']);
 
+        if (array_key_exists('panels', $data) && auth()->user()?->can('update', User::class)) {
+            $this->panelIds = collect($data['panels'] ?? [])
+                ->filter(fn ($id): bool => filled($id))
+                ->map(fn ($id): int => (int) $id)
+                ->values()
+                ->all();
+            unset($data['panels']);
+        }
+
         return $data;
     }
 
@@ -58,7 +72,12 @@ class CreateUser extends CreateRecord
         UserSignatureUpload::persist($member, $this->form->getState()['signature_upload'] ?? null);
 
         if (filled($member->email)) {
-            app(\App\Services\ParishEmailService::class)->sendAdminCreatedAccount($member);
+            app(ParishEmailService::class)->sendAdminCreatedAccount($member);
+        }
+
+        if ($this->panelIds !== null) {
+            app(PanelMembershipService::class)->syncUserPanels($member, $this->panelIds);
+            $this->panelIds = null;
         }
 
         if ($this->householdFormData === null || blank($this->householdFormData['family_id'] ?? null)) {

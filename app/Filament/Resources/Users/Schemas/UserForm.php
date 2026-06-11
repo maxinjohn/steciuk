@@ -120,12 +120,13 @@ class UserForm
                                         ->helperText('Office or title alongside the access role, e.g. Treasurer or Assistant Vicar.'),
                                     Select::make('panels')
                                         ->label('Panel membership')
-                                        ->relationship('panels', 'name')
+                                        ->relationship('panels', 'name', fn ($query) => $query->orderBy('sort_order')->orderBy('name'))
                                         ->multiple()
                                         ->searchable()
                                         ->preload()
-                                        ->visible(fn (): bool => auth()->user()?->can('update', User::class) ?? false)
-                                        ->helperText('Panel members must already be parish users. Manage panels under People → Panels.')
+                                        ->visible(fn (): bool => (auth()->user()?->can('update', User::class)
+                                            || auth()->user()?->can('create', User::class)) ?? false)
+                                        ->helperText('Assign panels here or under People → Panels. The user then appears on that panel and under Users → Panel members.')
                                         ->columnSpanFull(),
                                     Select::make('account_status')
                                         ->label('Account status')

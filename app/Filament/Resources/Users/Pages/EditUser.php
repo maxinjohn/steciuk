@@ -10,6 +10,7 @@ use App\Models\Family;
 use App\Models\User;
 use App\Services\DataProtectionService;
 use App\Services\MemberRegistrationService;
+use App\Services\PanelMembershipService;
 use App\Support\UserName;
 use App\Support\UserProfileAttributes;
 use Filament\Actions\Action;
@@ -22,6 +23,9 @@ class EditUser extends EditRecord
 
     /** @var array{family_id: int|null, family_relationship: string|null, is_family_admin: bool}|null */
     protected ?array $householdFormData = null;
+
+    /** @var list<int>|null */
+    protected ?array $panelIds = null;
 
     public function mount(int|string $record): void
     {
@@ -135,6 +139,15 @@ class EditUser extends EditRecord
 
         unset($data['signature_upload']);
 
+        if (array_key_exists('panels', $data) && auth()->user()?->can('update', User::class)) {
+            $this->panelIds = collect($data['panels'] ?? [])
+                ->filter(fn ($id): bool => filled($id))
+                ->map(fn ($id): int => (int) $id)
+                ->values()
+                ->all();
+            unset($data['panels']);
+        }
+
         return $data;
     }
 
@@ -144,6 +157,11 @@ class EditUser extends EditRecord
         $member = $this->getRecord()->fresh();
 
         UserSignatureUpload::persist($member, $this->form->getState()['signature_upload'] ?? null);
+
+        if ($this->panelIds !== null) {
+            app(PanelMembershipService::class)->syncUserPanels($member, $this->panelIds);
+            $this->panelIds = null;
+        }
 
         if ($this->householdFormData === null) {
             return;

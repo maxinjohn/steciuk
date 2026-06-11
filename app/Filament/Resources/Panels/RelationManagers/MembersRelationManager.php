@@ -6,10 +6,12 @@ use App\Filament\Resources\Users\UserResource;
 use App\Filament\Support\PanelMemberOptions;
 use App\Models\Panel;
 use App\Models\User;
+use App\Services\PanelMembershipService;
 use Filament\Actions\Action;
 use Filament\Actions\DetachAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\RecordActionsPosition;
@@ -27,6 +29,7 @@ class MembersRelationManager extends RelationManager
         $panel = $this->getOwnerRecord();
 
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['designation']))
             ->defaultSort('last_name')
             ->emptyStateHeading('No panel members yet')
             ->emptyStateDescription('Add existing parish users to this panel. Every panel member must already have a site account.')
@@ -52,12 +55,17 @@ class MembersRelationManager extends RelationManager
                     ->action(function (array $data) use ($panel): void {
                         $member = User::query()->findOrFail((int) $data['user_id']);
 
-                        $panel->members()->syncWithoutDetaching([
-                            $member->id => [
-                                'notes' => $data['notes'] ?? null,
-                                'sort_order' => $panel->members()->count() + 1,
-                            ],
-                        ]);
+                        app(PanelMembershipService::class)->attachMember(
+                            $panel,
+                            $member,
+                            $data['notes'] ?? null,
+                        );
+
+                        Notification::make()
+                            ->title('Panel member added')
+                            ->body($member->displayFullName().' is listed on this panel and under Users → Panel members.')
+                            ->success()
+                            ->send();
                     }),
             ])
             ->columns([

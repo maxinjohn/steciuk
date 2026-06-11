@@ -124,4 +124,20 @@ class VicarDesignationsAndPanelsTest extends TestCase
         $this->assertArrayNotHasKey($member->id, $options);
         $this->assertStringContainsString('panel-picker-admin@steciuk.org', $options[$admin->id]);
     }
+
+    public function test_panel_membership_from_user_form_appears_on_users_tab_query(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::SuperAdmin->value,
+            'email' => 'panel-sync-admin@steciuk.org',
+        ]);
+        $panel = Panel::query()->where('slug', 'parish-committee')->firstOrFail();
+
+        app(\App\Services\PanelMembershipService::class)->syncUserPanels($admin, [$panel->id]);
+
+        $this->assertTrue(
+            User::query()->whereHas('panels')->whereKey($admin->id)->exists(),
+        );
+        $this->assertTrue($admin->fresh()->panels->contains($panel));
+    }
 }

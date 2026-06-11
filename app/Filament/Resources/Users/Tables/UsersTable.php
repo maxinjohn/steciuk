@@ -79,7 +79,7 @@ class UsersTable
                     ->badge()
                     ->separator(', ')
                     ->placeholder('—')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(false),
                 TextColumn::make('member_status')
                     ->label('Status')
                     ->badge()
