@@ -3,7 +3,7 @@
     use App\Support\AdminPanelConfig;
 
     $heading = Setting::get('admin_welcome_heading', 'Welcome — manage your parish with peace');
-    $body = Setting::get('admin_welcome_body', 'Everything is grouped in the sidebar — tap a section header to expand or collapse it. Edit pages, worship times, photos, messages, and settings from here.');
+    $body = Setting::get('admin_welcome_body', 'Use the menu icon in the top bar to open navigation on phones and tablets. Tap a section to expand it, then choose a page. Edit worship, photos, messages, and settings from here.');
     $verse = Setting::get('admin_dashboard_verse', 'Be still, and know that I am God.');
     $verseRef = Setting::get('admin_dashboard_verse_ref', 'Psalm 46:10');
 @endphp

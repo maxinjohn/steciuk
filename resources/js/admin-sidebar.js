@@ -1,12 +1,11 @@
 /**
- * Parish admin sidebar — accordion groups (one open at a time).
- *
- * Filament pre-hides collapsed groups with inline display:none and uses
- * x-collapse on .fi-sidebar-group-items. Our job is to manage collapsedGroups
- * in the Alpine store and clear stale inline styles when a group expands —
- * without fighting Alpine's fi-collapsed class binding.
+ * Parish admin sidebar — desktop accordion groups only.
+ * Mobile uses Filament's native drawer; do not override positioning or collapse logic there.
  */
-const ADMIN_SIDEBAR_NAV_VERSION = '5';
+const ADMIN_SIDEBAR_NAV_VERSION = '6';
+const DESKTOP_BREAKPOINT = 1024;
+
+const isDesktop = () => window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`).matches;
 
 const getGroupLabels = () =>
     [...document.querySelectorAll('.fi-sidebar-group[data-group-label]')]
@@ -22,7 +21,7 @@ const ensureCollapsedArray = (store) => {
 };
 
 const refreshExpandedGroups = (store) => {
-    if (! store) {
+    if (! store || ! isDesktop()) {
         return;
     }
 
@@ -37,8 +36,6 @@ const refreshExpandedGroups = (store) => {
             return;
         }
 
-        // Remove inline styles left by Filament's pre-Alpine hide script or a
-        // stuck x-collapse height (shows only the first submenu item).
         for (const property of [
             'display',
             'height',
@@ -54,27 +51,28 @@ const refreshExpandedGroups = (store) => {
 };
 
 const scheduleRefresh = (store) => {
-    if (! store) {
+    if (! store || ! isDesktop()) {
         return;
     }
 
     refreshExpandedGroups(store);
     requestAnimationFrame(() => refreshExpandedGroups(store));
     window.setTimeout(() => refreshExpandedGroups(store), 220);
-    window.setTimeout(() => refreshExpandedGroups(store), 400);
 };
 
 const expandGroupForActivePage = (store) => {
     const labels = getGroupLabels();
 
-    if (! labels.length) {
+    if (! labels.length || ! store) {
         return;
     }
 
     const activeItem = document.querySelector('.fi-sidebar-nav .fi-sidebar-item.fi-active');
 
     if (! activeItem) {
-        scheduleRefresh(store);
+        if (isDesktop()) {
+            scheduleRefresh(store);
+        }
 
         return;
     }
@@ -82,14 +80,23 @@ const expandGroupForActivePage = (store) => {
     const groupElement = activeItem.closest('.fi-sidebar-group[data-group-label]');
 
     if (! groupElement) {
-        scheduleRefresh(store);
+        if (isDesktop()) {
+            scheduleRefresh(store);
+        }
 
         return;
     }
 
     const label = groupElement.dataset.groupLabel;
-    store.collapsedGroups = labels.filter((entry) => entry !== label);
-    scheduleRefresh(store);
+
+    if (store.groupIsCollapsed(label)) {
+        store.toggleCollapsedGroup(label);
+    }
+
+    if (isDesktop()) {
+        store.collapsedGroups = labels.filter((entry) => entry !== label);
+        scheduleRefresh(store);
+    }
 };
 
 const patchSidebarStore = () => {
@@ -108,7 +115,15 @@ const patchSidebarStore = () => {
     ensureCollapsedArray(store);
 
     if (! store.__parishSidebarPatched) {
+        const defaultToggle = store.toggleCollapsedGroup.bind(store);
+
         store.toggleCollapsedGroup = function parishToggleCollapsedGroup(group) {
+            if (! isDesktop()) {
+                defaultToggle(group);
+
+                return;
+            }
+
             const allLabels = getGroupLabels();
 
             if (this.groupIsCollapsed(group)) {
@@ -123,12 +138,14 @@ const patchSidebarStore = () => {
         store.__parishSidebarPatched = true;
     }
 
-    if (localStorage.getItem('adminSidebarNavVersion') !== ADMIN_SIDEBAR_NAV_VERSION) {
-        localStorage.setItem('adminSidebarNavVersion', ADMIN_SIDEBAR_NAV_VERSION);
-        localStorage.removeItem('collapsedGroups');
-        store.collapsedGroups = [...labels];
-    } else if (store.collapsedGroups.length === 0) {
-        store.collapsedGroups = [...labels];
+    if (isDesktop()) {
+        if (localStorage.getItem('adminSidebarNavVersion') !== ADMIN_SIDEBAR_NAV_VERSION) {
+            localStorage.setItem('adminSidebarNavVersion', ADMIN_SIDEBAR_NAV_VERSION);
+            localStorage.removeItem('collapsedGroups');
+            store.collapsedGroups = [...labels];
+        } else if (store.collapsedGroups.length === 0) {
+            store.collapsedGroups = [...labels];
+        }
     }
 
     expandGroupForActivePage(store);
@@ -140,7 +157,6 @@ const bootSidebar = () => {
     if (! patchSidebarStore()) {
         window.setTimeout(bootSidebar, 50);
         window.setTimeout(bootSidebar, 200);
-        window.setTimeout(bootSidebar, 500);
     }
 };
 
@@ -158,11 +174,29 @@ document.addEventListener('livewire:navigated', () => {
 });
 
 document.addEventListener('click', (event) => {
-    const button = event.target.closest('.fi-sidebar-group-btn, .fi-sidebar-group-collapse-btn');
+    const target = event.target;
 
-    if (! button) {
+    if (! (target instanceof Element)) {
         return;
     }
 
-    scheduleRefresh(window.Alpine?.store('sidebar'));
+    const store = window.Alpine?.store('sidebar');
+
+    if (target.closest('.fi-sidebar-group-btn, .fi-sidebar-group-collapse-btn')) {
+        scheduleRefresh(store);
+
+        return;
+    }
+
+    if (! isDesktop() && target.closest('.fi-sidebar-item-btn, .fi-sidebar-item a')) {
+        store?.close();
+    }
+});
+
+window.addEventListener('resize', () => {
+    const store = window.Alpine?.store('sidebar');
+
+    if (store) {
+        expandGroupForActivePage(store);
+    }
 });
