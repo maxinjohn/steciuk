@@ -2,11 +2,30 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 use Throwable;
 
 class SitePaths
 {
+    /**
+     * @var list<string>
+     */
+    private const UPLOAD_DIRECTORIES = [
+        'settings/branding',
+        'settings/seo',
+        'gallery/photos',
+        'gallery/albums',
+        'events/featured',
+        'news/featured',
+        'pages/featured',
+        'pages/og',
+        'ministries/featured',
+        'blocks/hero',
+        'blocks/media',
+        'sermons/audio',
+        'sermons/pdf',
+    ];
     /**
      * Resolve a path from .env — absolute paths pass through, relative paths
      * are resolved from the Laravel project root (not PHP's cwd).
@@ -142,6 +161,21 @@ class SitePaths
             self::configuredPath('private_uploads') ?? storage_path('app/private'),
             $mode,
         );
+
+        self::ensureCommonUploadDirectories($mode);
+    }
+
+    public static function ensureCommonUploadDirectories(?int $mode = null): void
+    {
+        $publicRoot = config('filesystems.disks.public.root');
+
+        if (! is_string($publicRoot) || $publicRoot === '') {
+            return;
+        }
+
+        foreach (self::UPLOAD_DIRECTORIES as $directory) {
+            self::ensureDirectoryExists($publicRoot.'/'.$directory, $mode);
+        }
     }
 
     public static function ensureSqliteDatabaseFile(): void
@@ -233,16 +267,21 @@ class SitePaths
         );
 
         $database = config('database.connections.sqlite.database');
-        $databaseOk = is_string($database)
-            && $database !== ':memory:'
-            && file_exists($database)
-            && is_readable($database)
-            && is_writable($database);
-        $checks[] = self::check(
-            $databaseOk,
-            'SQLite database file',
-            is_string($database) ? $database : 'not configured',
-        );
+
+        if ($database === ':memory:') {
+            $checks[] = self::check(true, 'SQLite database file', ':memory:');
+        } else {
+            $databaseOk = is_string($database)
+                && $database !== ''
+                && file_exists($database)
+                && is_readable($database)
+                && is_writable($database);
+            $checks[] = self::check(
+                $databaseOk,
+                'SQLite database file',
+                is_string($database) ? $database : 'not configured',
+            );
+        }
 
         $link = public_path('storage');
         $linkOk = is_link($link) || (is_dir($link) && file_exists($link));
@@ -265,6 +304,22 @@ class SitePaths
             'Debug mode',
             config('app.debug') ? 'APP_DEBUG=true (disable on production)' : 'off',
         );
+
+        $bootstrapCache = base_path('bootstrap/cache');
+        $checks[] = self::check(
+            is_dir($bootstrapCache) && is_writable($bootstrapCache),
+            'Bootstrap cache directory',
+            $bootstrapCache,
+        );
+
+        if (config('session.driver') === 'database') {
+            $sessionTable = (string) config('session.table', 'sessions');
+            $checks[] = self::check(
+                Schema::hasTable($sessionTable),
+                'Sessions table',
+                $sessionTable,
+            );
+        }
 
         return $checks;
     }

@@ -94,4 +94,18 @@ class SitePathsTest extends TestCase
         unlink($database);
         rmdir(dirname($database));
     }
+
+    public function test_ensure_common_upload_directories_creates_admin_upload_folders(): void
+    {
+        $publicRoot = storage_path('framework/testing/common-uploads-'.bin2hex(random_bytes(4)));
+
+        config(['filesystems.disks.public.root' => $publicRoot]);
+
+        SitePaths::ensureCommonUploadDirectories();
+
+        $this->assertDirectoryExists($publicRoot.'/settings/branding');
+        $this->assertDirectoryExists($publicRoot.'/gallery/photos');
+
+        \Illuminate\Support\Facades\File::deleteDirectory($publicRoot);
+    }
 }

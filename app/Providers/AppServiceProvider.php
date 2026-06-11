@@ -18,6 +18,7 @@ use Illuminate\Auth\Events\Attempting;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -39,6 +40,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->configureTrustedProxies();
+
         SitePaths::ensureConfiguredDataPaths();
         SitePaths::ensureSqliteDatabaseFile();
         SitePaths::ensurePublicStorageLink();
@@ -203,5 +206,26 @@ class AppServiceProvider extends ServiceProvider
                 ],
             ]);
         }
+    }
+
+    private function configureTrustedProxies(): void
+    {
+        $trustedProxies = config('security.trusted_proxies');
+
+        if (! filled($trustedProxies)) {
+            return;
+        }
+
+        $proxies = trim((string) $trustedProxies) === '*'
+            ? '*'
+            : array_map('trim', explode(',', (string) $trustedProxies));
+
+        Request::setTrustedProxies(
+            $proxies,
+            Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO,
+        );
     }
 }
