@@ -7,7 +7,7 @@
                 </div>
             @endif
 
-            <h2 class="member-portal-panel-title">Set up your household</h2>
+            <h2 class="member-portal-panel-title">Create family</h2>
             <p class="member-portal-panel-intro">
                 Register one person at a time. When your account is approved, create your household here and add spouses, children, or other dependents from your profile.
             </p>
@@ -20,7 +20,7 @@
                     <p class="mt-2 text-xs text-ink-muted">Many families can share the same surname (for example “Thadathil”). This label helps your parish recognise your household — it does not need to be unique.</p>
                 </div>
                 <button type="submit" class="btn btn-primary sm:w-auto" wire:loading.attr="disabled">
-                    <span wire:loading.remove wire:target="createHousehold">Create household</span>
+                    <span wire:loading.remove wire:target="createHousehold">Create family</span>
                     <span wire:loading wire:target="createHousehold">Creating…</span>
                 </button>
             </form>

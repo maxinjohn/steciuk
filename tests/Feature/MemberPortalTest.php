@@ -29,7 +29,7 @@ class MemberPortalTest extends TestCase
         $this->actingAs($admin)
             ->get('/account?tab=family')
             ->assertOk()
-            ->assertSee('Set up your household', false);
+            ->assertSee('Create family', false);
     }
 
     public function test_member_can_start_parish_conversation_from_portal(): void
@@ -83,7 +83,7 @@ class MemberPortalTest extends TestCase
         $this->actingAs($admin)
             ->get('/account?tab=family')
             ->assertOk()
-            ->assertSee('Set up your household', false);
+            ->assertSee('Create family', false);
     }
 
     public function test_admin_inbox_lists_conversations(): void
