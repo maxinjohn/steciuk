@@ -72,14 +72,6 @@ class LoginForm extends Component
                     'email' => 'Your registration was not approved. Please contact the parish office if you need assistance.',
                 ]);
             }
-
-            if (! $user->canSignInToMemberPortal()) {
-                Auth::logout();
-
-                throw ValidationException::withMessages([
-                    'email' => $user->householdMemberPortalMessage(),
-                ]);
-            }
         }
 
         RateLimiter::clear($key);

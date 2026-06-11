@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Support\ParishGender;
 use App\Support\ParishPronouns;
 use App\Support\ParishWorshipLocations;
+use App\Support\UserProfileAttributes;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -48,15 +49,19 @@ class UserForm
                                         ->maxLength(120),
                                     Select::make('pronouns')
                                         ->label('Pronouns')
-                                        ->options(ParishPronouns::options())
-                                        ->nullable()
-                                        ->searchable()
-                                        ->helperText('Optional. Shown on the member portal when provided.'),
+                                        ->options(ParishPronouns::requiredOptions())
+                                        ->required()
+                                        ->native()
+                                        ->rules(UserProfileAttributes::pronounsRules())
+                                        ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? trim($state) : null)
+                                        ->helperText('Shown on the member portal.'),
                                     Select::make('gender')
                                         ->label('Gender')
-                                        ->options(ParishGender::options())
-                                        ->nullable()
-                                        ->searchable(),
+                                        ->options(ParishGender::requiredOptions())
+                                        ->required()
+                                        ->native()
+                                        ->rules(UserProfileAttributes::genderRules())
+                                        ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? trim($state) : null),
                                     TextInput::make('email')
                                         ->label('Email address')
                                         ->email()
@@ -140,7 +145,7 @@ class UserForm
                                     Select::make('preferred_worship_location')
                                         ->label('Preferred worship location')
                                         ->options(ParishWorshipLocations::options())
-                                        ->searchable()
+                                        ->native()
                                         ->columnSpanFull(),
                                 ]),
                         ]),

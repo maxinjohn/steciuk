@@ -35,7 +35,15 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('last_name')
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                return $query
+                    ->orderByRaw("CASE WHEN account_status = ? AND role = ? THEN 0 ELSE 1 END", [
+                        AccountStatus::Pending->value,
+                        UserRole::Member->value,
+                    ])
+                    ->orderByDesc('created_at');
+            })
+            ->defaultSort('created_at', 'desc')
             ->searchable()
             ->searchDebounce('250ms')
             ->searchUsing(fn (Builder $query, string $search) => AdminTableSearch::applyUsers($query, $search))
@@ -70,22 +78,26 @@ class UsersTable
                         }
 
                         if ($record->isMember() && $record->accountStatus() === AccountStatus::Pending) {
-                            return AccountStatus::Pending->label();
+                            return 'Approval pending';
                         }
 
                         if ($record->isMember() && $record->accountStatus() === AccountStatus::Rejected) {
                             return AccountStatus::Rejected->label();
                         }
 
+                        if ($record->isMember() && $record->accountStatus() === AccountStatus::Approved) {
+                            return 'Verified member';
+                        }
+
                         return 'Active';
                     })
                     ->color(fn (string $state): string => match ($state) {
                         'Inactive' => 'danger',
-                        AccountStatus::Pending->label() => 'warning',
+                        'Approval pending' => 'warning',
                         AccountStatus::Rejected->label() => 'danger',
+                        'Verified member' => 'success',
                         default => 'gray',
-                    })
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    }),
                 TextColumn::make('family_id')
                     ->label('Family')
                     ->state(fn (User $record): array|string => $record->family

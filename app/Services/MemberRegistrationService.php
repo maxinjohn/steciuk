@@ -362,6 +362,8 @@ class MemberRegistrationService
                 'portal' => SecurityLogger::detectPortal(),
             ],
         );
+
+        app(ParishEmailService::class)->sendAccountApproved($user);
     }
 
     public function reject(User $user, User $approver): void

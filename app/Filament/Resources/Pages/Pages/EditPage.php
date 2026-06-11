@@ -3,9 +3,8 @@
 namespace App\Filament\Resources\Pages\Pages;
 
 use App\Filament\Resources\Pages\PageResource;
+use App\Filament\Support\PublishWorkflowActions;
 use App\Models\Page;
-use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
@@ -35,15 +34,12 @@ class EditPage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('viewPublic')
-                ->label('View live page')
-                ->icon('heroicon-o-eye')
-                ->url(fn (): string => $this->getRecord()->publicUrl())
-                ->openUrlInNewTab(),
-            DeleteAction::make()
-                ->visible(fn (): bool => auth()->user()?->hasFullPanelAccess() ?? false),
+            ...PublishWorkflowActions::headerActions(
+                fn (): Page => $this->getRecord(),
+                fn (Page $page): string => $page->publicUrl(),
+            ),
             ForceDeleteAction::make()
-                ->visible(fn (): bool => auth()->user()?->hasFullPanelAccess() ?? false),
+                ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
             RestoreAction::make()
                 ->visible(fn (): bool => auth()->user()?->hasFullPanelAccess() ?? false),
         ];

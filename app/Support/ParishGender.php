@@ -7,6 +7,18 @@ class ParishGender
     /**
      * @return array<string, string>
      */
+    public static function requiredOptions(): array
+    {
+        return array_filter(
+            self::options(),
+            fn (string $label, string $value): bool => $value !== '',
+            ARRAY_FILTER_USE_BOTH,
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
     public static function options(): array
     {
         return [

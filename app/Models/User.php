@@ -206,12 +206,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             return null;
         }
 
-        if ($this->isAccountApproved() && $this->isLinkedHouseholdMember()) {
-            $this->loadMissing('family');
-
-            return $this->householdMemberPortalMessage();
-        }
-
         return match ($this->accountStatus()) {
             AccountStatus::Pending => 'Your parish account is awaiting approval.',
             AccountStatus::Rejected => 'Your registration was not approved. Please contact the parish office if you need assistance.',
@@ -393,11 +387,11 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     public function canSignInToMemberPortal(): bool
     {
-        if (! $this->isMember() || ! $this->isAccountApproved() || ! filled($this->email)) {
-            return false;
-        }
-
-        return ! $this->isLinkedHouseholdMember();
+        return $this->isMember()
+            && $this->isAccountApproved()
+            && filled($this->email)
+            && $this->isActive()
+            && $this->familyIsActive();
     }
 
     public function hasUploadedProfilePhoto(): bool
@@ -476,6 +470,11 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function hasFullPanelAccess(): bool
     {
         return $this->isSuperAdmin() || $this->isAdmin();
+    }
+
+    public function canPublishContent(): bool
+    {
+        return $this->hasFullPanelAccess();
     }
 
     public function canManageSuperAdminAccount(User $target): bool

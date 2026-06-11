@@ -12,12 +12,14 @@ use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\FakesUkAddressLookup;
+use Tests\Support\RegistersTestMembers;
 use Tests\TestCase;
 
 class DataProtectionTest extends TestCase
 {
     use FakesUkAddressLookup;
     use RefreshDatabase;
+    use RegistersTestMembers;
 
     protected function setUp(): void
     {
@@ -49,14 +51,7 @@ class DataProtectionTest extends TestCase
         $this->fakeUkAddressLookup();
 
         Livewire::test(RegisterForm::class)
-            ->set('first_name', 'Parish')
-            ->set('last_name', 'Member')
-            ->set('email', 'consent@example.com')
-            ->set('password', 'SecurePass!123')
-            ->set('password_confirmation', 'SecurePass!123')
-            ->set('phone', '07700900123')
-            ->set('date_of_birth', '1990-05-15')
-            ->set('postcode', 'M1 1AE')
+            ->tap(fn ($component) => $this->withRequiredRegistrationFields($component, ['email' => 'consent@example.com']))
             ->call('lookupPostcode')
             ->set('accept_privacy', true)
             ->set('accept_terms', true)

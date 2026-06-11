@@ -100,8 +100,8 @@ class AdminPermissionsTest extends TestCase
         $superAdmin = User::factory()->create(['role' => UserRole::SuperAdmin]);
         $page = Page::factory()->create();
 
-        $this->assertFalse($editor->can('create', Page::class));
-        $this->assertFalse($editor->can('update', $page));
+        $this->assertTrue($editor->can('create', Page::class));
+        $this->assertTrue($editor->can('update', $page));
         $this->assertFalse($editor->can('delete', $page));
 
         $this->assertTrue($admin->can('update', $page));
@@ -140,6 +140,6 @@ class AdminPermissionsTest extends TestCase
 
         $this->assertTrue($editor->can('viewAny', Page::class));
         $this->assertTrue($editor->can('view', $page));
-        $this->assertFalse($editor->can('update', $page));
+        $this->assertTrue($editor->can('update', $page));
     }
 }

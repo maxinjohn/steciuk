@@ -32,9 +32,9 @@
                 <h2 class="member-portal-panel-title">Family household</h2>
                 <p class="member-portal-panel-intro">
                     @if ($canManage)
-                        Add household members here. You are the primary family account and sign in on behalf of your household — other members do not need their own login. Each new person stays pending until a parish admin approves them.
+                        Add household members here. You are the family administrator and can add or remove members. Each family member can sign in with their own account once approved.
                     @else
-                        Members linked to your parish family profile.
+                        Members linked to your parish family profile. Everyone in the household can sign in and view shared giving once approved.
                     @endif
                 </p>
             </div>

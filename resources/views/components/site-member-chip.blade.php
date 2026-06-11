@@ -37,9 +37,5 @@
             <span class="site-member-chip-link-label">Join the parish</span>
             <span class="site-member-chip-link-desc">Create your member account</span>
         </a>
-        <a href="{{ url('/new-member') }}" class="site-member-chip-link" role="menuitem" data-member-chip-link>
-            <span class="site-member-chip-link-label">Membership enquiry</span>
-            <span class="site-member-chip-link-desc">Speak with leadership first</span>
-        </a>
     </div>
 </div>

@@ -34,7 +34,7 @@ class PagesAdminTableTest extends TestCase
         $response->assertSee('Manage site pages, URLs, and published content.', false);
     }
 
-    public function test_pages_list_shows_view_only_actions_for_editor(): void
+    public function test_pages_list_shows_edit_actions_for_editor(): void
     {
         $editor = User::query()->where('email', 'editor@steciuk.org')->firstOrFail();
         $page = Page::query()->firstOrFail();
@@ -43,8 +43,7 @@ class PagesAdminTableTest extends TestCase
 
         $response->assertOk();
         $response->assertSee($page->title, false);
-        $response->assertSee('viewPublic', false);
-        $response->assertDontSee('pages/'.$page->id.'/edit', false);
+        $response->assertSee('pages/'.$page->id.'/edit', false);
     }
 
     public function test_page_public_url_uses_home_route_for_homepage(): void

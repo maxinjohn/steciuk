@@ -6,7 +6,9 @@
 ])
 
 @if ($turnstileEnabled)
-    <div {{ $attributes->merge(['class' => 'turnstile-wrap']) }} wire:ignore id="{{ $elementId }}"></div>
+    <div {{ $attributes->merge(['class' => 'turnstile-wrap']) }}>
+        <div wire:ignore id="{{ $elementId }}" class="turnstile-mount"></div>
+    </div>
 
     @once
         @push('scripts')
@@ -16,34 +18,77 @@
 
     @push('scripts')
         <script>
+            window.__steciTurnstile = window.__steciTurnstile || {};
+
             (function () {
                 const elementId = @js($elementId);
                 const siteKey = @js($turnstileSiteKey);
-                let widgetId = null;
+                const wireModel = @js($wireModel);
 
-                function renderWidget() {
-                    const element = document.getElementById(elementId);
-                    if (!window.turnstile || !element) {
+                function setToken(token) {
+                    if (window.Livewire && typeof @this !== 'undefined') {
+                        @this.set(wireModel, token || '');
+                    }
+                }
+
+                function renderWidget(force = false) {
+                    const mount = document.getElementById(elementId);
+                    if (!mount || !window.turnstile) {
                         return;
                     }
 
-                    if (widgetId !== null) {
-                        try { window.turnstile.remove(widgetId); } catch (e) {}
-                        widgetId = null;
+                    const existing = window.__steciTurnstile[elementId];
+                    if (existing?.widgetId && mount.dataset.turnstileReady === '1' && !force) {
+                        return;
                     }
 
-                    widgetId = window.turnstile.render(element, {
+                    if (existing?.widgetId) {
+                        try { window.turnstile.remove(existing.widgetId); } catch (e) {}
+                    }
+
+                    mount.innerHTML = '';
+                    mount.dataset.turnstileReady = '0';
+
+                    const widgetId = window.turnstile.render(mount, {
                         sitekey: siteKey,
-                        callback: (token) => @this.set(@js($wireModel), token),
-                        'expired-callback': () => @this.set(@js($wireModel), ''),
-                        'error-callback': () => @this.set(@js($wireModel), ''),
+                        appearance: 'always',
+                        'refresh-expired': 'auto',
+                        callback: (token) => {
+                            mount.dataset.turnstileReady = '1';
+                            setToken(token);
+                        },
+                        'expired-callback': () => {
+                            mount.dataset.turnstileReady = '0';
+                            setToken('');
+                        },
+                        'error-callback': () => {
+                            mount.dataset.turnstileReady = '0';
+                            setToken('');
+                        },
                     });
+
+                    window.__steciTurnstile[elementId] = { widgetId };
                 }
 
-                document.addEventListener('livewire:navigated', renderWidget);
-                document.addEventListener('DOMContentLoaded', renderWidget);
+                function boot() {
+                    if (window.turnstile) {
+                        renderWidget();
+                        return;
+                    }
+
+                    const timer = setInterval(() => {
+                        if (!window.turnstile) {
+                            return;
+                        }
+
+                        clearInterval(timer);
+                        renderWidget();
+                    }, 120);
+                }
+
+                document.addEventListener('DOMContentLoaded', boot);
                 if (document.readyState !== 'loading') {
-                    renderWidget();
+                    boot();
                 }
             })();
         </script>

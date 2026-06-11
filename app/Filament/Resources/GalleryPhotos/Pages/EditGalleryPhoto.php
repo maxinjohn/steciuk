@@ -3,7 +3,8 @@
 namespace App\Filament\Resources\GalleryPhotos\Pages;
 
 use App\Filament\Resources\GalleryPhotos\GalleryPhotoResource;
-use Filament\Actions\DeleteAction;
+use App\Filament\Support\PublishWorkflowActions;
+use App\Models\GalleryPhoto;
 use Filament\Resources\Pages\EditRecord;
 
 class EditGalleryPhoto extends EditRecord
@@ -12,8 +13,13 @@ class EditGalleryPhoto extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            DeleteAction::make(),
-        ];
+        $photo = fn (): GalleryPhoto => $this->getRecord();
+
+        return PublishWorkflowActions::headerActions(
+            $photo,
+            fn (GalleryPhoto $record): ?string => $record->album?->slug
+                ? route('gallery.show', $record->album->slug)
+                : null,
+        );
     }
 }

@@ -30,16 +30,17 @@
 
                 <div class="grid gap-5 sm:grid-cols-2">
                     <div>
-                        <label for="register-pronouns" class="form-label">Pronouns</label>
-                        <select id="register-pronouns" wire:model.blur="pronouns" class="form-input">
+                        <label for="register-pronouns" class="form-label">Pronouns <span class="text-red-600" aria-hidden="true">*</span></label>
+                        <select id="register-pronouns" wire:model.blur="pronouns" class="form-input" required aria-required="true" @error('pronouns') aria-invalid="true" @enderror>
                             @foreach ($pronounOptions as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
                         </select>
+                        @error('pronouns')<p class="form-error" role="alert">{{ $message }}</p>@enderror
                     </div>
                     <div>
-                        <label for="register-gender" class="form-label">Gender</label>
-                        <select id="register-gender" wire:model.blur="gender" class="form-input">
+                        <label for="register-gender" class="form-label">Gender <span class="text-red-600" aria-hidden="true">*</span></label>
+                        <select id="register-gender" wire:model.blur="gender" class="form-input" required aria-required="true" @error('gender') aria-invalid="true" @enderror>
                             @foreach ($genderOptions as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
@@ -102,7 +103,11 @@
         @if ($turnstileEnabled)
             <div>
                 <label class="form-label">Security check <span class="text-red-600" aria-hidden="true">*</span></label>
-                <div wire:ignore id="turnstile-register" class="turnstile-wrap"></div>
+                <x-turnstile-widget
+                    element-id="turnstile-register"
+                    :turnstile-enabled="$turnstileEnabled"
+                    :turnstile-site-key="$turnstileSiteKey"
+                />
                 @error('captchaToken')<p class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
         @endif
@@ -142,41 +147,3 @@
         </div>
     </form>
 </div>
-
-@if ($turnstileEnabled)
-    @push('scripts')
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
-        <script>
-            document.addEventListener('livewire:init', () => {
-                let widgetId = null;
-
-                const renderTurnstile = () => {
-                    const element = document.getElementById('turnstile-register');
-
-                    if (!window.turnstile || !element) {
-                        return;
-                    }
-
-                    if (widgetId !== null) {
-                        try { window.turnstile.remove(widgetId); } catch (e) {}
-                        widgetId = null;
-                    }
-
-                    widgetId = window.turnstile.render(element, {
-                        sitekey: @js($turnstileSiteKey),
-                        callback: (token) => @this.set('captchaToken', token),
-                        'expired-callback': () => @this.set('captchaToken', ''),
-                        'error-callback': () => @this.set('captchaToken', ''),
-                    });
-                };
-
-                renderTurnstile();
-                Livewire.hook('morph.updated', ({ component }) => {
-                    if (component.name === 'auth.register-form') {
-                        renderTurnstile();
-                    }
-                });
-            });
-        </script>
-    @endpush
-@endif

@@ -57,7 +57,6 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarFullyCollapsibleOnDesktop()
             ->sidebarWidth('18rem')
             ->maxContentWidth(Width::Full)
-            ->spa()
             ->spaUrlExceptions([
                 AdminPanelConfig::url('login'),
                 AdminPanelConfig::url('logout'),

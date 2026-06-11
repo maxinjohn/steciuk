@@ -76,6 +76,17 @@
                 @error('notes')<p id="member-notes-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
 
+            @if ($turnstileEnabled ?? false)
+                <div>
+                    <x-turnstile-widget
+                        element-id="turnstile-new-member"
+                        :turnstile-enabled="$turnstileEnabled"
+                        :turnstile-site-key="$turnstileSiteKey"
+                    />
+                    @error('captchaToken')<p class="form-error" role="alert">{{ $message }}</p>@enderror
+                </div>
+            @endif
+
             <div>
                 <button type="submit" class="btn btn-primary sm:w-auto" wire:loading.attr="disabled">
                     <span wire:loading.remove wire:target="submit">Submit Registration</span>
