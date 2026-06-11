@@ -61,7 +61,7 @@
 
                 <div class="member-portal-card">
                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Give anonymously</p>
-                    <h2 class="member-portal-panel-title mt-2">No account needed</h2>
+                    <h2 class="member-portal-panel-title mt-2">No registration needed</h2>
                     <p class="member-portal-panel-intro">{{ $anonymousIntro }}</p>
 
                     <ol class="mt-5 space-y-2 text-sm text-ink-muted">
