@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\UserRole;
+use App\Filament\Support\PanelMemberOptions;
 use App\Models\Designation;
 use App\Models\Panel;
 use App\Models\Role;
@@ -102,5 +103,25 @@ class VicarDesignationsAndPanelsTest extends TestCase
         $this->actingAs($admin)->get(AdminPanelConfig::url('designations'))->assertOk();
         $this->actingAs($admin)->get(AdminPanelConfig::url('panels'))->assertOk();
         $this->actingAs($admin)->get(AdminPanelConfig::url('roles'))->assertSee('Vicar', false);
+    }
+
+    public function test_panel_member_picker_lists_active_users_not_already_on_panel(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::SuperAdmin->value,
+            'email' => 'panel-picker-admin@steciuk.org',
+        ]);
+        $member = User::factory()->create([
+            'role' => UserRole::Member->value,
+            'email' => 'panel-picker-member@steciuk.org',
+        ]);
+        $panel = Panel::query()->where('slug', 'parish-committee')->firstOrFail();
+        $panel->members()->attach($member->id, ['sort_order' => 1]);
+
+        $options = PanelMemberOptions::options($panel->fresh());
+
+        $this->assertArrayHasKey($admin->id, $options);
+        $this->assertArrayNotHasKey($member->id, $options);
+        $this->assertStringContainsString('panel-picker-admin@steciuk.org', $options[$admin->id]);
     }
 }

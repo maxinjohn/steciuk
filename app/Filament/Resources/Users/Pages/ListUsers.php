@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Enums\UserRole;
 use App\Filament\Resources\Users\UserResource;
-use App\Filament\Support\UserSignatureUpload;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -18,11 +17,13 @@ class ListUsers extends ListRecords
     public function getTabs(): array
     {
         return [
-            'parish_users' => Tab::make('Parish users')
+            'all' => Tab::make('All users')
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query),
+            'members' => Tab::make('Parish members')
+                ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('role', UserRole::Member->value)),
             'panel_members' => Tab::make('Panel members')
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereHas('panels')),
-            'team' => Tab::make('Team accounts')
+            'staff' => Tab::make('Admin & staff')
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereIn('role', UserRole::panelRoleSlugs())),
         ];
     }

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Panels\RelationManagers;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Filament\Support\PanelMemberOptions;
 use App\Models\Panel;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -39,24 +40,10 @@ class MembersRelationManager extends RelationManager
                             ->label('Parish user')
                             ->required()
                             ->searchable()
-                            ->getSearchResultsUsing(function (string $search) use ($panel): array {
-                                return User::query()
-                                    ->where(function ($query) use ($search): void {
-                                        $query->where('name', 'like', "%{$search}%")
-                                            ->orWhere('first_name', 'like', "%{$search}%")
-                                            ->orWhere('last_name', 'like', "%{$search}%")
-                                            ->orWhere('email', 'like', "%{$search}%");
-                                    })
-                                    ->whereDoesntHave('panels', fn ($query) => $query->where('panels.id', $panel->id))
-                                    ->orderBy('last_name')
-                                    ->orderBy('first_name')
-                                    ->limit(50)
-                                    ->get()
-                                    ->mapWithKeys(fn (User $user): array => [
-                                        $user->id => trim($user->displayFullName().' · '.($user->email ?? 'no email')),
-                                    ])
-                                    ->all();
-                            }),
+                            ->options(fn (): array => PanelMemberOptions::options($panel))
+                            ->getSearchResultsUsing(fn (string $search): array => PanelMemberOptions::options($panel, $search))
+                            ->getOptionLabelUsing(fn ($value): ?string => PanelMemberOptions::labelForId((int) $value))
+                            ->helperText('Choose any active site user who is not already on this panel.'),
                         Textarea::make('notes')
                             ->label('Notes')
                             ->rows(2)
