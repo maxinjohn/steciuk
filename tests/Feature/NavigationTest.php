@@ -25,12 +25,57 @@ class NavigationTest extends TestCase
             $response->assertOk();
             $response->assertSee('data-menu-item', false);
             $response->assertSee('data-menu-trigger', false);
-            $response->assertSee('images/steci-mark.svg', false);
+            $response->assertSee('site-logo--parish-full', false);
+            $response->assertSee('/storage/settings/branding/steci-parish-logo.png', false);
+            $response->assertSee('site-logo-mark--parish-full', false);
             $response->assertSee('UK Parish', false);
             $response->assertSee('gospel-reminder', false);
             $response->assertSee('sanctuary-peace', false);
             $response->assertSee('faith-pillars--footer', false);
+            $response->assertSee('eauk-trust-mark', false);
+            $response->assertDontSee('eauk-member-badge', false);
+            $response->assertDontSee('eauk-member-ribbon', false);
+            $response->assertSee('images/eauk/member-logo-small.png', false);
+            $response->assertSee('Member of the Evangelical Alliance', false);
         }
+    }
+
+    public function test_home_includes_faith_whispers_and_spark_strip(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('faith-whispers', false)
+            ->assertSee('faith-spark-strip', false)
+            ->assertSee('Anchored in Christ', false)
+            ->assertSee('Faith for the journey', false);
+    }
+
+    public function test_footer_shows_single_eauk_trust_mark_in_about_column(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $response = $this->get('/');
+        $html = (string) $response->getContent();
+
+        $response->assertOk()
+            ->assertSee('Member of the Evangelical Alliance', false)
+            ->assertSee('eauk-trust-mark', false)
+            ->assertSee('Word, worship, and witness across the United Kingdom.', false)
+            ->assertDontSee('View our church profile', false)
+            ->assertDontSee('eauk-member-badge', false)
+            ->assertDontSee('eauk-member-ribbon', false)
+            ->assertDontSee('Evangelical Alliance member church', false)
+            ->assertSee('https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish', false);
+
+        $this->assertSame(2, preg_match_all('/class="[^"]*\beauk-trust-mark\b/', $html));
+        $this->assertLessThan(
+            strpos($html, 'faith-pillars--footer'),
+            strpos($html, 'eauk-trust-mark'),
+        );
     }
 
     public function test_home_location_tabs_render_with_single_visible_panel(): void

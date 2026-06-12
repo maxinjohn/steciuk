@@ -105,18 +105,20 @@ class Setting extends Model
             return null;
         }
 
+        $path = trim($path);
+
         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
             return $path;
         }
 
-        if (str_starts_with($path, '/')) {
-            return asset(ltrim($path, '/'));
+        if (str_starts_with($path, '/storage/') || str_starts_with($path, '/images/')) {
+            return $path;
         }
 
-        try {
-            return \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($path, '/'));
-        } catch (\Throwable) {
-            return asset('storage/'.ltrim($path, '/'));
+        if (str_starts_with($path, '/')) {
+            return $path;
         }
+
+        return '/storage/'.ltrim($path, '/');
     }
 }

@@ -143,7 +143,7 @@ class RegisterForm extends Component
 
         session()->flash('registration_submitted', true);
 
-        $this->redirectRoute('registration.pending', navigate: true);
+        $this->redirectRoute('registration.pending');
     }
 
     public function render()

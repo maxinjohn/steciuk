@@ -12,7 +12,13 @@ class ReferenceSiteContent
 {
     public const CHARITY_NUMBER = '1143030';
 
+    public const EAUK_HOME_URL = 'https://www.eauk.org/';
+
     public const EAUK_CHURCH_URL = 'https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish';
+
+    public const EAUK_BRAND_URL = 'https://www.eauk.org/brand/logos';
+
+    public const EAUK_MEMBERSHIP_NUMBER = '300947';
 
     /**
      * @return array<string, array{value: string, group: string}>
@@ -85,11 +91,11 @@ class ReferenceSiteContent
                 'group' => 'seo',
             ],
             'footer_text' => [
-                'value' => 'For the Word of God and for the testimony of Jesus Christ — Word, worship, and witness across the United Kingdom. Member of the Evangelical Alliance.',
+                'value' => 'An evangelical Oriental Protestant parish in the Saint Thomas Christian tradition — gathering monthly for worship across Manchester, Leicester, Dartford, Sunderland, and Bristol.',
                 'group' => 'general',
             ],
             'footer_tagline' => [
-                'value' => 'For the Word of God and for the testimony of Jesus Christ — Word, worship, and witness.',
+                'value' => 'Word, worship, and witness across the United Kingdom.',
                 'group' => 'general',
             ],
             'service_times_heading' => [
@@ -171,30 +177,30 @@ class ReferenceSiteContent
         return [
             [
                 'icon' => '🕊',
-                'title' => 'Peace in Christ',
-                'text' => 'His peace guards heart and mind — a gift for every believer who draws near in worship and prayer.',
+                'title' => 'Heavenly peace',
+                'text' => 'Christ\'s peace guards heart and mind — a gift from above for every believer who draws near in worship.',
                 'ref' => 'Philippians 4:7',
             ],
             [
                 'icon' => '🙏',
-                'title' => 'Rest in Prayer',
-                'text' => 'Bring every burden to the Lord. Our parish family intercedes with you in faith.',
+                'title' => 'Bold in prayer',
+                'text' => 'Cast every burden on the Lord. Our parish family intercedes with you before the throne of grace.',
                 'ref' => 'Matthew 11:28',
                 'link' => '/prayer-request',
                 'linkLabel' => 'Submit a prayer request',
             ],
             [
                 'icon' => '📖',
-                'title' => 'Hope in Scripture',
-                'text' => 'Holy Scripture nourishes faith — through preaching, reading, and Holy Communion at the Lord\'s table.',
+                'title' => 'Fed by Scripture',
+                'text' => 'God\'s Word nourishes faith — through preaching, reading, and Holy Communion at the Lord\'s table.',
                 'ref' => 'Romans 15:4',
                 'link' => '/sermons',
                 'linkLabel' => 'Listen to a sermon',
             ],
             [
                 'icon' => '✝',
-                'title' => 'Assurance in Grace',
-                'text' => 'Salvation is by grace through faith in Christ alone — not by works, but by the mercy of God.',
+                'title' => 'Assurance in grace',
+                'text' => 'Salvation is by grace through faith in Christ alone — mercy from heaven, not merit from us.',
                 'ref' => 'Ephesians 2:8–9',
                 'link' => '/our-church',
                 'linkLabel' => 'Read our beliefs',
@@ -453,30 +459,71 @@ HTML;
 
     public static function ourChurch(): string
     {
-        return <<<'HTML'
-<h2>Who We Are</h2>
-<p>The St. Thomas Evangelical Church of India – UK Parish is part of <strong>STECI</strong>, a global evangelical Oriental Protestant church with deep roots in the Saint Thomas Christian community of Kerala. Founded on <strong>26 January 1961</strong>, STECI emerged from a reform movement within the <strong>Malankara Mar Thoma Syrian Church</strong>, seeking stricter adherence to biblical authority, <em>sola scriptura</em>, and evangelical doctrine. Our UK Parish gathers approximately ninety families across Britain for monthly worship — in person and online — under episcopal oversight from STECI headquarters at <strong>Manjadi, Thiruvalla, Kerala</strong>. We are a <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" target="_blank" rel="noopener noreferrer">member of the Evangelical Alliance</a> (Registered Charity No. <strong>1143030</strong>).</p>
+        $eaukUrl = self::EAUK_CHURCH_URL;
+        $eaukBrand = self::EAUK_BRAND_URL;
+        $charity = self::CHARITY_NUMBER;
 
-<h2>What We Believe</h2>
-<p>We confess the evangelical Oriental Protestant faith of STECI — the historic Christian faith as revealed in Holy Scripture and summarised in the <strong>Nicene Creed</strong>. Our motto is <em>For the Word of God and for the testimony of Jesus Christ</em> (Revelation 1:9). Core convictions include:</p>
+        return <<<HTML
+<h2 id="who-we-are">Who We Are</h2>
+<p>The <strong>St. Thomas Evangelical Church of India – UK Parish</strong> is the British fellowship of <strong>STECI</strong> — a global evangelical Oriental Protestant church rooted in the Saint Thomas Christian tradition of Kerala. Founded on <strong>26 January 1961</strong>, STECI emerged from a reform movement within the Malankara Mar Thoma Syrian Church, seeking faithful adherence to <em>sola scriptura</em>, the priesthood of all believers, and the evangelical Gospel.</p>
+<p>Our UK Parish gathers approximately <strong>ninety families</strong> for monthly worship across five cities — <strong>Manchester, Leicester, Dartford, Sunderland, and Bristol</strong> — meeting <strong>in person and online</strong>. We remain under episcopal oversight from STECI headquarters at <strong>Manjadi, Thiruvalla, Kerala</strong>, united by our motto: <em>For the Word of God and for the testimony of Jesus Christ</em> (Revelation 1:9). We are a registered charity (No. <strong>{$charity}</strong>).</p>
+
+<h2 id="where-we-gather">Where &amp; How We Gather</h2>
+<p>Although our families are spread across Britain, we worship as one parish family. Each month we gather for Holy Communion, biblical preaching, congregational prayer, and fellowship — with many members joining online when they cannot travel. Our worship is Scripture-centred and evangelical, conducted primarily in <strong>English</strong> with Malayalam hymns and readings at many gatherings.</p>
 <ul>
-<li>The <strong>Holy Trinity</strong> — one God: Father, Son, and Holy Spirit</li>
-<li><strong>Sola Scriptura</strong> — the sixty-six books of the Bible as the inspired, supreme authority for faith and practice</li>
-<li><strong>Salvation by grace through faith</strong> in Jesus Christ alone — not by human works</li>
-<li>Jesus Christ as <strong>Lord and Saviour</strong>; his <strong>second coming</strong>, the resurrection of the dead, and the call to holy living</li>
-<li>The <strong>priesthood of all believers</strong> — prayer to God through Christ alone, without veneration of saints or prayers for the dead</li>
-<li>Two sacraments instituted by Christ: <strong>Baptism</strong> (including the baptism of children born to Christian parents) and the <strong>Lord's Supper</strong> — Holy Communion observed as a memorial of Christ's sacrifice</li>
-<li>The <strong>Great Commission</strong> — safeguarding sound doctrine, living a holy life, and making disciples in the United Kingdom and beyond</li>
+<li><strong>Manchester</strong> — primary fellowship hub in the North West</li>
+<li><strong>Leicester</strong> — East Midlands congregation</li>
+<li><strong>Dartford</strong> — South East fellowship near London</li>
+<li><strong>Sunderland</strong> — North East gathering</li>
+<li><strong>Bristol</strong> — South West congregation</li>
 </ul>
+<p>Visit our <a href="/service-times">service times page</a> for current schedules, or contact the <a href="/contact">parish office</a> to confirm dates and venues.</p>
+
+<h2 id="evangelical-alliance">Evangelical Alliance Membership</h2>
+<p>We are proud to be a <a href="{$eaukUrl}" target="_blank" rel="noopener noreferrer">member church of the Evangelical Alliance</a> — the largest evangelical body in the United Kingdom, uniting Christians who confess the historic evangelical faith. Membership signifies our commitment to sound doctrine, united witness, and accountable church life alongside fellow evangelical congregations.</p>
+<p>Our membership is displayed using the official Evangelical Alliance member logo in accordance with the <a href="{$eaukBrand}" target="_blank" rel="noopener noreferrer">EAUK brand guidelines</a>. You can view our public church profile on the Evangelical Alliance website.</p>
+
+<h2 id="what-we-believe">What We Believe</h2>
+<p>We confess the evangelical Oriental Protestant faith of STECI — the historic Christian faith as revealed in Holy Scripture and summarised in the <strong>Nicene Creed</strong>. We hold to the supreme authority of the Bible, salvation by grace through faith in Jesus Christ alone, and the call to holy living until Christ returns.</p>
+
+<h3>Holy Scripture</h3>
+<p>We believe the sixty-six books of the Old and New Testaments are the inspired, infallible Word of God — our final authority for doctrine, worship, and Christian living. Scripture is living and active, profitable for teaching, rebuke, correction, and training in righteousness (2 Timothy 3:16–17).</p>
+
+<h3>God the Trinity</h3>
+<p>We worship one God in three persons: <strong>Father, Son, and Holy Spirit</strong> — co-equal, co-eternal, and of one substance. God created all things, sustains the universe, and redeems sinners through his Son.</p>
+
+<h3>Jesus Christ</h3>
+<p>We believe in the full deity and true humanity of Jesus Christ, his virgin birth, sinless life, atoning death on the cross, bodily resurrection, ascension, and his return in glory to judge the living and the dead. He alone is Lord and Saviour — the only mediator between God and humanity (1 Timothy 2:5).</p>
+
+<h3>Salvation by Grace</h3>
+<p>Salvation is by <strong>grace through faith</strong> in Christ alone — not earned by human works, church tradition, or merit. All who repent and trust in Jesus are justified, adopted into God's family, and assured of eternal life. We rejoice in the finished work of the cross and the empty tomb.</p>
+
+<h3>The Holy Spirit</h3>
+<p>The Spirit convicts the world of sin, regenerates believers, indwells the church, and empowers us for holy living and witness. He distributes gifts for the building up of the body of Christ and produces the fruit of godly character in those who walk by faith.</p>
+
+<h3>The Church</h3>
+<p>The church is the body of Christ — a fellowship of believers called out from the world to worship, discipleship, and mission. We uphold the <strong>priesthood of all believers</strong>: every Christian may approach God directly through Christ, without veneration of saints or prayers for the dead.</p>
+
+<h3>Sacraments</h3>
+<p>Christ instituted two sacraments: <strong>Baptism</strong> (including the baptism of children born to Christian parents) and the <strong>Lord's Supper</strong>. Holy Communion is observed as a memorial of Christ's sacrifice — a sacred meal of remembrance, thanksgiving, and spiritual nourishment for believers.</p>
+
+<h3>The Last Things</h3>
+<p>We await the personal return of Jesus Christ, the resurrection of the dead, the final judgment, and the new heaven and earth where God will dwell with his people forever. Until that day we live as pilgrims, witnesses, and servants of the Gospel.</p>
+
+<h3>The Nicene Creed</h3>
+<blockquote>
+<p><em>We believe in one God, the Father Almighty, Maker of heaven and earth, and of all things visible and invisible. And in one Lord Jesus Christ, the only-begotten Son of God, begotten of the Father before all worlds; God of God, Light of Light, very God of very God; begotten, not made, being of one substance with the Father, by whom all things were made… And we look for the resurrection of the dead, and the life of the world to come. Amen.</em></p>
+</blockquote>
 
 <h3>What We Reject</h3>
-<p>In continuity with the reform vision of <strong>Abraham Malpan</strong> and the founding of STECI, we do not practise veneration of saints, prayers for the dead, auricular confession, idolatry, or worship directed to icons or statues. Our faith is centred on Christ and Scripture alone.</p>
+<p>In continuity with the reform vision of <strong>Abraham Malpan</strong> and the founding of STECI, we do not practise veneration of saints, prayers for the dead, auricular confession to priests, idolatry, or worship directed to icons or statues. Our faith is centred on Christ and Scripture alone.</p>
 
-<h2>How We Worship</h2>
-<p>Our worship follows STECI's evangelical, Scripture-centred pattern: Bible readings, expository preaching, congregational hymns, prayer, and Holy Communion — without elaborate ritual or ceremonial excess. In the UK Parish, services are conducted primarily in <strong>English</strong>, with Malayalam hymns and readings at many gatherings.</p>
+<h2 id="how-we-worship">How We Worship</h2>
+<p>Our worship follows STECI's evangelical pattern: readings from Holy Scripture, expository preaching, congregational hymns, united prayer, and Holy Communion — without elaborate ritual or ceremonial excess. We gather to hear God's Word, respond in praise, and encourage one another in faith.</p>
 
-<h2>Our UK Parish</h2>
-<p>With worship locations in five cities, our parish brings together families from diverse backgrounds who share a common faith and cultural heritage. We support one another through pastoral care, Sunday School, youth and women's fellowships, choir, prayer groups, and community events — both in person and online.</p>
+<h2 id="parish-life">Parish Life &amp; Mission</h2>
+<p>Across our five locations we support one another through pastoral care, Sunday School, youth and women's fellowships, choir, prayer groups, and community events — in person and online. We pray for our neighbours, support global mission, and invite all who seek Christ to worship with us.</p>
+<p>Whether you are exploring faith for the first time or seeking a spiritual home within the Saint Thomas Christian tradition, you are warmly welcome. <a href="/contact">Contact the parish office</a>, submit a <a href="/prayer-request">prayer request</a>, or explore our <a href="/ministries">ministries</a> to learn more.</p>
 HTML;
     }
 

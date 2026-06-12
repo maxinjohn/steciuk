@@ -82,7 +82,7 @@ class LoginForm extends Component
             'ip' => request()->ip(),
         ]);
 
-        $this->redirectIntended(route('account'), navigate: true);
+        $this->redirectIntended(route('account'));
     }
 
     public function render()

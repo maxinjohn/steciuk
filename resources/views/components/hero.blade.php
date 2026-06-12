@@ -18,7 +18,7 @@
         : null;
 
     $sizeClasses = match ($size) {
-        'large', 'immersive' => 'min-h-0 py-14 sm:py-16 lg:min-h-[min(84vh,780px)] lg:py-24',
+        'large', 'immersive' => 'min-h-0 py-12 sm:py-14 lg:min-h-[min(72vh,680px)] lg:py-20',
         'small' => 'min-h-0 py-10 sm:py-12 lg:min-h-[28vh]',
         default => 'min-h-0 py-12 sm:py-14 lg:min-h-[40vh] lg:py-24',
     };

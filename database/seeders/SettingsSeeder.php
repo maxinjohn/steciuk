@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Setting;
 use App\Support\ReferenceSiteContent;
 use App\Support\SeedConfig;
+use App\Support\SiteBrandingAssets;
 use App\Support\UkAddressFormatter;
 use Illuminate\Database\Seeder;
 
@@ -13,6 +14,7 @@ class SettingsSeeder extends Seeder
     public function run(): void
     {
         $reference = ReferenceSiteContent::settings();
+        $logoPath = SiteBrandingAssets::ensureParishLogoInUploads();
         $contactAddress = [
             'contact_address_line_1' => $reference['contact_address_line_1']['value'],
             'contact_address_line_2' => $reference['contact_address_line_2']['value'],
@@ -56,7 +58,7 @@ class SettingsSeeder extends Seeder
             ['key' => 'admin_dashboard_verse_ref', 'value' => 'Psalm 46:10', 'group' => 'admin'],
             ['key' => 'maintenance_mode_enabled', 'value' => '0', 'group' => 'general'],
             ['key' => 'maintenance_mode_message', 'value' => 'Our website is temporarily undergoing maintenance. Please check back soon.', 'group' => 'general'],
-            ['key' => 'logo', 'value' => '/images/steci-mark.svg', 'group' => 'branding'],
+            ['key' => 'logo', 'value' => $logoPath, 'group' => 'branding'],
             ['key' => 'favicon', 'value' => '/icons/favicon.svg', 'group' => 'branding'],
             ['key' => 'faith_sanctuary_kicker', 'value' => 'In Christ\'s peace', 'group' => 'faith'],
             ['key' => 'faith_sanctuary_note', 'value' => 'A quiet moment before you go — the Lord is near.', 'group' => 'faith'],

@@ -22,7 +22,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="{{ $pwaShortName ?? 'STECI UK' }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/steci-mark.svg') }}">
+    @php
+        $appleIcon = \App\Models\Setting::assetUrl($siteLogo ?? null)
+            ?? asset(\App\Support\SiteBrandingAssets::BUNDLED_LOGO_PUBLIC);
+    @endphp
+    <link rel="apple-touch-icon" href="{{ $appleIcon }}">
     <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
@@ -216,6 +220,7 @@
             @yield('content')
         </main>
 
+        <x-faith-spark-strip />
         <x-sanctuary-peace
             :kicker="$faithSanctuaryKicker ?? null"
             :note="$faithSanctuaryNote ?? null"
@@ -225,16 +230,10 @@
 
         <footer class="site-footer lg:pb-0" aria-label="Site footer">
             <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-                <div class="hidden gap-8 md:grid md:grid-cols-2 md:gap-10 lg:grid-cols-4">
+                <div class="hidden gap-6 lg:grid lg:grid-cols-4 lg:gap-8">
                     <div>
                         <h2>About</h2>
-                        <p class="mt-3 text-sm leading-relaxed text-[var(--site-footer-muted)]">{{ $siteMotto }}</p>
-                        @if ($footerText)
-                            <p class="mt-3 text-sm leading-relaxed text-[var(--site-footer-muted)]">{!! safeHtml($footerText) !!}</p>
-                        @endif
-                        @if ($charityNumber)
-                            <p class="mt-4 text-xs text-[var(--site-footer-muted)]/80">Registered Charity No. {{ $charityNumber }}</p>
-                        @endif
+                        <x-footer-about />
                     </div>
                     <div>
                         <h2>Quick Links</h2>
@@ -288,7 +287,7 @@
                     </div>
                 </div>
 
-                <div class="space-y-2 md:hidden" x-data="{ open: 'about' }">
+                <div class="space-y-2 lg:hidden" x-data="{ open: 'about' }">
                     @foreach ([
                         ['id' => 'about', 'title' => 'About', 'slot' => 'about'],
                         ['id' => 'links', 'title' => 'Quick Links', 'slot' => 'links'],
@@ -316,13 +315,7 @@
                                 x-cloak
                             >
                                 @if ($section['slot'] === 'about')
-                                    <p class="pt-3 text-sm leading-relaxed text-[var(--site-footer-muted)]">{{ $siteMotto }}</p>
-                                    @if ($footerText)
-                                        <div class="mt-2 text-sm text-[var(--site-footer-muted)]">{!! safeHtml($footerText) !!}</div>
-                                    @endif
-                                    @if ($charityNumber)
-                                        <p class="mt-3 text-xs text-[var(--site-footer-muted)]/80">Registered Charity No. {{ $charityNumber }}</p>
-                                    @endif
+                                    <x-footer-about compact />
                                 @elseif ($section['slot'] === 'links')
                                     <div class="pt-3">
                                         <x-menu :items="$footerMenu" variant="footer" />
@@ -355,10 +348,7 @@
                 <div class="mt-10 border-t border-white/10 pt-8 text-center text-sm text-[var(--site-footer-muted)]">
                     <x-faith-pillars variant="footer" class="!py-0 !mb-8" />
                     <p class="text-xs uppercase tracking-[0.2em] text-[var(--site-footer-muted)]/70">Evangelical Oriental Protestant · Saint Thomas Christian heritage</p>
-                    <p class="mt-2 text-xs text-[var(--site-footer-muted)]/80">
-                        <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" class="site-footer-accent-link" target="_blank" rel="noopener noreferrer">Evangelical Alliance member church</a>
-                    </p>
-                    <p class="mt-3">&copy; {{ date('Y') }} {{ $siteName }}. All rights reserved.</p>
+                    <p class="mt-6">&copy; {{ date('Y') }} {{ $siteName }}. All rights reserved.</p>
                 </div>
             </div>
         </footer>

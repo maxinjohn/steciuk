@@ -85,14 +85,16 @@ const initLocationTabs = () => {
 
 const initDesktopNav = () => {
     const shell = document.querySelector('.desktop-nav-shell');
-    const items = [...document.querySelectorAll('[data-menu-item]')];
 
-    if (! items.length) {
+    if (! shell || shell.dataset.navReady === '1') {
         return;
     }
 
-    let closeTimer = null;
+    shell.dataset.navReady = '1';
+
+    const items = () => [...shell.querySelectorAll('[data-menu-item]')];
     const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    let closeTimer = null;
 
     const setOpen = (item, open) => {
         const trigger = item?.querySelector('[data-menu-trigger]');
@@ -106,7 +108,7 @@ const initDesktopNav = () => {
     };
 
     const closeAll = (except = null) => {
-        items.forEach((item) => {
+        items().forEach((item) => {
             if (item !== except) {
                 setOpen(item, false);
             }
@@ -124,14 +126,14 @@ const initDesktopNav = () => {
 
     const scheduleClose = () => {
         clearTimeout(closeTimer);
-        closeTimer = window.setTimeout(() => closeAll(), 140);
+        closeTimer = window.setTimeout(() => closeAll(), 160);
     };
 
     const cancelClose = () => {
         clearTimeout(closeTimer);
     };
 
-    items.forEach((item) => {
+    items().forEach((item) => {
         const trigger = item.querySelector('[data-menu-trigger]');
         const panel = item.querySelector('[data-menu-panel]');
 
@@ -166,25 +168,35 @@ const initDesktopNav = () => {
                 scheduleClose();
             });
         }
+    });
 
-        trigger.addEventListener('click', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
+    shell.addEventListener('click', (event) => {
+        const trigger = event.target instanceof Element
+            ? event.target.closest('[data-menu-trigger]')
+            : null;
 
-            if (item.classList.contains('is-open')) {
-                closeAll();
-            } else {
-                openItem(item);
-            }
-        });
+        if (! trigger) {
+            return;
+        }
 
-        panel.addEventListener('click', (event) => {
-            event.stopPropagation();
-        });
+        const item = trigger.closest('[data-menu-item]');
+
+        if (! item) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (item.classList.contains('is-open')) {
+            closeAll();
+        } else {
+            openItem(item);
+        }
     });
 
     document.addEventListener('click', (event) => {
-        if (event.target instanceof Node && shell?.contains(event.target)) {
+        if (event.target instanceof Element && event.target.closest('.desktop-nav-shell')) {
             return;
         }
 
@@ -216,9 +228,11 @@ const initMobileNav = () => {
     sections.forEach((section) => {
         const trigger = section.querySelector('[data-mobile-nav-trigger]');
 
-        if (! trigger) {
+        if (! trigger || section.dataset.mobileNavBound === '1') {
             return;
         }
+
+        section.dataset.mobileNavBound = '1';
 
         trigger.addEventListener('click', () => {
             const panel = section.querySelector('[data-mobile-nav-panel]');
@@ -243,7 +257,7 @@ const initMobileNav = () => {
 
 const initScrollReveal = () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const selector = '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip, .heavenly-comfort-card, .hero-gen-z';
+    const selector = '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .faith-whisper-card, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip, .heavenly-comfort-card, .hero-gen-z';
 
     const elements = document.querySelectorAll(selector);
 
@@ -453,21 +467,24 @@ const initPWA = () => {
     });
 };
 
-initDarkMode();
-document.addEventListener('DOMContentLoaded', () => {
+const initPublicSiteUi = () => {
     initHeaderScroll();
     initDesktopNav();
     initLocationTabs();
     initMobileDock();
     initMobileNav();
     initMemberChip();
+    initScrollReveal();
 
-    const runDeferred = () => initScrollReveal();
     if ('requestIdleCallback' in window) {
-        requestIdleCallback(runDeferred, { timeout: 1200 });
+        requestIdleCallback(() => initPWA(), { timeout: 3000 });
     } else {
-        runDeferred();
+        initPWA();
     }
+};
 
-    initPWA();
+initDarkMode();
+document.addEventListener('DOMContentLoaded', initPublicSiteUi);
+document.addEventListener('livewire:navigated', () => {
+    initScrollReveal();
 });

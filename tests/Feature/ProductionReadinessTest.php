@@ -24,6 +24,14 @@ class ProductionReadinessTest extends TestCase
         $this->seed(ReferenceDataSeeder::class);
     }
 
+    public function test_bundled_branding_assets_exist_for_deploy(): void
+    {
+        $this->assertFileExists(public_path('images/branding/steci-parish-logo.png'));
+        $this->assertFileExists(public_path('images/branding/steci-parish-logo-mark.png'));
+        $this->assertFileExists(public_path('images/eauk/member-logo-small.png'));
+        $this->assertFileExists(public_path('images/eauk/member-logo-medium.png'));
+    }
+
     public function test_site_doctor_passes_on_fresh_install(): void
     {
         $this->artisan('site:doctor')

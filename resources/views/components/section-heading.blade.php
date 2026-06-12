@@ -17,7 +17,7 @@
     $subtitleClass = $light ? 'text-white/85' : 'text-ink-muted';
 @endphp
 
-<div {{ $attributes->merge(['class' => 'section-head genz-head mb-10 sm:mb-12 flex flex-col ' . $alignClasses]) }}>
+<div {{ $attributes->merge(['class' => 'section-head genz-head flex flex-col ' . $alignClasses]) }}>
     @if ($kicker)
         <div class="genz-kicker {{ $light ? 'genz-kicker--light' : '' }}">
             <span class="genz-kicker-dot" aria-hidden="true"></span>

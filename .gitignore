@@ -60,6 +60,12 @@ _ide_helper_models.php
 /public/storage
 /public/fonts-manifest.dev.json
 
+# Local logo experiments (canonical assets are steci-parish-logo*.png only)
+/public/images/branding/mark-test-*.png
+/public/images/branding/mark-final-*.png
+/public/images/branding/mark-*-test*.png
+/public/images/branding/*-candidate.png
+
 # Tests & coverage
 /.phpunit.cache
 /.phpunit.result.cache

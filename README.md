@@ -151,8 +151,10 @@ npm install && npm run build
 mkdir -p storage/database && touch storage/database/database.sqlite
 chmod -R 775 storage bootstrap/cache
 php artisan migrate --force
-php artisan storage:link
+php artisan site:ensure-paths --link
+php artisan storage:link   # no-op if --link above already ran
 php artisan config:cache && php artisan route:cache && php artisan view:cache
+php artisan site:doctor
 ```
 
 ### Production `.env` example
@@ -190,6 +192,8 @@ Scheduled SQLite maintenance runs automatically (daily light optimize, weekly an
 - [ ] HTTPS enabled (Let's Encrypt)
 - [ ] Cron enabled for `php artisan schedule:run`
 - [ ] Enable MFA for super admin (`REQUIRE_MFA_SUPER_ADMIN=true`)
+- [ ] `public/images/branding/steci-parish-logo.png` and EAUK marks committed; after deploy run `php artisan site:ensure-paths --link`
+- [ ] Header logo loads from `/storage/settings/branding/steci-parish-logo.png` (hard refresh once)
 
 ## Admin panel
 

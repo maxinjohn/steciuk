@@ -170,6 +170,8 @@ class SitePaths
 
         self::ensureCommonUploadDirectories($mode);
 
+        SiteBrandingAssets::ensureParishLogoInUploads();
+
         if (app()->environment('production')) {
             @file_put_contents($verifiedFlag, now()->toIso8601String());
         }
@@ -340,6 +342,31 @@ class SitePaths
                 $sessionTable,
             );
         }
+
+        $bundledLogo = public_path('images/branding/steci-parish-logo.png');
+        $checks[] = self::check(
+            is_file($bundledLogo),
+            'Bundled parish logo',
+            is_file($bundledLogo) ? 'images/branding/steci-parish-logo.png' : 'missing — commit public/images/branding/steci-parish-logo.png',
+        );
+
+        $syncedLogo = public_path('storage/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/'));
+        $checks[] = self::check(
+            is_file($syncedLogo) || is_file($bundledLogo),
+            'Synced parish logo in storage',
+            is_file($syncedLogo)
+                ? 'storage/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/')
+                : (is_file($bundledLogo)
+                    ? 'run php artisan site:ensure-paths --link'
+                    : 'missing bundled logo'),
+        );
+
+        $eaukMark = public_path('images/eauk/member-logo-small.png');
+        $checks[] = self::check(
+            is_file($eaukMark),
+            'EAUK trust mark asset',
+            is_file($eaukMark) ? 'images/eauk/member-logo-small.png' : 'missing — commit public/images/eauk/member-logo-small.png',
+        );
 
         return $checks;
     }
