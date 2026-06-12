@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\UserRole;
 use App\Models\Role;
 use App\Models\Setting;
+use App\Services\ParishEmailService;
 use Database\Seeders\DesignationSeeder;
 use Database\Seeders\PanelSeeder;
 use Database\Seeders\RoleSeeder;
@@ -48,6 +49,11 @@ class SiteEnsureRolesCommand extends Command
                 '--class' => PanelSeeder::class,
                 '--force' => $force,
             ]);
+        }
+
+        if (Schema::hasTable('settings')) {
+            $this->components->info('Ensuring default parish email templates…');
+            app(ParishEmailService::class)->seedDefaultsIfMissing();
         }
 
         Setting::forgetCache();

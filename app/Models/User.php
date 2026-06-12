@@ -300,6 +300,14 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             && $this->isAccountApproved();
     }
 
+    public function canViewHouseholdGivingOnPortal(): bool
+    {
+        return $this->family_id !== null
+            && $this->isActive()
+            && $this->familyIsActive()
+            && $this->isAccountApproved();
+    }
+
     public function family(): BelongsTo
     {
         return $this->belongsTo(Family::class);

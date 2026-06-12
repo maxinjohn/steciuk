@@ -25,10 +25,31 @@ class UserPasswordService
         );
     }
 
+    public function sendPasswordResetLinkForFamilyAdmin(User $admin, User $target): void
+    {
+        abort_unless($admin->canManageHouseholdOnPortal(), 403);
+        abort_unless($target->family_id && (int) $target->family_id === (int) $admin->family_id, 403);
+
+        if ((int) $target->id === (int) $admin->id) {
+            abort(403, 'Use your profile or the forgot password page to change your own password.');
+        }
+
+        if ($target->isFamilyAdmin()) {
+            abort(403, 'Only a parish admin can send a password reset link to the primary family account.');
+        }
+
+        $this->dispatchPasswordResetLink($admin, $target);
+    }
+
     public function sendPasswordResetLink(User $actor, User $target): void
     {
         $this->assertCanManagePassword($actor, $target);
 
+        $this->dispatchPasswordResetLink($actor, $target);
+    }
+
+    private function dispatchPasswordResetLink(User $actor, User $target): void
+    {
         if (! filled($target->email)) {
             throw ValidationException::withMessages([
                 'email' => 'This account does not have an email address, so a reset link cannot be sent.',

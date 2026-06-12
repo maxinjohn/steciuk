@@ -94,18 +94,72 @@ class GivingAndEmailTemplatesTest extends TestCase
     public function test_email_templates_page_loads_with_defaults(): void
     {
         $admin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        $service = app(ParishEmailService::class);
 
         $this->actingAs($admin)
             ->get(AdminPanelConfig::url('email-templates'))
             ->assertOk()
-            ->assertSee('Member account approved', false);
+            ->assertSee('Member account approved', false)
+            ->assertSee('Welcome after registration submitted', false);
+
+        $expected = [];
+        foreach ($service->defaultTemplates() as $key => $template) {
+            $resolved = $service->resolve($key);
+            $expected["{$key}_subject"] = $resolved['subject'];
+            $expected["{$key}_body"] = $resolved['body'];
+        }
 
         Livewire::actingAs($admin)
             ->test(EmailTemplatesSettings::class)
             ->assertFormFieldExists('account_approved_subject')
-            ->assertFormSet([
-                'account_approved_subject' => app(ParishEmailService::class)->resolve(ParishEmailService::ACCOUNT_APPROVED)['subject'],
-            ]);
+            ->assertFormSet($expected);
+    }
+
+    public function test_email_templates_restore_defaults_refills_form(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        $service = app(ParishEmailService::class);
+
+        Setting::set($service::STORAGE_KEY, json_encode([
+            'parish_welcome' => ['subject' => 'Custom subject', 'body' => 'Custom body'],
+        ]), 'mail');
+        Setting::forgetCache();
+
+        Livewire::actingAs($admin)
+            ->test(EmailTemplatesSettings::class)
+            ->call('restoreDefaults')
+            ->assertSet('data.parish_welcome_subject', $service->defaultTemplates()[$service::PARISH_WELCOME]['subject'])
+            ->assertSet('data.parish_welcome_body', $service->defaultTemplates()[$service::PARISH_WELCOME]['body']);
+    }
+
+    public function test_custom_saved_email_template_is_used_when_resolving(): void
+    {
+        Setting::set(ParishEmailService::STORAGE_KEY, json_encode([
+            ParishEmailService::PARISH_WELCOME => [
+                'subject' => 'Custom welcome subject',
+                'body' => 'Custom welcome body for {first_name}',
+            ],
+        ]), 'mail');
+        Setting::forgetCache();
+
+        $template = app(ParishEmailService::class)->resolve(ParishEmailService::PARISH_WELCOME);
+
+        $this->assertSame('Custom welcome subject', $template['subject']);
+        $this->assertSame('Custom welcome body for {first_name}', $template['body']);
+    }
+
+    public function test_email_template_tabs_match_known_workflows(): void
+    {
+        $labels = array_column(app(ParishEmailService::class)->defaultTemplates(), 'label');
+
+        $this->assertSame([
+            'Member account approved',
+            'Account created by parish admin',
+            'Registration not approved',
+            'Added to a parish family',
+            'Family member request approved',
+            'Welcome after registration submitted',
+        ], $labels);
     }
 
     public function test_legacy_external_give_link_resolves_to_local_route(): void

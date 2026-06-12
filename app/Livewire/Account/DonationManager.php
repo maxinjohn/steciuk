@@ -81,7 +81,7 @@ class DonationManager extends Component
         /** @var User|null $user */
         $user = Auth::user();
 
-        abort_unless($user instanceof User && $user->canManageHouseholdOnPortal(), 403);
+        abort_unless($user instanceof User && $user->canViewHouseholdGivingOnPortal(), 403);
 
         return redirect()->route('account.giving.export', $this->exportQuery('household'));
     }
@@ -144,16 +144,13 @@ class DonationManager extends Component
                 ->limit(50)
                 ->get();
 
-            if ($user->canManageHouseholdOnPortal() && $user->family_id) {
-                $memberIds = DonationService::familyMemberIds($user->family_id);
-
+            if ($user->canViewHouseholdGivingOnPortal()) {
                 $householdDonations = Donation::query()
                     ->with('user')
-                    ->whereIn('user_id', $memberIds)
-                    ->where('user_id', '!=', $user->id)
+                    ->where('family_id', $user->family_id)
                     ->latest('donated_on')
                     ->latest('id')
-                    ->limit(30)
+                    ->limit(50)
                     ->get();
             }
         }
@@ -163,7 +160,7 @@ class DonationManager extends Component
             'householdDonations' => $householdDonations,
             'summary' => $summary,
             'methodOptions' => DonationMethod::options(),
-            'canViewHousehold' => $user?->canManageHouseholdOnPortal() ?? false,
+            'canViewHousehold' => $user?->canViewHouseholdGivingOnPortal() ?? false,
             'privacyPolicyUrl' => GdprConfig::privacyPolicyUrl(),
             'givingBankDetails' => GivingPageConfig::bankDetails(),
         ]);

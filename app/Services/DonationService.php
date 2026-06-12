@@ -307,14 +307,12 @@ class DonationService
 
     public function approvedTotalForFamily(?int $familyId): float
     {
-        $memberIds = self::familyMemberIds($familyId);
-
-        if ($memberIds === []) {
+        if (! $familyId) {
             return 0.0;
         }
 
         return (float) Donation::query()
-            ->whereIn('user_id', $memberIds)
+            ->where('family_id', $familyId)
             ->where('status', DonationStatus::Approved->value)
             ->sum('amount');
     }
@@ -328,9 +326,8 @@ class DonationService
         $household = $this->approvedTotalForFamily($user->family_id);
         $pendingQuery = Donation::query()->where('status', DonationStatus::Pending->value);
 
-        if ($user->canManageHouseholdOnPortal() && $user->family_id) {
-            $memberIds = self::familyMemberIds($user->family_id);
-            $pendingCount = (clone $pendingQuery)->whereIn('user_id', $memberIds)->count();
+        if ($user->canViewHouseholdGivingOnPortal()) {
+            $pendingCount = (clone $pendingQuery)->where('family_id', $user->family_id)->count();
         } else {
             $pendingCount = (clone $pendingQuery)->where('user_id', $user->id)->count();
         }

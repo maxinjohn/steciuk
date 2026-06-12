@@ -153,4 +153,79 @@ class DonationTest extends TestCase
 
         $this->assertDatabaseMissing('users', ['id' => $child->id]);
     }
+
+    public function test_household_giving_totals_use_family_id_snapshot(): void
+    {
+        $familyA = Family::query()->create(['name' => 'Family A']);
+        $familyB = Family::query()->create(['name' => 'Family B']);
+
+        $member = User::factory()->create([
+            'role' => UserRole::Member,
+            'family_id' => $familyA->id,
+        ]);
+
+        Donation::query()->create([
+            'user_id' => $member->id,
+            'family_id' => $familyA->id,
+            'amount' => 50.00,
+            'currency' => 'GBP',
+            'method' => 'cash',
+            'status' => DonationStatus::Approved->value,
+            'donated_on' => now()->toDateString(),
+        ]);
+
+        $member->update(['family_id' => $familyB->id]);
+
+        $service = app(DonationService::class);
+
+        $this->assertSame(50.0, $service->approvedTotalForFamily($familyA->id));
+        $this->assertSame(0.0, $service->approvedTotalForFamily($familyB->id));
+    }
+
+    public function test_household_member_sees_shared_giving_summary_and_export(): void
+    {
+        $family = Family::query()->create(['name' => 'Shared Family']);
+
+        $head = User::factory()->create([
+            'role' => UserRole::Member,
+            'family_id' => $family->id,
+            'is_family_admin' => true,
+            'family_relationship' => 'head',
+        ]);
+
+        $family->update(['admin_user_id' => $head->id]);
+
+        $spouse = User::factory()->create([
+            'email' => 'spouse@example.com',
+            'role' => UserRole::Member,
+            'family_id' => $family->id,
+            'is_family_admin' => false,
+            'family_relationship' => 'spouse',
+        ]);
+
+        Donation::query()->create([
+            'user_id' => $head->id,
+            'family_id' => $family->id,
+            'amount' => 75.00,
+            'currency' => 'GBP',
+            'method' => 'bank_transfer',
+            'status' => DonationStatus::Approved->value,
+            'donated_on' => now()->toDateString(),
+        ]);
+
+        Livewire::actingAs($spouse)
+            ->test(DonationManager::class)
+            ->assertSee('Household approved giving')
+            ->assertSee('£75.00')
+            ->assertSee($head->displayFullName());
+
+        $response = $this->actingAs($spouse)->get(route('account.giving.export', [
+            'scope' => 'household',
+            'from' => now()->startOfMonth()->toDateString(),
+            'to' => now()->toDateString(),
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+    }
 }
