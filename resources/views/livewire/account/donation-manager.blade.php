@@ -122,12 +122,12 @@
         </div>
     </div>
 
-    @if ($canViewHousehold && $householdDonations->isNotEmpty())
+    @if ($canViewHousehold)
         <div class="member-portal-card">
             <h2 class="member-portal-panel-title">Household giving history</h2>
-            <p class="member-portal-panel-intro">Gifts reported by other members of your household.</p>
+            <p class="member-portal-panel-intro">All gifts recorded for your parish household — the same view for every family member.</p>
             <div class="member-giving-list mt-5">
-                @foreach ($householdDonations as $donation)
+                @forelse ($householdDonations as $donation)
                     <div class="member-giving-item" wire:key="household-donation-{{ $donation->id }}">
                         <div>
                             <p class="font-semibold text-ink">{{ $donation->formattedAmount() }}</p>
@@ -144,7 +144,9 @@
                             'member-status-badge--rejected' => $donation->statusEnum() === \App\Enums\DonationStatus::Rejected,
                         ])>{{ $donation->statusEnum()->label() }}</span>
                     </div>
-                @endforeach
+                @empty
+                    <p class="text-sm text-ink-muted">No household giving records yet.</p>
+                @endforelse
             </div>
         </div>
     @endif

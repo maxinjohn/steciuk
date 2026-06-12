@@ -19,6 +19,9 @@
         .totals .value { text-align: right; font-weight: bold; width: 120px; }
         .footer { margin-top: 28px; font-size: 10px; color: #666; }
         .empty { padding: 24px 0; color: #666; font-style: italic; }
+        .verification { margin-top: 28px; padding-top: 16px; border-top: 1px solid #ddd; }
+        .verification img { max-height: 64px; margin-bottom: 8px; }
+        .verification p { margin: 0 0 4px; font-size: 11px; }
     </style>
 </head>
 <body>
@@ -89,6 +92,17 @@
                 </tr>
             @endif
         </table>
+    @endif
+
+    @if (! empty($verification))
+        <div class="verification">
+            @if (! empty($verification['signature_data_uri']))
+                <img src="{{ $verification['signature_data_uri'] }}" alt="Vicar signature">
+            @endif
+            <p><strong>Verified by:</strong> {{ $verification['name'] }}@if(! empty($verification['title'])) · {{ $verification['title'] }}@endif</p>
+            <p><strong>Verification date:</strong> {{ $verification['verified_at'] }}</p>
+            <p>This statement has been issued with the parish vicar&rsquo;s verification signature for your records.</p>
+        </div>
     @endif
 
     <p class="footer">

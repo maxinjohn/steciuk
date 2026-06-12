@@ -33,8 +33,11 @@ class SiteDoctorCommand extends Command
 
         if ($failed > 0) {
             $this->components->warn('Fix the failed checks above, then run:');
+            $this->line('  php artisan migrate --force');
+            $this->line('  php artisan site:ensure-admin --force');
+            $this->line('  php artisan site:ensure-roles --force');
             $this->line('  php artisan site:ensure-paths --link');
-            $this->line('  php artisan config:cache');
+            $this->line('  php artisan config:clear && php artisan config:cache');
 
             return self::FAILURE;
         }

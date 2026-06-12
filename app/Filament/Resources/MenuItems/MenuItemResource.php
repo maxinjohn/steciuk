@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class MenuItemResource extends Resource
 {
@@ -30,6 +31,14 @@ class MenuItemResource extends Resource
     protected static ?string $pluralModelLabel = 'Menu Items';
 
     protected static ?int $navigationSort = 2;
+
+    /**
+     * @return Builder<MenuItem>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['page']);
+    }
 
     public static function form(Schema $schema): Schema
     {

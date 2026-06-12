@@ -6,6 +6,7 @@ use App\Enums\FamilyRelationship;
 use App\Models\User;
 use App\Services\DataProtectionService;
 use App\Services\MemberRegistrationService;
+use App\Services\UserPasswordService;
 use App\Support\GdprConfig;
 use App\Support\ParishGender;
 use App\Support\ParishPronouns;
@@ -54,6 +55,8 @@ class FamilyMembersManager extends Component
     public string $family_name = '';
 
     public bool $householdCreated = false;
+
+    public bool $passwordResetSent = false;
 
     public function mount(): void
     {
@@ -170,6 +173,20 @@ class FamilyMembersManager extends Component
         $this->reset(['editingMemberId', 'editEmail', 'saved', 'emailUpdated']);
     }
 
+    public function sendMemberPasswordResetLink(int $memberId, UserPasswordService $passwordService): void
+    {
+        $admin = Auth::user();
+
+        abort_unless($admin instanceof User && $admin->canManageHouseholdOnPortal(), 403);
+
+        $member = User::query()->findOrFail($memberId);
+
+        $passwordService->sendPasswordResetLinkForFamilyAdmin($admin, $member);
+
+        $this->passwordResetSent = true;
+        $this->reset(['editingMemberId', 'editEmail', 'saved', 'emailUpdated']);
+    }
+
     public function render()
     {
         /** @var User|null $user */
@@ -188,6 +205,7 @@ class FamilyMembersManager extends Component
 
         return view('livewire.account.family-members-manager', [
             'members' => $members,
+            'family' => $user?->family?->loadMissing('admin'),
             'relationshipOptions' => FamilyRelationship::options(),
             'pronounOptions' => ParishPronouns::options(),
             'genderOptions' => ParishGender::options(),

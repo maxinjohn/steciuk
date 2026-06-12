@@ -19,9 +19,9 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
-use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
+use Illuminate\Support\Facades\DB;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
@@ -31,8 +31,6 @@ use Filament\Support\Icons\Heroicon;
 
 class ChurchSettings extends Page
 {
-    use CanUseDatabaseTransactions;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
     protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::SiteSettings;
@@ -116,75 +114,67 @@ class ChurchSettings extends Page
 
     public function save(): void
     {
-        try {
-            $this->beginDatabaseTransaction();
+        $data = $this->form->getState();
+        $maintenanceEnabled = (bool) ($data['maintenance_mode_enabled'] ?? false);
+        unset($data['maintenance_mode_enabled']);
 
-            $data = $this->form->getState();
-            $maintenanceEnabled = (bool) ($data['maintenance_mode_enabled'] ?? false);
-            unset($data['maintenance_mode_enabled']);
+        $data['contact_postcode'] = UkPostcode::normalize($data['contact_postcode'] ?? '')
+            ?? trim((string) ($data['contact_postcode'] ?? ''));
+        $data['contact_country'] = filled($data['contact_country'] ?? null)
+            ? trim((string) $data['contact_country'])
+            : 'United Kingdom';
+        $data['main_address'] = UkAddressFormatter::format(
+            line1: $data['contact_address_line_1'] ?? null,
+            line2: $data['contact_address_line_2'] ?? null,
+            city: $data['contact_city'] ?? null,
+            county: $data['contact_county'] ?? null,
+            postcode: $data['contact_postcode'] ?? null,
+            country: $data['contact_country'] ?? null,
+        );
 
-            $data['contact_postcode'] = UkPostcode::normalize($data['contact_postcode'] ?? '')
-                ?? trim((string) ($data['contact_postcode'] ?? ''));
-            $data['contact_country'] = filled($data['contact_country'] ?? null)
-                ? trim((string) $data['contact_country'])
-                : 'United Kingdom';
-            $data['main_address'] = UkAddressFormatter::format(
-                line1: $data['contact_address_line_1'] ?? null,
-                line2: $data['contact_address_line_2'] ?? null,
-                city: $data['contact_city'] ?? null,
-                county: $data['contact_county'] ?? null,
-                postcode: $data['contact_postcode'] ?? null,
-                country: $data['contact_country'] ?? null,
-            );
+        DB::transaction(function () use ($data, $maintenanceEnabled): void {
+            Setting::persistBatch(function () use ($data): void {
+                foreach ($data as $key => $value) {
+                    if (in_array($key, ['faith_sanctuary_verses', 'faith_comfort_cards'], true)) {
+                        Setting::set($key, json_encode($value ?? []), 'faith');
 
-            foreach ($data as $key => $value) {
-                if (in_array($key, ['faith_sanctuary_verses', 'faith_comfort_cards'], true)) {
-                    Setting::set($key, json_encode($value ?? []), 'faith');
+                        continue;
+                    }
 
-                    continue;
+                    if (in_array($key, ['admin_use_church_logo', 'registration_captcha_enabled'], true)) {
+                        Setting::set($key, ($value ?? false) ? '1' : '0', $key === 'admin_use_church_logo' ? 'branding' : 'security');
+
+                        continue;
+                    }
+
+                    $group = match (true) {
+                        str_starts_with($key, 'contact_') => 'contact',
+                        str_starts_with($key, 'faith_') => 'faith',
+                        str_starts_with($key, 'gospel_') => 'general',
+                        str_starts_with($key, 'admin_') => 'admin',
+                        str_starts_with($key, 'seo_') => 'seo',
+                        in_array($key, ['theme_color', 'pwa_short_name'], true) => 'branding',
+                        in_array($key, ['twitter', 'youtube', 'facebook', 'instagram'], true) => 'social',
+                        default => 'general',
+                    };
+
+                    Setting::set($key, $value ?? '', $group);
                 }
-
-                if (in_array($key, ['admin_use_church_logo', 'registration_captcha_enabled'], true)) {
-                    Setting::set($key, ($value ?? false) ? '1' : '0', $key === 'admin_use_church_logo' ? 'branding' : 'security');
-
-                    continue;
-                }
-
-                $group = match (true) {
-                    str_starts_with($key, 'contact_') => 'contact',
-                    str_starts_with($key, 'faith_') => 'faith',
-                    str_starts_with($key, 'gospel_') => 'general',
-                    str_starts_with($key, 'admin_') => 'admin',
-                    str_starts_with($key, 'seo_') => 'seo',
-                    in_array($key, ['theme_color', 'pwa_short_name'], true) => 'branding',
-                    in_array($key, ['twitter', 'youtube', 'facebook', 'instagram'], true) => 'social',
-                    default => 'general',
-                };
-
-                Setting::set($key, $value ?? '', $group);
-            }
-
-            Setting::forgetCache();
+            });
 
             if ($maintenanceEnabled) {
                 MaintenanceModeService::enable();
             } else {
                 MaintenanceModeService::disable();
             }
+        });
 
-            $this->commitDatabaseTransaction();
+        SecurityLogger::logSettingsSaved('Church & Faith settings');
 
-            SecurityLogger::logSettingsSaved('Church & Faith settings');
-
-            Notification::make()
-                ->success()
-                ->title('Settings saved')
-                ->send();
-        } catch (\Throwable $exception) {
-            $this->rollBackDatabaseTransaction();
-
-            throw $exception;
-        }
+        Notification::make()
+            ->success()
+            ->title('Settings saved')
+            ->send();
     }
 
     public function defaultForm(Schema $schema): Schema

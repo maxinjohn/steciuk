@@ -52,7 +52,7 @@ class Setting extends Model
         return $value !== '' ? $value : $default;
     }
 
-    public static function set(string $key, mixed $value, ?string $group = null): static
+    public static function set(string $key, mixed $value, ?string $group = null, bool $refreshCache = true): static
     {
         $storedValue = is_array($value) ? json_encode($value) : (string) $value;
 
@@ -61,10 +61,31 @@ class Setting extends Model
             ['value' => $storedValue, 'group' => $group],
         );
 
-        static::forgetCache();
+        if ($refreshCache && ! static::$deferCacheRefresh) {
+            static::forgetCache();
+        }
 
         return $setting;
     }
+
+    /**
+     * Persist multiple settings with a single cache refresh.
+     *
+     * @param  callable(): void  $callback
+     */
+    public static function persistBatch(callable $callback): void
+    {
+        static::$deferCacheRefresh = true;
+
+        try {
+            $callback();
+        } finally {
+            static::$deferCacheRefresh = false;
+            static::forgetCache();
+        }
+    }
+
+    private static bool $deferCacheRefresh = false;
 
     public static function forget(string $key): void
     {

@@ -12,7 +12,6 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
@@ -24,8 +23,6 @@ use Filament\Support\Icons\Heroicon;
 
 class EmailTemplatesSettings extends Page
 {
-    use CanUseDatabaseTransactions;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelopeOpen;
 
     protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::SiteSettings;
@@ -53,18 +50,20 @@ class EmailTemplatesSettings extends Page
 
     public function mount(): void
     {
-        $service = app(ParishEmailService::class);
-        $service->seedDefaultsIfMissing();
+        $this->fillFormFromService();
+    }
 
-        $templates = $service->allTemplates();
-        $state = [];
+    public function restoreDefaults(): void
+    {
+        app(ParishEmailService::class)->resetTemplatesToDefaults();
+        $this->fillFormFromService();
 
-        foreach ($templates as $key => $template) {
-            $state["{$key}_subject"] = $template['subject'] ?? '';
-            $state["{$key}_body"] = $template['body'] ?? '';
-        }
+        SecurityLogger::logSettingsSaved('Email templates restored to defaults');
 
-        $this->form->fill($state);
+        Notification::make()
+            ->title('Default email templates restored')
+            ->success()
+            ->send();
     }
 
     public function save(): void
@@ -87,6 +86,26 @@ class EmailTemplatesSettings extends Page
             ->title('Email templates saved')
             ->success()
             ->send();
+    }
+
+    public function defaultForm(Schema $schema): Schema
+    {
+        return $schema->statePath('data');
+    }
+
+    private function fillFormFromService(): void
+    {
+        $service = app(ParishEmailService::class);
+        $service->seedDefaultsIfMissing();
+
+        $state = [];
+
+        foreach ($service->allTemplates() as $key => $template) {
+            $state["{$key}_subject"] = $template['subject'] ?? '';
+            $state["{$key}_body"] = $template['body'] ?? '';
+        }
+
+        $this->form->fill($state);
     }
 
     public function form(Schema $schema): Schema
@@ -131,6 +150,14 @@ class EmailTemplatesSettings extends Page
                     ->livewireSubmitHandler('save')
                     ->footer([
                         Actions::make([
+                            Action::make('restoreDefaults')
+                                ->label('Restore defaults')
+                                ->color('gray')
+                                ->outlined()
+                                ->requiresConfirmation()
+                                ->modalHeading('Restore default email templates?')
+                                ->modalDescription('This replaces every subject and body with the built-in parish defaults. Custom wording will be lost.')
+                                ->action(fn () => $this->restoreDefaults()),
                             Action::make('save')
                                 ->label('Save templates')
                                 ->submit('save'),

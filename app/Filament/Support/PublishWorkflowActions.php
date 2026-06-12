@@ -4,6 +4,7 @@ namespace App\Filament\Support;
 
 use App\Enums\PublishStatus;
 use App\Models\User;
+use App\Services\SecurityLogger;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
@@ -21,6 +22,9 @@ class PublishWorkflowActions
     {
         return array_filter([
             self::previewAction($recordResolver, $previewUrlResolver),
+            self::submitForReviewAction($recordResolver),
+            self::approveAndPublishAction($recordResolver),
+            self::returnReviewToDraftAction($recordResolver),
             self::publishAction($recordResolver),
             self::unpublishAction($recordResolver),
             self::revertToDraftAction($recordResolver),
@@ -63,6 +67,117 @@ class PublishWorkflowActions
 
                 return self::status($record) === PublishStatus::Published
                     && filled($previewUrlResolver($record));
+            });
+    }
+
+    /**
+     * @param  callable(): Model  $recordResolver
+     */
+    private static function submitForReviewAction(callable $recordResolver): Action
+    {
+        return Action::make('submitForReview')
+            ->label('Submit for review')
+            ->icon('heroicon-o-paper-airplane')
+            ->color('info')
+            ->requiresConfirmation()
+            ->modalHeading('Submit for parish review?')
+            ->modalDescription('An admin or vicar will review this before it goes live on the public site.')
+            ->visible(function () use ($recordResolver): bool {
+                if (self::canPublish()) {
+                    return false;
+                }
+
+                /** @var Model $record */
+                $record = $recordResolver();
+                $status = self::status($record);
+
+                return in_array($status, [PublishStatus::Draft, PublishStatus::Unpublished], true);
+            })
+            ->action(function () use ($recordResolver): void {
+                /** @var Model $record */
+                $record = $recordResolver();
+                $record->update(['status' => PublishStatus::PendingReview->value]);
+
+                SecurityLogger::audit('content_submitted_for_review', actor: auth()->user(), subject: $record, context: [
+                    'content_type' => class_basename($record),
+                    'content_id' => $record->getKey(),
+                    'title' => (string) ($record->title ?? $record->getKey()),
+                ]);
+
+                app(\App\Services\ContentApprovalService::class)->forgetPendingCountCache();
+
+                Notification::make()
+                    ->title('Submitted for review')
+                    ->body('Parish leadership will review this before publishing.')
+                    ->success()
+                    ->send();
+            });
+    }
+
+    /**
+     * @param  callable(): Model  $recordResolver
+     */
+    private static function approveAndPublishAction(callable $recordResolver): Action
+    {
+        return Action::make('approveAndPublish')
+            ->label('Approve & publish')
+            ->icon('heroicon-o-check-badge')
+            ->color('success')
+            ->requiresConfirmation()
+            ->visible(function () use ($recordResolver): bool {
+                if (! self::canPublish()) {
+                    return false;
+                }
+
+                return self::status($recordResolver()) === PublishStatus::PendingReview;
+            })
+            ->action(function () use ($recordResolver): void {
+                /** @var Model $record */
+                $record = $recordResolver();
+                $approver = auth()->user();
+
+                if ($approver instanceof User) {
+                    app(\App\Services\ContentApprovalService::class)->approve($record::class, (int) $record->getKey(), $approver);
+                }
+
+                Notification::make()
+                    ->title('Approved and published')
+                    ->success()
+                    ->send();
+            });
+    }
+
+    /**
+     * @param  callable(): Model  $recordResolver
+     */
+    private static function returnReviewToDraftAction(callable $recordResolver): Action
+    {
+        return Action::make('returnReviewToDraft')
+            ->label('Return to editor')
+            ->icon('heroicon-o-arrow-uturn-left')
+            ->color('warning')
+            ->requiresConfirmation()
+            ->modalDescription('The editor can revise this and submit again.')
+            ->visible(function () use ($recordResolver): bool {
+                if (! self::canPublish()) {
+                    return false;
+                }
+
+                return self::status($recordResolver()) === PublishStatus::PendingReview;
+            })
+            ->action(function () use ($recordResolver): void {
+                /** @var Model $record */
+                $record = $recordResolver();
+                $approver = auth()->user();
+
+                if ($approver instanceof User) {
+                    app(\App\Services\ContentApprovalService::class)->returnToDraft($record::class, (int) $record->getKey(), $approver);
+                }
+
+                Notification::make()
+                    ->title('Returned to draft')
+                    ->success()
+                    ->send();
             });
     }
 

@@ -16,7 +16,7 @@ class SqliteOptimizerTest extends TestCase
     {
         $this->assertSame('sqlite', config('database.default'));
 
-        SqliteOptimizer::configureConnection();
+        SqliteOptimizer::configureConnection(\DB::connection());
 
         $journalMode = strtolower((string) \DB::connection()->getPdo()->query('PRAGMA journal_mode')->fetchColumn());
         $this->assertContains($journalMode, ['wal', 'memory', 'delete']);

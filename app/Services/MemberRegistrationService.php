@@ -168,6 +168,8 @@ class MemberRegistrationService
                 ],
             );
 
+            app(ParishEmailService::class)->sendRegistrationWelcome($head);
+
             return $head;
         });
     }
@@ -346,6 +348,9 @@ class MemberRegistrationService
 
     public function approve(User $user, User $approver): void
     {
+        $wasPending = $user->accountStatus() === AccountStatus::Pending;
+        $family = $user->family;
+
         $user->update([
             'account_status' => AccountStatus::Approved->value,
             'approved_at' => now(),
@@ -364,6 +369,14 @@ class MemberRegistrationService
         );
 
         app(ParishEmailService::class)->sendAccountApproved($user);
+
+        if ($wasPending && $family && $user->family_id) {
+            $requester = $family->admin ?? $family->members()->where('is_family_admin', true)->first();
+
+            if ($requester && (int) $requester->id !== (int) $user->id) {
+                app(ParishEmailService::class)->sendFamilyRequestApproved($requester, $user, $family, $approver);
+            }
+        }
     }
 
     public function reject(User $user, User $approver): void
@@ -529,6 +542,10 @@ class MemberRegistrationService
             ],
         );
 
+        if (filled($member->email)) {
+            app(ParishEmailService::class)->sendFamilyMemberAdded($member, $family);
+        }
+
         return $member;
     }
 
@@ -598,6 +615,8 @@ class MemberRegistrationService
         }
 
         return DB::transaction(function () use ($actor, $member, $family, $relationship, $makeFamilyAdmin): User {
+            $wasAlreadyLinked = (int) $member->family_id === (int) $family->id;
+
             if ($member->family_id && (int) $member->family_id !== (int) $family->id) {
                 $this->detachUserFromFamily($member);
             }
@@ -632,6 +651,10 @@ class MemberRegistrationService
                     'portal' => SecurityLogger::detectPortal(),
                 ],
             );
+
+            if (! $wasAlreadyLinked && filled($member->email)) {
+                app(ParishEmailService::class)->sendFamilyMemberAdded($member->fresh(), $family);
+            }
 
             return $member->fresh();
         });

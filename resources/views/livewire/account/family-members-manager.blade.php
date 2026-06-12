@@ -30,7 +30,10 @@
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
                 <h2 class="member-portal-panel-title">Family household</h2>
-                <p class="member-portal-panel-intro">
+                @if ($family)
+                    <p class="text-sm font-medium text-ink">{{ $family->memberPortalLabel() }}</p>
+                @endif
+                <p class="member-portal-panel-intro mt-2">
                     @if ($canManage)
                         Add household members here. You are the family administrator and can add or remove members. Each family member can sign in with their own account once approved.
                     @else
@@ -42,7 +45,13 @@
 
         @if ($emailUpdated)
             <div class="member-alert member-alert--success mt-5" role="status">
-                Email saved for parish records. Household members sign in through the primary family account, not their own email.
+                Email saved for parish records. Once approved, this member can sign in with their own email address.
+            </div>
+        @endif
+
+        @if ($passwordResetSent)
+            <div class="member-alert member-alert--success mt-5" role="status">
+                Password reset link sent. Ask them to check their inbox (and spam folder).
             </div>
         @endif
 
@@ -97,6 +106,17 @@
                             'member-status-badge--rejected' => $member->accountStatus() === \App\Enums\AccountStatus::Rejected,
                         ])>{{ $member->accountStatus()->label() }}</span>
                         @if ($canManage && ! $member->isFamilyAdmin() && $member->id !== auth()->id())
+                            @if ($member->email)
+                                <button
+                                    type="button"
+                                    class="member-family-edit-link"
+                                    wire:click="sendMemberPasswordResetLink({{ $member->id }})"
+                                    wire:confirm="Send a password reset link to {{ $member->email }}?"
+                                    wire:loading.attr="disabled"
+                                >
+                                    Send reset link
+                                </button>
+                            @endif
                             <button
                                 type="button"
                                 class="member-family-remove-link"
@@ -126,7 +146,7 @@
 
             <h3 class="member-portal-panel-title">Add household member</h3>
             <p class="member-portal-panel-intro mt-2">
-                Children and dependents do not need an email. Only the primary family account signs in to the member portal on behalf of your household.
+                Children and dependents do not need an email. Adults with an email can sign in to their own member portal once approved.
             </p>
             <form wire:submit="addMember" class="mt-6 space-y-5">
                 <div class="grid gap-5 sm:grid-cols-2">

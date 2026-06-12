@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Enums\AdminNavigationGroup;
+use App\Filament\Support\AdminBranding;
 use App\Models\Setting;
 use App\Support\AdminPanelConfig;
 use App\Filament\Auth\Login as AdminLogin;
@@ -44,7 +45,7 @@ class AdminPanelProvider extends PanelProvider
             ->profile(isSimple: false)
             ->brandName(AdminPanelConfig::name())
             ->brandLogo(fn () => view('filament.admin.logo'))
-            ->favicon(fn (): string => Setting::assetUrl(Setting::get('favicon')) ?? asset('icons/favicon.svg'))
+            ->favicon(fn (): string => AdminBranding::faviconUrl())
             ->colors([
                 'primary' => Color::Amber,
                 'gray' => Color::Slate,
@@ -57,7 +58,9 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarFullyCollapsibleOnDesktop()
             ->sidebarWidth('18rem')
             ->maxContentWidth(Width::Full)
-            ->spa()
+            ->databaseTransactions(
+                config('database.default') !== 'sqlite' && ! app()->environment('testing'),
+            )
             ->darkMode(true)
             ->defaultThemeMode(ThemeMode::Light)
             ->viteTheme('resources/css/filament/admin/theme.css')

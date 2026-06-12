@@ -14,7 +14,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
-use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
@@ -27,8 +26,6 @@ use Illuminate\Validation\ValidationException;
 
 class MailSettings extends Page
 {
-    use CanUseDatabaseTransactions;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
 
     protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::SiteSettings;
@@ -77,11 +74,9 @@ class MailSettings extends Page
 
     public function save(): void
     {
-        try {
-            $this->beginDatabaseTransaction();
+        $data = MailConfigService::normalizeFormData($this->form->getState());
 
-            $data = MailConfigService::normalizeFormData($this->form->getState());
-
+        Setting::persistBatch(function () use ($data): void {
             Setting::set('mail_mailer', $data['mail_mailer'] ?? 'sendmail', 'mail');
             Setting::set('mail_host', $data['mail_host'] ?? '', 'mail');
             Setting::set('mail_port', (string) ($data['mail_port'] ?? '587'), 'mail');
@@ -96,23 +91,16 @@ class MailSettings extends Page
             if (! empty($data['mail_password'])) {
                 Setting::set('mail_password', MailConfigService::encryptPassword($data['mail_password']), 'mail');
             }
+        });
 
-            Setting::forgetCache();
-            MailConfigService::applyFromSettings();
+        MailConfigService::applyFromSettings();
 
-            $this->commitDatabaseTransaction();
+        SecurityLogger::logSettingsSaved('Email & SMTP settings');
 
-            SecurityLogger::logSettingsSaved('Email & SMTP settings');
-
-            Notification::make()
-                ->success()
-                ->title('Mail settings saved')
-                ->send();
-        } catch (\Throwable $exception) {
-            $this->rollBackDatabaseTransaction();
-
-            throw $exception;
-        }
+        Notification::make()
+            ->success()
+            ->title('Mail settings saved')
+            ->send();
     }
 
     public function sendTestEmail(): void

@@ -5,10 +5,12 @@ namespace App\Filament\Resources\Users\Pages;
 use App\Enums\FamilyRelationship;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Support\AdminUserPasswordActions;
+use App\Filament\Support\UserSignatureUpload;
 use App\Models\Family;
 use App\Models\User;
 use App\Services\DataProtectionService;
 use App\Services\MemberRegistrationService;
+use App\Services\PanelMembershipService;
 use App\Support\UserName;
 use App\Support\UserProfileAttributes;
 use Filament\Actions\Action;
@@ -21,6 +23,9 @@ class EditUser extends EditRecord
 
     /** @var array{family_id: int|null, family_relationship: string|null, is_family_admin: bool}|null */
     protected ?array $householdFormData = null;
+
+    /** @var list<int>|null */
+    protected ?array $panelIds = null;
 
     public function mount(int|string $record): void
     {
@@ -93,6 +98,17 @@ class EditUser extends EditRecord
         return true;
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $target = $this->getRecord();
+
+        if ($target instanceof User) {
+            $data = UserSignatureUpload::fillFormData($target, $data);
+        }
+
+        return $data;
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data = UserName::normalize($data);
@@ -121,11 +137,32 @@ class EditUser extends EditRecord
             unset($data['family_id'], $data['family_relationship'], $data['is_family_admin']);
         }
 
+        unset($data['signature_upload']);
+
+        if (array_key_exists('panels', $data) && auth()->user()?->can('update', User::class)) {
+            $this->panelIds = collect($data['panels'] ?? [])
+                ->filter(fn ($id): bool => filled($id))
+                ->map(fn ($id): int => (int) $id)
+                ->values()
+                ->all();
+            unset($data['panels']);
+        }
+
         return $data;
     }
 
     protected function afterSave(): void
     {
+        /** @var User $member */
+        $member = $this->getRecord()->fresh();
+
+        UserSignatureUpload::persist($member, $this->form->getState()['signature_upload'] ?? null);
+
+        if ($this->panelIds !== null) {
+            app(PanelMembershipService::class)->syncUserPanels($member, $this->panelIds);
+            $this->panelIds = null;
+        }
+
         if ($this->householdFormData === null) {
             return;
         }

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\GalleryPhotos\Schemas;
 
-use App\Enums\PublishStatus;
+use App\Filament\Support\PublishStatusSelect;
 use App\Filament\Support\SecureFileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -44,12 +44,7 @@ class GalleryPhotoForm
                     ->numeric()
                     ->default(0)
                     ->helperText('Lower numbers appear first.'),
-                Select::make('status')
-                    ->label('Status')
-                    ->options(collect(PublishStatus::cases())->mapWithKeys(fn (PublishStatus $status) => [$status->value => $status->label()])->all())
-                    ->default(PublishStatus::Draft->value)
-                    ->required()
-                    ->native(false),
+                PublishStatusSelect::make()->native(false),
             ]);
     }
 }

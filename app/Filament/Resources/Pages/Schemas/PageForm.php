@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Pages\Schemas;
 
 use App\Enums\PublishStatus;
 use App\Filament\Support\ChurchRichEditor;
+use App\Filament\Support\PublishStatusSelect;
 use App\Filament\Support\SecureFileUpload;
 use App\Models\Page;
 use Filament\Forms\Components\Placeholder;
@@ -147,10 +148,7 @@ class PageForm
                         Tab::make('Settings')
                             ->icon('heroicon-o-cog-6-tooth')
                             ->schema([
-                                Select::make('status')
-                                    ->options(PublishStatus::class)
-                                    ->default('draft')
-                                    ->required(),
+                                PublishStatusSelect::make(),
                                 TextInput::make('sort_order')
                                     ->numeric()
                                     ->default(0)

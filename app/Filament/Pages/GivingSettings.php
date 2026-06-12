@@ -11,7 +11,6 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
@@ -22,8 +21,6 @@ use Filament\Support\Icons\Heroicon;
 
 class GivingSettings extends Page
 {
-    use CanUseDatabaseTransactions;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHeart;
 
     protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::Giving;
@@ -64,30 +61,21 @@ class GivingSettings extends Page
 
     public function save(): void
     {
-        try {
-            $this->beginDatabaseTransaction();
-
+        Setting::persistBatch(function (): void {
             foreach ($this->form->getState() as $key => $value) {
                 Setting::set($key, $value ?? '', 'giving');
             }
 
             Setting::set('donation_link', '/give', 'general');
-            Setting::forgetCache();
+        });
 
-            $this->commitDatabaseTransaction();
+        SecurityLogger::logSettingsSaved('Giving page & bank details');
 
-            SecurityLogger::logSettingsSaved('Giving page & bank details');
-
-            Notification::make()
-                ->success()
-                ->title('Giving settings saved')
-                ->body('The public /give page and member portal giving tab will use these details.')
-                ->send();
-        } catch (\Throwable $exception) {
-            $this->rollBackDatabaseTransaction();
-
-            throw $exception;
-        }
+        Notification::make()
+            ->success()
+            ->title('Giving settings saved')
+            ->body('The public /give page and member portal giving tab will use these details.')
+            ->send();
     }
 
     public function defaultForm(Schema $schema): Schema

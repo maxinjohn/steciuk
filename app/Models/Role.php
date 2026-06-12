@@ -68,10 +68,19 @@ class Role extends Model
         return match ($slug) {
             UserRole::SuperAdmin->value => 'Super Admin',
             UserRole::Admin->value => 'Admin',
+            UserRole::Vicar->value => 'Vicar',
             UserRole::Editor->value => 'Editor',
             UserRole::Member->value => 'Member',
             default => Str::headline(str_replace('_', ' ', $slug)),
         };
+    }
+
+    public function isNameLocked(): bool
+    {
+        return in_array($this->slug, [
+            UserRole::SuperAdmin->value,
+            UserRole::Vicar->value,
+        ], true);
     }
 
     /**
@@ -104,6 +113,7 @@ class Role extends Model
         return [
             UserRole::SuperAdmin->value => 'Super Admin',
             UserRole::Admin->value => 'Admin',
+            UserRole::Vicar->value => 'Vicar',
             UserRole::Editor->value => 'Editor',
             UserRole::Member->value => 'Member',
         ];

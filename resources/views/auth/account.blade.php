@@ -5,8 +5,8 @@
 
 @section('content')
     @php
-        $user = auth()->user();
-        $family = $user->family?->loadCount('members');
+        $user = auth()->user()->load(['family' => fn ($query) => $query->withCount('members'), 'designation', 'panels']);
+        $family = $user->family;
         $showFamilyTab = $user->canBelongToHousehold();
 
         $accountTabs = [
@@ -57,7 +57,10 @@
                         <p class="member-portal-kicker">Member portal</p>
                         <h1 class="member-portal-title">{{ $user->displayFullName() }}</h1>
                         <p class="member-portal-subtitle">
-                            {{ $family?->name ? $family->memberPortalLabel().' · ' : '' }}{{ \App\Models\Role::labelForSlug($user->roleSlug()) }}
+                            {{ $family ? $family->memberPortalLabel().' · ' : '' }}{{ \App\Models\Role::labelForSlug($user->roleSlug()) }}
+                            @if ($user->designationLabel())
+                                · {{ $user->designationLabel() }}
+                            @endif
                             @if ($user->formattedPronouns())
                                 · {{ $user->formattedPronouns() }}
                             @endif
@@ -122,6 +125,12 @@
                                     <div><dt>Pronouns</dt><dd>{{ $user->formattedPronouns() }}</dd></div>
                                 @endif
                                 <div><dt>Role</dt><dd>{{ \App\Models\Role::labelForSlug($user->roleSlug()) }}</dd></div>
+                                @if ($user->designationLabel())
+                                    <div><dt>Designation</dt><dd>{{ $user->designationLabel() }}</dd></div>
+                                @endif
+                                @if ($user->panels->isNotEmpty())
+                                    <div><dt>Panels</dt><dd>{{ $user->panels->pluck('name')->join(', ') }}</dd></div>
+                                @endif
                                 @if ($family)
                                     <div><dt>Family household</dt><dd>{{ $family->memberPortalLabel() }} · {{ $family->members_count }} {{ str('member')->plural($family->members_count) }}</dd></div>
                                     @if ($user->familyRelationship())

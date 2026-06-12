@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -131,5 +132,68 @@ class UserPasswordManagementTest extends TestCase
             'token' => $token,
             'email' => 'member@example.com',
         ], false), $mail->actionUrl);
+    }
+
+    public function test_family_admin_can_send_password_reset_link_to_household_member(): void
+    {
+        Notification::fake();
+
+        $family = Family::query()->create(['name' => 'Reset Family']);
+
+        $head = User::factory()->create([
+            'email' => 'head@example.com',
+            'role' => UserRole::Member,
+            'family_id' => $family->id,
+            'is_family_admin' => true,
+            'family_relationship' => 'head',
+        ]);
+
+        $family->update(['admin_user_id' => $head->id]);
+
+        $child = User::factory()->create([
+            'email' => 'child@example.com',
+            'role' => UserRole::Member,
+            'family_id' => $family->id,
+            'is_family_admin' => false,
+            'family_relationship' => 'child',
+            'date_of_birth' => '2010-01-01',
+        ]);
+
+        Livewire::actingAs($head)
+            ->test(\App\Livewire\Account\FamilyMembersManager::class)
+            ->call('sendMemberPasswordResetLink', $child->id)
+            ->assertHasNoErrors()
+            ->assertSet('passwordResetSent', true);
+
+        Notification::assertSentTo($child, ResetPassword::class);
+    }
+
+    public function test_family_admin_cannot_send_password_reset_link_without_email(): void
+    {
+        $family = Family::query()->create(['name' => 'No Email Family']);
+
+        $head = User::factory()->create([
+            'email' => 'head@example.com',
+            'role' => UserRole::Member,
+            'family_id' => $family->id,
+            'is_family_admin' => true,
+            'family_relationship' => 'head',
+        ]);
+
+        $family->update(['admin_user_id' => $head->id]);
+
+        $child = User::factory()->create([
+            'email' => null,
+            'role' => UserRole::Member,
+            'family_id' => $family->id,
+            'is_family_admin' => false,
+            'family_relationship' => 'child',
+            'date_of_birth' => '2010-01-01',
+        ]);
+
+        $this->expectException(ValidationException::class);
+
+        app(\App\Services\UserPasswordService::class)
+            ->sendPasswordResetLinkForFamilyAdmin($head, $child);
     }
 }

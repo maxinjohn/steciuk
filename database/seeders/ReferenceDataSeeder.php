@@ -20,6 +20,8 @@ class ReferenceDataSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
+            DesignationSeeder::class,
+            PanelSeeder::class,
             UserSeeder::class,
             SettingsSeeder::class,
             ServiceSeeder::class,

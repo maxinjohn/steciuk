@@ -36,6 +36,7 @@ _ide_helper_models.php
 /storage/*.key
 /storage/database/*.sqlite
 /storage/database/*.sqlite-*
+/storage/database/.sqlite-pragmas.lock
 /storage/framework/cache/data/*
 !/storage/framework/cache/data/.gitignore
 /storage/framework/sessions/*

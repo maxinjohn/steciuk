@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DonationResource extends Resource
 {
@@ -39,6 +40,14 @@ class DonationResource extends Resource
     public static function canCreate(): bool
     {
         return auth()->user()?->can('create', Donation::class) ?? false;
+    }
+
+    /**
+     * @return Builder<Donation>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['user']);
     }
 
     public static function form(Schema $schema): Schema

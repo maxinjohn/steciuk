@@ -26,7 +26,7 @@ class UserResource extends Resource
 
     protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::People;
 
-    protected static ?string $navigationLabel = 'Members';
+    protected static ?string $navigationLabel = 'Users';
 
     protected static ?string $modelLabel = 'User';
 
@@ -49,7 +49,7 @@ class UserResource extends Resource
      */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['family', 'approvedBy']);
+        return parent::getEloquentQuery()->with(['family', 'approvedBy', 'designation', 'panels']);
     }
 
     public static function form(Schema $schema): Schema

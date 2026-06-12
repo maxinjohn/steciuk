@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\GalleryAlbums\Schemas;
 
-use App\Enums\PublishStatus;
+use App\Filament\Support\PublishStatusSelect;
 use App\Filament\Support\SecureFileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -26,12 +26,7 @@ class GalleryAlbumForm
                     ->required()
                     ->numeric()
                     ->default(0),
-                Select::make('status')
-                    ->label('Status')
-                    ->options(collect(PublishStatus::cases())->mapWithKeys(fn (PublishStatus $status) => [$status->value => $status->label()])->all())
-                    ->default(PublishStatus::Draft->value)
-                    ->required()
-                    ->native(),
+                PublishStatusSelect::make()->native(),
             ]);
     }
 }

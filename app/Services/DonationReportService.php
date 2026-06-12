@@ -118,6 +118,7 @@ class DonationReportService
             'total_approved' => (float) $donations->where('status', DonationStatus::Approved->value)->sum('amount'),
             'total_pending' => (float) $donations->where('status', DonationStatus::Pending->value)->sum('amount'),
             'total_rejected' => (float) $donations->where('status', DonationStatus::Rejected->value)->sum('amount'),
+            'verification' => app(VicarVerificationService::class)->pdfVerificationBlock(),
         ];
     }
 
@@ -131,7 +132,7 @@ class DonationReportService
         abort_unless(in_array($scope, [DonationReportScope::Personal, DonationReportScope::Household], true), 403);
 
         if ($scope === DonationReportScope::Household) {
-            abort_unless($actor->canManageHouseholdOnPortal() && $actor->family_id, 403);
+            abort_unless($actor->canViewHouseholdGivingOnPortal(), 403);
         }
 
         $actor->loadMissing('family');
@@ -227,13 +228,13 @@ class DonationReportService
         return match ($scope) {
             DonationReportScope::Personal => $query->where('user_id', $member?->id),
             DonationReportScope::Member => $query->where('user_id', $member?->id),
-            DonationReportScope::Household => $query->whereIn(
-                'user_id',
-                DonationService::familyMemberIds($family?->id) ?: [-1],
+            DonationReportScope::Household => $query->where(
+                'family_id',
+                $family?->id ?? -1,
             ),
-            DonationReportScope::Family => $query->whereIn(
-                'user_id',
-                DonationService::familyMemberIds($family?->id) ?: [-1],
+            DonationReportScope::Family => $query->where(
+                'family_id',
+                $family?->id ?? -1,
             ),
             DonationReportScope::All => $query,
         };

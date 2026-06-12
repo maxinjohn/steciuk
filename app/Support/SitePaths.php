@@ -207,6 +207,8 @@ class SitePaths
         }
 
         @chmod($database, 0664);
+
+        \App\Services\SqliteOptimizer::initializeNewDatabase($database);
     }
 
     public static function ensurePublicStorageLink(): bool
@@ -321,6 +323,14 @@ class SitePaths
             'Bootstrap cache directory',
             $bootstrapCache,
         );
+
+        if (config('database.default') === 'sqlite') {
+            $checks[] = self::check(
+                Schema::hasTable('migrations'),
+                'Database migrations',
+                Schema::hasTable('migrations') ? 'applied' : 'missing — run php artisan migrate --force',
+            );
+        }
 
         if (config('session.driver') === 'database') {
             $sessionTable = (string) config('session.table', 'sessions');

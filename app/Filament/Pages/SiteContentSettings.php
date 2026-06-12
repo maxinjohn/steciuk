@@ -13,7 +13,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
-use Filament\Pages\Concerns\CanUseDatabaseTransactions;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\EmbeddedSchema;
@@ -25,8 +24,6 @@ use Filament\Support\Icons\Heroicon;
 
 class SiteContentSettings extends Page
 {
-    use CanUseDatabaseTransactions;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
     protected static string|\UnitEnum|null $navigationGroup = AdminNavigationGroup::SiteSettings;
@@ -75,11 +72,9 @@ class SiteContentSettings extends Page
 
     public function save(): void
     {
-        try {
-            $this->beginDatabaseTransaction();
+        $data = $this->form->getState();
 
-            $data = $this->form->getState();
-
+        Setting::persistBatch(function () use ($data): void {
             foreach ($data as $key => $value) {
                 if ($key === 'site_announcement_enabled') {
                     Setting::set($key, ($value ?? false) ? '1' : '0', 'general');
@@ -89,22 +84,14 @@ class SiteContentSettings extends Page
 
                 Setting::set($key, $value ?? '', 'general');
             }
+        });
 
-            Setting::forgetCache();
+        SecurityLogger::logSettingsSaved('Public site content settings');
 
-            $this->commitDatabaseTransaction();
-
-            SecurityLogger::logSettingsSaved('Public site content settings');
-
-            Notification::make()
-                ->success()
-                ->title('Public site copy saved')
-                ->send();
-        } catch (\Throwable $exception) {
-            $this->rollBackDatabaseTransaction();
-
-            throw $exception;
-        }
+        Notification::make()
+            ->success()
+            ->title('Public site copy saved')
+            ->send();
     }
 
     public function defaultForm(Schema $schema): Schema

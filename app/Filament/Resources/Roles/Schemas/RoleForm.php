@@ -24,6 +24,10 @@ class RoleForm
                         TextInput::make('name')
                             ->required()
                             ->maxLength(120)
+                            ->disabled(fn (?Role $record): bool => (bool) ($record?->isNameLocked() ?? false))
+                            ->helperText(fn (?Role $record): ?string => ($record?->isNameLocked() ?? false)
+                                ? 'This predefined role name is fixed.'
+                                : null)
                             ->live(onBlur: true)
                             ->afterStateUpdated(function (Set $set, ?string $state, ?string $operation): void {
                                 if ($operation !== 'create') {

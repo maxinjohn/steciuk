@@ -62,7 +62,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*')
+                || $request->expectsJson()
+                || $request->hasHeader('X-Livewire'),
         );
 
         $exceptions->dontFlash([
@@ -113,7 +115,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 : 500;
 
             if ($request->expectsJson() || $request->hasHeader('X-Livewire')) {
-                $reload = $status === 419 && AdminPanelConfig::isAdminRequest($request);
+                $reload = AdminPanelConfig::shouldTrackAdminSession($request)
+                    && in_array($status, [401, 403, 419, 429, 500, 503], true);
 
                 return ErrorResponse::json($status, reload: $reload);
             }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\Family;
 
 class ParishEmailService
 {
@@ -74,8 +75,8 @@ class ParishEmailService
 
         foreach ($this->defaultTemplates() as $key => $defaults) {
             $saved = $stored[$key] ?? [];
-            $subject = filled($saved['subject'] ?? null) ? $saved['subject'] : $defaults['subject'];
-            $body = filled($saved['body'] ?? null) ? $saved['body'] : $defaults['body'];
+            $subject = $this->resolvedTemplateField($saved['subject'] ?? null, $defaults['subject']);
+            $body = $this->resolvedTemplateField($saved['body'] ?? null, $defaults['body']);
 
             if (($saved['subject'] ?? null) !== $subject || ($saved['body'] ?? null) !== $body) {
                 $needsSave = true;
@@ -92,22 +93,31 @@ class ParishEmailService
         }
     }
 
+    public function resetTemplatesToDefaults(): void
+    {
+        $templates = [];
+
+        foreach ($this->defaultTemplates() as $key => $defaults) {
+            $templates[$key] = [
+                'subject' => $defaults['subject'],
+                'body' => $defaults['body'],
+            ];
+        }
+
+        $this->saveTemplates($templates);
+    }
+
     /**
      * @return array{subject: string, body: string}
      */
     public function resolve(string $key): array
     {
         $defaults = $this->defaultTemplates();
-        $stored = $this->storedTemplates();
-        $template = array_merge($defaults[$key] ?? [], $stored[$key] ?? []);
+        $saved = $this->storedTemplates()[$key] ?? [];
 
         return [
-            'subject' => filled($template['subject'] ?? null)
-                ? (string) $template['subject']
-                : (string) ($defaults[$key]['subject'] ?? ''),
-            'body' => filled($template['body'] ?? null)
-                ? (string) $template['body']
-                : (string) ($defaults[$key]['body'] ?? ''),
+            'subject' => $this->resolvedTemplateField($saved['subject'] ?? null, (string) ($defaults[$key]['subject'] ?? '')),
+            'body' => $this->resolvedTemplateField($saved['body'] ?? null, (string) ($defaults[$key]['body'] ?? '')),
         ];
     }
 
@@ -146,6 +156,55 @@ class ParishEmailService
         ]);
     }
 
+    public function sendRegistrationWelcome(User $user): void
+    {
+        if (! filled($user->email)) {
+            return;
+        }
+
+        $this->send(self::PARISH_WELCOME, $user->email, [
+            '{first_name}' => $user->first_name ?: $user->name ?: 'Member',
+        ]);
+    }
+
+    public function sendAdminCreatedAccount(User $user): void
+    {
+        if (! filled($user->email)) {
+            return;
+        }
+
+        $this->send(self::ACCOUNT_ADDED_BY_ADMIN, $user->email, [
+            '{first_name}' => $user->first_name ?: $user->name ?: 'Member',
+            '{email}' => (string) $user->email,
+        ]);
+    }
+
+    public function sendFamilyMemberAdded(User $member, Family $family): void
+    {
+        if (! filled($member->email)) {
+            return;
+        }
+
+        $this->send(self::FAMILY_MEMBER_ADDED, $member->email, [
+            '{first_name}' => $member->first_name ?: $member->name ?: 'Member',
+            '{family_name}' => $family->memberPortalLabel(),
+        ]);
+    }
+
+    public function sendFamilyRequestApproved(User $requester, User $member, Family $family, User $approver): void
+    {
+        if (! filled($requester->email)) {
+            return;
+        }
+
+        $this->send(self::FAMILY_REQUEST_APPROVED, $requester->email, [
+            '{first_name}' => $requester->first_name ?: $requester->name ?: 'Member',
+            '{member_name}' => $member->displayFullName(),
+            '{family_name}' => $family->memberPortalLabel(),
+            '{approver_name}' => $approver->displayFullName(),
+        ]);
+    }
+
     /**
      * @param  array<string, array{subject?: string, body?: string}>  $templates
      */
@@ -168,8 +227,8 @@ class ParishEmailService
                 $saved = $stored[$key] ?? [];
 
                 return array_merge($template, [
-                    'subject' => filled($saved['subject'] ?? null) ? $saved['subject'] : $template['subject'],
-                    'body' => filled($saved['body'] ?? null) ? $saved['body'] : $template['body'],
+                    'subject' => $this->resolvedTemplateField($saved['subject'] ?? null, $template['subject']),
+                    'body' => $this->resolvedTemplateField($saved['body'] ?? null, $template['body']),
                 ]);
             })
             ->all();
@@ -181,9 +240,14 @@ class ParishEmailService
     private function baseReplacements(): array
     {
         return [
-            '{site_name}' => (string) config('site.name', 'STECI UK Parish'),
+            '{site_name}' => Setting::text('site_name', (string) config('site.name', 'STECI UK Parish')),
             '{login_url}' => route('login'),
         ];
+    }
+
+    private function resolvedTemplateField(?string $saved, string $default): string
+    {
+        return filled($saved) ? (string) $saved : $default;
     }
 
     /**
