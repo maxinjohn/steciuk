@@ -33,7 +33,7 @@ class ReferenceSiteContentMigrator
         }
 
         foreach (ReferenceSiteContent::settings() as $key => $data) {
-            Setting::query()->updateOrCreate(
+            Setting::query()->firstOrCreate(
                 ['key' => $key],
                 ['value' => $data['value'], 'group' => $data['group']],
             );

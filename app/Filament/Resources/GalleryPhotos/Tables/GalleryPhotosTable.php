@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\GalleryPhotos\Tables;
 
+use App\Filament\Support\AdminMediaColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Support\CompactTableActions;
 use Filament\Tables\Enums\RecordActionsPosition;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -24,10 +24,7 @@ class GalleryPhotosTable
                 TextColumn::make('title')
                     ->searchable()
                     ->placeholder('—'),
-                ImageColumn::make('image_path')
-                    ->disk('public')
-                    ->square()
-                    ->imageSize(56),
+                AdminMediaColumn::storageImage('image_path', 'Preview'),
                 TextColumn::make('status')
                     ->badge()
                     ->sortable(),
