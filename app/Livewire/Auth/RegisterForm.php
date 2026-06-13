@@ -3,10 +3,9 @@
 namespace App\Livewire\Auth;
 
 use App\Livewire\Concerns\HandlesUkAddress;
-use App\Rules\TurnstileCaptcha;
+use App\Livewire\Concerns\ValidatesTurnstileCaptcha;
 use App\Services\MemberRegistrationService;
 use App\Services\SecurityLogger;
-use App\Services\TurnstileCaptchaService;
 use App\Support\GdprConfig;
 use App\Support\ParishGender;
 use App\Support\ParishPronouns;
@@ -21,6 +20,7 @@ use Livewire\Component;
 class RegisterForm extends Component
 {
     use HandlesUkAddress;
+    use ValidatesTurnstileCaptcha;
 
     #[Validate('nullable|string|max:120')]
     public string $first_name = '';
@@ -57,8 +57,6 @@ class RegisterForm extends Component
     #[Validate('nullable|string|max:0')]
     public string $website = '';
 
-    public string $captchaToken = '';
-
     public bool $accept_privacy = false;
 
     public bool $accept_terms = false;
@@ -88,22 +86,19 @@ class RegisterForm extends Component
             'date_of_birth' => 'required|date|before:today|after:1900-01-01',
             'preferred_worship_location' => 'nullable|string|in:'.implode(',', ParishWorshipLocations::all()),
             'website' => 'nullable|string|max:0',
-            'captchaToken' => [
-                Rule::requiredIf(fn (): bool => app(TurnstileCaptchaService::class)->isEnabled()),
-                new TurnstileCaptcha,
-            ],
             'accept_privacy' => 'accepted',
             'accept_terms' => 'accepted',
             'marketing_consent' => 'boolean',
-        ], $this->ukAddressValidationRules());
+        ], $this->turnstileValidationRules(), $this->ukAddressValidationRules());
 
-        $validated = $this->validate($rules);
+        $validated = $this->validateWithTurnstileReset('turnstile-register', $rules);
 
         $key = 'register:'.request()->ip();
         $maxAttempts = 10;
 
         if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
             $minutes = (int) ceil(RateLimiter::availableIn($key) / 60);
+            $this->resetTurnstileCaptcha('turnstile-register');
             $this->addError(
                 'form',
                 $minutes <= 1
@@ -148,14 +143,15 @@ class RegisterForm extends Component
 
     public function render()
     {
-        return view('livewire.auth.register-form', [
-            'worshipLocations' => ParishWorshipLocations::options(),
-            'pronounOptions' => ParishPronouns::requiredOptions(),
-            'genderOptions' => ParishGender::requiredOptions(),
-            'turnstileSiteKey' => app(TurnstileCaptchaService::class)->siteKey(),
-            'turnstileEnabled' => app(TurnstileCaptchaService::class)->isEnabled(),
-            'privacyPolicyUrl' => GdprConfig::privacyPolicyUrl(),
-            'termsUrl' => GdprConfig::termsUrl(),
-        ]);
+        return view('livewire.auth.register-form', array_merge(
+            $this->turnstileViewData(),
+            [
+                'worshipLocations' => ParishWorshipLocations::options(),
+                'pronounOptions' => ParishPronouns::requiredOptions(),
+                'genderOptions' => ParishGender::requiredOptions(),
+                'privacyPolicyUrl' => GdprConfig::privacyPolicyUrl(),
+                'termsUrl' => GdprConfig::termsUrl(),
+            ],
+        ));
     }
 }

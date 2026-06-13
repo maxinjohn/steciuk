@@ -61,15 +61,26 @@ trait HandlesChurchForm
             return;
         }
 
-        RateLimiter::hit($key, 3600);
-
         $rules = array_merge(
             $this->validationRules(),
             $this->captchaValidationRules(),
             ['website' => 'nullable|string|max:0'],
         );
 
-        $this->validate($rules);
+        $captchaRules = $this->captchaValidationRules();
+        $elementId = method_exists($this, 'turnstileElementId') ? $this->turnstileElementId() : null;
+
+        if (
+            $captchaRules !== []
+            && $elementId !== null
+            && method_exists($this, 'validateWithTurnstileReset')
+        ) {
+            $this->validateWithTurnstileReset($elementId, $rules);
+        } else {
+            $this->validate($rules);
+        }
+
+        RateLimiter::hit($key, 3600);
 
         $submission = FormSubmission::query()->create([
             'form_type' => $this->formType(),

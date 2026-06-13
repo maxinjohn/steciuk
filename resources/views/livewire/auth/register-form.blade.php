@@ -100,17 +100,11 @@
             </div>
         </div>
 
-        @if ($turnstileEnabled)
-            <div>
-                <label class="form-label">Security check <span class="text-red-600" aria-hidden="true">*</span></label>
-                <x-turnstile-widget
-                    element-id="turnstile-register"
-                    :turnstile-enabled="$turnstileEnabled"
-                    :turnstile-site-key="$turnstileSiteKey"
-                />
-                @error('captchaToken')<p class="form-error" role="alert">{{ $message }}</p>@enderror
-            </div>
-        @endif
+        <x-turnstile-field
+            element-id="turnstile-register"
+            :turnstile-enabled="$turnstileEnabled ?? false"
+            :turnstile-site-key="$turnstileSiteKey ?? ''"
+        />
 
         <div class="member-register-section">
             <h3 class="member-register-section-title">Privacy & consent</h3>

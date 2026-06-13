@@ -25,6 +25,12 @@
             Remember me on this device
         </label>
 
+        <x-turnstile-field
+            element-id="turnstile-login"
+            :turnstile-enabled="$turnstileEnabled ?? false"
+            :turnstile-site-key="$turnstileSiteKey ?? ''"
+        />
+
         <div class="flex flex-wrap items-center gap-4">
             <button type="submit" class="btn btn-primary sm:w-auto" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="login">Sign in</span>

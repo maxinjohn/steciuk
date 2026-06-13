@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
+use App\Livewire\Forms\ContactForm;
 use App\Models\Page;
+use App\Models\User;
+use App\Support\AdminPanelConfig;
 use App\Support\CustomAssetSanitizer;
 use App\Support\SafeUrl;
 use App\Support\SeedConfig;
@@ -73,19 +77,32 @@ class SecurityHardeningTest extends TestCase
         config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
         $this->seed(ReferenceDataSeeder::class);
 
-        $admin = \App\Models\User::factory()->create(['role' => \App\Enums\UserRole::SuperAdmin]);
+        $admin = User::factory()->create(['role' => UserRole::SuperAdmin]);
 
-        $response = $this->actingAs($admin)->get(\App\Support\AdminPanelConfig::url('church-settings'));
+        $response = $this->actingAs($admin)->get(AdminPanelConfig::url('church-settings'));
 
         $response->assertOk();
         $csp = (string) $response->headers->get('Content-Security-Policy');
         $this->assertStringContainsString('https://fonts.bunny.net', $csp);
         $this->assertStringContainsString('https://static.cloudflareinsights.com', $csp);
+        $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
+    }
+
+    public function test_admin_login_csp_allows_turnstile(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $response = $this->get(AdminPanelConfig::url('login'));
+
+        $response->assertOk();
+        $csp = (string) $response->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
     }
 
     public function test_honeypot_submission_is_logged(): void
     {
-        Livewire::test(\App\Livewire\Forms\ContactForm::class)
+        Livewire::test(ContactForm::class)
             ->set('website', 'http://bot.test')
             ->set('name', 'Bot')
             ->set('email', 'bot@example.com')
