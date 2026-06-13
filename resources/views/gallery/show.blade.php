@@ -15,7 +15,7 @@
     <section
         class="page-section page-section--article py-10 sm:py-12 md:py-16"
         x-data="galleryLightbox()"
-        @keydown.escape.window="lightbox = false"
+        @keydown.escape.window="close()"
         @keydown.arrow-right.window="if (lightbox) next()"
         @keydown.arrow-left.window="if (lightbox) prev()"
     >
@@ -24,14 +24,15 @@
                 @foreach ($album->photos as $index => $photo)
                     @php
                         $variant = str_contains(strtolower($photo->title ?? ''), 'communion') ? 'communion' : (str_contains(strtolower($album->slug ?? ''), 'fellowship') ? 'fellowship' : 'worship');
-                        $src = galleryPhotoUrl($photo->image_path, $variant);
+                        $thumb = galleryPhotoUrl($photo->image_path, $variant, 'display');
+                        $full = galleryPhotoUrl($photo->image_path, $variant, 'full');
                         $alt = $photo->alt_text ?? $photo->title ?? '';
                     @endphp
                     <button
                         type="button"
                         class="gallery-photo-btn group focus:outline-none"
                         data-gallery-photo
-                        data-src="{{ $src }}"
+                        data-src="{{ $full }}"
                         data-title="{{ $photo->title ?? '' }}"
                         data-caption="{{ $photo->caption ?? '' }}"
                         data-alt="{{ $alt }}"
@@ -39,7 +40,7 @@
                         aria-label="View {{ $photo->title ?? 'photo ' . ($index + 1) }}"
                     >
                         <img
-                            src="{{ $src }}"
+                            src="{{ $thumb }}"
                             alt="{{ $alt }}"
                             loading="lazy"
                             decoding="async"
@@ -66,13 +67,13 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[80] flex items-center justify-center bg-black/95 p-4 pb-dock"
+            class="fixed inset-0 z-[250] flex items-center justify-center bg-black/95 p-4 pb-dock"
             x-cloak
             role="dialog"
             aria-modal="true"
             :aria-label="photos[current]?.title || 'Photo viewer'"
         >
-            <button type="button" @click="lightbox = false" class="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20" aria-label="Close lightbox">
+            <button type="button" @click="close()" class="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20" aria-label="Close lightbox">
                 <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
@@ -84,7 +85,7 @@
                 <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
             </button>
 
-            <div class="max-h-[85vh] max-w-5xl text-center" @click.outside="lightbox = false">
+            <div class="max-h-[85vh] max-w-5xl text-center" @click.outside="close()">
                 <template x-if="photos.length">
                     <div>
                         <img :src="photos[current]?.src" :alt="photos[current]?.alt || ''" class="mx-auto max-h-[75vh] rounded-lg object-contain shadow-2xl" decoding="async">

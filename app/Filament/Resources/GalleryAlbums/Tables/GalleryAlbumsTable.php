@@ -20,7 +20,10 @@ class GalleryAlbumsTable
                     ->searchable(),
                 TextColumn::make('slug')
                     ->searchable(),
-                ImageColumn::make('cover_image'),
+                ImageColumn::make('cover_image')
+                    ->disk('public')
+                    ->square()
+                    ->imageSize(56),
                 TextColumn::make('sort_order')
                     ->numeric()
                     ->sortable(),

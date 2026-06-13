@@ -65,27 +65,7 @@ class SqliteOptimizer
             return;
         }
 
-        $lockPath = dirname($resolvedPath).'/.sqlite-pragmas.lock';
-        $lockHandle = @fopen($lockPath, 'c+');
-
-        if ($lockHandle === false) {
-            static::applyFileLevelPragmas($pdo, $markerPath);
-
-            return;
-        }
-
-        try {
-            flock($lockHandle, LOCK_EX);
-
-            if (is_file($markerPath)) {
-                return;
-            }
-
-            static::applyFileLevelPragmas($pdo, $markerPath);
-        } finally {
-            flock($lockHandle, LOCK_UN);
-            fclose($lockHandle);
-        }
+        static::applyFileLevelPragmas($pdo, $markerPath);
     }
 
     public static function initializeNewDatabase(string $databasePath): void

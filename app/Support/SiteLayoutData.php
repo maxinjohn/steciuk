@@ -78,12 +78,18 @@ class SiteLayoutData
             'contactFormHeading' => $settings['contact_form_heading'] ?? 'Send a Message',
             'contactFormIntro' => $settings['contact_form_intro'] ?? 'Whether you need pastoral support, information about Holy Communion, or wish to join our parish — write to us and we will respond as soon as we can.',
             'serviceLocations' => ServiceLocations::names(),
-            'headerMenu' => $menus[MenuLocation::Header->value],
+            'headerMenu' => self::withoutMemberAreaMenu($menus[MenuLocation::Header->value]),
             'footerMenu' => $menus[MenuLocation::Footer->value],
             'mobileMenu' => $menus[MenuLocation::Mobile->value],
             'navMenu' => self::navMenu(
                 $menus[MenuLocation::Mobile->value],
                 $menus[MenuLocation::Header->value],
+            ),
+            'mobileDrawerMenu' => self::mobileDrawerMenu(
+                self::navMenu(
+                    $menus[MenuLocation::Mobile->value],
+                    $menus[MenuLocation::Header->value],
+                ),
             ),
         ];
 
@@ -98,6 +104,29 @@ class SiteLayoutData
     public static function navMenu(Collection $mobileMenu, Collection $headerMenu): Collection
     {
         return $mobileMenu->isNotEmpty() ? $mobileMenu : $headerMenu;
+    }
+
+    public static function mobileDrawerMenu(Collection $navMenu): Collection
+    {
+        return self::withoutMemberAreaMenu($navMenu);
+    }
+
+    public static function withoutMemberAreaMenu(Collection $menu): Collection
+    {
+        return $menu
+            ->reject(fn ($item) => self::isMemberAreaMenuItem($item))
+            ->values();
+    }
+
+    public static function isMemberAreaMenuItem(object $item): bool
+    {
+        $seedKey = (string) ($item->seed_key ?? '');
+
+        if ($seedKey === 'member-area' || str_starts_with($seedKey, 'members.')) {
+            return true;
+        }
+
+        return strcasecmp(trim((string) ($item->label ?? '')), 'Member area') === 0;
     }
 
     public static function footerAboutTagline(?string $tagline, ?string $motto): string

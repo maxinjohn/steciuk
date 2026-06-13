@@ -15,18 +15,29 @@ class GalleryPhotosTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('sort_order')
             ->columns([
-                TextColumn::make('gallery_album_id')
-                    ->numeric()
+                TextColumn::make('album.title')
+                    ->label('Album')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('title')
-                    ->searchable(),
-                ImageColumn::make('image_path'),
-                TextColumn::make('alt_text')
-                    ->searchable(),
+                    ->searchable()
+                    ->placeholder('—'),
+                ImageColumn::make('image_path')
+                    ->disk('public')
+                    ->square()
+                    ->imageSize(56),
+                TextColumn::make('status')
+                    ->badge()
+                    ->sortable(),
                 TextColumn::make('sort_order')
+                    ->label('Order')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('alt_text')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

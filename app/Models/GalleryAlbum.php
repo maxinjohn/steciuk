@@ -39,8 +39,37 @@ class GalleryAlbum extends Model implements HasMedia
             }
         });
 
-        static::saved(fn () => \App\Services\SiteCache::forgetPublicContent());
-        static::deleted(fn () => \App\Services\SiteCache::forgetPublicContent());
+        static::updating(function (GalleryAlbum $album): void {
+            if ($album->isDirty('cover_image')) {
+                $original = $album->getOriginal('cover_image');
+
+                if (filled($original) && $original !== $album->cover_image) {
+                    \App\Support\GalleryImageProcessor::deleteStoredImage($original);
+                }
+            }
+        });
+
+        static::deleting(function (GalleryAlbum $album): void {
+            $album->photos()->each(function (GalleryPhoto $photo): void {
+                \App\Support\GalleryImageProcessor::deleteStoredImage($photo->image_path);
+            });
+        });
+
+        static::saved(function (GalleryAlbum $album): void {
+            if (
+                filled($album->cover_image)
+                && ($album->wasRecentlyCreated || $album->wasChanged('cover_image'))
+            ) {
+                \App\Support\GalleryImageProcessor::processCover($album->cover_image);
+            }
+
+            \App\Services\SiteCache::forgetPublicContent();
+        });
+
+        static::deleted(function (GalleryAlbum $album): void {
+            \App\Support\GalleryImageProcessor::deleteStoredImage($album->cover_image);
+            \App\Services\SiteCache::forgetPublicContent();
+        });
     }
 
     public static function generateUniqueSlug(string $title, ?int $ignoreId = null): string
@@ -81,5 +110,25 @@ class GalleryAlbum extends Model implements HasMedia
     public function scopePublished($query)
     {
         return $this->scopeActive($query);
+    }
+
+    public function resolvedCoverPath(): ?string
+    {
+        if (filled($this->cover_image)) {
+            return $this->cover_image;
+        }
+
+        if ($this->relationLoaded('photos')) {
+            $photo = $this->photos->first();
+
+            return $photo?->image_path;
+        }
+
+        $path = $this->photos()
+            ->published()
+            ->orderBy('sort_order')
+            ->value('image_path');
+
+        return is_string($path) && $path !== '' ? $path : null;
     }
 }

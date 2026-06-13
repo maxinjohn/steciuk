@@ -21,7 +21,8 @@ class GalleryAlbumForm
                     ->required(),
                 Textarea::make('description')
                     ->columnSpanFull(),
-                SecureFileUpload::image('cover_image', 'gallery/albums'),
+                SecureFileUpload::image('cover_image', 'gallery/albums')
+                    ->helperText('Optional cover for the album index. If empty, the first published photo is used.'),
                 TextInput::make('sort_order')
                     ->required()
                     ->numeric()

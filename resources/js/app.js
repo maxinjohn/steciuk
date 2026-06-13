@@ -2,16 +2,24 @@
 
 const updateThemeColor = () => {
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) return;
-    meta.setAttribute('content', document.documentElement.classList.contains('dark') ? '#131316' : '#d4cabb');
+    if (! meta) {
+        return;
+    }
+
+    const root = document.documentElement;
+    const light = root.dataset.themeColorLight || '#d4cabb';
+    const dark = root.dataset.themeColorDark || '#131316';
+
+    meta.setAttribute('content', root.classList.contains('dark') ? dark : light);
 };
 
 const initDarkMode = () => {
     const stored = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    if (stored === 'dark' || (!stored && prefersDark)) {
+    if (stored === 'dark') {
         document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
     }
 
     updateThemeColor();
@@ -40,6 +48,11 @@ window.galleryLightbox = () => ({
     open(index) {
         this.current = index;
         this.lightbox = true;
+        document.body.classList.add('gallery-lightbox-open');
+    },
+    close() {
+        this.lightbox = false;
+        document.body.classList.remove('gallery-lightbox-open');
     },
     next() {
         if (! this.photos.length) return;
@@ -124,25 +137,43 @@ const bindDesktopNav = (shell) => {
     let closeTimer = null;
 
     const positionPanel = (item) => {
+        const drop = item.querySelector('.desktop-nav-drop');
         const trigger = item.querySelector('[data-menu-trigger]');
         const panel = item.querySelector('[data-menu-panel]');
 
-        if (! trigger || ! panel) {
+        if (! drop || ! panel) {
             return;
         }
 
-        const triggerRect = trigger.getBoundingClientRect();
-        const gap = panel.classList.contains('menu-mega') ? 10 : 8;
+        panel.style.left = '';
+        panel.style.right = '';
+        panel.style.maxWidth = '';
 
-        panel.classList.add('menu-dropdown-panel--fixed');
-        panel.style.top = `${triggerRect.bottom + gap}px`;
-
-        if (panel.classList.contains('menu-mega')) {
-            panel.style.left = `${triggerRect.left + (triggerRect.width / 2)}px`;
-            return;
+        if (panel.classList.contains('menu-mega') || panel.classList.contains('desktop-nav-flyout--grid')) {
+            panel.style.left = '50%';
         }
 
-        panel.style.left = `${triggerRect.left}px`;
+        requestAnimationFrame(() => {
+            const rect = panel.getBoundingClientRect();
+            const viewportPadding = 12;
+
+            if (rect.right > window.innerWidth - viewportPadding) {
+                const shift = rect.right - (window.innerWidth - viewportPadding);
+                panel.style.left = panel.classList.contains('desktop-nav-flyout--grid') || panel.classList.contains('menu-mega')
+                    ? `calc(50% - ${Math.ceil(shift)}px)`
+                    : 'auto';
+                panel.style.right = panel.classList.contains('desktop-nav-flyout--grid') || panel.classList.contains('menu-mega')
+                    ? 'auto'
+                    : '0';
+            }
+
+            if (rect.left < viewportPadding) {
+                panel.style.left = `${viewportPadding - drop.getBoundingClientRect().left}px`;
+                panel.style.right = 'auto';
+            }
+
+            panel.style.maxWidth = `${window.innerWidth - (viewportPadding * 2)}px`;
+        });
     };
 
     const resetPanel = (item) => {
@@ -152,9 +183,9 @@ const bindDesktopNav = (shell) => {
             return;
         }
 
-        panel.classList.remove('menu-dropdown-panel--fixed');
-        panel.style.top = '';
         panel.style.left = '';
+        panel.style.right = '';
+        panel.style.maxWidth = '';
     };
 
     const setOpen = (item, open) => {
@@ -193,7 +224,7 @@ const bindDesktopNav = (shell) => {
 
     const scheduleClose = () => {
         clearTimeout(closeTimer);
-        closeTimer = window.setTimeout(() => closeAll(), 160);
+        closeTimer = window.setTimeout(() => closeAll(), 220);
     };
 
     const cancelClose = () => {
@@ -201,10 +232,11 @@ const bindDesktopNav = (shell) => {
     };
 
     items().forEach((item) => {
+        const drop = item.querySelector('.desktop-nav-drop');
         const trigger = item.querySelector('[data-menu-trigger]');
         const panel = item.querySelector('[data-menu-panel]');
 
-        if (! trigger || ! panel) {
+        if (! drop || ! trigger || ! panel) {
             return;
         }
 
@@ -220,26 +252,15 @@ const bindDesktopNav = (shell) => {
         }, { signal });
 
         if (canHover) {
-            item.addEventListener('mouseenter', () => {
+            drop.addEventListener('mouseenter', () => {
                 cancelClose();
                 openItem(item);
             }, { signal });
 
-            item.addEventListener('mouseleave', (event) => {
+            drop.addEventListener('mouseleave', (event) => {
                 const next = event.relatedTarget;
 
-                if (next instanceof Node && (item.contains(next) || panel.contains(next))) {
-                    return;
-                }
-
-                scheduleClose();
-            }, { signal });
-
-            panel.addEventListener('mouseenter', cancelClose, { signal });
-            panel.addEventListener('mouseleave', (event) => {
-                const next = event.relatedTarget;
-
-                if (next instanceof Node && item.contains(next)) {
+                if (next instanceof Node && drop.contains(next)) {
                     return;
                 }
 
@@ -249,7 +270,7 @@ const bindDesktopNav = (shell) => {
     });
 
     document.addEventListener('click', (event) => {
-        if (event.target instanceof Element && event.target.closest('.desktop-nav-shell')) {
+        if (event.target instanceof Element && event.target.closest('.desktop-nav-dock, .desktop-nav-shell')) {
             return;
         }
 
@@ -265,21 +286,24 @@ const bindDesktopNav = (shell) => {
     window.addEventListener('scroll', () => closeAll(), { passive: true, signal });
 
     window.addEventListener('resize', () => {
-        const openItem = items().find((item) => item.classList.contains('is-open'));
+        const openItemEl = items().find((item) => item.classList.contains('is-open'));
 
-        if (openItem) {
-            positionPanel(openItem);
+        if (openItemEl) {
+            positionPanel(openItemEl);
         }
-
-        ensureDesktopNavEndVisible(shell);
     }, { signal });
-
-    ensureDesktopNavEndVisible(shell);
 };
 
 const initDesktopNav = () => {
-    document.querySelectorAll('.desktop-nav-shell').forEach((shell) => {
+    document.querySelectorAll('.desktop-nav-dock, .desktop-nav-shell').forEach((shell) => {
         bindDesktopNav(shell);
+        ensureDesktopNavEndVisible(shell);
+    });
+};
+
+const syncDesktopNavLayout = () => {
+    document.querySelectorAll('.desktop-nav-dock, .desktop-nav-shell').forEach((shell) => {
+        ensureDesktopNavEndVisible(shell);
     });
 };
 
@@ -401,8 +425,26 @@ const initMobileDock = () => {
         });
     };
 
-    const mainContent = document.getElementById('main-content');
-    const siteHeader = document.getElementById('site-header');
+    const siteShell = document.getElementById('site-shell');
+    let scrollLockY = 0;
+
+    const lockPageScroll = () => {
+        scrollLockY = window.scrollY;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollLockY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+    };
+
+    const unlockPageScroll = () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollLockY);
+    };
 
     const setOpen = (open) => {
         menu.classList.toggle('is-open', open);
@@ -410,16 +452,23 @@ const initMobileDock = () => {
         toggle.classList.toggle('is-active', open);
         toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
         document.body.classList.toggle('mobile-menu-open', open);
-        siteHeader?.toggleAttribute('inert', open);
-        mainContent?.toggleAttribute('inert', open);
+        siteShell?.toggleAttribute('inert', open);
 
         if (open) {
+            siteShell?.setAttribute('aria-hidden', 'true');
+        } else {
+            siteShell?.removeAttribute('aria-hidden');
+        }
+
+        if (open) {
+            lockPageScroll();
             menu.setAttribute('aria-hidden', 'false');
             overlay?.setAttribute('aria-hidden', 'false');
             requestAnimationFrame(() => closeButton?.focus());
             return;
         }
 
+        unlockPageScroll();
         collapseMobileSections();
         toggle.focus({ preventScroll: true });
         menu.setAttribute('aria-hidden', 'true');
@@ -575,7 +624,9 @@ document.addEventListener('DOMContentLoaded', initPublicSiteUi);
 window.addEventListener('load', () => {
     initDesktopNav();
     initMobileNav();
+    syncDesktopNavLayout();
 });
+window.addEventListener('resize', syncDesktopNavLayout, { passive: true });
 document.addEventListener('livewire:navigated', () => {
     initDesktopNav();
     initMobileNav();

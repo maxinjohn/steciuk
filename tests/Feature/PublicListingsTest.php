@@ -67,7 +67,47 @@ class PublicListingsTest extends TestCase
 
         $this->get(route('gallery.show', 'parish-worship-services'))
             ->assertOk()
-            ->assertSee('images/gallery/placeholder-worship.svg', false);
+            ->assertSee('images/gallery/placeholder-worship.svg', false)
+            ->assertSee('gallery-photo-grid', false);
+    }
+
+    public function test_gallery_index_uses_uniform_tile_layout(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $this->get(route('gallery.index'))
+            ->assertOk()
+            ->assertSee('gallery-mosaic', false)
+            ->assertDontSee('gallery-tile--wide', false);
+    }
+
+    public function test_gallery_index_counts_only_published_photos(): void
+    {
+        $album = \App\Models\GalleryAlbum::factory()->create([
+            'title' => 'Test Album',
+            'slug' => 'test-album',
+            'status' => 'published',
+        ]);
+
+        \App\Models\GalleryPhoto::query()->create([
+            'gallery_album_id' => $album->id,
+            'image_path' => 'gallery/photos/published.jpg',
+            'sort_order' => 0,
+            'status' => 'published',
+        ]);
+
+        \App\Models\GalleryPhoto::query()->create([
+            'gallery_album_id' => $album->id,
+            'image_path' => 'gallery/photos/draft.jpg',
+            'sort_order' => 1,
+            'status' => 'draft',
+        ]);
+
+        $this->get(route('gallery.index'))
+            ->assertOk()
+            ->assertSee('1 photos', false)
+            ->assertDontSee('2 photos', false);
     }
 
     public function test_bootstrap_if_empty_runs_on_fresh_database(): void

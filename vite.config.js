@@ -11,7 +11,6 @@ export default defineConfig({
                 'resources/css/filament/admin/theme.css',
                 'resources/js/app.js',
                 'resources/js/admin-sidebar.js',
-                'resources/js/admin-form-tabs.js',
                 'resources/js/admin-session.js',
             ],
             refresh: true,

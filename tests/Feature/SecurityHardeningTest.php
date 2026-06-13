@@ -80,6 +80,7 @@ class SecurityHardeningTest extends TestCase
         $response->assertOk();
         $csp = (string) $response->headers->get('Content-Security-Policy');
         $this->assertStringContainsString('https://fonts.bunny.net', $csp);
+        $this->assertStringContainsString('https://static.cloudflareinsights.com', $csp);
     }
 
     public function test_honeypot_submission_is_logged(): void
