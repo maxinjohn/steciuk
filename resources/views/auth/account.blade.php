@@ -41,23 +41,20 @@
             <div class="member-portal-hero" x-data="{ avatarUrl: @js($user->avatarUrl()) }" @avatar-updated.window="avatarUrl = $event.detail.url">
                 <div class="member-portal-hero-main">
                     <div class="member-portal-avatar-wrap member-portal-avatar--xl">
-                        @if ($user->avatarUrl())
-                            <img
-                                src="{{ $user->avatarUrl() }}"
-                                alt=""
-                                class="member-portal-avatar-img"
-                                width="144"
-                                height="144"
-                                loading="eager"
-                                decoding="async"
-                                x-show="avatarUrl"
-                                x-bind:src="avatarUrl"
-                                x-on:error="avatarUrl = null"
-                            >
-                        @endif
+                        <img
+                            x-show="avatarUrl"
+                            x-bind:src="avatarUrl"
+                            x-on:error="avatarUrl = null"
+                            alt=""
+                            class="member-portal-avatar-img"
+                            width="144"
+                            height="144"
+                            loading="eager"
+                            decoding="async"
+                        >
                         <span
                             class="member-portal-avatar member-portal-avatar--xl"
-                            @if ($user->avatarUrl()) x-show="! avatarUrl" @endif
+                            x-show="! avatarUrl"
                             aria-hidden="true"
                         >{{ $user->initials() }}</span>
                     </div>

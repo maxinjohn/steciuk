@@ -26,11 +26,13 @@ return [
     | Reference data seeding
     |--------------------------------------------------------------------------
     |
-    | Reference parish copy is applied by migrations. These modes apply only when
-    | running database/seeders manually (e.g. local development).
-    | bootstrap — create all reference records
-    | sync      — upsert seeded records; preserve admin passwords unless overwrite flags are set
-    | off       — skip seeding (default; production)
+    | Reference parish data is applied automatically after php artisan migrate
+    | (sync mode: upsert missing rows, update shipped definitions, preserve prod-only
+    | content and custom settings/passwords unless overwrite flags are enabled).
+    |
+    | bootstrap — force-create all reference records (manual site:bootstrap only)
+    | sync      — upsert seeded records; preserve admin passwords and prod settings
+    | off       — skip php artisan db:seed only; migrate still syncs reference data
     |
     */
 

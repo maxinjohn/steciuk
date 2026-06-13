@@ -7,6 +7,7 @@ use App\Database\SQLiteConnection;
 use App\Filament\Auth\Login;
 use App\Http\Middleware\ThrottleAdminLogin;
 use App\Listeners\FilamentAdminAuditListener;
+use App\Listeners\SyncReferenceDataAfterMigration;
 use App\Models\User;
 use App\Services\MailConfigService;
 use App\Services\SecurityLogger;
@@ -23,6 +24,7 @@ use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Events\ConnectionEstablished;
+use Illuminate\Database\Events\MigrationsEnded;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
@@ -63,6 +65,8 @@ class AppServiceProvider extends ServiceProvider
                 SqliteOptimizer::configureConnection($event->connection);
             }
         });
+
+        Event::listen(MigrationsEnded::class, SyncReferenceDataAfterMigration::class);
 
         MailConfigService::applyFromSettings();
 

@@ -97,6 +97,16 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             if ($user->isDirty('role')) {
                 $user->enforceRoleAssignmentPolicy();
             }
+
+            if ($user->isDirty('email')) {
+                \App\Support\Gravatar::forgetCache($user->getOriginal('email'));
+            }
+        });
+
+        static::saved(function (User $user): void {
+            if ($user->wasChanged('email')) {
+                \App\Support\Gravatar::forgetCache($user->email);
+            }
         });
     }
 
@@ -423,19 +433,27 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             return null;
         }
 
-        $hash = md5(strtolower(trim((string) $this->email)));
+        return \App\Support\Gravatar::url((string) $this->email, $size);
+    }
 
-        return "https://www.gravatar.com/avatar/{$hash}?s={$size}&d=404";
+    public function hasGravatar(int $size = 256): bool
+    {
+        return filled($this->email)
+            && \App\Support\Gravatar::exists((string) $this->email, $size);
     }
 
     public function avatarUrl(int $size = 256): ?string
     {
-        return $this->profilePhotoUrl() ?? $this->gravatarUrl($size);
+        if ($url = $this->profilePhotoUrl()) {
+            return $url;
+        }
+
+        return $this->hasGravatar($size) ? $this->gravatarUrl($size) : null;
     }
 
     public function usesGravatar(): bool
     {
-        return ! $this->hasUploadedProfilePhoto() && filled($this->email);
+        return ! $this->hasUploadedProfilePhoto() && $this->hasGravatar();
     }
 
     public function roleSlug(): string

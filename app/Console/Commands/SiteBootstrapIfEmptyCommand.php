@@ -10,7 +10,7 @@ class SiteBootstrapIfEmptyCommand extends Command
     protected $signature = 'site:bootstrap-if-empty
                             {--force : Run without confirmation in production}';
 
-    protected $description = 'Bootstrap reference data when the database has no pages (first deploy)';
+    protected $description = 'Run migrate when the database has no pages (legacy helper; migrate already syncs reference data)';
 
     public function handle(): int
     {
@@ -20,9 +20,9 @@ class SiteBootstrapIfEmptyCommand extends Command
             return self::SUCCESS;
         }
 
-        $this->components->warn('No pages found — running first-time bootstrap.');
+        $this->components->warn('No pages found — running migrate to provision reference data.');
 
-        return $this->call('site:bootstrap', [
+        return $this->call('migrate', [
             '--force' => $this->option('force'),
         ]);
     }

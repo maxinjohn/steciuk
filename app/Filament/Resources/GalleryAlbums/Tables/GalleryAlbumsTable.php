@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\GalleryAlbums\Tables;
 
+use App\Filament\Support\AdminMediaColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Support\CompactTableActions;
 use Filament\Tables\Enums\RecordActionsPosition;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -20,10 +20,7 @@ class GalleryAlbumsTable
                     ->searchable(),
                 TextColumn::make('slug')
                     ->searchable(),
-                ImageColumn::make('cover_image')
-                    ->disk('public')
-                    ->square()
-                    ->imageSize(56),
+                AdminMediaColumn::storageImage('cover_image', 'Cover'),
                 TextColumn::make('sort_order')
                     ->numeric()
                     ->sortable(),

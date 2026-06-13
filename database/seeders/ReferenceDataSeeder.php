@@ -6,9 +6,10 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 /**
- * Idempotent reference data for first install and controlled prod sync.
+ * Idempotent reference data for first install and deploy migrations.
  *
  * - Upserts records by stable keys (slug, email, seed_key, setting key)
+ * - Applied automatically after php artisan migrate (sync mode)
  * - Never deletes prod-only records (custom pages, menu links, form submissions)
  * - Preserves prod passwords and settings unless overwrite flags are enabled
  */

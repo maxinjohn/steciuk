@@ -2,9 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Services\SiteCache;
+use App\Database\ReferenceDataMigrator;
 use App\Support\SeedConfig;
-use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Console\Command;
 
 class SiteSyncReferenceDataCommand extends Command
@@ -12,7 +11,7 @@ class SiteSyncReferenceDataCommand extends Command
     protected $signature = 'site:sync-reference-data
                             {--force : Run without confirmation in production}';
 
-    protected $description = 'Legacy optional reseed. Prefer php artisan migrate for reference content updates.';
+    protected $description = 'Legacy manual re-sync. Prefer php artisan migrate, which upserts reference data automatically.';
 
     public function handle(): int
     {
@@ -25,11 +24,9 @@ class SiteSyncReferenceDataCommand extends Command
         config(['site.seed.mode' => SeedConfig::MODE_SYNC]);
 
         $this->components->info('Syncing reference data (SEED_MODE=sync)...');
-        $this->line('Preserves: prod-only pages/menus, admin passwords, and settings (unless SEED_OVERWRITE_* is true).');
+        $this->line('Prefer php artisan migrate on deploy. This command preserves prod-only records and custom settings.');
 
-        (new ReferenceDataSeeder)->setCommand($this)->run();
-
-        SiteCache::forgetAfterReferenceDataChange();
+        ReferenceDataMigrator::sync();
 
         $this->components->success('Reference data sync complete.');
 
