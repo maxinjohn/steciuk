@@ -366,6 +366,12 @@ const bindMobileNav = (root) => {
             panel.toggleAttribute('hidden', ! nextExpanded);
             section.classList.toggle('is-expanded', nextExpanded);
             trigger.querySelector('.menu-link-mobile-chevron')?.classList.toggle('rotate-180', nextExpanded);
+
+            if (nextExpanded) {
+                requestAnimationFrame(() => {
+                    panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                });
+            }
         }, { signal });
     });
 };

@@ -291,25 +291,25 @@
 
         <div class="mobile-sheet-body mobile-drawer-body">
             <x-menu :items="$mobileDrawerMenu" variant="mobile" />
+        </div>
 
-            <div class="mobile-drawer-footer">
-                @if ($showGiveButton ?? filled($donationLink))
-                    <a href="{{ $givePageUrl ?? route('give') }}" data-close-mobile-menu class="mobile-drawer-cta mobile-drawer-cta--give">
-                        {{ $giveButtonLabel ?? 'Give' }}
-                    </a>
-                @endif
-                @auth
-                    <a href="{{ route('account') }}" data-close-mobile-menu class="mobile-drawer-cta">
-                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
-                        My account
-                    </a>
-                @else
-                    <div class="mobile-drawer-auth">
-                        <a href="{{ route('login') }}" data-close-mobile-menu class="mobile-drawer-auth-link">Sign in</a>
-                        <a href="{{ route('register') }}" data-close-mobile-menu class="mobile-drawer-auth-link mobile-drawer-auth-link--primary">Join parish</a>
-                    </div>
-                @endauth
-            </div>
+        <div class="mobile-drawer-footer">
+            @if ($showGiveButton ?? filled($donationLink))
+                <a href="{{ $givePageUrl ?? route('give') }}" data-close-mobile-menu class="mobile-drawer-cta mobile-drawer-cta--give">
+                    {{ $giveButtonLabel ?? 'Give' }}
+                </a>
+            @endif
+            @auth
+                <a href="{{ route('account') }}" data-close-mobile-menu class="mobile-drawer-cta">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                    My account
+                </a>
+            @else
+                <div class="mobile-drawer-auth">
+                    <a href="{{ route('login') }}" data-close-mobile-menu class="mobile-drawer-auth-link">Sign in</a>
+                    <a href="{{ route('register') }}" data-close-mobile-menu class="mobile-drawer-auth-link mobile-drawer-auth-link--primary">Join parish</a>
+                </div>
+            @endauth
         </div>
     </nav>
 
