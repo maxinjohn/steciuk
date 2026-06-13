@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\PublicUploadController;
 use App\Database\SQLiteConnection;
 use App\Filament\Auth\Login;
 use App\Http\Middleware\ThrottleAdminLogin;
@@ -27,6 +28,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
@@ -54,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
         SitePaths::ensureConfiguredDataPaths();
         SqliteHealth::ensureReady();
         SitePaths::ensurePublicStorageLink();
+        $this->registerPublicUploadRoute();
 
         Event::listen(ConnectionEstablished::class, function (ConnectionEstablished $event): void {
             if ($event->connection->getDriverName() === 'sqlite') {
@@ -228,9 +231,20 @@ class AppServiceProvider extends ServiceProvider
             config(['filesystems.disks.local.root' => $private]);
         }
 
-        if ($public = SitePaths::configuredPath('public_uploads')) {
-            SitePaths::ensurePublicDiskConfigured();
+        SitePaths::syncPublicDiskConfig();
+    }
+
+    private function registerPublicUploadRoute(): void
+    {
+        $prefix = trim(SitePaths::publicStorageBaseUrl(), '/');
+
+        if ($prefix === '') {
+            return;
         }
+
+        Route::get($prefix.'/{path}', PublicUploadController::class)
+            ->where('path', '.*')
+            ->name('site.public-uploads');
     }
 
     private function configureTrustedProxies(): void

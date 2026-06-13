@@ -135,6 +135,8 @@ class SitePaths
 
     public static function publicUploadsRoot(): string
     {
+        self::syncPublicDiskConfig();
+
         $configured = self::configuredPath('public_uploads');
 
         if ($configured !== null) {
@@ -144,15 +146,17 @@ class SitePaths
         $diskRoot = config('filesystems.disks.public.root');
 
         if (is_string($diskRoot) && $diskRoot !== '') {
-            return realpath($diskRoot) ?: $diskRoot;
+            return self::resolve($diskRoot) ?? (realpath($diskRoot) ?: $diskRoot);
         }
 
         return storage_path('app/public');
     }
 
-    public static function ensurePublicDiskConfigured(): void
+    public static function syncPublicDiskConfig(): void
     {
-        $public = self::configuredPath('public_uploads');
+        $configured = self::configuredPath('public_uploads');
+        $diskRoot = config('filesystems.disks.public.root');
+        $public = $configured ?? (is_string($diskRoot) && $diskRoot !== '' ? self::resolve($diskRoot) : null);
 
         if ($public === null) {
             return;
@@ -160,11 +164,17 @@ class SitePaths
 
         config([
             'filesystems.disks.public.root' => $public,
-            'filesystems.disks.public.url' => env('PUBLIC_STORAGE_URL', '/storage'),
+            'filesystems.disks.public.url' => rtrim((string) config('filesystems.disks.public.url', '/storage'), '/') ?: '/storage',
             'filesystems.links' => [
                 public_path('storage') => $public,
             ],
         ]);
+    }
+
+    /** @deprecated Use syncPublicDiskConfig() */
+    public static function ensurePublicDiskConfigured(): void
+    {
+        self::syncPublicDiskConfig();
     }
 
     public static function ensureBrandingUploadDirectory(?int $mode = null): ?string
@@ -331,28 +341,30 @@ class SitePaths
 
     public static function ensurePublicStorageLink(): bool
     {
+        self::syncPublicDiskConfig();
+
         $link = public_path('storage');
-        $target = config('filesystems.disks.public.root');
+        $targetPath = self::publicUploadsRoot();
 
-        if (! is_string($target) || $target === '') {
-            return false;
+        if (! is_dir($targetPath)) {
+            self::ensureDirectoryExists($targetPath);
+            $targetPath = realpath($targetPath) ?: $targetPath;
         }
-
-        if (! is_dir($target)) {
-            self::ensureDirectoryExists($target);
-        }
-
-        $targetPath = realpath($target) ?: $target;
 
         if (! is_dir($targetPath)) {
             return false;
         }
 
+        $targetPath = realpath($targetPath) ?: $targetPath;
+
         if (is_link($link)) {
             $linked = realpath($link) ?: readlink($link);
 
-            return $linked === $targetPath
-                || (is_string($linked) && realpath($linked) === $targetPath);
+            if ($linked === $targetPath || (is_string($linked) && realpath($linked) === $targetPath)) {
+                return true;
+            }
+
+            @unlink($link);
         }
 
         if (file_exists($link)) {
@@ -450,11 +462,13 @@ class SitePaths
         $link = public_path('storage');
         $linkOk = is_link($link) || (is_dir($link) && file_exists($link));
         $checks[] = self::check(
-            $linkOk,
+            $linkOk || is_file(self::publicUploadsRoot().'/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/')),
             'Public storage link',
             is_link($link)
                 ? $link.' -> '.readlink($link)
-                : ($linkOk ? $link : 'missing — run php artisan storage:link'),
+                : ($linkOk
+                    ? $link
+                    : 'missing symlink — /storage is served by Laravel from '.self::publicUploadsRoot()),
         );
 
         $checks[] = self::check(
