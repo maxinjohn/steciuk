@@ -3,7 +3,7 @@
 ])
 
 <section {{ $attributes->merge(['class' => 'faith-whispers faith-whispers--' . $variant]) }} aria-label="Daily faith reminders">
-    <div class="faith-whispers__inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="faith-whispers__inner mx-auto max-w-7xl">
         <div class="faith-whispers__head">
             <p class="faith-whispers__kicker">
                 <span class="genz-kicker-dot" aria-hidden="true"></span>

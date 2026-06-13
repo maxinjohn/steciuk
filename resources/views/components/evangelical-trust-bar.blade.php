@@ -14,7 +14,7 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'evangelical-trust-bar evangelical-trust-bar--' . $variant]) }} aria-label="Evangelical faith markers">
-    <div class="evangelical-trust-bar-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="evangelical-trust-bar-inner mx-auto max-w-7xl">
         <div class="evangelical-trust-bar-track">
             @foreach ($signals as $signal)
                 <span class="evangelical-trust-chip">

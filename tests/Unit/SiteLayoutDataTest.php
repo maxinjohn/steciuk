@@ -25,4 +25,13 @@ class SiteLayoutDataTest extends TestCase
             SiteLayoutData::footerAboutTagline(null, null),
         );
     }
+
+    public function test_nav_menu_prefers_mobile_menu_when_present(): void
+    {
+        $mobile = collect([(object) ['label' => 'Mobile']]);
+        $header = collect([(object) ['label' => 'Header']]);
+
+        $this->assertSame('Mobile', SiteLayoutData::navMenu($mobile, $header)->first()->label);
+        $this->assertSame('Header', SiteLayoutData::navMenu(collect(), $header)->first()->label);
+    }
 }

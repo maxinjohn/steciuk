@@ -4,7 +4,7 @@
 
 <aside class="gospel-reminder" aria-label="Parish witness">
     <div class="gospel-reminder-glow" aria-hidden="true"></div>
-    <div class="gospel-reminder-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="gospel-reminder-inner mx-auto max-w-7xl">
         <span class="gospel-reminder-cross" aria-hidden="true">✝</span>
         <div class="gospel-reminder-copy">
             @if ($gospelReminderKicker ?? null)

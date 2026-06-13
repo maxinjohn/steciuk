@@ -48,7 +48,7 @@
 <section {{ $attributes->merge(['class' => 'heavenly-comfort']) }} aria-label="Comfort in Christ">
     <div class="heavenly-comfort-glow heavenly-comfort-glow--left" aria-hidden="true"></div>
     <div class="heavenly-comfort-glow heavenly-comfort-glow--right" aria-hidden="true"></div>
-    <div class="heavenly-comfort-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="heavenly-comfort-inner mx-auto max-w-7xl">
         <div class="heavenly-comfort-header">
             <p class="heavenly-comfort-kicker">
                 <span class="genz-kicker-dot" aria-hidden="true"></span>

@@ -31,7 +31,7 @@
 
 <section {{ $attributes->merge(['class' => 'eauk-member-panel']) }} aria-label="Parish profile and Evangelical Alliance membership">
     <div class="eauk-member-panel__hero">
-        <div class="eauk-member-panel__hero-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="eauk-member-panel__hero-inner mx-auto max-w-7xl">
             <div class="eauk-member-panel__hero-grid">
                 <div class="eauk-member-panel__intro">
                     <p class="eauk-member-panel__kicker">Evangelical Alliance member church</p>
@@ -75,7 +75,7 @@
     </div>
 
     <div class="eauk-member-panel__facts">
-        <div class="eauk-member-panel__facts-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="eauk-member-panel__facts-inner mx-auto max-w-7xl">
             <dl class="eauk-member-panel__facts-grid">
                 @foreach ($facts as $fact)
                     <div class="eauk-member-panel__fact">

@@ -8,7 +8,7 @@
 @endphp
 
 <aside {{ $attributes->merge(['class' => 'scripture-ribbon']) }} aria-label="Parish motto">
-    <div class="scripture-ribbon-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="scripture-ribbon-inner mx-auto max-w-7xl">
         <span class="scripture-ribbon-cross" aria-hidden="true">✝</span>
         <blockquote class="scripture-ribbon-text">
             <p>&ldquo;{{ $motto }}&rdquo;</p>

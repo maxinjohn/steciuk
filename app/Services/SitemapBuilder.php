@@ -121,6 +121,7 @@ class SitemapBuilder
             'gallery.index' => ['priority' => 0.75, 'frequency' => Url::CHANGE_FREQUENCY_WEEKLY],
             'resources.index' => ['priority' => 0.7, 'frequency' => Url::CHANGE_FREQUENCY_MONTHLY],
             'services.index' => ['priority' => 0.85, 'frequency' => Url::CHANGE_FREQUENCY_WEEKLY],
+            'give' => ['priority' => 0.8, 'frequency' => Url::CHANGE_FREQUENCY_MONTHLY],
         ];
     }
 

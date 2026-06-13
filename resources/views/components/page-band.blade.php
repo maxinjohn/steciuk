@@ -4,14 +4,14 @@
     'kicker' => 'Evangelical Oriental Protestant Parish',
 ])
 
-<section {{ $attributes->merge(['class' => 'page-band page-section']) }}>
+<section {{ $attributes->merge(['class' => 'page-band']) }}>
     <div class="page-band-bg" aria-hidden="true">
         <span class="page-band-cross" aria-hidden="true">✝</span>
         <span class="page-band-orb page-band-orb--gold"></span>
         <span class="page-band-orb page-band-orb--navy"></span>
         <span class="page-band-grid"></span>
     </div>
-    <div class="page-band-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="page-band-inner mx-auto max-w-7xl">
         @if ($kicker)
             <div class="genz-kicker">
                 <span class="genz-kicker-dot" aria-hidden="true"></span>

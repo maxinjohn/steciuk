@@ -1,7 +1,7 @@
 @php
     use App\Support\ReferenceSiteContent;
 
-    $logoSrc = asset('images/eauk/member-logo-small.png');
+    $logoSrc = asset('images/eauk/member-logo-medium.png');
 @endphp
 
 <a
@@ -14,8 +14,8 @@
     <span class="eauk-trust-mark__logo-shell" aria-hidden="true">
         <img
             src="{{ $logoSrc }}"
-            width="417"
-            height="94"
+            width="1012"
+            height="236"
             class="eauk-trust-mark__logo"
             alt=""
             loading="lazy"

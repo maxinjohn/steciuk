@@ -5,7 +5,7 @@
 
 @section('content')
     <section class="member-portal member-portal--pending py-16 sm:py-20">
-        <div class="member-portal-shell mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+        <div class="member-portal-shell mx-auto max-w-2xl">
             <div class="member-portal-card member-portal-card--hero text-center">
                 <div class="member-portal-icon-ring mx-auto">
                     <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">

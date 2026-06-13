@@ -21,7 +21,7 @@
 
     @if ($page->content)
         <section class="page-section page-section--compact page-section--article">
-            <div class="page-section-inner mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="page-section-inner mx-auto max-w-4xl">
                 @if ($page->slug === 'our-church')
                     <nav class="our-church-nav" aria-label="On this page">
                         <p class="our-church-nav__label">On this page</p>

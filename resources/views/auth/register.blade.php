@@ -14,7 +14,7 @@
     />
 
     <section class="page-section page-section--article py-10 sm:py-12 md:py-14">
-        <div class="page-section-inner mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+        <div class="page-section-inner mx-auto max-w-2xl">
             <div class="prose-church prose-church--page mb-8 text-center">
                 <p>Create your own parish member account. After approval, you can add household members from the Family tab in your account — each person has their own profile.</p>
             </div>

@@ -43,7 +43,7 @@
         <div class="absolute inset-0 bg-surface" aria-hidden="true"></div>
     @endif
 
-    <div class="relative mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-8 lg:px-10">
+    <div class="page-section-inner relative mx-auto w-full max-w-7xl">
         <div class="hero-grid">
             <div @class(['hero-copy', 'text-ink' => $style === 'minimal'])>
                 @if ($style !== 'minimal')

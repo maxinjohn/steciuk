@@ -37,7 +37,7 @@
     @endphp
 
     <section class="member-portal py-8 sm:py-12 md:py-14">
-        <div class="member-portal-shell mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div class="member-portal-shell site-content-shell mx-auto w-full max-w-7xl">
             <div class="member-portal-hero" x-data="{ avatarUrl: @js($user->avatarUrl()) }" @avatar-updated.window="avatarUrl = $event.detail.url">
                 <div class="member-portal-hero-main">
                     <div class="member-portal-avatar-wrap member-portal-avatar--xl">

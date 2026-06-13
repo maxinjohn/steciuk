@@ -19,7 +19,7 @@
         @keydown.arrow-right.window="if (lightbox) next()"
         @keydown.arrow-left.window="if (lightbox) prev()"
     >
-        <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="page-section-inner mx-auto max-w-7xl">
             <div class="gallery-photo-grid">
                 @foreach ($album->photos as $index => $photo)
                     @php

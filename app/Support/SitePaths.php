@@ -145,7 +145,7 @@ class SitePaths
     {
         $verifiedFlag = storage_path('framework/.site-paths-verified');
 
-        if (app()->environment('production') && is_file($verifiedFlag)) {
+        if (is_file($verifiedFlag)) {
             return;
         }
 
@@ -172,9 +172,7 @@ class SitePaths
 
         SiteBrandingAssets::ensureParishLogoInUploads();
 
-        if (app()->environment('production')) {
-            @file_put_contents($verifiedFlag, now()->toIso8601String());
-        }
+        @file_put_contents($verifiedFlag, now()->toIso8601String());
     }
 
     public static function ensureCommonUploadDirectories(?int $mode = null): void
@@ -285,15 +283,29 @@ class SitePaths
         if ($database === ':memory:') {
             $checks[] = self::check(true, 'SQLite database file', ':memory:');
         } else {
-            $databaseOk = is_string($database)
-                && $database !== ''
-                && file_exists($database)
-                && is_readable($database)
-                && is_writable($database);
+            $resolvedDatabase = is_string($database) ? (self::resolve($database) ?? $database) : null;
+            $databaseOk = is_string($resolvedDatabase)
+                && $resolvedDatabase !== ''
+                && file_exists($resolvedDatabase)
+                && is_readable($resolvedDatabase)
+                && is_writable($resolvedDatabase);
+            $integrityOk = $databaseOk && \App\Services\SqliteHealth::integrityOk($resolvedDatabase);
             $checks[] = self::check(
                 $databaseOk,
                 'SQLite database file',
-                is_string($database) ? $database : 'not configured',
+                is_string($resolvedDatabase) ? $resolvedDatabase : 'not configured',
+            );
+            $checks[] = self::check(
+                $integrityOk,
+                'SQLite integrity',
+                $integrityOk ? 'ok' : 'corrupt — run php artisan db:repair-sqlite --force',
+            );
+
+            $journalMode = \App\Services\SqliteOptimizer::journalMode();
+            $checks[] = self::check(
+                $integrityOk && $journalMode === 'wal',
+                'SQLite WAL mode',
+                $journalMode === 'wal' ? 'wal' : ($journalMode ?? 'unknown').' — restart app after php artisan config:clear',
             );
         }
 
@@ -331,6 +343,12 @@ class SitePaths
                 Schema::hasTable('migrations'),
                 'Database migrations',
                 Schema::hasTable('migrations') ? 'applied' : 'missing — run php artisan migrate --force',
+            );
+
+            $checks[] = self::check(
+                Schema::hasTable('pages'),
+                'Pages table',
+                Schema::hasTable('pages') ? 'ready' : 'missing — run php artisan migrate --force',
             );
         }
 

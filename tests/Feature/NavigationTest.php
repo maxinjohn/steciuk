@@ -26,8 +26,9 @@ class NavigationTest extends TestCase
             $response->assertSee('data-menu-item', false);
             $response->assertSee('data-menu-trigger', false);
             $response->assertSee('site-logo--parish-full', false);
-            $response->assertSee('/storage/settings/branding/steci-parish-logo.png', false);
+            $response->assertSee('steci-parish-logo', false);
             $response->assertSee('site-logo-mark--parish-full', false);
+            $response->assertSee('St. Thomas Evangelical Church of India', false);
             $response->assertSee('UK Parish', false);
             $response->assertSee('gospel-reminder', false);
             $response->assertSee('sanctuary-peace', false);
@@ -35,7 +36,7 @@ class NavigationTest extends TestCase
             $response->assertSee('eauk-trust-mark', false);
             $response->assertDontSee('eauk-member-badge', false);
             $response->assertDontSee('eauk-member-ribbon', false);
-            $response->assertSee('images/eauk/member-logo-small.png', false);
+            $response->assertSee('images/eauk/member-logo-medium.png', false);
             $response->assertSee('Member of the Evangelical Alliance', false);
         }
     }
@@ -127,6 +128,25 @@ class NavigationTest extends TestCase
             ->assertRedirect(route('register'));
     }
 
+    public function test_authenticated_header_includes_contact_menu_and_body_class(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $member = User::factory()->create([
+            'role' => UserRole::Member,
+            'account_status' => AccountStatus::Approved->value,
+        ]);
+
+        $this->actingAs($member)
+            ->get(route('account'))
+            ->assertOk()
+            ->assertSee('is-authenticated', false)
+            ->assertSee('data-menu-item', false)
+            ->assertSee('>Contact<', false)
+            ->assertSee('aria-label="Account"', false);
+    }
+
     public function test_member_account_parish_links_exclude_membership_enquiry(): void
     {
         config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
@@ -165,8 +185,26 @@ class NavigationTest extends TestCase
         $response->assertOk();
         $response->assertSee('id="mobile-menu"', false);
         $response->assertSee('data-mobile-nav-trigger', false);
+        $response->assertSee('data-mobile-nav-panel', false);
+        $response->assertSee('data-menu-panel', false);
         $response->assertSee('data-close-mobile-menu', false);
+        $response->assertSee('min-[1300px]:hidden', false);
+        $response->assertSee('mobile-dock-wrap min-[1300px]:hidden', false);
         $response->assertDontSee('mobile-theme-toggle', false);
         $response->assertDontSee('x-data="{ mobileOpen: false }"', false);
+    }
+
+    public function test_desktop_submenu_panels_render_for_nested_menu_items(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('menu-dropdown-panel', false);
+        $response->assertSee('Welcome', false);
+        $response->assertSee('Service Times', false);
+        $response->assertSee('Join the parish', false);
     }
 }

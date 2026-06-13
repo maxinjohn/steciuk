@@ -6,6 +6,7 @@ use App\Enums\MenuLocation;
 use App\Models\Setting;
 use App\Services\MenuCache;
 use App\Services\ServiceLocations;
+use Illuminate\Support\Collection;
 
 class SiteLayoutData
 {
@@ -80,6 +81,10 @@ class SiteLayoutData
             'headerMenu' => $menus[MenuLocation::Header->value],
             'footerMenu' => $menus[MenuLocation::Footer->value],
             'mobileMenu' => $menus[MenuLocation::Mobile->value],
+            'navMenu' => self::navMenu(
+                $menus[MenuLocation::Mobile->value],
+                $menus[MenuLocation::Header->value],
+            ),
         ];
 
         return self::$resolved;
@@ -88,6 +93,11 @@ class SiteLayoutData
     public static function forget(): void
     {
         self::$resolved = null;
+    }
+
+    public static function navMenu(Collection $mobileMenu, Collection $headerMenu): Collection
+    {
+        return $mobileMenu->isNotEmpty() ? $mobileMenu : $headerMenu;
     }
 
     public static function footerAboutTagline(?string $tagline, ?string $motto): string

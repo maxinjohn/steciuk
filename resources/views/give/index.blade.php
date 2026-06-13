@@ -12,8 +12,8 @@
         scripture-ref="2 Corinthians 9:7"
     />
 
-    <section class="page-section py-10 sm:py-14">
-        <div class="page-section-inner mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+    <section class="page-section page-section--compact">
+        <div class="page-section-inner mx-auto max-w-5xl">
             <div class="grid gap-6 lg:grid-cols-2">
                 <div class="member-portal-card">
                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Give as a member</p>

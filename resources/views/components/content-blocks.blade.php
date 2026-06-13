@@ -82,7 +82,7 @@
         @case('image_text')
             @php $imageFirst = $type === 'image_text'; @endphp
             <section class="page-section page-section--compact">
-                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl">
                     <div class="grid items-center gap-6 lg:grid-cols-2 lg:gap-10 {{ $imageFirst ? '' : '' }}">
                         @if ($imageFirst)
                             <div class="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--site-surface-2)] shadow-lg">
@@ -130,7 +130,7 @@
                 $isPrimary = $style === 'primary';
             @endphp
             <section class="page-section page-section--compact">
-                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl">
                     <div @class([
                         'cta-gen-z overflow-hidden rounded-3xl px-6 py-12 text-center sm:px-12 sm:py-16',
                         'cta-gen-z--primary' => $isPrimary,
@@ -158,7 +158,7 @@
         @case('ministry_cards')
             @php $items = $ministries->take($data['limit'] ?? 4); @endphp
             <section class="page-section page-section--compact">
-                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl">
                     <x-section-heading :title="$data['heading'] ?? 'Our Ministries'" :subtitle="$data['subheading'] ?? null" />
                     <div class="bento-grid bento-grid--ministries mt-8">
                         @forelse ($items as $ministry)
@@ -197,7 +197,7 @@
         @case('event_list')
             @php $items = $events->take($data['limit'] ?? 3); @endphp
             <section class="page-section page-section--compact">
-                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl">
                     <x-section-heading :title="$data['heading'] ?? 'Upcoming Events'" />
                     <div class="feed-grid mt-8">
                         @forelse ($items as $event)
@@ -246,7 +246,7 @@
         @case('sermon_list')
             @php $items = $sermons->take($data['limit'] ?? 3); @endphp
             <section class="page-section page-section--compact">
-                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl">
                     <x-section-heading :title="$data['heading'] ?? 'Recent Sermons'" />
                     <div class="sermon-stack mt-8">
                         @forelse ($items as $sermon)
@@ -287,7 +287,7 @@
         @case('gallery')
             @php $items = $albums->take($data['limit'] ?? 6); @endphp
             <section class="page-section page-section--compact">
-                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl">
                     <x-section-heading :title="$data['heading'] ?? 'Gallery'" />
                     <div class="gallery-mosaic mt-8">
                         @forelse ($items as $album)
@@ -320,7 +320,7 @@
 
         @case('quote')
             <section class="page-section page-section--compact">
-                <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-4xl page-section-inner">
                     <blockquote class="quote-gen-z">
                         <span class="quote-gen-z-mark" aria-hidden="true">"</span>
                         <p class="quote-gen-z-text">{{ $data['quote'] ?? '' }}</p>
@@ -341,7 +341,7 @@
 
         @case('faq')
                 <section class="page-section page-section--blessed page-section--compact">
-                <div class="page-section-inner mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-3xl">
                     @if (! empty($data['heading']))
                         <x-section-heading :title="$data['heading']" />
                     @endif
@@ -390,7 +390,7 @@
             @endphp
             @if ($locationsData->isNotEmpty())
                 <section class="page-section page-section--blessed page-section--compact" data-location-tabs>
-                    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="page-section-inner mx-auto max-w-7xl">
                         <x-section-heading :title="$data['heading'] ?? 'Locations'" :subtitle="$data['subheading'] ?? null" />
 
                         <div class="location-tabs mt-8" role="tablist" aria-label="UK worship locations">
@@ -474,7 +474,7 @@
             @php $embed = $youtubeEmbed($data['url'] ?? null); @endphp
             @if ($embed)
                 <section class="page-section page-section--compact">
-                    <div class="page-section-inner mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                    <div class="page-section-inner mx-auto max-w-5xl">
                         @if (! empty($data['heading']))
                             <x-section-heading :title="$data['heading']" :subtitle="$data['subheading'] ?? null" />
                         @endif
@@ -495,7 +495,7 @@
 
         @case('map')
             <section class="page-section page-section--compact">
-                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl">
                     @if (! empty($data['heading']))
                         <x-section-heading :title="$data['heading']" />
                     @endif
@@ -514,7 +514,7 @@
 
         @case('contact')
             <section class="page-section page-section--compact">
-                <div class="page-section-inner mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-2xl">
                     @if (! empty($data['heading']))
                         <x-section-heading :title="$data['heading']" />
                     @endif
@@ -525,7 +525,7 @@
 
         @case('downloads')
             <section class="page-section page-section--compact">
-                <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8">
+                <div class="page-section-inner mx-auto max-w-7xl">
                     @if (! empty($data['heading']))
                         <x-section-heading :title="$data['heading']" />
                     @endif
@@ -541,7 +541,7 @@
         @default
             @if ($block->title)
                 <section class="py-8 sm:py-10">
-                    <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="page-section-inner mx-auto max-w-7xl">
                         <x-section-heading :title="$block->title" />
                         @if (is_array($data) && ! empty($data['body']))
                             <div class="prose-church prose-church--page mx-auto max-w-3xl">{!! safeHtml($data['body']) !!}</div>

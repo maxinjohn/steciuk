@@ -26,7 +26,11 @@ class MaintenanceModeService
     {
         $adminPath = trim(AdminPanelConfig::path(), '/');
 
-        if ($path === 'up' || $path === $adminPath || str_starts_with($path, $adminPath.'/')) {
+        if (in_array($path, ['up', 'sitemap.xml', 'robots.txt'], true)) {
+            return true;
+        }
+
+        if ($path === $adminPath || str_starts_with($path, $adminPath.'/')) {
             return true;
         }
 

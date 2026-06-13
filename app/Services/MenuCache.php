@@ -13,7 +13,7 @@ class MenuCache
 {
     private const TTL_SECONDS = 3600;
 
-    private const ALL_TREES_CACHE_KEY = 'menu.trees.all.v3';
+    private const ALL_TREES_CACHE_KEY = 'menu.trees.all.v4';
 
     public static function load(MenuLocation $location): Collection
     {
@@ -25,6 +25,18 @@ class MenuCache
      */
     public static function loadAll(): array
     {
+        $cached = Cache::get(self::ALL_TREES_CACHE_KEY);
+
+        if (! static::isValidPackedTrees($cached)) {
+            if ($cached !== null) {
+                Cache::forget(self::ALL_TREES_CACHE_KEY);
+            }
+
+            foreach (MenuLocation::cases() as $location) {
+                Cache::forget('menu.tree.'.$location->value.'.v2');
+            }
+        }
+
         $trees = Cache::remember(self::ALL_TREES_CACHE_KEY, self::TTL_SECONDS, function (): array {
             $packed = [];
 
@@ -35,14 +47,65 @@ class MenuCache
             return $packed;
         });
 
+        if (! static::isValidPackedTrees($trees)) {
+            Cache::forget(self::ALL_TREES_CACHE_KEY);
+
+            return static::loadAllFresh();
+        }
+
         return collect($trees)
             ->map(fn (array $tree): Collection => static::hydrateTree($tree))
             ->all();
     }
 
+    /**
+     * @return array<string, Collection<int, object>>
+     */
+    private static function loadAllFresh(): array
+    {
+        $packed = [];
+
+        foreach (MenuLocation::cases() as $location) {
+            $packed[$location->value] = static::buildTree($location);
+        }
+
+        Cache::put(self::ALL_TREES_CACHE_KEY, $packed, self::TTL_SECONDS);
+
+        return collect($packed)
+            ->map(fn (array $tree): Collection => static::hydrateTree($tree))
+            ->all();
+    }
+
+    /**
+     * @param  mixed  $trees
+     */
+    private static function isValidPackedTrees(mixed $trees): bool
+    {
+        if (! is_array($trees)) {
+            return false;
+        }
+
+        foreach (MenuLocation::cases() as $location) {
+            $tree = $trees[$location->value] ?? null;
+
+            if (! is_array($tree)) {
+                return false;
+            }
+
+            foreach ($tree as $item) {
+                if (! is_array($item) || ! array_key_exists('label', $item)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public static function forgetAll(): void
     {
         Cache::forget(self::ALL_TREES_CACHE_KEY);
+        Cache::forget('menu.trees.all.v3');
 
         foreach (MenuLocation::cases() as $location) {
             Cache::forget('menu.tree.'.$location->value.'.v2');

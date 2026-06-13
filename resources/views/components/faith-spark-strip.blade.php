@@ -21,7 +21,7 @@
 @endphp
 
 <aside {{ $attributes->merge(['class' => 'faith-spark-strip']) }} aria-label="Faith anchors">
-    <div class="faith-spark-strip__inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="faith-spark-strip__inner mx-auto max-w-7xl">
         <p class="faith-spark-strip__kicker">
             <span class="genz-kicker-dot" aria-hidden="true"></span>
             Anchored in Christ

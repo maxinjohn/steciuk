@@ -69,7 +69,7 @@
 @if ($showPageContent)
     <section class="page-section page-section--compact page-section--article">
         <div @class([
-            'page-section-inner mx-auto px-4 sm:px-6 lg:px-8',
+            'page-section-inner mx-auto',
             'max-w-3xl' => ($page->layout_variant ?? 'standard') === 'standard',
             'max-w-5xl' => ($page->layout_variant ?? 'standard') === 'minimal',
             'max-w-7xl' => in_array($page->layout_variant ?? 'standard', ['bento', 'immersive'], true),
