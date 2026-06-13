@@ -6,6 +6,7 @@ use App\Enums\DonationMethod;
 use App\Enums\DonationStatus;
 use App\Filament\Resources\Donations\DonationResource;
 use App\Filament\Support\AdminDonationTableActions;
+use App\Filament\Support\AdminTableSearch;
 use App\Models\Donation;
 use App\Services\DonationService;
 use App\Services\PermissionService;
@@ -28,6 +29,9 @@ class DonationsTable
     {
         return $table
             ->defaultSort('donated_on', 'desc')
+            ->searchable()
+            ->searchDebounce('250ms')
+            ->searchUsing(fn (Builder $query, string $search) => AdminTableSearch::applyDonations($query, $search))
             ->columns([
                 TextColumn::make('user.name')
                     ->label('Donor')

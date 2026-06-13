@@ -15,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 
 class ListDonations extends ListRecords
 {
@@ -30,6 +31,10 @@ class ListDonations extends ListRecords
                 ->label('Export PDF')
                 ->icon('heroicon-o-document-arrow-down')
                 ->visible(fn (): bool => auth()->user()?->can('viewAny', Donation::class) ?? false)
+                ->slideOver()
+                ->modalWidth(Width::TwoExtraLarge)
+                ->stickyModalHeader()
+                ->stickyModalFooter()
                 ->form([
                     Select::make('scope')
                         ->label('Export scope')

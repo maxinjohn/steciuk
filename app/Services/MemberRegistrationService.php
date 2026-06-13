@@ -670,10 +670,12 @@ class MemberRegistrationService
         FamilyRelationship $relationship,
         bool $forceMove = true,
     ): void {
-        foreach ($userIds as $userId) {
-            $member = User::query()->findOrFail($userId);
-            $this->assignUserToFamily($actor, $member, $family, $relationship, forceMove: $forceMove);
-        }
+        DB::transaction(function () use ($actor, $family, $userIds, $relationship, $forceMove): void {
+            foreach ($userIds as $userId) {
+                $member = User::query()->findOrFail($userId);
+                $this->assignUserToFamily($actor, $member, $family, $relationship, forceMove: $forceMove);
+            }
+        });
     }
 
     public function removeUserFromFamily(User $actor, User $member): User

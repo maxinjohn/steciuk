@@ -18,9 +18,10 @@
         ],
         [
             'group' => 'Messages & forms',
-            'hint' => 'Contact submissions and enquiries',
+            'hint' => 'Conversations, contact submissions, and enquiries',
             'items' => [
-                ['label' => 'Inbox', 'url' => \App\Filament\Resources\FormSubmissions\FormSubmissionResource::getUrl('index'), 'desc' => 'Contact form messages and visitor enquiries'],
+                ['label' => 'Inbox', 'url' => \App\Filament\Resources\Conversations\ConversationResource::getUrl('index'), 'desc' => 'Member messages and parish conversations'],
+                ['label' => 'Form log', 'url' => \App\Filament\Resources\FormSubmissions\FormSubmissionResource::getUrl('index'), 'desc' => 'Contact, prayer, volunteer, and visitor form records'],
             ],
         ],
         [

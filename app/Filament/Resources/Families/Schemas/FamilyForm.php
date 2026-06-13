@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Families\Schemas;
 
+use App\Filament\Support\HouseholdMemberOptions;
 use App\Models\Family;
 use App\Models\User;
 use App\Support\ParishWorshipLocations;
@@ -35,7 +36,9 @@ class FamilyForm
                             ->label('Head of household (optional)')
                             ->helperText('Choose an existing member account to link immediately — usually whoever registered first individually.')
                             ->searchable()
-                            ->getSearchResultsUsing(fn (string $search): array => self::searchUnlinkedMembers($search))
+                            ->preload()
+                            ->options(fn (): array => HouseholdMemberOptions::unlinkedOptions())
+                            ->getSearchResultsUsing(fn (string $search): array => HouseholdMemberOptions::unlinkedOptions($search))
                             ->getOptionLabelUsing(fn ($value): ?string => User::query()->find($value)?->displayFullName())
                             ->visible(fn (string $operation): bool => $operation === 'create'),
                         Placeholder::make('primary_family_account')
@@ -67,29 +70,5 @@ class FamilyForm
                             ->columnSpanFull(),
                     ]),
             ]);
-    }
-
-    /**
-     * @return array<int|string, string>
-     */
-    private static function searchUnlinkedMembers(string $search): array
-    {
-        return User::query()
-            ->householdEligible()
-            ->whereNull('family_id')
-            ->where(function ($query) use ($search): void {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            })
-            ->orderBy('last_name')
-            ->orderBy('first_name')
-            ->limit(50)
-            ->get()
-            ->mapWithKeys(fn (User $user): array => [
-                $user->id => trim($user->displayFullName().' · '.($user->email ?? 'no email')),
-            ])
-            ->all();
     }
 }
