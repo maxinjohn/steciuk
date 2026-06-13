@@ -109,25 +109,66 @@ html.dark .form-required {
     }
 }
 
-/* Dark mode toggle label */
-.theme-toggle-btn {
+/* Dark mode toggle — minimal ghost icon aligned with nav scale */
+.site-header-actions .theme-toggle-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 1.625rem;
+    min-width: 1.625rem;
+    width: 1.625rem;
+    height: 1.625rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: color-mix(in srgb, var(--site-ink) 62%, transparent);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
 }
 
-.theme-toggle-label {
-    display: none;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--site-ink-muted);
+.site-header-actions .theme-toggle-btn:hover {
+    color: var(--site-ink);
+    background: color-mix(in srgb, var(--site-ink) 7%, transparent);
+}
+
+.site-header-actions .theme-toggle-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--site-accent) 70%, var(--site-ink));
+    outline-offset: 2px;
+}
+
+.theme-toggle-icon {
+    height: 0.875rem;
+    width: 0.875rem;
+    flex-shrink: 0;
 }
 
 @media (min-width: 1300px) {
-    .theme-toggle-label {
-        display: inline;
+    .site-header-actions .theme-toggle-btn {
+        min-height: 1.5rem;
+        min-width: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .theme-toggle-icon {
+        height: 0.8125rem;
+        width: 0.8125rem;
+    }
+}
+
+@media (max-width: 1299px) {
+    .site-header-actions .theme-toggle-btn {
+        min-height: 1.875rem;
+        min-width: 1.875rem;
+        width: 1.875rem;
+        height: 1.875rem;
+    }
+
+    .theme-toggle-icon {
+        height: 0.9375rem;
+        width: 0.9375rem;
     }
 }
 

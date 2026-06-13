@@ -26,29 +26,21 @@ const initDarkMode = () => {
     syncDarkModeToggleState();
 };
 
-const toggleDarkMode = () => {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    updateThemeColor();
-
-    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
-        button.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-        const label = button.querySelector('[data-theme-label]');
-        if (label) {
-            label.textContent = isDark ? 'Dark' : 'Light';
-        }
-    });
-};
+const themeToggleLabel = (isDark) => isDark ? 'Switch to light mode' : 'Switch to dark mode';
 
 const syncDarkModeToggleState = () => {
     const isDark = document.documentElement.classList.contains('dark');
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
         button.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-        const label = button.querySelector('[data-theme-label]');
-        if (label) {
-            label.textContent = isDark ? 'Dark' : 'Light';
-        }
+        button.setAttribute('aria-label', themeToggleLabel(isDark));
     });
+};
+
+const toggleDarkMode = () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateThemeColor();
+    syncDarkModeToggleState();
 };
 
 window.toggleDarkMode = toggleDarkMode;
