@@ -43,7 +43,7 @@ return [
             'root' => env('PUBLIC_STORAGE_PATH', storage_path('app/public')),
             'url' => env('PUBLIC_STORAGE_URL', '/storage'),
             'visibility' => 'public',
-            'serve' => true,
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

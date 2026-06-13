@@ -131,4 +131,41 @@ class SitePathsTest extends TestCase
             SitePaths::normalizeUploadRelativePath('/storage/settings/branding/logo.png'),
         );
     }
+
+    public function test_ensure_public_storage_link_repairs_wrong_symlink_target(): void
+    {
+        $uploadRoot = storage_path('framework/testing/link-target-'.bin2hex(random_bytes(4)));
+        $wrongTarget = storage_path('framework/testing/link-wrong-'.bin2hex(random_bytes(4)));
+
+        \Illuminate\Support\Facades\File::ensureDirectoryExists($uploadRoot);
+        \Illuminate\Support\Facades\File::ensureDirectoryExists($wrongTarget);
+
+        config(['site.paths.public_uploads' => $uploadRoot]);
+        SitePaths::syncPublicDiskConfig();
+
+        $link = public_path('storage');
+
+        if (file_exists($link)) {
+            if (is_link($link)) {
+                @unlink($link);
+            } else {
+                \Illuminate\Support\Facades\File::deleteDirectory($link);
+            }
+        }
+
+        symlink($wrongTarget, $link);
+
+        $this->assertFalse(SitePaths::publicStorageLinkDetail()['ok']);
+
+        $this->assertTrue(SitePaths::ensurePublicStorageLink());
+        $this->assertTrue(SitePaths::publicStorageLinkDetail()['ok']);
+        $this->assertSame(realpath($uploadRoot), realpath($link));
+
+        if (is_link($link)) {
+            @unlink($link);
+        }
+
+        \Illuminate\Support\Facades\File::deleteDirectory($uploadRoot);
+        \Illuminate\Support\Facades\File::deleteDirectory($wrongTarget);
+    }
 }
