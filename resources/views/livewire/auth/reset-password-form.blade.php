@@ -24,6 +24,12 @@
             <input type="password" id="reset-password-confirmation" wire:model="password_confirmation" class="form-input" required autocomplete="new-password">
         </div>
 
+        <x-turnstile-field
+            element-id="turnstile-reset-password"
+            :turnstile-enabled="$turnstileEnabled ?? false"
+            :turnstile-site-key="$turnstileSiteKey ?? ''"
+        />
+
         <div class="flex flex-wrap items-center gap-4">
             <button type="submit" class="btn btn-primary sm:w-auto" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="resetPassword">Save new password</span>

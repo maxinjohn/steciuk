@@ -2,18 +2,81 @@
 
 namespace App\Filament\Auth;
 
+use App\Rules\TurnstileCaptcha;
+use App\Services\TurnstileCaptchaService;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
+use Filament\Forms\Components\ViewField;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Schema;
 use Illuminate\Validation\ValidationException;
 use SensitiveParameter;
 
 class Login extends \Filament\Auth\Pages\Login
 {
+    public string $captchaToken = '';
+
     public function mount(): void
     {
         parent::mount();
 
         if (request()->boolean('expired')) {
             session()->regenerateToken();
+        }
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components(array_filter([
+                $this->getEmailFormComponent(),
+                $this->getPasswordFormComponent(),
+                $this->getRememberFormComponent(),
+                $this->getTurnstileFormComponent(),
+            ]));
+    }
+
+    protected function getTurnstileFormComponent(): ?Component
+    {
+        if (! app(TurnstileCaptchaService::class)->isEnabled()) {
+            return null;
+        }
+
+        $service = app(TurnstileCaptchaService::class);
+
+        return ViewField::make('turnstile')
+            ->hiddenLabel()
+            ->view('filament.admin.turnstile-field')
+            ->viewData([
+                'turnstileEnabled' => true,
+                'turnstileSiteKey' => $service->siteKey(),
+            ])
+            ->columnSpanFull();
+    }
+
+    public function authenticate(): ?LoginResponse
+    {
+        if (filled($this->data['email'] ?? null)) {
+            $this->data['email'] = self::normalizeEmail($this->data['email']);
+        }
+
+        if (app(TurnstileCaptchaService::class)->isEnabled()) {
+            try {
+                $this->validate([
+                    'captchaToken' => ['required', new TurnstileCaptcha],
+                ]);
+            } catch (ValidationException $exception) {
+                $this->resetTurnstileCaptcha();
+
+                throw $exception;
+            }
+        }
+
+        try {
+            return parent::authenticate();
+        } catch (ValidationException $exception) {
+            $this->resetTurnstileCaptcha();
+
+            throw $exception;
         }
     }
 
@@ -27,15 +90,6 @@ class Login extends \Filament\Auth\Pages\Login
             'email' => self::normalizeEmail($data['email'] ?? ''),
             'password' => $data['password'] ?? '',
         ];
-    }
-
-    public function authenticate(): ?LoginResponse
-    {
-        if (filled($this->data['email'] ?? null)) {
-            $this->data['email'] = self::normalizeEmail($this->data['email']);
-        }
-
-        return parent::authenticate();
     }
 
     protected function throwFailureValidationException(): never
@@ -52,5 +106,15 @@ class Login extends \Filament\Auth\Pages\Login
     public static function normalizeEmail(mixed $email): string
     {
         return strtolower(trim((string) $email));
+    }
+
+    protected function resetTurnstileCaptcha(): void
+    {
+        if (! app(TurnstileCaptchaService::class)->isEnabled()) {
+            return;
+        }
+
+        $this->captchaToken = '';
+        $this->dispatch('turnstile-reset', elementId: 'turnstile-admin-login');
     }
 }

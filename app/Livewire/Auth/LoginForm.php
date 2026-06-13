@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth;
 
 use App\Enums\AccountStatus;
+use App\Livewire\Concerns\ValidatesTurnstileCaptcha;
 use App\Models\User;
 use App\Services\SecurityLogger;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,8 @@ use Livewire\Component;
 
 class LoginForm extends Component
 {
+    use ValidatesTurnstileCaptcha;
+
     #[Validate('required|email|max:255')]
     public string $email = '';
 
@@ -23,13 +26,18 @@ class LoginForm extends Component
 
     public function login(): void
     {
-        $this->validate();
+        $this->validateWithTurnstileReset('turnstile-login', array_merge([
+            'email' => 'required|email|max:255',
+            'password' => 'required|string',
+        ], $this->turnstileValidationRules()));
 
         $email = strtolower(trim($this->email));
         $key = 'member-login:'.hash('sha256', $email).'|'.request()->ip();
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
+            $this->resetTurnstileCaptcha('turnstile-login');
+
             throw ValidationException::withMessages([
                 'email' => "Too many sign-in attempts. Please try again in {$seconds} seconds.",
             ]);
@@ -37,6 +45,7 @@ class LoginForm extends Component
 
         if (! Auth::attempt(['email' => $email, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($key, 900);
+            $this->resetTurnstileCaptcha('turnstile-login');
 
             throw ValidationException::withMessages([
                 'email' => 'These credentials do not match our records.',
@@ -48,6 +57,7 @@ class LoginForm extends Component
 
         if (! $user->isActive() || ! $user->familyIsActive()) {
             Auth::logout();
+            $this->resetTurnstileCaptcha('turnstile-login');
 
             throw ValidationException::withMessages([
                 'email' => $user->memberAccessBlockReason() ?? 'Your parish account is not active. Please contact the parish office for help.',
@@ -59,6 +69,7 @@ class LoginForm extends Component
 
             if ($status === AccountStatus::Pending) {
                 Auth::logout();
+                $this->resetTurnstileCaptcha('turnstile-login');
 
                 throw ValidationException::withMessages([
                     'email' => 'Your parish account is awaiting approval. We will email you once a member of the leadership team has reviewed your registration.',
@@ -67,6 +78,7 @@ class LoginForm extends Component
 
             if ($status === AccountStatus::Rejected) {
                 Auth::logout();
+                $this->resetTurnstileCaptcha('turnstile-login');
 
                 throw ValidationException::withMessages([
                     'email' => 'Your registration was not approved. Please contact the parish office if you need assistance.',
@@ -87,6 +99,6 @@ class LoginForm extends Component
 
     public function render()
     {
-        return view('livewire.auth.login-form');
+        return view('livewire.auth.login-form', $this->turnstileViewData());
     }
 }

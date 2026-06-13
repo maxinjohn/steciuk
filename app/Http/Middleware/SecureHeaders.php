@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\AdminPanelConfig;
+use App\Support\MemberPortalRoutes;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +33,7 @@ class SecureHeaders
 
         $fontCdn = 'https://fonts.bunny.net';
 
-        if (config('security.csp_enabled') && ! \App\Support\AdminPanelConfig::isAdminRequest($request)) {
+        if (config('security.csp_enabled') && ! AdminPanelConfig::isAdminRequest($request)) {
             $csp = implode('; ', [
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com ".self::CLOUDFLARE_SCRIPT_SOURCES,
@@ -45,20 +47,20 @@ class SecureHeaders
                 "base-uri 'self'",
                 "form-action 'self'",
                 "frame-ancestors 'self'",
-                "upgrade-insecure-requests",
+                'upgrade-insecure-requests',
             ]);
             $response->headers->set('Content-Security-Policy', $csp);
         }
 
-        if (\App\Support\AdminPanelConfig::isAdminRequest($request) && config('security.csp_enabled')) {
+        if (AdminPanelConfig::isAdminRequest($request) && config('security.csp_enabled')) {
             $response->headers->set('Content-Security-Policy', implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com ".self::CLOUDFLARE_SCRIPT_SOURCES,
                 "style-src 'self' 'unsafe-inline' {$fontCdn}",
                 "img-src 'self' data: blob: https:",
                 "font-src 'self' data: {$fontCdn}",
                 "connect-src 'self' https: wss:",
-                "frame-src 'self'",
+                "frame-src 'self' https://challenges.cloudflare.com",
                 "object-src 'none'",
                 "base-uri 'self'",
                 "form-action 'self'",
@@ -66,8 +68,8 @@ class SecureHeaders
             ]));
         }
 
-        if (\App\Support\AdminPanelConfig::isAdminRequest($request)
-            || \App\Support\MemberPortalRoutes::isPortalRequest($request)) {
+        if (AdminPanelConfig::isAdminRequest($request)
+            || MemberPortalRoutes::isPortalRequest($request)) {
             $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
             $response->headers->set('Pragma', 'no-cache');
             $response->headers->set('Expires', '0');

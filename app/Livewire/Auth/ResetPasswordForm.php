@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\Livewire\Concerns\ValidatesTurnstileCaptcha;
 use App\Services\SecurityLogger;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Password;
@@ -12,6 +13,8 @@ use Livewire\Component;
 
 class ResetPasswordForm extends Component
 {
+    use ValidatesTurnstileCaptcha;
+
     public string $token = '';
 
     #[Validate('required|email|max:255')]
@@ -29,10 +32,10 @@ class ResetPasswordForm extends Component
 
     public function resetPassword(): void
     {
-        $this->validate([
+        $this->validateWithTurnstileReset('turnstile-reset-password', array_merge([
             'email' => 'required|email|max:255',
             'password' => ['required', 'confirmed', PasswordRule::defaults()],
-        ]);
+        ], $this->turnstileValidationRules()));
 
         $status = Password::reset(
             [
@@ -54,6 +57,8 @@ class ResetPasswordForm extends Component
         );
 
         if ($status !== Password::PASSWORD_RESET) {
+            $this->resetTurnstileCaptcha('turnstile-reset-password');
+
             throw ValidationException::withMessages([
                 'email' => __($status),
             ]);
@@ -66,6 +71,6 @@ class ResetPasswordForm extends Component
 
     public function render()
     {
-        return view('livewire.auth.reset-password-form');
+        return view('livewire.auth.reset-password-form', $this->turnstileViewData());
     }
 }

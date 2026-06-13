@@ -19,6 +19,12 @@
             <input type="email" id="forgot-email" wire:model.blur="email" class="form-input" required autocomplete="email" @error('email') aria-invalid="true" @enderror>
         </div>
 
+        <x-turnstile-field
+            element-id="turnstile-forgot-password"
+            :turnstile-enabled="$turnstileEnabled ?? false"
+            :turnstile-site-key="$turnstileSiteKey ?? ''"
+        />
+
         <div class="flex flex-wrap items-center gap-4">
             <button type="submit" class="btn btn-primary sm:w-auto" wire:loading.attr="disabled" @disabled($sent)>
                 <span wire:loading.remove wire:target="sendResetLink">Send reset link</span>
