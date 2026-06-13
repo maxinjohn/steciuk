@@ -150,126 +150,6 @@ html.dark {
         isolation: isolate;
     }
 
-    .site-header-veena {
-        display: none;
-    }
-
-    @media (max-width: 1299px) {
-        .site-header {
-            border-bottom: none;
-            background: transparent;
-            box-shadow: none;
-        }
-
-        .site-header::before {
-            bottom: auto;
-            height: calc(100% - clamp(1.35rem, 5vw, 2.125rem));
-        }
-
-        .site-header::after {
-            display: none;
-        }
-
-        .site-header-inner {
-            background: var(--site-glass);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: none;
-            padding-bottom: 0.375rem;
-        }
-
-        .is-home .site-header:not(.site-header--elevated) .site-header-inner {
-            background: color-mix(in srgb, var(--site-glass) 82%, transparent);
-        }
-
-        .site-header-veena {
-            display: block;
-            position: relative;
-            z-index: 1;
-            line-height: 0;
-            margin-top: -2px;
-            pointer-events: none;
-            filter: drop-shadow(0 10px 22px color-mix(in srgb, var(--site-brand) 12%, transparent));
-        }
-
-        .site-header-veena__svg {
-            display: block;
-            width: 100%;
-            height: clamp(1.35rem, 5vw, 2.125rem);
-        }
-
-        .site-header-veena__glow {
-            fill: url(#site-header-veena-glow);
-            opacity: 0.55;
-        }
-
-        .site-header-veena__fill {
-            fill: var(--site-glass);
-        }
-
-        .is-home .site-header:not(.site-header--elevated) .site-header-veena__fill {
-            fill: color-mix(in srgb, var(--site-glass) 82%, transparent);
-        }
-
-        .site-header-veena__stop--start {
-            stop-color: var(--site-accent);
-            stop-opacity: 0.95;
-        }
-
-        .site-header-veena__stop--mid {
-            stop-color: var(--site-accent);
-            stop-opacity: 0.72;
-        }
-
-        .site-header-veena__stop--end {
-            stop-color: color-mix(in srgb, var(--site-brand) 55%, var(--site-accent));
-            stop-opacity: 0.45;
-        }
-
-        .site-header-veena__glow-stop--core {
-            stop-color: var(--site-accent);
-            stop-opacity: 0.22;
-        }
-
-        .site-header-veena__glow-stop--edge {
-            stop-color: var(--site-accent);
-            stop-opacity: 0;
-        }
-
-        .site-header-veena__stroke {
-            stroke: url(#site-header-veena-accent);
-            stroke-width: 2.25;
-            vector-effect: non-scaling-stroke;
-            opacity: 0.94;
-        }
-
-        .site-header-veena__neck {
-            stroke: color-mix(in srgb, var(--site-accent) 72%, white);
-            stroke-width: 1;
-            vector-effect: non-scaling-stroke;
-            opacity: 0.55;
-        }
-
-        .site-header-veena__inner {
-            stroke: color-mix(in srgb, var(--site-accent) 62%, white);
-            stroke-width: 1.15;
-            vector-effect: non-scaling-stroke;
-            opacity: 0.42;
-        }
-
-        .site-header--elevated .site-header-inner {
-            background: var(--site-glass);
-        }
-
-        .site-header--elevated .site-header-veena__fill {
-            fill: var(--site-glass);
-        }
-
-        .is-home #main-content > :first-child.hero-modern {
-            margin-top: -0.25rem;
-        }
-    }
-
     .site-header::before {
         content: '';
         position: absolute;
@@ -4015,11 +3895,12 @@ html.dark {
 
     .hero-grid--home-art .hero-eyebrow {
         margin-bottom: 0.5rem;
+        width: fit-content;
+        max-width: 100%;
         white-space: nowrap;
         font-size: clamp(0.4375rem, 2.45vw, 0.8125rem);
         letter-spacing: 0.028em;
         line-height: 1.25;
-        max-width: 100%;
     }
 
     @media (max-width: 767px) {
