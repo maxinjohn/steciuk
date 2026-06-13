@@ -12,7 +12,7 @@
     />
 
     <section class="page-section page-section--article py-10 sm:py-12 md:py-14">
-        <div class="page-section-inner mx-auto max-w-xl px-4 sm:px-6 lg:px-8">
+        <div class="page-section-inner mx-auto max-w-xl">
             <div class="form-gen-z card-modern">
                 @livewire('auth.forgot-password-form')
             </div>

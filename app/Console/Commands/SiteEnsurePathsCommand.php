@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\SiteBrandingAssets;
 use App\Support\SitePaths;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -18,6 +19,7 @@ class SiteEnsurePathsCommand extends Command
 
         SitePaths::ensureConfiguredDataPaths();
         SitePaths::ensureSqliteDatabaseFile();
+        SiteBrandingAssets::syncDefaultLogoSetting();
 
         $linked = SitePaths::ensurePublicStorageLink();
 

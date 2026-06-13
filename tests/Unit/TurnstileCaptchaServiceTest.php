@@ -27,6 +27,18 @@ class TurnstileCaptchaServiceTest extends TestCase
         $this->assertFalse(app(TurnstileCaptchaService::class)->isEnabled());
     }
 
+    public function test_it_is_disabled_when_site_keys_are_missing(): void
+    {
+        config([
+            'services.turnstile.enabled' => true,
+            'services.turnstile.site_key' => '',
+            'services.turnstile.secret_key' => '',
+        ]);
+        Setting::set('registration_captcha_enabled', '1', 'security');
+
+        $this->assertFalse(app(TurnstileCaptchaService::class)->isEnabled());
+    }
+
     public function test_it_is_enabled_when_env_and_admin_setting_allow_it(): void
     {
         config(['services.turnstile.enabled' => true]);

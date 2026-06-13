@@ -162,6 +162,10 @@ class ChurchSettings extends Page
                 }
             });
 
+            if (filled($data['logo'] ?? null)) {
+                \App\Support\SiteBrandingAssets::processUploadedLogo($data['logo']);
+            }
+
             if ($maintenanceEnabled) {
                 MaintenanceModeService::enable();
             } else {

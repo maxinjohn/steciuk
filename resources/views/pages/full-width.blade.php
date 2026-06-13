@@ -13,7 +13,7 @@
 
     @if ($page->content)
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
-            <div class="page-section-inner mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="page-section-inner mx-auto max-w-5xl">
                 <div class="prose-church prose-church--page">{!! safeHtml($page->content) !!}</div>
             </div>
         </section>

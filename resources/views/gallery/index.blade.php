@@ -13,8 +13,8 @@
             scripture-ref="Psalm 95:6"
         />
 
-        <section class="page-section py-10 sm:py-14">
-            <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section class="page-section page-section--compact">
+            <div class="page-section-inner mx-auto max-w-7xl">
                 <div class="gallery-mosaic">
                     @forelse ($albums as $album)
                         <x-card

@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Database\SQLiteConnection;
 use App\Filament\Auth\Login;
 use App\Http\Middleware\ThrottleAdminLogin;
 use App\Listeners\FilamentAdminAuditListener;
 use App\Models\User;
 use App\Services\MailConfigService;
 use App\Services\SecurityLogger;
+use App\Services\SqliteHealth;
 use App\Services\SqliteOptimizer;
 use App\Support\SitePaths;
 use Filament\Facades\Filament;
@@ -18,6 +20,7 @@ use Illuminate\Auth\Events\Attempting;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -33,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->applyCustomDataPaths();
+        $this->normalizeSqliteDatabasePath();
 
         if ($storagePath = SitePaths::configuredPath('storage')) {
             $this->app->useStoragePath($storagePath);
@@ -41,10 +45,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Connection::resolverFor('sqlite', function ($connection, $database, $prefix, $config) {
+            return new SQLiteConnection($connection, $database, $prefix, $config);
+        });
+
         $this->configureTrustedProxies();
 
         SitePaths::ensureConfiguredDataPaths();
-        SitePaths::ensureSqliteDatabaseFile();
+        SqliteHealth::ensureReady();
         SitePaths::ensurePublicStorageLink();
 
         Event::listen(ConnectionEstablished::class, function (ConnectionEstablished $event): void {
@@ -191,6 +199,23 @@ class AppServiceProvider extends ServiceProvider
             RecordUpdated::class,
             [FilamentAdminAuditListener::class, 'recordUpdated'],
         );
+    }
+
+    private function normalizeSqliteDatabasePath(): void
+    {
+        if (config('database.default') !== 'sqlite') {
+            return;
+        }
+
+        $database = config('database.connections.sqlite.database');
+
+        if (! is_string($database) || $database === '' || $database === ':memory:') {
+            return;
+        }
+
+        config([
+            'database.connections.sqlite.database' => SitePaths::resolve($database) ?? $database,
+        ]);
     }
 
     private function applyCustomDataPaths(): void

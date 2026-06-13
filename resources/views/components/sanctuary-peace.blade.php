@@ -27,7 +27,7 @@
 
 <aside {{ $attributes->merge(['class' => 'sanctuary-peace']) }} aria-label="Scripture of peace">
     <div class="sanctuary-peace-glow" aria-hidden="true"></div>
-    <div class="sanctuary-peace-inner mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+    <div class="sanctuary-peace-inner mx-auto max-w-3xl">
         <p class="sanctuary-peace-kicker">
             <span class="sanctuary-peace-cross" aria-hidden="true">✝</span>
             {{ $kickerText }}

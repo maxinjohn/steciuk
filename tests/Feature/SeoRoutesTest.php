@@ -63,6 +63,7 @@ class SeoRoutesTest extends TestCase
         $this->assertStringContainsString(route('ministries.show', $ministry->slug), $xml);
         $this->assertStringContainsString(route('gallery.show', $album->slug), $xml);
         $this->assertStringContainsString(route('services.index'), $xml);
+        $this->assertStringContainsString(route('give'), $xml);
     }
 
     public function test_sitemap_excludes_noindex_pages(): void
@@ -91,7 +92,18 @@ class SeoRoutesTest extends TestCase
 
         $this->assertStringContainsString('User-agent: *', $body);
         $this->assertStringContainsString('Disallow: /'.AdminPanelConfig::path(), $body);
+        $this->assertStringContainsString('Disallow: /login', $body);
+        $this->assertStringContainsString('Disallow: /register', $body);
+        $this->assertStringContainsString('Disallow: /account', $body);
         $this->assertStringContainsString('Sitemap: '.route('sitemap'), $body);
         $this->assertStringContainsString('Host: '.rtrim(config('app.url'), '/'), $body);
+    }
+
+    public function test_auth_pages_emit_noindex_meta(): void
+    {
+        $response = $this->get(route('login'));
+
+        $response->assertOk();
+        $response->assertSee('<meta name="robots" content="noindex, nofollow">', false);
     }
 }

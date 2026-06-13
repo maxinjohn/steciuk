@@ -11,6 +11,7 @@ class Seo
         'admin',
         'events',
         'gallery',
+        'give',
         'manifest.webmanifest',
         'ministries',
         'news',

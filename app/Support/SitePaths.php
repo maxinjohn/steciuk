@@ -145,7 +145,7 @@ class SitePaths
     {
         $verifiedFlag = storage_path('framework/.site-paths-verified');
 
-        if (app()->environment('production') && is_file($verifiedFlag)) {
+        if (is_file($verifiedFlag)) {
             return;
         }
 
@@ -170,9 +170,9 @@ class SitePaths
 
         self::ensureCommonUploadDirectories($mode);
 
-        if (app()->environment('production')) {
-            @file_put_contents($verifiedFlag, now()->toIso8601String());
-        }
+        SiteBrandingAssets::ensureParishLogoInUploads();
+
+        @file_put_contents($verifiedFlag, now()->toIso8601String());
     }
 
     public static function ensureCommonUploadDirectories(?int $mode = null): void
@@ -283,15 +283,29 @@ class SitePaths
         if ($database === ':memory:') {
             $checks[] = self::check(true, 'SQLite database file', ':memory:');
         } else {
-            $databaseOk = is_string($database)
-                && $database !== ''
-                && file_exists($database)
-                && is_readable($database)
-                && is_writable($database);
+            $resolvedDatabase = is_string($database) ? (self::resolve($database) ?? $database) : null;
+            $databaseOk = is_string($resolvedDatabase)
+                && $resolvedDatabase !== ''
+                && file_exists($resolvedDatabase)
+                && is_readable($resolvedDatabase)
+                && is_writable($resolvedDatabase);
+            $integrityOk = $databaseOk && \App\Services\SqliteHealth::integrityOk($resolvedDatabase);
             $checks[] = self::check(
                 $databaseOk,
                 'SQLite database file',
-                is_string($database) ? $database : 'not configured',
+                is_string($resolvedDatabase) ? $resolvedDatabase : 'not configured',
+            );
+            $checks[] = self::check(
+                $integrityOk,
+                'SQLite integrity',
+                $integrityOk ? 'ok' : 'corrupt — run php artisan db:repair-sqlite --force',
+            );
+
+            $journalMode = \App\Services\SqliteOptimizer::journalMode();
+            $checks[] = self::check(
+                $integrityOk && $journalMode === 'wal',
+                'SQLite WAL mode',
+                $journalMode === 'wal' ? 'wal' : ($journalMode ?? 'unknown').' — restart app after php artisan config:clear',
             );
         }
 
@@ -330,6 +344,12 @@ class SitePaths
                 'Database migrations',
                 Schema::hasTable('migrations') ? 'applied' : 'missing — run php artisan migrate --force',
             );
+
+            $checks[] = self::check(
+                Schema::hasTable('pages'),
+                'Pages table',
+                Schema::hasTable('pages') ? 'ready' : 'missing — run php artisan migrate --force',
+            );
         }
 
         if (config('session.driver') === 'database') {
@@ -340,6 +360,31 @@ class SitePaths
                 $sessionTable,
             );
         }
+
+        $bundledLogo = public_path('images/branding/steci-parish-logo.png');
+        $checks[] = self::check(
+            is_file($bundledLogo),
+            'Bundled parish logo',
+            is_file($bundledLogo) ? 'images/branding/steci-parish-logo.png' : 'missing — commit public/images/branding/steci-parish-logo.png',
+        );
+
+        $syncedLogo = public_path('storage/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/'));
+        $checks[] = self::check(
+            is_file($syncedLogo) || is_file($bundledLogo),
+            'Synced parish logo in storage',
+            is_file($syncedLogo)
+                ? 'storage/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/')
+                : (is_file($bundledLogo)
+                    ? 'run php artisan site:ensure-paths --link'
+                    : 'missing bundled logo'),
+        );
+
+        $eaukMark = public_path('images/eauk/member-logo-small.png');
+        $checks[] = self::check(
+            is_file($eaukMark),
+            'EAUK trust mark asset',
+            is_file($eaukMark) ? 'images/eauk/member-logo-small.png' : 'missing — commit public/images/eauk/member-logo-small.png',
+        );
 
         return $checks;
     }

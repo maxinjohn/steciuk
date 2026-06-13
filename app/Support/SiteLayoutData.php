@@ -6,6 +6,7 @@ use App\Enums\MenuLocation;
 use App\Models\Setting;
 use App\Services\MenuCache;
 use App\Services\ServiceLocations;
+use Illuminate\Support\Collection;
 
 class SiteLayoutData
 {
@@ -60,6 +61,10 @@ class SiteLayoutData
             'giveButtonLabel' => $settings['give_button_label'] ?? 'Give',
             'footerCopyright' => $settings['footer_copyright'] ?? null,
             'footerTagline' => $settings['footer_tagline'] ?? null,
+            'footerAboutTagline' => self::footerAboutTagline(
+                $settings['footer_tagline'] ?? null,
+                $settings['motto'] ?? 'For the Word of God and for the testimony of Jesus Christ',
+            ),
             'googleMapsEmbed' => $settings['google_maps_embed'] ?? null,
             'faithSanctuaryKicker' => $settings['faith_sanctuary_kicker'] ?? null,
             'faithSanctuaryNote' => $settings['faith_sanctuary_note'] ?? null,
@@ -76,6 +81,10 @@ class SiteLayoutData
             'headerMenu' => $menus[MenuLocation::Header->value],
             'footerMenu' => $menus[MenuLocation::Footer->value],
             'mobileMenu' => $menus[MenuLocation::Mobile->value],
+            'navMenu' => self::navMenu(
+                $menus[MenuLocation::Mobile->value],
+                $menus[MenuLocation::Header->value],
+            ),
         ];
 
         return self::$resolved;
@@ -84,5 +93,24 @@ class SiteLayoutData
     public static function forget(): void
     {
         self::$resolved = null;
+    }
+
+    public static function navMenu(Collection $mobileMenu, Collection $headerMenu): Collection
+    {
+        return $mobileMenu->isNotEmpty() ? $mobileMenu : $headerMenu;
+    }
+
+    public static function footerAboutTagline(?string $tagline, ?string $motto): string
+    {
+        $fallback = 'Word, worship, and witness across the United Kingdom.';
+        $about = trim((string) ($tagline ?: $fallback));
+
+        $motto = trim((string) $motto);
+        if ($motto !== '' && str_starts_with($about, $motto)) {
+            $about = trim(substr($about, strlen($motto)));
+            $about = ltrim($about, " \t\n\r\0\x0B—–-");
+        }
+
+        return $about !== '' ? $about : $fallback;
     }
 }

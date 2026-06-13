@@ -83,16 +83,79 @@ const initLocationTabs = () => {
     });
 };
 
-const initDesktopNav = () => {
-    const shell = document.querySelector('.desktop-nav-shell');
-    const items = [...document.querySelectorAll('[data-menu-item]')];
-
-    if (! items.length) {
+const ensureDesktopNavEndVisible = (shell) => {
+    if (window.matchMedia('(max-width: 1299px)').matches) {
         return;
     }
 
-    let closeTimer = null;
+    shell.scrollLeft = 0;
+
+    if (shell.scrollWidth <= shell.clientWidth + 1) {
+        return;
+    }
+
+    const menuItems = [...shell.querySelectorAll('[data-menu-item]')];
+    const lastItem = menuItems.at(-1);
+
+    if (! lastItem) {
+        return;
+    }
+
+    const shellRect = shell.getBoundingClientRect();
+    const lastRect = lastItem.getBoundingClientRect();
+
+    if (lastRect.right <= shellRect.right - 4) {
+        return;
+    }
+
+    shell.scrollLeft += lastRect.right - shellRect.right + 8;
+};
+
+const bindDesktopNav = (shell) => {
+    if (shell._navAbort) {
+        shell._navAbort.abort();
+    }
+
+    shell._navAbort = new AbortController();
+    const { signal } = shell._navAbort;
+
+    const items = () => [...shell.querySelectorAll('[data-menu-item]')];
     const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    let closeTimer = null;
+
+    const positionPanel = (item) => {
+        const trigger = item.querySelector('[data-menu-trigger]');
+        const panel = item.querySelector('[data-menu-panel]');
+
+        if (! trigger || ! panel) {
+            return;
+        }
+
+        const triggerRect = trigger.getBoundingClientRect();
+        const gap = panel.classList.contains('menu-mega') ? 10 : 8;
+
+        panel.classList.add('menu-dropdown-panel--fixed');
+        panel.style.top = `${triggerRect.bottom + gap}px`;
+
+        if (panel.classList.contains('menu-mega')) {
+            panel.style.left = `${triggerRect.left + (triggerRect.width / 2)}px`;
+            return;
+        }
+
+        panel.style.left = `${triggerRect.left}px`;
+    };
+
+    const resetPanel = (item) => {
+        const panel = item.querySelector('[data-menu-panel]');
+
+        if (! panel) {
+            return;
+        }
+
+        panel.classList.remove('menu-dropdown-panel--fixed');
+        panel.style.top = '';
+        panel.style.left = '';
+    };
 
     const setOpen = (item, open) => {
         const trigger = item?.querySelector('[data-menu-trigger]');
@@ -103,10 +166,16 @@ const initDesktopNav = () => {
 
         item.classList.toggle('is-open', open);
         trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+        if (open) {
+            positionPanel(item);
+        } else {
+            resetPanel(item);
+        }
     };
 
     const closeAll = (except = null) => {
-        items.forEach((item) => {
+        items().forEach((item) => {
             if (item !== except) {
                 setOpen(item, false);
             }
@@ -114,7 +183,7 @@ const initDesktopNav = () => {
     };
 
     const openItem = (item) => {
-        if (! item.querySelector('[data-menu-trigger]')) {
+        if (! item?.querySelector('[data-menu-trigger]')) {
             return;
         }
 
@@ -124,47 +193,19 @@ const initDesktopNav = () => {
 
     const scheduleClose = () => {
         clearTimeout(closeTimer);
-        closeTimer = window.setTimeout(() => closeAll(), 140);
+        closeTimer = window.setTimeout(() => closeAll(), 160);
     };
 
     const cancelClose = () => {
         clearTimeout(closeTimer);
     };
 
-    items.forEach((item) => {
+    items().forEach((item) => {
         const trigger = item.querySelector('[data-menu-trigger]');
         const panel = item.querySelector('[data-menu-panel]');
 
         if (! trigger || ! panel) {
             return;
-        }
-
-        if (canHover) {
-            item.addEventListener('mouseenter', () => {
-                cancelClose();
-                openItem(item);
-            });
-
-            item.addEventListener('mouseleave', (event) => {
-                const next = event.relatedTarget;
-
-                if (next instanceof Node && (item.contains(next) || panel.contains(next))) {
-                    return;
-                }
-
-                scheduleClose();
-            });
-
-            panel.addEventListener('mouseenter', cancelClose);
-            panel.addEventListener('mouseleave', (event) => {
-                const next = event.relatedTarget;
-
-                if (next instanceof Node && item.contains(next)) {
-                    return;
-                }
-
-                scheduleClose();
-            });
         }
 
         trigger.addEventListener('click', (event) => {
@@ -176,32 +217,81 @@ const initDesktopNav = () => {
             } else {
                 openItem(item);
             }
-        });
+        }, { signal });
 
-        panel.addEventListener('click', (event) => {
-            event.stopPropagation();
-        });
+        if (canHover) {
+            item.addEventListener('mouseenter', () => {
+                cancelClose();
+                openItem(item);
+            }, { signal });
+
+            item.addEventListener('mouseleave', (event) => {
+                const next = event.relatedTarget;
+
+                if (next instanceof Node && (item.contains(next) || panel.contains(next))) {
+                    return;
+                }
+
+                scheduleClose();
+            }, { signal });
+
+            panel.addEventListener('mouseenter', cancelClose, { signal });
+            panel.addEventListener('mouseleave', (event) => {
+                const next = event.relatedTarget;
+
+                if (next instanceof Node && item.contains(next)) {
+                    return;
+                }
+
+                scheduleClose();
+            }, { signal });
+        }
     });
 
     document.addEventListener('click', (event) => {
-        if (event.target instanceof Node && shell?.contains(event.target)) {
+        if (event.target instanceof Element && event.target.closest('.desktop-nav-shell')) {
             return;
         }
 
         closeAll();
-    });
+    }, { signal });
 
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             closeAll();
         }
-    });
+    }, { signal });
 
-    window.addEventListener('scroll', () => closeAll(), { passive: true });
+    window.addEventListener('scroll', () => closeAll(), { passive: true, signal });
+
+    window.addEventListener('resize', () => {
+        const openItem = items().find((item) => item.classList.contains('is-open'));
+
+        if (openItem) {
+            positionPanel(openItem);
+        }
+
+        ensureDesktopNavEndVisible(shell);
+    }, { signal });
+
+    ensureDesktopNavEndVisible(shell);
 };
 
-const initMobileNav = () => {
-    const sections = [...document.querySelectorAll('[data-mobile-nav-section]')];
+const initDesktopNav = () => {
+    document.querySelectorAll('.desktop-nav-shell').forEach((shell) => {
+        bindDesktopNav(shell);
+    });
+};
+
+const bindMobileNav = (root) => {
+    if (root._navAbort) {
+        root._navAbort.abort();
+    }
+
+    root._navAbort = new AbortController();
+    const { signal } = root._navAbort;
+
+    const sections = () => [...root.querySelectorAll('[data-mobile-nav-section]')];
 
     const collapseSection = (section) => {
         const trigger = section.querySelector('[data-mobile-nav-trigger]');
@@ -213,20 +303,23 @@ const initMobileNav = () => {
         trigger?.querySelector('.menu-link-mobile-chevron')?.classList.remove('rotate-180');
     };
 
-    sections.forEach((section) => {
+    sections().forEach((section) => {
         const trigger = section.querySelector('[data-mobile-nav-trigger]');
+        const panel = section.querySelector('[data-mobile-nav-panel]');
 
-        if (! trigger) {
+        if (! trigger || ! panel) {
             return;
         }
 
-        trigger.addEventListener('click', () => {
-            const panel = section.querySelector('[data-mobile-nav-panel]');
+        trigger.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
             const expanded = trigger.getAttribute('aria-expanded') === 'true';
             const nextExpanded = ! expanded;
 
             if (nextExpanded) {
-                sections.forEach((other) => {
+                sections().forEach((other) => {
                     if (other !== section) {
                         collapseSection(other);
                     }
@@ -234,16 +327,24 @@ const initMobileNav = () => {
             }
 
             trigger.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
-            panel?.toggleAttribute('hidden', ! nextExpanded);
+            panel.toggleAttribute('hidden', ! nextExpanded);
             section.classList.toggle('is-expanded', nextExpanded);
             trigger.querySelector('.menu-link-mobile-chevron')?.classList.toggle('rotate-180', nextExpanded);
-        });
+        }, { signal });
     });
+};
+
+const initMobileNav = () => {
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    if (mobileMenu) {
+        bindMobileNav(mobileMenu);
+    }
 };
 
 const initScrollReveal = () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const selector = '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .page-section, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip, .heavenly-comfort-card, .hero-gen-z';
+    const selector = '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .faith-whisper-card, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip, .heavenly-comfort-card, .hero-gen-z';
 
     const elements = document.querySelectorAll(selector);
 
@@ -453,21 +554,30 @@ const initPWA = () => {
     });
 };
 
-initDarkMode();
-document.addEventListener('DOMContentLoaded', () => {
+const initPublicSiteUi = () => {
     initHeaderScroll();
     initDesktopNav();
     initLocationTabs();
     initMobileDock();
     initMobileNav();
     initMemberChip();
+    initScrollReveal();
 
-    const runDeferred = () => initScrollReveal();
     if ('requestIdleCallback' in window) {
-        requestIdleCallback(runDeferred, { timeout: 1200 });
+        requestIdleCallback(() => initPWA(), { timeout: 3000 });
     } else {
-        runDeferred();
+        initPWA();
     }
+};
 
-    initPWA();
+initDarkMode();
+document.addEventListener('DOMContentLoaded', initPublicSiteUi);
+window.addEventListener('load', () => {
+    initDesktopNav();
+    initMobileNav();
+});
+document.addEventListener('livewire:navigated', () => {
+    initDesktopNav();
+    initMobileNav();
+    initScrollReveal();
 });

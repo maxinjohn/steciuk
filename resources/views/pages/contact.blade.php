@@ -12,9 +12,9 @@
         scripture-ref="Psalm 145:18"
     />
 
-    <section class="page-section py-8 sm:py-14">
+    <section class="page-section page-section--compact">
         <div class="page-section-inner mx-auto max-w-7xl">
-            <div class="contact-layout grid gap-8 lg:grid-cols-5 lg:gap-12">
+            <div class="contact-layout grid gap-6 lg:grid-cols-5 lg:gap-8">
                 <div class="lg:col-span-2 space-y-5 sm:space-y-6">
                     <x-card class="contact-office-card">
                         <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand">We are here for you</p>

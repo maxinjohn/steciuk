@@ -7,9 +7,19 @@ use Illuminate\Support\Facades\Http;
 
 class TurnstileCaptchaService
 {
+    public function isConfigured(): bool
+    {
+        return filled(config('services.turnstile.site_key'))
+            && filled(config('services.turnstile.secret_key'));
+    }
+
     public function isEnabled(): bool
     {
-        if (! (bool) config('services.turnstile.enabled', true)) {
+        if (! (bool) config('services.turnstile.enabled', false)) {
+            return false;
+        }
+
+        if (! $this->isConfigured()) {
             return false;
         }
 

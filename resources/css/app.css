@@ -7,6 +7,7 @@
 
 @theme {
     --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --breakpoint-lg: 81.25rem;
 
     --color-ink: #1c1917;
     --color-ink-muted: #4a4238;
@@ -61,6 +62,13 @@
     --site-footer-muted: rgba(245, 239, 230, 0.72);
     --mobile-dock-bar-height: 3.875rem;
     --mobile-dock-height: calc(var(--mobile-dock-bar-height) + 0.75rem + env(safe-area-inset-bottom, 0px));
+    --site-desktop-min: 81.25rem;
+    --site-logo-emblem-height: 4.25rem;
+    --site-logo-full-height: 5.25rem;
+    --site-logo-light-shell: #d4cabb;
+    --section-space-y: 1.75rem;
+    --section-space-y-md: 2.25rem;
+    --section-space-y-lg: 2.75rem;
     color-scheme: light;
 }
 
@@ -158,6 +166,16 @@ html.dark {
         border-bottom-color: color-mix(in srgb, var(--site-accent) 18%, var(--site-glass-border));
     }
 
+    .is-home .scripture-ribbon {
+        padding-top: 1.25rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .is-home .heavenly-comfort {
+        padding-top: 1.5rem;
+        padding-bottom: 1.75rem;
+    }
+
     .site-header--elevated {
         box-shadow:
             0 10px 40px color-mix(in srgb, var(--site-brand) 12%, transparent),
@@ -173,79 +191,119 @@ html.dark {
         gap: 0.75rem;
         max-width: 90rem;
         margin-inline: auto;
-        min-height: 4.25rem;
-        padding: 0.875rem 1.125rem;
+        min-height: 6rem;
+        padding: 0.625rem 1rem 0.625rem max(0.125rem, env(safe-area-inset-left, 0px));
         overflow: visible;
     }
 
     @media (min-width: 768px) {
         .site-header-inner {
             gap: 0.875rem;
-            min-height: 4.5rem;
-            padding: 0.875rem 1.25rem;
+            min-height: 6.25rem;
+            padding: 0.625rem 1.25rem 0.625rem max(0.25rem, env(safe-area-inset-left, 0px));
         }
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .site-header-inner {
             display: grid;
-            grid-template-columns: minmax(0, max-content) minmax(0, 1fr) minmax(11.5rem, max-content);
+            grid-template-columns: auto minmax(0, 1fr) auto;
             align-items: center;
-            column-gap: 1rem;
-            min-height: 5rem;
-            padding: 0.75rem 1.5rem;
+            column-gap: 0.75rem;
+            min-height: 6.5rem;
+            padding: 0.625rem 1.25rem 0.625rem max(0.25rem, env(safe-area-inset-left, 0px));
         }
 
         .site-logo-link {
             grid-column: 1;
             position: relative;
-            z-index: 6;
+            z-index: 1;
             flex: none;
-            min-width: 0;
-            max-width: min(100%, 15.5rem);
+            min-width: max-content;
+            max-width: none;
+            width: max-content;
+            justify-self: start;
+            justify-content: flex-start;
+            overflow: visible;
+        }
+
+        .site-logo-link:has(.site-logo--parish-full) {
+            min-width: max-content;
+            max-width: none;
+            width: max-content;
         }
 
         .site-header-nav {
             grid-column: 2;
-            z-index: 4;
+            z-index: 5;
+            position: relative;
+            isolation: isolate;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             width: 100%;
             min-width: 0;
             max-width: 100%;
             overflow: visible;
-            container-type: inline-size;
-            container-name: header-nav;
+            pointer-events: auto;
+        }
+
+        .site-header-nav .desktop-nav-shell {
+            width: fit-content;
+            max-width: 100%;
+            margin-inline: 0;
         }
 
         .site-header-actions {
             grid-column: 3;
-            z-index: 6;
+            z-index: 2;
             flex: none;
             display: flex;
             align-items: center;
             justify-content: flex-end;
             gap: 0.375rem;
-            min-width: 11.5rem;
+            min-width: 0;
             flex-shrink: 0;
-            isolation: isolate;
         }
     }
 
     @media (min-width: 1280px) {
         .site-header-inner {
-            column-gap: 1.25rem;
-            padding: 0.75rem 2rem;
+            column-gap: 0.875rem;
+            padding: 0.625rem 1.5rem 0.625rem max(0.25rem, env(safe-area-inset-left, 0px));
         }
 
-        .site-logo-link {
-            max-width: min(100%, 20rem);
+        .site-logo-link:has(.site-logo--parish-full) {
+            min-width: max-content;
+            max-width: none;
+            width: max-content;
         }
 
         .site-header-actions {
-            min-width: 12.5rem;
             gap: 0.5rem;
+        }
+    }
+
+    @media (min-width: 1536px) {
+        .site-header-inner {
+            column-gap: 0.875rem;
+            padding-right: 1.75rem;
+        }
+    }
+
+    @media (min-width: 1440px) {
+        .menu-link-desktop {
+            height: 2.625rem;
+            padding-inline: 0.875rem;
+            font-size: 0.8125rem;
+        }
+
+        .desktop-nav-list {
+            gap: 0.125rem;
+        }
+
+        .desktop-nav-shell {
+            padding: 0.4375rem 0.6875rem;
         }
     }
 
@@ -254,14 +312,27 @@ html.dark {
         min-width: 0;
         flex: 1 1 auto;
         align-items: center;
+        justify-content: flex-start;
         flex-shrink: 1;
         max-width: calc(100% - 7.5rem);
+        overflow: visible;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .site-logo-link {
             flex: none;
-            max-width: min(100%, 15.5rem);
+            min-width: max-content;
+            max-width: none;
+            width: max-content;
+            justify-content: flex-start;
+            justify-self: start;
+            overflow: visible;
+        }
+
+        .site-logo-link:has(.site-logo--parish-full) {
+            min-width: max-content;
+            max-width: none;
+            width: max-content;
         }
     }
 
@@ -270,6 +341,7 @@ html.dark {
         min-width: 0;
         align-items: center;
         gap: 0.75rem;
+        overflow: visible;
     }
 
     .site-logo-mark {
@@ -278,13 +350,108 @@ html.dark {
         flex-shrink: 0;
         border-radius: 12px;
         box-shadow: 0 4px 14px rgba(26, 35, 50, 0.12);
+        object-fit: contain;
     }
 
-    @media (min-width: 1024px) {
-        .site-logo-mark {
-            width: 2.75rem;
-            height: 2.75rem;
+    .site-logo-mark--parish,
+    .site-logo-mark--parish-emblem {
+        display: block;
+        width: auto;
+        height: var(--site-logo-emblem-height);
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        object-fit: contain;
+        object-position: center;
+        filter: none;
+        flex-shrink: 0;
+        image-rendering: auto;
+    }
+
+    @media (min-width: 520px) {
+        :root {
+            --site-logo-emblem-height: 4.5rem;
+            --site-logo-full-height: 5.5rem;
         }
+    }
+
+    @media (min-width: 1300px) {
+        :root {
+            --site-logo-emblem-height: 4.75rem;
+            --site-logo-full-height: 5.75rem;
+        }
+    }
+
+    .site-logo-mark--parish-full {
+        display: block;
+        width: auto;
+        height: var(--site-logo-full-height);
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        object-fit: contain;
+        object-position: center bottom;
+        filter: none;
+        flex-shrink: 0;
+        image-rendering: auto;
+    }
+
+    .site-logo--parish-full {
+        gap: 0.5rem;
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .site-logo--parish-full .site-logo-line {
+        color: var(--site-brand);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.15;
+        font-size: clamp(0.6875rem, 1.45vw, 0.875rem);
+        max-width: 100%;
+    }
+
+    .site-logo--parish-full .site-logo-stack {
+        overflow: hidden;
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .site-logo--parish-full .site-logo-sub {
+        color: color-mix(in srgb, var(--site-accent) 82%, var(--site-brand));
+        letter-spacing: 0.08em;
+        white-space: nowrap;
+        line-height: 1.1;
+        font-size: clamp(0.625rem, 1.35vw, 0.75rem);
+    }
+
+    html.dark .site-logo--parish-full .site-logo-sub {
+        color: color-mix(in srgb, var(--site-accent) 90%, white);
+    }
+
+    .site-logo-mark.site-logo-mark--parish-full {
+        width: auto;
+        height: var(--site-logo-full-height);
+        max-width: none;
+        object-position: center bottom;
+    }
+
+    html.dark .site-logo-mark--parish,
+    html.dark .site-logo-mark--parish-full {
+        filter: none;
+    }
+
+    html.dark .site-header .site-logo-mark.site-logo-mark--parish-full {
+        background-color: var(--site-logo-light-shell);
+        isolation: isolate;
     }
 
     .site-header-actions {
@@ -321,15 +488,61 @@ html.dark {
         gap: 0.1875rem;
         min-width: 0;
         flex: 1;
+        overflow: hidden;
     }
 
     .site-logo-line {
         font-weight: 700;
         letter-spacing: -0.02em;
         color: var(--site-ink);
-        font-size: clamp(0.6875rem, 3.1vw, 1.125rem);
+        font-size: clamp(0.6875rem, 2.4vw, 1rem);
         line-height: 1.12;
-        white-space: normal;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .site-header .site-logo--parish-full .site-logo-line,
+    .site-header .site-logo--parish-full .site-logo-line.site-logo-line--title {
+        overflow: visible;
+        text-overflow: unset;
+        max-width: none;
+        flex-shrink: 0;
+        color: var(--site-brand);
+        line-height: 1.15;
+    }
+
+    @media (min-width: 1300px) {
+        .site-header .site-logo--parish-full .site-logo-line,
+        .site-header .site-logo--parish-full .site-logo-line.site-logo-line--title {
+            white-space: nowrap;
+            font-size: clamp(0.6875rem, 1.45vw, 0.875rem);
+        }
+    }
+
+    @media (max-width: 1299px) {
+        .site-header .site-logo--parish-full .site-logo-line,
+        .site-header .site-logo--parish-full .site-logo-line.site-logo-line--title {
+            white-space: normal;
+            text-wrap: balance;
+            font-size: clamp(0.5625rem, 2.85vw, 0.75rem);
+        }
+    }
+
+    .site-header .site-logo--parish-full .site-logo-stack {
+        overflow: visible;
+        flex: none;
+        flex-shrink: 0;
+        min-width: 0;
+        max-width: none;
+    }
+
+    @media (max-width: 1299px) {
+        .site-header .site-logo--parish-full .site-logo-stack {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
     }
 
     .site-logo-row {
@@ -343,6 +556,12 @@ html.dark {
     @media (min-width: 520px) {
         .site-logo-line {
             white-space: nowrap;
+        }
+    }
+
+    @media (min-width: 1300px) {
+        .site-logo-line {
+            font-size: 0.9375rem;
         }
     }
 
@@ -364,7 +583,7 @@ html.dark {
         line-height: 1;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .site-logo-sub {
             font-size: 0.8125rem;
         }
@@ -372,11 +591,14 @@ html.dark {
 
     .desktop-nav-shell {
         position: relative;
+        z-index: 2;
         display: none;
         box-sizing: border-box;
+        flex-direction: row;
         align-items: center;
-        justify-content: center;
-        width: fit-content;
+        justify-content: flex-start;
+        width: 100%;
+        min-width: 0;
         max-width: 100%;
         margin-inline: auto;
         padding: 0.3125rem 0.5rem;
@@ -384,17 +606,22 @@ html.dark {
         border: 1px solid color-mix(in srgb, var(--site-accent) 18%, var(--site-border));
         background: var(--site-surface);
         box-shadow: var(--site-shadow);
-        overflow: visible;
+        overflow-x: auto;
+        overflow-y: visible;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
     .desktop-nav-shell::-webkit-scrollbar {
         display: none;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .desktop-nav-shell {
             display: inline-flex;
             align-items: center;
+            width: fit-content;
+            max-width: 100%;
         }
     }
 
@@ -410,51 +637,28 @@ html.dark {
         }
     }
 
-    @container header-nav (max-width: 52rem) {
+    @media (min-width: 1300px) and (max-width: 1399px) {
+        .site-header-inner {
+            column-gap: 0.625rem;
+        }
+
+        .desktop-nav-shell {
+            padding: 0.375rem 0.5rem;
+        }
+
         .menu-link-desktop {
             height: 2.375rem;
-            padding-inline: 0.625rem;
+            padding-inline: 0.5625rem;
             font-size: 0.75rem;
-        }
-    }
-
-    @container header-nav (max-width: 44rem) {
-        .desktop-nav-shell {
-            padding: 0.25rem 0.4375rem;
         }
 
         .desktop-nav-list {
-            gap: 0;
-        }
-
-        .menu-link-desktop {
-            height: 2.125rem;
-            padding-inline: 0.5rem;
-            font-size: 0.6875rem;
-            gap: 0.125rem;
+            gap: 0.0625rem;
         }
 
         .menu-chevron {
-            height: 0.625rem;
-            width: 0.625rem;
-        }
-    }
-
-    @container header-nav (max-width: 36rem) {
-        .desktop-nav-shell {
-            padding: 0.1875rem 0.3125rem;
-        }
-
-        .menu-link-desktop {
-            height: 2rem;
-            padding-inline: 0.375rem;
-            font-size: 0.625rem;
-        }
-    }
-
-    @media (min-width: 1024px) and (max-width: 1279px) {
-        .site-header-actions {
-            min-width: 10.5rem;
+            height: 0.8125rem;
+            width: 0.8125rem;
         }
 
         .site-header-actions .btn {
@@ -469,10 +673,47 @@ html.dark {
         }
     }
 
+    @media (min-width: 1300px) and (max-width: 1559px) {
+        body.is-authenticated .site-header-inner {
+            column-gap: 0.625rem;
+        }
+
+        body.is-authenticated .desktop-nav-shell {
+            padding: 0.375rem 0.5rem;
+        }
+
+        body.is-authenticated .menu-link-desktop {
+            height: 2.375rem;
+            padding-inline: 0.5625rem;
+            font-size: 0.75rem;
+        }
+
+        body.is-authenticated .desktop-nav-list {
+            gap: 0.0625rem;
+        }
+
+        body.is-authenticated .menu-chevron {
+            height: 0.8125rem;
+            width: 0.8125rem;
+        }
+
+        body.is-authenticated .site-header-actions .btn {
+            min-height: 2.375rem !important;
+            padding-inline: 0.75rem !important;
+            font-size: 0.75rem !important;
+        }
+
+        body.is-authenticated .site-header-actions a.rounded-xl {
+            padding: 0.375rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    }
+
     .menu-nav-item {
         position: relative;
-        flex: 0 1 auto;
-        min-width: 0;
+        flex: 0 0 auto;
+        min-width: max-content;
+        overflow: visible;
     }
 
     .menu-nav-item.is-open {
@@ -506,6 +747,22 @@ html.dark {
         transform: translateX(-50%) translateY(0);
     }
 
+    .menu-dropdown-panel.menu-dropdown-panel--fixed {
+        position: fixed;
+        z-index: 320;
+        right: auto;
+        bottom: auto;
+        margin: 0;
+    }
+
+    .menu-nav-item.is-open > .menu-dropdown-panel.menu-dropdown-panel--fixed.menu-mega {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .menu-nav-item.is-open > .menu-dropdown-panel.menu-dropdown-panel--fixed.menu-dropdown {
+        transform: translateY(0);
+    }
+
     .menu-nav-item.is-open > .menu-link-desktop .menu-chevron {
         transform: rotate(180deg);
         opacity: 1;
@@ -514,19 +771,20 @@ html.dark {
     .desktop-nav-list {
         position: relative;
         z-index: 1;
-        display: flex;
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: max-content;
         align-items: center;
-        justify-content: center;
-        flex: 1 1 auto;
+        justify-content: start;
         gap: 0.125rem;
-        min-width: 0;
-        max-width: 100%;
+        width: max-content;
+        min-width: max-content;
+        max-width: none;
         margin: 0;
         padding: 0;
         list-style: none;
-        flex-wrap: nowrap;
-        overflow: visible;
         box-sizing: border-box;
+        overflow: visible;
     }
 
     .menu-chevron {
@@ -609,6 +867,35 @@ html.dark {
 
     .site-member-chip-btn--solo {
         text-decoration: none;
+    }
+
+    @media (min-width: 1300px) {
+        .site-header-actions .site-member-chip-btn--solo {
+            position: relative;
+            width: 2.75rem;
+            height: 2.75rem;
+            min-height: 2.75rem;
+            padding: 0;
+            gap: 0;
+        }
+
+        .site-header-actions .site-member-chip-btn--solo .site-member-chip-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    }
+
+    @media (max-width: 1299px) {
+        .site-header-actions .site-member-chip-btn--solo .site-member-chip-label {
+            max-width: 4.5rem;
+        }
     }
 
     .site-member-chip-icon {
@@ -988,7 +1275,7 @@ html.dark {
 
     .mobile-nav-section {
         margin-bottom: 0.625rem;
-        overflow: clip;
+        overflow: visible;
         border-radius: 20px;
         border: 1px solid var(--site-border);
         background: color-mix(in srgb, var(--site-glass) 88%, transparent);
@@ -1125,9 +1412,8 @@ html.dark {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.25rem;
+        gap: 0.1875rem;
         height: 2.5rem;
-        max-width: 100%;
         padding: 0 0.8125rem;
         border-radius: 9999px;
         font-size: 0.8125rem;
@@ -1136,8 +1422,9 @@ html.dark {
         line-height: 1;
         color: var(--site-ink-muted);
         white-space: nowrap;
-        flex: 0 1 auto;
-        min-width: 0;
+        flex: 0 0 auto;
+        flex-shrink: 0;
+        min-width: max-content;
         transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     }
 
@@ -1303,6 +1590,14 @@ html.dark {
         opacity: 1;
     }
 
+    @media (min-width: 1300px) {
+        .mobile-dock-wrap,
+        .mobile-overlay,
+        .mobile-sheet {
+            display: none !important;
+        }
+    }
+
     .mobile-dock-wrap {
         position: fixed;
         z-index: 100;
@@ -1397,7 +1692,7 @@ html.dark {
         padding-bottom: var(--mobile-dock-height);
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .has-mobile-dock {
             padding-bottom: 0;
         }
@@ -1407,7 +1702,7 @@ html.dark {
         padding-bottom: var(--mobile-dock-height);
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .pb-dock {
             padding-bottom: 0;
         }
@@ -1593,7 +1888,7 @@ html.dark {
         align-items: center;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .hero-grid {
             grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
             gap: 3rem;
@@ -1903,6 +2198,523 @@ html.dark {
         color: var(--site-accent-hover);
     }
 
+    .eauk-trust-mark {
+        display: inline-flex;
+        max-width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.625rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding-top: 1rem;
+        text-align: left;
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .eauk-trust-mark:hover,
+    .eauk-trust-mark:focus-visible {
+        opacity: 0.92;
+    }
+
+    .eauk-trust-mark__logo-shell {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        background: rgba(245, 239, 230, 0.94);
+        padding: 0.5rem 0.75rem;
+    }
+
+    html.dark .eauk-trust-mark__logo-shell {
+        background: rgba(245, 239, 230, 0.9);
+    }
+
+    .eauk-trust-mark__logo {
+        display: block;
+        width: auto;
+        height: 2.25rem;
+        max-width: 12rem;
+    }
+
+    @media (min-width: 640px) {
+        .eauk-trust-mark__logo {
+            height: 2.5rem;
+            max-width: 13rem;
+        }
+    }
+
+    .eauk-trust-mark__label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.45;
+        color: var(--site-footer-muted);
+        text-decoration: underline;
+        text-underline-offset: 0.14em;
+        text-decoration-color: color-mix(in srgb, var(--site-accent) 55%, transparent);
+    }
+
+    .eauk-trust-mark:hover .eauk-trust-mark__label,
+    .eauk-trust-mark:focus-visible .eauk-trust-mark__label {
+        color: var(--site-footer-ink);
+    }
+
+    .eauk-member-panel {
+        border-bottom: 1px solid var(--site-border);
+    }
+
+    .eauk-member-panel__hero {
+        background: linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--site-brand) 92%, #141820) 0%,
+            color-mix(in srgb, var(--site-brand) 78%, #0f172a) 100%
+        );
+        color: var(--site-hero-ink);
+    }
+
+    .eauk-member-panel__hero-inner {
+        padding: 1.75rem 0 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .eauk-member-panel__hero-inner {
+            padding: 2rem 0 1.75rem;
+        }
+    }
+
+    .eauk-member-panel__hero-grid {
+        display: grid;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    @media (min-width: 1300px) {
+        .eauk-member-panel__hero-grid {
+            grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+            gap: 2rem;
+        }
+    }
+
+    .eauk-member-panel__kicker {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: color-mix(in srgb, var(--site-accent) 85%, white);
+    }
+
+    .eauk-member-panel__title {
+        margin-top: 0.5rem;
+        font-size: clamp(1.35rem, 2.8vw, 2rem);
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        color: var(--site-hero-ink);
+    }
+
+    .eauk-member-panel__summary {
+        margin-top: 0.75rem;
+        max-width: 42rem;
+        font-size: 0.9375rem;
+        line-height: 1.65;
+        color: var(--site-hero-muted);
+    }
+
+    .eauk-member-panel__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.625rem;
+        margin-top: 1rem;
+    }
+
+    .eauk-member-panel__action {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        padding: 0.45rem 0.85rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--site-hero-ink);
+        text-decoration: none;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .eauk-member-panel__action:hover,
+    .eauk-member-panel__action:focus-visible {
+        border-color: rgba(255, 255, 255, 0.32);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .eauk-member-panel__action--primary {
+        border-color: color-mix(in srgb, var(--site-accent) 55%, transparent);
+        background: color-mix(in srgb, var(--site-accent) 18%, transparent);
+        color: var(--site-hero-ink);
+    }
+
+    .eauk-member-panel__mark-wrap {
+        justify-self: start;
+    }
+
+    @media (min-width: 1300px) {
+        .eauk-member-panel__mark-wrap {
+            justify-self: end;
+            text-align: right;
+        }
+    }
+
+    .eauk-member-panel__mark {
+        display: inline-flex;
+        border-radius: 0.75rem;
+        background: rgba(245, 239, 230, 0.96);
+        padding: 0.65rem 0.85rem;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .eauk-member-panel__mark:hover,
+    .eauk-member-panel__mark:focus-visible {
+        transform: translateY(-1px);
+        opacity: 0.96;
+    }
+
+    .eauk-member-panel__mark-logo {
+        display: block;
+        width: min(100%, 11rem);
+        height: auto;
+    }
+
+    .eauk-member-panel__charity {
+        margin-top: 0.5rem;
+        font-size: 0.6875rem;
+        color: var(--site-hero-muted);
+    }
+
+    .eauk-member-panel__facts {
+        background: var(--site-surface);
+        border-bottom: 1px solid var(--site-border);
+    }
+
+    .eauk-member-panel__facts-inner {
+        padding: 0.85rem 0;
+    }
+
+    .eauk-member-panel__facts-grid {
+        display: grid;
+        gap: 0.85rem;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    @media (min-width: 640px) {
+        .eauk-member-panel__facts-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1300px) {
+        .eauk-member-panel__facts-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+        }
+    }
+
+    .eauk-member-panel__fact-label {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--site-muted);
+    }
+
+    .eauk-member-panel__fact-icon {
+        display: inline-flex;
+        color: var(--site-brand);
+    }
+
+    .eauk-member-panel__fact-icon svg {
+        height: 0.95rem;
+        width: 0.95rem;
+    }
+
+    .eauk-member-panel__fact-value {
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    .eauk-member-panel__fact-value a {
+        color: var(--site-ink);
+        text-decoration: none;
+    }
+
+    .eauk-member-panel__fact-value a:hover,
+    .eauk-member-panel__fact-value a:focus-visible {
+        color: var(--site-brand);
+        text-decoration: underline;
+    }
+
+    .our-church-nav {
+        border: 1px solid var(--site-border);
+        border-radius: 1rem;
+        background: color-mix(in srgb, var(--site-surface-2) 70%, var(--site-surface));
+        padding: 1rem 1.125rem;
+    }
+
+    .our-church-nav__label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--site-muted);
+    }
+
+    .our-church-nav__list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0.75rem;
+        margin-top: 0.65rem;
+    }
+
+    .our-church-nav__list a {
+        display: inline-flex;
+        border-radius: 999px;
+        background: var(--site-surface);
+        border: 1px solid var(--site-border);
+        padding: 0.35rem 0.7rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--site-ink);
+        text-decoration: none;
+        transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .our-church-nav__list a:hover,
+    .our-church-nav__list a:focus-visible {
+        border-color: color-mix(in srgb, var(--site-brand) 35%, var(--site-border));
+        color: var(--site-brand);
+    }
+
+    .page-section--compact {
+        padding-top: var(--section-space-y);
+        padding-bottom: var(--section-space-y);
+    }
+
+    @media (min-width: 640px) {
+        .page-section--compact {
+            padding-top: var(--section-space-y-md);
+            padding-bottom: var(--section-space-y-md);
+        }
+    }
+
+    @media (min-width: 1300px) {
+        .page-section--compact {
+            padding-top: var(--section-space-y-lg);
+            padding-bottom: var(--section-space-y-lg);
+        }
+    }
+
+    .faith-spark-strip {
+        border-top: 1px solid var(--site-border);
+        border-bottom: 1px solid var(--site-border);
+        background: color-mix(in srgb, var(--site-surface) 82%, var(--site-bg));
+        padding: 0.75rem 0 0.85rem;
+    }
+
+    .faith-spark-strip__kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 0.55rem;
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--site-muted);
+    }
+
+    .faith-spark-strip__track {
+        display: flex;
+        gap: 0.5rem;
+        padding-bottom: 0.15rem;
+    }
+
+    .faith-spark-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--site-brand) 18%, var(--site-border));
+        background: var(--site-surface);
+        padding: 0.35rem 0.7rem 0.35rem 0.45rem;
+        text-decoration: none;
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .faith-spark-chip:hover,
+    .faith-spark-chip:focus-visible {
+        transform: translateY(-1px);
+        border-color: color-mix(in srgb, var(--site-accent) 45%, var(--site-border));
+        box-shadow: 0 4px 14px color-mix(in srgb, var(--site-brand) 8%, transparent);
+    }
+
+    .faith-spark-chip__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.35rem;
+        height: 1.35rem;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--site-accent) 14%, var(--site-surface));
+        font-size: 0.625rem;
+        color: var(--site-brand);
+    }
+
+    .faith-spark-chip__copy {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .faith-spark-chip__label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        color: var(--site-ink);
+    }
+
+    .faith-spark-chip__ref {
+        font-size: 0.5625rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        color: var(--site-muted);
+    }
+
+    .faith-whispers {
+        padding: var(--section-space-y-md) 0;
+        border-bottom: 1px solid var(--site-border);
+        background: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--site-surface) 88%, var(--site-bg)) 0%,
+            var(--site-bg) 100%
+        );
+    }
+
+    .faith-whispers--home {
+        padding: var(--section-space-y) 0 var(--section-space-y-md);
+    }
+
+    .faith-whispers__head {
+        margin-bottom: 0.85rem;
+    }
+
+    .faith-whispers__kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--site-muted);
+    }
+
+    .faith-whispers__title {
+        margin-top: 0.35rem;
+        font-size: clamp(1.125rem, 2.4vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--site-ink);
+    }
+
+    .faith-whispers__grid {
+        display: grid;
+        gap: 0.65rem;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    @media (min-width: 640px) {
+        .faith-whispers__grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1300px) {
+        .faith-whispers__grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+    }
+
+    .faith-whisper-card {
+        position: relative;
+        padding: 0.85rem 0.95rem 0.95rem;
+        border-radius: 1rem;
+        border: 1px solid color-mix(in srgb, var(--site-accent) 14%, var(--site-border));
+        background: var(--site-surface);
+        box-shadow: 0 2px 10px color-mix(in srgb, var(--site-brand) 5%, transparent);
+    }
+
+    .faith-whisper-card__icon {
+        font-size: 1.125rem;
+        line-height: 1;
+    }
+
+    .faith-whisper-card__title {
+        margin-top: 0.35rem;
+        font-size: 0.8125rem;
+        font-weight: 800;
+        color: var(--site-ink);
+    }
+
+    .faith-whisper-card__text {
+        margin-top: 0.25rem;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        color: var(--site-muted);
+    }
+
+    .faith-whisper-card__ref {
+        margin-top: 0.35rem;
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: color-mix(in srgb, var(--site-accent) 80%, var(--site-brand));
+    }
+
+    .faith-whisper-card__link {
+        display: inline-block;
+        margin-top: 0.45rem;
+        font-size: 0.625rem;
+        font-weight: 700;
+        color: var(--site-brand);
+        text-decoration: none;
+    }
+
+    .faith-whisper-card__link:hover,
+    .faith-whisper-card__link:focus-visible {
+        text-decoration: underline;
+    }
+
+    html.dark .faith-spark-chip,
+    html.dark .faith-whisper-card {
+        background: var(--site-surface);
+    }
+
+    .section-head {
+        margin-bottom: 1.25rem;
+    }
+
+    @media (min-width: 640px) {
+        .section-head {
+            margin-bottom: 1.5rem;
+        }
+    }
+
     /* ── Dark mode (warm charcoal + gold — same tokens on mobile & desktop) ── */
     html.dark body,
     html.dark .site-body {
@@ -1921,6 +2733,11 @@ html.dark {
         background: var(--site-nav-bg);
         border-color: rgba(255, 255, 255, 0.12);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        max-width: 100%;
+    }
+
+    html.dark .desktop-nav-list {
+        gap: 0.0625rem;
     }
 
     html.dark .menu-link-desktop {
@@ -2048,7 +2865,7 @@ html.dark {
         pointer-events: none;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .pwa-install-banner {
             bottom: 0;
         }
@@ -2182,7 +2999,7 @@ html.dark {
 
     .bento-grid { display: grid; gap: 1rem; }
     @media (min-width: 768px) { .bento-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; } }
-    @media (min-width: 1024px) { .bento-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1300px) { .bento-grid { grid-template-columns: repeat(3, 1fr); } }
 
     /* ── Gen Z visual system ── */
     .site-mesh {
@@ -2244,6 +3061,10 @@ html.dark {
         box-shadow: 0 3px 14px rgba(28, 25, 23, 0.08);
     }
 
+    html:not(.dark) .faith-pillars:not(.faith-pillars--footer) .faith-pillars-kicker {
+        color: color-mix(in srgb, var(--site-brand) 78%, var(--site-ink-muted));
+    }
+
     html:not(.dark) .faith-pillars--footer .faith-pillar {
         background: rgba(255, 255, 255, 0.07);
         border-color: rgba(255, 255, 255, 0.14);
@@ -2260,6 +3081,14 @@ html.dark {
 
     html:not(.dark) .faith-pillars--footer .faith-pillar-ref {
         color: var(--site-accent-hover);
+    }
+
+    html:not(.dark) .faith-pillars:not(.faith-pillars--footer) {
+        background: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--site-surface) 88%, var(--site-brand) 12%) 0%,
+            var(--site-bg) 100%
+        );
     }
 
     html:not(.dark) .faith-pillars {
@@ -2531,7 +3360,7 @@ html.dark {
 
     .faith-pillars {
         position: relative;
-        padding: 2rem 0 2.25rem;
+        padding: 1.5rem 0 1.75rem;
         background: linear-gradient(180deg, var(--site-hero-bg) 0%, var(--site-surface) 100%);
         border-bottom: 1px solid var(--site-border);
     }
@@ -2570,7 +3399,7 @@ html.dark {
         }
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .faith-pillars-track {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 1rem;
@@ -2811,7 +3640,7 @@ html.dark {
         color: var(--site-accent);
     }
 
-    @media (min-width: 768px) and (max-width: 1023px) {
+    @media (min-width: 768px) and (max-width: 1299px) {
         .parish-action-strip-track {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2821,37 +3650,6 @@ html.dark {
 
         .parish-action-card {
             min-width: 0;
-        }
-    }
-
-    @media (min-width: 1024px) and (max-width: 1279px) {
-        .parish-action-strip-track {
-            display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
-            overflow: visible;
-            scroll-snap-type: none;
-        }
-
-        .parish-action-card {
-            grid-column: span 2;
-            min-width: 0;
-            padding: 0.75rem 0.875rem;
-        }
-
-        .parish-action-card:nth-child(4) {
-            grid-column: 2 / span 2;
-        }
-
-        .parish-action-card:nth-child(5) {
-            grid-column: 4 / span 2;
-        }
-
-        .parish-action-label {
-            font-size: 0.8125rem;
-        }
-
-        .parish-action-desc {
-            font-size: 0.6875rem;
         }
     }
 
@@ -2886,7 +3684,7 @@ html.dark {
         display: none;
     }
 
-    @media (min-width: 768px) and (max-width: 1023px) {
+    @media (min-width: 768px) and (max-width: 1299px) {
         .evangelical-trust-bar-track {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2962,7 +3760,7 @@ html.dark {
         }
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .worship-rhythm-grid {
             grid-template-columns: repeat(4, minmax(0, 1fr));
         }
@@ -3060,7 +3858,7 @@ html.dark {
         flex-direction: column;
         align-items: center;
         gap: 0.625rem;
-        padding: 1.5rem 0 1.75rem;
+        padding: 1.125rem 0 1.25rem;
         text-align: center;
     }
 
@@ -3069,6 +3867,8 @@ html.dark {
             flex-direction: row;
             justify-content: center;
             text-align: left;
+            gap: 0.75rem;
+            padding: 1.25rem 0 1.375rem;
             gap: 1rem;
         }
     }
@@ -3153,13 +3953,13 @@ html.dark {
     .sanctuary-peace-inner {
         position: relative;
         z-index: 1;
-        padding: 1.5rem 0 1.75rem;
+        padding: 1.125rem 0 1.25rem;
         text-align: center;
     }
 
     @media (min-width: 768px) {
         .sanctuary-peace-inner {
-            padding: 2rem 0 2.25rem;
+            padding: 1.375rem 0 1.5rem;
         }
     }
 
@@ -3237,7 +4037,7 @@ html.dark {
     .heavenly-comfort {
         position: relative;
         overflow: hidden;
-        padding: 2.5rem 0 3rem;
+        padding: 1.75rem 0 2rem;
         border-bottom: 1px solid var(--site-border);
         background: linear-gradient(
             180deg,
@@ -3277,7 +4077,7 @@ html.dark {
 
     .heavenly-comfort-header {
         max-width: 40rem;
-        margin: 0 auto 1.75rem;
+        margin: 0 auto 1.25rem;
         text-align: center;
     }
 
@@ -3313,14 +4113,14 @@ html.dark {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    @media (min-width: 768px) and (max-width: 1023px) {
+    @media (min-width: 768px) and (max-width: 1299px) {
         .heavenly-comfort-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 1.125rem;
         }
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .heavenly-comfort-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 1.125rem;
@@ -3950,7 +4750,7 @@ html.dark {
         }
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1300px) {
         .location-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
@@ -4218,7 +5018,6 @@ html.dark {
     .animate-fade-up,
     .glass-card,
     .bento-grid > *,
-    .page-section,
     .feed-card,
     .gallery-tile,
     .sermon-card,
@@ -4236,10 +5035,15 @@ html.dark {
         transition: opacity 0.45s ease, transform 0.45s ease;
     }
 
+    .faith-whisper-card {
+        opacity: 0;
+        transform: translateY(0.75rem);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
     .animate-fade-up.is-visible,
     .glass-card.is-visible,
     .bento-grid > *.is-visible,
-    .page-section.is-visible,
     .feed-card.is-visible,
     .gallery-tile.is-visible,
     .sermon-card.is-visible,
@@ -4251,7 +5055,8 @@ html.dark {
     .parish-action-card.is-visible,
     .worship-rhythm-card.is-visible,
     .evangelical-trust-chip.is-visible,
-    .heavenly-comfort-card.is-visible {
+    .heavenly-comfort-card.is-visible,
+    .faith-whisper-card.is-visible {
         opacity: 1;
         transform: translateY(0);
     }
@@ -4278,7 +5083,7 @@ html.dark {
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
 @keyframes kenBurns { from { transform: scale(1); } to { transform: scale(1.06); } }
 
-@media (max-width: 1023px) {
+@media (max-width: 1299px) {
     .site-header .mx-auto {
         min-height: 3.25rem;
         padding-top: 0.625rem;
@@ -4549,9 +5354,9 @@ html.dark .heavenly-comfort-card {
     );
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1300px) {
     .site-header-inner {
-        padding-inline: 2.5rem;
+        padding: 0.625rem 1.5rem 0.625rem max(0.25rem, env(safe-area-inset-left, 0px));
     }
 
     .hero-title-gradient {
@@ -4586,14 +5391,20 @@ html.dark .heavenly-comfort-card {
     }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1299px) {
     .site-header-inner {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
-        min-height: 3.625rem;
-        padding: 0.625rem max(0.875rem, env(safe-area-inset-right, 0px)) 0.625rem max(0.875rem, env(safe-area-inset-left, 0px));
+        min-height: 6.25rem;
+        padding: 0.625rem max(0.875rem, env(safe-area-inset-right, 0px)) 0.625rem max(0.375rem, env(safe-area-inset-left, 0px));
         gap: 0.5rem;
+        overflow: visible;
+    }
+
+    .site-logo-link,
+    .site-logo {
+        overflow: visible;
     }
 
     .site-logo-link {
@@ -4611,6 +5422,29 @@ html.dark .heavenly-comfort-card {
         height: 2.375rem;
         border-radius: 11px;
         box-shadow: 0 4px 14px color-mix(in srgb, var(--site-brand) 16%, transparent);
+    }
+
+    .site-logo-mark.site-logo-mark--parish-full {
+        width: auto;
+        height: var(--site-logo-full-height);
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        object-fit: contain;
+        object-position: center bottom;
+        filter: none;
+        flex-shrink: 0;
+    }
+
+    html.dark .site-header .site-logo-mark.site-logo-mark--parish-full {
+        background-color: var(--site-logo-light-shell);
+        isolation: isolate;
+    }
+
+    .site-logo--parish-full {
+        gap: 0.5rem;
     }
 
     .site-header-actions {
@@ -4738,7 +5572,6 @@ html.dark .heavenly-comfort-card {
 
     .animate-fade-up,
     .glass-card,
-    .page-section,
     .feed-card {
         transition-duration: 0.32s;
     }
@@ -4757,10 +5590,11 @@ html.dark .heavenly-comfort-card {
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 
+    html { scroll-behavior: auto; }
+
     .animate-fade-up,
     .glass-card,
     .bento-grid > *,
-    .page-section,
     .feed-card,
     .gallery-tile,
     .sermon-card,
@@ -4768,11 +5602,16 @@ html.dark .heavenly-comfort-card {
     .resource-row,
     .past-event-chip,
     .faith-pillar,
+    .faith-whisper-card,
     .scripture-ribbon,
     .parish-action-card,
     .worship-rhythm-card,
     .evangelical-trust-chip,
-    .heavenly-comfort-card {
+    .heavenly-comfort-card,
+    .quote-gen-z,
+    .cta-gen-z,
+    .form-gen-z,
+    .hero-gen-z {
         opacity: 1 !important;
         transform: none !important;
     }
@@ -4842,6 +5681,14 @@ html.dark .heavenly-comfort-card {
     }
 }
 
+@media (max-width: 1299px) {
+    .hero-glow-left,
+    .hero-glow-right,
+    .genz-kicker-dot {
+        animation: none;
+    }
+}
+
 @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
     .hero-glow-left,
     .hero-glow-right {
@@ -4850,7 +5697,7 @@ html.dark .heavenly-comfort-card {
 }
 
 /* Heavenly UI polish — tablet, desktop, mobile speed */
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) and (max-width: 1299px) {
     .page-band {
         padding: 2.125rem 0 1.875rem;
     }
@@ -4877,7 +5724,7 @@ html.dark .heavenly-comfort-card {
     }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1300px) {
     .heavenly-comfort {
         padding: 3rem 0 3.5rem;
     }
@@ -4929,11 +5776,37 @@ html.dark .heavenly-comfort-card {
     );
 }
 
+@media (max-width: 1299px) {
+    .animate-fade-up,
+    .glass-card,
+    .bento-grid > *,
+    .feed-card,
+    .gallery-tile,
+    .sermon-card,
+    .location-card,
+    .resource-row,
+    .past-event-chip,
+    .faith-pillar,
+    .faith-whisper-card,
+    .scripture-ribbon,
+    .parish-action-card,
+    .worship-rhythm-card,
+    .evangelical-trust-chip,
+    .heavenly-comfort-card,
+    .quote-gen-z,
+    .cta-gen-z,
+    .form-gen-z,
+    .hero-gen-z {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
 @media (max-width: 767px) {
     .animate-fade-up,
     .glass-card,
     .bento-grid > *,
-    .page-section,
     .feed-card,
     .gallery-tile,
     .sermon-card,
@@ -5021,6 +5894,17 @@ html.dark .heavenly-comfort-card {
 .resource-row-title { color: var(--site-ink); }
 .parish-action-label { color: var(--site-ink); }
 
+/* Base heading colour is site-ink; dark bands must keep hero ink text in light theme */
+.hero-modern :is(h1, h2, h3, h4, h5, h6),
+.eauk-member-panel__hero :is(h1, h2, h3, h4, h5, h6),
+.scripture-ribbon :is(h1, h2, h3, h4, h5, h6),
+.gospel-reminder :is(h1, h2, h3, h4, h5, h6),
+.sanctuary-peace :is(h1, h2, h3, h4, h5, h6),
+.evangelical-trust-bar :is(h1, h2, h3, h4, h5, h6),
+.gallery-tile-overlay :is(h1, h2, h3, h4, h5, h6) {
+    color: inherit;
+}
+
 .gallery-tile-overlay .gallery-tile-title {
     color: var(--site-hero-ink);
 }
@@ -5075,20 +5959,47 @@ html.dark .parish-action-arrow {
     pointer-events: none;
 }
 
-.page-section-inner {
+.page-section-inner,
+.page-band-inner,
+.parish-action-strip-inner,
+.gospel-reminder-inner,
+.sanctuary-peace-inner,
+.faith-whispers__inner,
+.faith-spark-strip__inner,
+.site-content-shell,
+.eauk-member-panel__hero-inner,
+.eauk-member-panel__facts-inner {
     position: relative;
     z-index: 1;
     padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right));
 }
 
 @media (min-width: 640px) {
-    .page-section-inner {
+    .page-section-inner,
+    .page-band-inner,
+    .parish-action-strip-inner,
+    .gospel-reminder-inner,
+    .sanctuary-peace-inner,
+    .faith-whispers__inner,
+    .faith-spark-strip__inner,
+    .site-content-shell,
+    .eauk-member-panel__hero-inner,
+    .eauk-member-panel__facts-inner {
         padding-inline: max(1.5rem, env(safe-area-inset-left)) max(1.5rem, env(safe-area-inset-right));
     }
 }
 
-@media (min-width: 1024px) {
-    .page-section-inner {
+@media (min-width: 1300px) {
+    .page-section-inner,
+    .page-band-inner,
+    .parish-action-strip-inner,
+    .gospel-reminder-inner,
+    .sanctuary-peace-inner,
+    .faith-whispers__inner,
+    .faith-spark-strip__inner,
+    .site-content-shell,
+    .eauk-member-panel__hero-inner,
+    .eauk-member-panel__facts-inner {
         padding-inline: max(2rem, env(safe-area-inset-left)) max(2rem, env(safe-area-inset-right));
     }
 }
@@ -5162,7 +6073,7 @@ html.dark .site-category-pill {
     gap: 2.5rem;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1300px) {
     .article-layout {
         grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
         gap: 3rem;
@@ -5251,7 +6162,7 @@ html.dark .site-category-pill {
     }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1300px) {
     .gallery-photo-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
@@ -5443,7 +6354,7 @@ html.dark .site-category-pill {
     z-index: 1;
 }
 
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) and (max-width: 1299px) {
     .page-section--article .prose-church--page {
         padding: 1.5rem;
     }
@@ -5477,7 +6388,10 @@ html.dark .site-category-pill {
     .worship-rhythm-inner,
     .gospel-reminder-inner,
     .sanctuary-peace-inner,
-    .hero-modern > .relative {
+    .parish-action-strip-inner,
+    .site-content-shell,
+    .hero-modern > .relative,
+    .hero-modern > .page-section-inner {
         padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right)) !important;
     }
 
@@ -6298,7 +7212,7 @@ html.dark .member-register-toggle-btn.is-active {
     background: color-mix(in srgb, var(--site-surface) 90%, transparent);
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1300px) {
     .member-portal-grid {
         grid-template-columns: 16rem minmax(0, 1fr);
         align-items: start;
@@ -6472,7 +7386,7 @@ html.dark .member-register-toggle-btn.is-active {
     }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1299px) {
     .member-portal-tabs {
         flex-direction: row;
         flex-wrap: nowrap;
@@ -6780,7 +7694,7 @@ html.dark .member-register-toggle-btn.is-active {
     overflow-wrap: anywhere;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1300px) {
     .member-portal-mobile-nav {
         display: none;
     }

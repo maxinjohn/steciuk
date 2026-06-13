@@ -11,14 +11,35 @@
         badge="Evangelical Oriental Protestant"
         size="small"
     />
-    <x-parish-action-strip class="!py-3" />
+
+    @if ($page->slug === 'our-church')
+        <x-eauk-member-panel />
+        <x-faith-pillars class="!py-6 sm:!py-8" />
+    @else
+        <x-parish-action-strip class="!py-3" />
+    @endif
 
     @if ($page->content)
-        <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
-            <div class="page-section-inner mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <section class="page-section page-section--compact page-section--article">
+            <div class="page-section-inner mx-auto max-w-4xl">
+                @if ($page->slug === 'our-church')
+                    <nav class="our-church-nav" aria-label="On this page">
+                        <p class="our-church-nav__label">On this page</p>
+                        <ul class="our-church-nav__list" role="list">
+                            <li><a href="#who-we-are">Who we are</a></li>
+                            <li><a href="#where-we-gather">Where we gather</a></li>
+                            <li><a href="#evangelical-alliance">Evangelical Alliance</a></li>
+                            <li><a href="#what-we-believe">What we believe</a></li>
+                            <li><a href="#how-we-worship">How we worship</a></li>
+                            <li><a href="#parish-life">Parish life</a></li>
+                        </ul>
+                    </nav>
+                @endif
+
                 <div @class([
                     'prose-church prose-church--page',
                     'prose-church--compact sm:text-center' => $page->slug === 'leadership',
+                    'mt-8' => $page->slug === 'our-church',
                 ])>{!! safeHtml($page->content) !!}</div>
             </div>
         </section>

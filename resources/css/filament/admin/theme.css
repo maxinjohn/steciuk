@@ -1070,12 +1070,16 @@
 
 @media (prefers-reduced-motion: reduce) {
     .admin-dock-item,
-    .admin-dock-item__icon {
+    .admin-dock-item__icon,
+    .fi-btn-primary,
+    .fi-stats-card {
         transition: none !important;
     }
 
     .admin-dock-item:active,
-    .admin-dock-item.is-active .admin-dock-item__icon {
+    .admin-dock-item.is-active .admin-dock-item__icon,
+    .fi-btn-primary:hover,
+    .fi-stats-card:hover {
         transform: none;
     }
 }

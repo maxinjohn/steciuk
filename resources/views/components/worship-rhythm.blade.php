@@ -4,7 +4,7 @@
 ])
 
 <section {{ $attributes->merge(['class' => 'worship-rhythm']) }} aria-label="Worship rhythm">
-    <div class="worship-rhythm-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="worship-rhythm-inner mx-auto max-w-7xl">
         <div class="worship-rhythm-header">
             <p class="genz-kicker">
                 <span class="genz-kicker-dot" aria-hidden="true"></span>

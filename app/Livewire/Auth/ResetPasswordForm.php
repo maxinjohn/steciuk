@@ -61,7 +61,7 @@ class ResetPasswordForm extends Component
 
         session()->flash('password_reset', true);
 
-        $this->redirectRoute('login', navigate: true);
+        $this->redirectRoute('login');
     }
 
     public function render()

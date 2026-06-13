@@ -73,7 +73,9 @@ class MemberPortalTest extends TestCase
             ->assertSee('member-portal-tab', false)
             ->assertSee('>Messages<', false)
             ->assertSee('>Family<', false)
-            ->assertSee('member-portal-shell', false);
+            ->assertSee('member-portal-shell', false)
+            ->assertSee('Your details', false)
+            ->assertSee($admin->displayFirstName(), false);
 
         $this->actingAs($admin)
             ->get('/account?tab=messages')

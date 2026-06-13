@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\SitePaths;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use PDO;
@@ -12,11 +13,8 @@ class SqliteOptimizer
     /** @var array<int, true> */
     private static array $configuredConnections = [];
 
-    private static bool $persistentPragmasEnsured = false;
-
     /**
-     * Apply per-connection performance pragmas once. Persistent settings (WAL) are
-     * configured separately so concurrent PHP processes do not fight for locks.
+     * Apply per-connection read/concurrency pragmas on every SQLite connection.
      */
     public static function configureConnection(Connection $connection): void
     {
@@ -42,35 +40,36 @@ class SqliteOptimizer
             return;
         }
 
-        static::ensurePersistentPragmas($pdo, $database);
+        static::ensureFileLevelPragmas($pdo, $database);
+        static::applyConnectionPragmas($pdo);
 
         static::$configuredConnections[$connectionId] = true;
     }
 
     /**
-     * Set WAL mode and related persistent pragmas once per database file.
+     * Configure WAL mode once per database file (safe for many concurrent readers).
      */
-    public static function ensurePersistentPragmas(PDO $pdo, ?string $databasePath = null): void
+    public static function ensureFileLevelPragmas(PDO $pdo, ?string $databasePath = null): void
     {
-        if (static::$persistentPragmasEnsured) {
-            return;
-        }
-
         $databasePath ??= (string) config('database.connections.sqlite.database');
 
         if ($databasePath === '' || $databasePath === ':memory:') {
-            static::$persistentPragmasEnsured = true;
-
             return;
         }
 
-        $resolvedPath = realpath($databasePath) ?: $databasePath;
+        $resolvedPath = SitePaths::resolve($databasePath) ?? $databasePath;
+        $resolvedPath = realpath($resolvedPath) ?: $resolvedPath;
+        $markerPath = dirname($resolvedPath).'/.sqlite-wal-ready';
+
+        if (is_file($markerPath)) {
+            return;
+        }
+
         $lockPath = dirname($resolvedPath).'/.sqlite-pragmas.lock';
         $lockHandle = @fopen($lockPath, 'c+');
 
         if ($lockHandle === false) {
-            static::applyPersistentPragmas($pdo);
-            static::$persistentPragmasEnsured = true;
+            static::applyFileLevelPragmas($pdo, $markerPath);
 
             return;
         }
@@ -78,13 +77,15 @@ class SqliteOptimizer
         try {
             flock($lockHandle, LOCK_EX);
 
-            static::applyPersistentPragmas($pdo);
+            if (is_file($markerPath)) {
+                return;
+            }
+
+            static::applyFileLevelPragmas($pdo, $markerPath);
         } finally {
             flock($lockHandle, LOCK_UN);
             fclose($lockHandle);
         }
-
-        static::$persistentPragmasEnsured = true;
     }
 
     public static function initializeNewDatabase(string $databasePath): void
@@ -93,11 +94,16 @@ class SqliteOptimizer
             return;
         }
 
-        $pdo = new PDO('sqlite:'.$databasePath, null, null, [
+        $resolvedPath = SitePaths::resolve($databasePath) ?? $databasePath;
+        $resolvedPath = realpath($resolvedPath) ?: $resolvedPath;
+        $markerPath = dirname($resolvedPath).'/.sqlite-wal-ready';
+
+        $pdo = new PDO('sqlite:'.$resolvedPath, null, null, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ]);
 
-        static::applyPersistentPragmas($pdo);
+        static::applyFileLevelPragmas($pdo, $markerPath);
+        static::applyConnectionPragmas($pdo);
     }
 
     public static function maintain(bool $light = false, bool $reclaim = false): void
@@ -112,9 +118,16 @@ class SqliteOptimizer
             return;
         }
 
-        static::ensurePersistentPragmas($pdo);
+        static::ensureFileLevelPragmas($pdo);
+        static::applyConnectionPragmas($pdo);
 
         if ($reclaim) {
+            $databasePath = SqliteHealth::databasePath();
+
+            if ($databasePath !== null && SqliteHealth::integrityOk($databasePath)) {
+                SqliteHealth::backup($databasePath, 'before-reclaim');
+            }
+
             static::enableIncrementalAutoVacuum($pdo, true);
             static::execWithRetry($pdo, 'PRAGMA wal_checkpoint(TRUNCATE)');
             static::execWithRetry($pdo, 'VACUUM');
@@ -151,14 +164,21 @@ class SqliteOptimizer
         return (int) $pdo->query('PRAGMA auto_vacuum')->fetchColumn();
     }
 
-    private static function applyPersistentPragmas(PDO $pdo): void
+    public static function journalMode(?PDO $pdo = null): ?string
     {
-        $busyTimeout = (int) config('database.connections.sqlite.busy_timeout', 30000);
-        $journalMode = strtolower((string) config('database.connections.sqlite.persistent_pragmas.journal_mode', 'wal'));
-        $synchronous = strtolower((string) config('database.connections.sqlite.persistent_pragmas.synchronous', 'normal'));
+        $pdo ??= static::pdo();
 
-        static::execWithRetry($pdo, 'PRAGMA busy_timeout = '.$busyTimeout);
-        static::execWithRetry($pdo, 'PRAGMA foreign_keys = ON');
+        if ($pdo === null) {
+            return null;
+        }
+
+        return strtolower((string) $pdo->query('PRAGMA journal_mode')->fetchColumn());
+    }
+
+    private static function applyFileLevelPragmas(PDO $pdo, string $markerPath): void
+    {
+        $journalMode = strtolower((string) config('database.connections.sqlite.journal_mode', 'wal'));
+        $synchronous = strtolower((string) config('database.connections.sqlite.synchronous', 'normal'));
 
         $currentJournalMode = strtolower((string) $pdo->query('PRAGMA journal_mode')->fetchColumn());
 
@@ -170,6 +190,23 @@ class SqliteOptimizer
 
         if ($currentSynchronous !== $synchronous) {
             static::execWithRetry($pdo, 'PRAGMA synchronous = '.static::quotePragmaValue($synchronous));
+        }
+
+        if (strtolower((string) $pdo->query('PRAGMA journal_mode')->fetchColumn()) === 'wal') {
+            @file_put_contents($markerPath, now()->toIso8601String());
+        }
+    }
+
+    private static function applyConnectionPragmas(PDO $pdo): void
+    {
+        $busyTimeout = (int) config('database.connections.sqlite.busy_timeout', 60000);
+        static::execWithRetry($pdo, 'PRAGMA busy_timeout = '.$busyTimeout);
+        static::execWithRetry($pdo, 'PRAGMA foreign_keys = ON');
+
+        $walAutocheckpoint = (int) config('database.connections.sqlite.wal_autocheckpoint', 2000);
+
+        if ($walAutocheckpoint > 0) {
+            static::execWithRetry($pdo, 'PRAGMA wal_autocheckpoint = '.$walAutocheckpoint);
         }
     }
 
@@ -186,13 +223,13 @@ class SqliteOptimizer
         }
     }
 
-    private static function execWithRetry(?PDO $pdo, string $statement, int $attempts = 5): void
+    private static function execWithRetry(?PDO $pdo, string $statement, int $attempts = 8): void
     {
         if ($pdo === null) {
             return;
         }
 
-        $delayMs = 50;
+        $delayMs = 25;
 
         for ($attempt = 1; $attempt <= $attempts; $attempt++) {
             try {
@@ -205,7 +242,7 @@ class SqliteOptimizer
                 }
 
                 usleep($delayMs * 1000);
-                $delayMs = min($delayMs * 2, 500);
+                $delayMs = min($delayMs * 2, 750);
             }
         }
     }

@@ -43,6 +43,7 @@ class FullSiteSmokeTest extends TestCase
             '/terms-of-use',
             '/sitemap.xml',
             '/robots.txt',
+            '/give',
             '/manifest.webmanifest',
         ];
     }

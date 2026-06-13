@@ -9,8 +9,17 @@
     @php
         $ogImageOverride = trim($__env->yieldContent('og_image'));
         $ogType = trim($__env->yieldContent('og_type')) ?: 'website';
+        $seoRobots = request()->routeIs(
+            'login',
+            'register',
+            'password.request',
+            'password.reset',
+            'registration.pending',
+            'account',
+            'account.giving.export',
+        ) ? 'noindex, nofollow' : null;
     @endphp
-    <x-seo-meta :image="$ogImageOverride ?: null" :type="$ogType" />
+    <x-seo-meta :image="$ogImageOverride ?: null" :type="$ogType" :robots="$seoRobots" />
 
     @php
         $faviconUrl = \App\Models\Setting::assetUrl($siteFavicon ?? null) ?? asset('icons/favicon.svg');
@@ -22,7 +31,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="{{ $pwaShortName ?? 'STECI UK' }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/steci-mark.svg') }}">
+    @php
+        $appleIcon = \App\Models\Setting::assetUrl($siteLogo ?? null)
+            ?? asset(\App\Support\SiteBrandingAssets::BUNDLED_LOGO_PUBLIC);
+    @endphp
+    <link rel="apple-touch-icon" href="{{ $appleIcon }}">
     <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
@@ -57,13 +70,10 @@
     @stack('head')
 </head>
 <body @class([
-    'site-body site-mesh has-mobile-dock min-h-screen flex flex-col lg:pb-0',
+    'site-body site-mesh has-mobile-dock min-h-screen flex flex-col min-[1300px]:pb-0',
     'is-home' => request()->routeIs('home'),
+    'is-authenticated' => auth()->check(),
 ])>
-    @php
-        $navMenu = ($mobileMenu ?? collect())->isNotEmpty() ? $mobileMenu : $headerMenu;
-    @endphp
-
     <div id="site-shell">
         <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-[var(--site-brand)] focus:px-4 focus:py-2 focus:text-white focus:shadow-lg">
             Skip to main content
@@ -77,7 +87,7 @@
                     <x-site-logo />
                 </a>
 
-                <nav class="site-header-nav hidden lg:flex lg:min-w-0 lg:items-center" aria-label="Main navigation">
+                <nav class="site-header-nav hidden min-[1300px]:flex min-[1300px]:min-w-0 min-[1300px]:items-center" aria-label="Main navigation">
                     <x-menu :items="$headerMenu" variant="desktop" />
                 </nav>
 
@@ -88,24 +98,24 @@
                     </button>
 
                     @if ($showGiveButton ?? filled($donationLink))
-                        <x-button href="{{ $givePageUrl ?? route('give') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm lg:inline-flex">
+                        <x-button href="{{ $givePageUrl ?? route('give') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm min-[1300px]:inline-flex">
                             {{ $giveButtonLabel ?? 'Give' }}
                         </x-button>
                     @else
-                        <x-button href="{{ url('/service-times') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm lg:inline-flex">
+                        <x-button href="{{ url('/service-times') }}" variant="primary" class="hidden !min-h-11 !w-auto !px-5 !py-2.5 !text-sm min-[1300px]:inline-flex">
                             Visit
                         </x-button>
                     @endif
 
                     @auth
-                        <a href="{{ route('account') }}" class="site-member-chip-btn site-member-chip-btn--solo">
+                        <a href="{{ route('account') }}" class="site-member-chip-btn site-member-chip-btn--solo" aria-label="Account">
                             <svg class="site-member-chip-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
                             </svg>
                             <span class="site-member-chip-label">Account</span>
                         </a>
                     @else
-                        <x-site-member-chip class="lg:hidden" />
+                        <x-site-member-chip class="min-[1300px]:hidden" />
                     @endauth
                 </div>
             </div>
@@ -113,13 +123,13 @@
 
         <div
             id="mobile-menu-overlay"
-            class="mobile-overlay fixed lg:hidden"
+            class="mobile-overlay fixed min-[1300px]:hidden"
             aria-hidden="true"
         ></div>
 
         <nav
             id="mobile-menu"
-            class="mobile-sheet fixed lg:hidden"
+            class="mobile-sheet fixed min-[1300px]:hidden"
             aria-label="Mobile navigation"
             aria-hidden="true"
         >
@@ -216,6 +226,7 @@
             @yield('content')
         </main>
 
+        <x-faith-spark-strip />
         <x-sanctuary-peace
             :kicker="$faithSanctuaryKicker ?? null"
             :note="$faithSanctuaryNote ?? null"
@@ -224,17 +235,11 @@
         <x-gospel-reminder />
 
         <footer class="site-footer lg:pb-0" aria-label="Site footer">
-            <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-                <div class="hidden gap-8 md:grid md:grid-cols-2 md:gap-10 lg:grid-cols-4">
+            <div class="site-content-shell mx-auto max-w-7xl py-12 lg:py-16">
+                <div class="hidden gap-6 lg:grid lg:grid-cols-4 lg:gap-8">
                     <div>
                         <h2>About</h2>
-                        <p class="mt-3 text-sm leading-relaxed text-[var(--site-footer-muted)]">{{ $siteMotto }}</p>
-                        @if ($footerText)
-                            <p class="mt-3 text-sm leading-relaxed text-[var(--site-footer-muted)]">{!! safeHtml($footerText) !!}</p>
-                        @endif
-                        @if ($charityNumber)
-                            <p class="mt-4 text-xs text-[var(--site-footer-muted)]/80">Registered Charity No. {{ $charityNumber }}</p>
-                        @endif
+                        <x-footer-about />
                     </div>
                     <div>
                         <h2>Quick Links</h2>
@@ -288,7 +293,7 @@
                     </div>
                 </div>
 
-                <div class="space-y-2 md:hidden" x-data="{ open: 'about' }">
+                <div class="space-y-2 lg:hidden" x-data="{ open: 'about' }">
                     @foreach ([
                         ['id' => 'about', 'title' => 'About', 'slot' => 'about'],
                         ['id' => 'links', 'title' => 'Quick Links', 'slot' => 'links'],
@@ -316,13 +321,7 @@
                                 x-cloak
                             >
                                 @if ($section['slot'] === 'about')
-                                    <p class="pt-3 text-sm leading-relaxed text-[var(--site-footer-muted)]">{{ $siteMotto }}</p>
-                                    @if ($footerText)
-                                        <div class="mt-2 text-sm text-[var(--site-footer-muted)]">{!! safeHtml($footerText) !!}</div>
-                                    @endif
-                                    @if ($charityNumber)
-                                        <p class="mt-3 text-xs text-[var(--site-footer-muted)]/80">Registered Charity No. {{ $charityNumber }}</p>
-                                    @endif
+                                    <x-footer-about compact />
                                 @elseif ($section['slot'] === 'links')
                                     <div class="pt-3">
                                         <x-menu :items="$footerMenu" variant="footer" />
@@ -355,17 +354,14 @@
                 <div class="mt-10 border-t border-white/10 pt-8 text-center text-sm text-[var(--site-footer-muted)]">
                     <x-faith-pillars variant="footer" class="!py-0 !mb-8" />
                     <p class="text-xs uppercase tracking-[0.2em] text-[var(--site-footer-muted)]/70">Evangelical Oriental Protestant · Saint Thomas Christian heritage</p>
-                    <p class="mt-2 text-xs text-[var(--site-footer-muted)]/80">
-                        <a href="https://www.eauk.org/churches/st-thomas-evangelical-church-of-india-uk-parish" class="site-footer-accent-link" target="_blank" rel="noopener noreferrer">Evangelical Alliance member church</a>
-                    </p>
-                    <p class="mt-3">&copy; {{ date('Y') }} {{ $siteName }}. All rights reserved.</p>
+                    <p class="mt-6">&copy; {{ date('Y') }} {{ $siteName }}. All rights reserved.</p>
                 </div>
             </div>
         </footer>
 
     </div>
 
-    <div class="mobile-dock-wrap lg:hidden">
+    <div class="mobile-dock-wrap min-[1300px]:hidden">
         <nav class="mobile-dock" aria-label="Quick navigation">
         <a href="{{ route('home') }}" class="mobile-dock-item {{ request()->routeIs('home') ? 'is-active' : '' }}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>

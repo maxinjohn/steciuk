@@ -8,6 +8,7 @@ use App\Models\Service;
 use App\Models\Setting;
 use App\Services\SiteCache;
 use App\Support\ReferenceSiteContent;
+use App\Support\SiteBrandingAssets;
 use Illuminate\Support\Facades\Schema;
 
 class ReferenceSiteContentMigrator
@@ -37,6 +38,8 @@ class ReferenceSiteContentMigrator
                 ['value' => $data['value'], 'group' => $data['group']],
             );
         }
+
+        SiteBrandingAssets::syncDefaultLogoSetting();
     }
 
     private static function applyPages(): void

@@ -32,26 +32,34 @@
 
         $allowedTabIds = array_column($accountTabs, 'id');
         $initialTab = in_array(request('tab'), $allowedTabIds, true) ? request('tab') : 'overview';
+
+        $tabPanelStyle = static fn (string $tabId): string => $initialTab === $tabId ? '' : 'display: none;';
     @endphp
 
     <section class="member-portal py-8 sm:py-12 md:py-14">
-        <div class="member-portal-shell mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div class="member-portal-shell site-content-shell mx-auto w-full max-w-7xl">
             <div class="member-portal-hero" x-data="{ avatarUrl: @js($user->avatarUrl()) }" @avatar-updated.window="avatarUrl = $event.detail.url">
                 <div class="member-portal-hero-main">
                     <div class="member-portal-avatar-wrap member-portal-avatar--xl">
-                        <template x-if="avatarUrl">
+                        @if ($user->avatarUrl())
                             <img
-                                :src="avatarUrl"
+                                src="{{ $user->avatarUrl() }}"
                                 alt=""
                                 class="member-portal-avatar-img"
                                 width="144"
                                 height="144"
                                 loading="eager"
                                 decoding="async"
+                                x-show="avatarUrl"
+                                x-bind:src="avatarUrl"
                                 x-on:error="avatarUrl = null"
                             >
-                        </template>
-                        <span class="member-portal-avatar member-portal-avatar--xl" x-show="!avatarUrl" aria-hidden="true">{{ $user->initials() }}</span>
+                        @endif
+                        <span
+                            class="member-portal-avatar member-portal-avatar--xl"
+                            @if ($user->avatarUrl()) x-show="! avatarUrl" @endif
+                            aria-hidden="true"
+                        >{{ $user->initials() }}</span>
                     </div>
                     <div>
                         <p class="member-portal-kicker">Member portal</p>
@@ -100,8 +108,8 @@
                     @foreach ($accountTabs as $accountTab)
                         <button
                             type="button"
-                            class="member-portal-tab"
-                            :class="tab === @js($accountTab['id']) && 'is-active'"
+                            class="member-portal-tab @if ($initialTab === $accountTab['id']) is-active @endif"
+                            :class="{ 'is-active': tab === @js($accountTab['id']) }"
                             @click="tab = @js($accountTab['id'])"
                         >
                             <span class="member-portal-tab__label">{{ $accountTab['label'] }}</span>
@@ -113,7 +121,7 @@
                 </nav>
 
                 <div class="member-portal-panels">
-                    <div x-show="tab === 'overview'" x-cloak class="member-portal-panel-stack">
+                    <div x-show="tab === 'overview'" style="{{ $tabPanelStyle('overview') }}" class="member-portal-panel-stack">
                         <div class="member-portal-card">
                             <h2 class="member-portal-panel-title">Your details</h2>
                             <dl class="member-portal-dl">
@@ -172,67 +180,53 @@
                         </div>
                     </div>
 
-                    <template x-if="tab === 'messages'">
-                        <div>
-                            @livewire('account.parish-messages-manager')
-                        </div>
-                    </template>
+                    <div x-show="tab === 'messages'" style="{{ $tabPanelStyle('messages') }}">
+                        @livewire('account.parish-messages-manager')
+                    </div>
 
-                    <template x-if="tab === 'photo'">
-                        <div class="member-portal-card member-portal-card--profile">
-                            <h2 class="member-portal-panel-title">Photo & identity</h2>
-                            <p class="member-portal-panel-intro">Make your profile feel like you — upload, replace, or remove your photo any time.</p>
-                            <div class="mt-6">
-                                @livewire('account.profile-avatar-form')
-                            </div>
+                    <div x-show="tab === 'photo'" style="{{ $tabPanelStyle('photo') }}" class="member-portal-card member-portal-card--profile">
+                        <h2 class="member-portal-panel-title">Photo & identity</h2>
+                        <p class="member-portal-panel-intro">Make your profile feel like you — upload, replace, or remove your photo any time.</p>
+                        <div class="mt-6">
+                            @livewire('account.profile-avatar-form')
                         </div>
-                    </template>
+                    </div>
 
-                    <template x-if="tab === 'contact'">
-                        <div class="member-portal-card">
-                            <h2 class="member-portal-panel-title">Contact & address</h2>
-                            <p class="member-portal-panel-intro">Keep your contact details and UK address up to date for parish communications.</p>
-                            <div class="mt-6">
-                                @livewire('account.profile-form')
-                            </div>
+                    <div x-show="tab === 'contact'" style="{{ $tabPanelStyle('contact') }}" class="member-portal-card">
+                        <h2 class="member-portal-panel-title">Contact & address</h2>
+                        <p class="member-portal-panel-intro">Keep your contact details and UK address up to date for parish communications.</p>
+                        <div class="mt-6">
+                            @livewire('account.profile-form')
                         </div>
-                    </template>
+                    </div>
 
-                    <template x-if="tab === 'password'">
-                        <div class="member-portal-card">
-                            <h2 class="member-portal-panel-title">Password</h2>
-                            <p class="member-portal-panel-intro">Change your sign-in password separately from your profile details.</p>
-                            <div class="mt-6">
-                                @livewire('account.profile-password-form')
-                            </div>
+                    <div x-show="tab === 'password'" style="{{ $tabPanelStyle('password') }}" class="member-portal-card">
+                        <h2 class="member-portal-panel-title">Password</h2>
+                        <p class="member-portal-panel-intro">Change your sign-in password separately from your profile details.</p>
+                        <div class="mt-6">
+                            @livewire('account.profile-password-form')
                         </div>
-                    </template>
+                    </div>
 
-                    <template x-if="tab === 'privacy'">
-                        <div class="member-portal-card">
-                            <h2 class="member-portal-panel-title">Privacy & data</h2>
-                            <p class="member-portal-panel-intro">Exercise your UK data protection rights — download your data, manage marketing preferences, or request deletion.</p>
-                            <div class="mt-6">
-                                @livewire('account.profile-privacy-form')
-                            </div>
+                    <div x-show="tab === 'privacy'" style="{{ $tabPanelStyle('privacy') }}" class="member-portal-card">
+                        <h2 class="member-portal-panel-title">Privacy & data</h2>
+                        <p class="member-portal-panel-intro">Exercise your UK data protection rights — download your data, manage marketing preferences, or request deletion.</p>
+                        <div class="mt-6">
+                            @livewire('account.profile-privacy-form')
                         </div>
-                    </template>
+                    </div>
 
                     @if ($showFamilyTab)
-                        <template x-if="tab === 'family'">
-                            <div>
-                                @livewire('account.family-members-manager')
-                            </div>
-                        </template>
+                        <div x-show="tab === 'family'" style="{{ $tabPanelStyle('family') }}">
+                            @livewire('account.family-members-manager')
+                        </div>
                     @endif
 
-                    <template x-if="tab === 'giving'">
-                        <div>
-                            @livewire('account.donation-manager')
-                        </div>
-                    </template>
+                    <div x-show="tab === 'giving'" style="{{ $tabPanelStyle('giving') }}">
+                        @livewire('account.donation-manager')
+                    </div>
 
-                    <div x-show="tab === 'parish'" x-cloak class="member-portal-panel-stack">
+                    <div x-show="tab === 'parish'" style="{{ $tabPanelStyle('parish') }}" class="member-portal-panel-stack">
                         <div class="member-portal-card">
                             <h2 class="member-portal-panel-title">Parish life</h2>
                             <ul class="member-portal-link-list" role="list">

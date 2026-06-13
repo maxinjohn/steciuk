@@ -43,7 +43,7 @@
 @endphp
 
 <section {{ $attributes->merge(['class' => 'parish-action-strip parish-action-strip--' . $variant]) }} aria-label="Parish quick actions">
-    <div class="parish-action-strip-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="parish-action-strip-inner mx-auto max-w-7xl">
         <p class="parish-action-strip-kicker">
             <span class="genz-kicker-dot" aria-hidden="true"></span>
             Draw near · Worship · Pray

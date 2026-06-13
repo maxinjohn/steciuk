@@ -15,7 +15,7 @@
         <x-parish-action-strip class="!py-3" />
 
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
-            <div class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="page-section-inner mx-auto max-w-7xl">
                 <div class="article-layout">
                     <div>
                         @if ($ministry->description)

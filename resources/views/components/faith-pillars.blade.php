@@ -14,7 +14,7 @@
 @endphp
 
 <section {{ $attributes->merge(['class' => 'faith-pillars faith-pillars--' . $variant]) }} aria-label="What we believe">
-    <div class="faith-pillars-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="faith-pillars-inner mx-auto max-w-7xl">
         <p class="faith-pillars-kicker">
             <span class="genz-kicker-dot" aria-hidden="true"></span>
             STECI evangelical faith · Revelation 1:9

@@ -18,7 +18,7 @@
         : null;
 
     $sizeClasses = match ($size) {
-        'large', 'immersive' => 'min-h-0 py-14 sm:py-16 lg:min-h-[min(84vh,780px)] lg:py-24',
+        'large', 'immersive' => 'min-h-0 py-12 sm:py-14 lg:min-h-[min(72vh,680px)] lg:py-20',
         'small' => 'min-h-0 py-10 sm:py-12 lg:min-h-[28vh]',
         default => 'min-h-0 py-12 sm:py-14 lg:min-h-[40vh] lg:py-24',
     };
@@ -43,7 +43,7 @@
         <div class="absolute inset-0 bg-surface" aria-hidden="true"></div>
     @endif
 
-    <div class="relative mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-8 lg:px-10">
+    <div class="page-section-inner relative mx-auto w-full max-w-7xl">
         <div class="hero-grid">
             <div @class(['hero-copy', 'text-ink' => $style === 'minimal'])>
                 @if ($style !== 'minimal')

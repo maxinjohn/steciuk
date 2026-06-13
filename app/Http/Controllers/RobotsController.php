@@ -14,14 +14,32 @@ class RobotsController extends Controller
         $host = rtrim(config('app.url'), '/');
         $adminPath = AdminPanelConfig::path();
 
+        $privatePaths = [
+            'login',
+            'register',
+            'forgot-password',
+            'reset-password',
+            'registration/pending',
+            'account',
+            'offline',
+            'livewire',
+        ];
+
         $lines = [
             '# STECI UK Parish',
             'User-agent: *',
             'Allow: /',
             'Disallow: /'.$adminPath,
             'Disallow: /'.$adminPath.'/',
-            'Disallow: /offline',
-            'Disallow: /livewire/',
+        ];
+
+        foreach ($privatePaths as $path) {
+            $lines[] = 'Disallow: /'.$path;
+            $lines[] = 'Disallow: /'.$path.'/';
+        }
+
+        $lines = [
+            ...$lines,
             '',
             'User-agent: GPTBot',
             'Disallow: /',

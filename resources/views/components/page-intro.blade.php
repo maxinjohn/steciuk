@@ -2,7 +2,7 @@
     'title',
     'subtitle' => null,
     'kicker' => 'Evangelical Oriental Protestant Parish',
-    'showStrips' => true,
+    'showStrips' => false,
     'showScripture' => true,
     'scripture' => 'Your word is a lamp to my feet and a light to my path.',
     'scriptureRef' => 'Psalm 119:105',
