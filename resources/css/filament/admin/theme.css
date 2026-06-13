@@ -515,6 +515,20 @@
     @apply rounded-2xl border border-stone-200 bg-white shadow-2xl;
 }
 
+.fi-modal:not(.fi-modal-slide-over) .fi-modal-window-has-content.fi-modal-window {
+    max-height: min(92dvh, 960px);
+}
+
+.fi-modal:not(.fi-modal-slide-over) .fi-modal-window-has-content .fi-modal-content {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.fi-modal-slide-over .fi-modal-content {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
 .dark .fi-modal-window {
     @apply border-white/10 bg-slate-900;
 }
