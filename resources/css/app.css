@@ -3934,7 +3934,7 @@ html.dark {
         justify-self: end;
         width: 100%;
         max-width: 100%;
-        margin-top: 2.625rem;
+        margin-top: 3.875rem;
     }
 
     .hero-grid--home-art .hero-art-showcase__frame {
@@ -3943,16 +3943,34 @@ html.dark {
 
     .hero-grid--home-art .hero-eyebrow {
         margin-bottom: 0.5rem;
-        white-space: nowrap;
+        white-space: normal;
+        overflow-wrap: anywhere;
         font-size: clamp(0.4375rem, 2.45vw, 0.8125rem);
         letter-spacing: 0.028em;
-        line-height: 1.25;
+        line-height: 1.35;
         max-width: 100%;
+    }
+
+    @media (max-width: 767px) {
+        .hero-grid--home-art .hero-intro-block {
+            position: relative;
+            z-index: 3;
+            padding-right: 0.125rem;
+        }
+
+        .hero-grid--home-art .hero-art-showcase {
+            z-index: 1;
+            margin-top: 4.125rem;
+        }
     }
 
     @media (max-width: 479px) {
         .hero-grid--home-art {
-            grid-template-columns: minmax(0, 1fr) minmax(6.5rem, 38%);
+            grid-template-columns: minmax(0, 1fr) minmax(6.5rem, 36%);
+        }
+
+        .hero-grid--home-art .hero-art-showcase {
+            margin-top: 4.5rem;
         }
 
         .hero-grid--home-art .hero-art-showcase__frame {
@@ -3969,14 +3987,14 @@ html.dark {
         }
     }
 
-    @media (min-width: 480px) {
+    @media (min-width: 480px) and (max-width: 767px) {
         .hero-grid--home-art .hero-eyebrow {
             font-size: clamp(0.5625rem, 2.2vw, 0.8125rem);
             letter-spacing: 0.045em;
         }
 
         .hero-grid--home-art .hero-art-showcase {
-            margin-top: 3rem;
+            margin-top: 4rem;
         }
     }
 
@@ -3992,6 +4010,7 @@ html.dark {
         .hero-grid--home-art .hero-eyebrow {
             font-size: 0.8125rem;
             letter-spacing: 0.08em;
+            white-space: nowrap;
         }
 
         .hero-grid--home-art .hero-art-showcase {
