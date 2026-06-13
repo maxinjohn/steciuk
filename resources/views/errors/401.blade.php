@@ -4,9 +4,9 @@
     message="You need to sign in before you can view this page."
     verse="Draw near to God, and he will draw near to you."
     verse-ref="James 4:8"
-    primary-label="Parish admin sign in"
-    :primary-url="\App\Support\AdminPanelConfig::url('login')"
-    secondary-label="Public site"
+    primary-label="Member sign in"
+    :primary-url="route('login')"
+    secondary-label="Back to home"
     :secondary-url="url('/')"
-    :show-admin-link="false"
+    :show-admin-link="true"
 />
