@@ -2,16 +2,24 @@
 
 const updateThemeColor = () => {
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) return;
-    meta.setAttribute('content', document.documentElement.classList.contains('dark') ? '#131316' : '#d4cabb');
+    if (! meta) {
+        return;
+    }
+
+    const root = document.documentElement;
+    const light = root.dataset.themeColorLight || '#d4cabb';
+    const dark = root.dataset.themeColorDark || '#131316';
+
+    meta.setAttribute('content', root.classList.contains('dark') ? dark : light);
 };
 
 const initDarkMode = () => {
     const stored = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    if (stored === 'dark' || (!stored && prefersDark)) {
+    if (stored === 'dark') {
         document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
     }
 
     updateThemeColor();
@@ -40,6 +48,11 @@ window.galleryLightbox = () => ({
     open(index) {
         this.current = index;
         this.lightbox = true;
+        document.body.classList.add('gallery-lightbox-open');
+    },
+    close() {
+        this.lightbox = false;
+        document.body.classList.remove('gallery-lightbox-open');
     },
     next() {
         if (! this.photos.length) return;
@@ -284,6 +297,13 @@ const bindDesktopNav = (shell) => {
 const initDesktopNav = () => {
     document.querySelectorAll('.desktop-nav-dock, .desktop-nav-shell').forEach((shell) => {
         bindDesktopNav(shell);
+        ensureDesktopNavEndVisible(shell);
+    });
+};
+
+const syncDesktopNavLayout = () => {
+    document.querySelectorAll('.desktop-nav-dock, .desktop-nav-shell').forEach((shell) => {
+        ensureDesktopNavEndVisible(shell);
     });
 };
 
@@ -604,7 +624,9 @@ document.addEventListener('DOMContentLoaded', initPublicSiteUi);
 window.addEventListener('load', () => {
     initDesktopNav();
     initMobileNav();
+    syncDesktopNavLayout();
 });
+window.addEventListener('resize', syncDesktopNavLayout, { passive: true });
 document.addEventListener('livewire:navigated', () => {
     initDesktopNav();
     initMobileNav();

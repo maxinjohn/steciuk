@@ -274,6 +274,13 @@ html.dark {
             width: fit-content;
             max-width: 100%;
             margin-inline: auto;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .desktop-nav-dock::-webkit-scrollbar,
+        .desktop-nav-shell::-webkit-scrollbar {
+            display: none;
         }
 
         .desktop-nav-list {
@@ -4740,36 +4747,38 @@ html.dark {
 
     @media (min-width: 768px) {
         .gallery-mosaic {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 1rem;
         }
+    }
 
-        .gallery-tile--wide {
-            grid-column: span 2;
-            grid-row: span 2;
+    @media (min-width: 1300px) {
+        .gallery-mosaic {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
         }
     }
 
     .gallery-tile {
-        border-radius: 20px;
-        min-height: 10rem;
-    }
-
-    .gallery-tile-media {
         position: relative;
-        height: 100%;
-        min-height: 10rem;
+        display: block;
+        aspect-ratio: 4 / 3;
+        border-radius: 20px;
         overflow: hidden;
     }
 
-    .gallery-tile--wide .gallery-tile-media {
-        min-height: 16rem;
+    .gallery-tile-media {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
     }
 
     .gallery-tile-image {
+        position: absolute;
+        inset: 0;
         height: 100%;
         width: 100%;
         object-fit: cover;
+        object-position: center;
         transition: transform 0.5s ease;
     }
 
@@ -5546,10 +5555,6 @@ html.dark .heavenly-comfort-card {
 }
 
 @media (min-width: 1300px) {
-    .site-header-inner {
-        padding: 0.625rem 1.5rem 0.625rem max(0.25rem, env(safe-area-inset-left, 0px));
-    }
-
     .hero-title-gradient {
         font-size: clamp(2.5rem, 4.2vw, 3.75rem);
         letter-spacing: -0.035em;
@@ -6357,11 +6362,14 @@ html.dark .site-category-pill {
 
 .gallery-photo-btn {
     position: relative;
+    display: block;
+    width: 100%;
     aspect-ratio: 1;
     overflow: hidden;
     border-radius: 1.125rem;
     border: 1px solid var(--site-border);
     background: var(--site-surface-2);
+    padding: 0;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -6377,14 +6385,21 @@ html.dark .site-category-pill {
 }
 
 .gallery-photo-btn img {
+    position: absolute;
+    inset: 0;
     height: 100%;
     width: 100%;
     object-fit: cover;
+    object-position: center;
     transition: transform 0.35s ease;
 }
 
 .gallery-photo-btn:hover img {
     transform: scale(1.05);
+}
+
+body.gallery-lightbox-open {
+    overflow: hidden;
 }
 
 .contact-office-card {
@@ -6725,14 +6740,6 @@ html.dark .site-category-pill {
     .gallery-mosaic {
         grid-template-columns: 1fr;
         gap: 0.875rem;
-    }
-
-    .gallery-tile {
-        min-height: 11.5rem;
-    }
-
-    .gallery-tile-media {
-        min-height: 11.5rem;
     }
 
     .gallery-photo-grid {

@@ -11,7 +11,8 @@ class GalleryController extends Controller
     {
         $albums = \App\Models\GalleryAlbum::query()
             ->active()
-            ->withCount('photos')
+            ->withCount(['photos as photos_count' => fn ($query) => $query->published()])
+            ->with(['photos' => fn ($query) => $query->published()->orderBy('sort_order')->limit(1)])
             ->orderBy('sort_order')
             ->paginate(12);
 

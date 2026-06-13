@@ -27,13 +27,13 @@ class GalleryPhotoForm
                 Textarea::make('caption')
                     ->rows(3)
                     ->columnSpanFull(),
-                SecureFileUpload::image('image_path', 'gallery/photos')->required(),
+                SecureFileUpload::image('image_path', 'gallery/photos')
+                    ->required(),
                 SecureFileUpload::image('bulk_images', 'gallery/photos')
                     ->label('Additional photos')
                     ->multiple()
                     ->maxFiles(20)
                     ->dehydrated(false)
-                    ->visibleOn('create')
                     ->helperText('Optional. Each extra file is saved as its own photo in this album.'),
                 TextInput::make('alt_text')
                     ->label('Alt text')

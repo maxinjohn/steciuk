@@ -103,6 +103,7 @@ class HomePageData
             'albums' => GalleryAlbum::query()
                 ->select(['id', 'title', 'slug', 'cover_image', 'sort_order', 'status'])
                 ->active()
+                ->with(['photos' => fn ($query) => $query->published()->orderBy('sort_order')->limit(1)])
                 ->orderBy('sort_order')
                 ->limit(4)
                 ->get(),

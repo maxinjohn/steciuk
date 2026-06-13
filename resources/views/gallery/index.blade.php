@@ -20,16 +20,13 @@
                         <x-card
                             :href="route('gallery.show', $album->slug)"
                             :padding="false"
-                            @class([
-                                'gallery-tile overflow-hidden',
-                                'gallery-tile--wide' => $loop->index % 5 === 0,
-                            ])
+                            class="gallery-tile overflow-hidden"
                         >
                             <div class="gallery-tile-media">
                                 @php
                                     $coverVariant = str_contains(strtolower($album->slug), 'fellowship') ? 'fellowship' : 'worship';
                                 @endphp
-                                <img src="{{ galleryCoverUrl($album->cover_image, $coverVariant) }}" alt="{{ $album->title }}" loading="lazy" decoding="async" class="gallery-tile-image">
+                                <img src="{{ galleryCoverUrl($album->cover_image, $coverVariant, $album) }}" alt="{{ $album->title }}" loading="lazy" decoding="async" class="gallery-tile-image">
                                 <div class="gallery-tile-overlay">
                                     <span class="feed-sticker">{{ $album->photos_count }} photos</span>
                                     <h2 class="gallery-tile-title">{{ $album->title }}</h2>
