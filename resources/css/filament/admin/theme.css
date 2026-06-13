@@ -15,6 +15,7 @@
     --admin-dock-accent-glow: rgba(245, 158, 11, 0.42);
     --admin-dock-bar-height: 4.125rem;
     --admin-dock-wrap-padding: 0.5rem;
+    --admin-topbar-height: calc(4rem + env(safe-area-inset-top, 0px));
     --admin-dock-height: calc(
         var(--admin-dock-bar-height) + var(--admin-dock-wrap-padding) + 0.625rem + env(safe-area-inset-bottom, 0px)
     );
@@ -527,6 +528,42 @@
 .fi-modal-slide-over .fi-modal-content {
     overflow-y: auto;
     overscroll-behavior: contain;
+}
+
+/* Slide-over panels sit below the sticky admin topbar (and above the mobile dock). */
+.fi-modal.fi-modal-slide-over > .fi-modal-close-overlay,
+.fi-modal.fi-modal-slide-over > .fi-modal-window-ctn {
+    z-index: 50;
+    top: var(--admin-topbar-height, 4rem);
+    bottom: 0;
+    height: auto;
+}
+
+@media (max-width: 1023px) {
+    .fi-modal.fi-modal-slide-over > .fi-modal-close-overlay,
+    .fi-modal.fi-modal-slide-over > .fi-modal-window-ctn {
+        bottom: var(--admin-dock-height, 0px);
+    }
+}
+
+.fi-modal.fi-modal-slide-over > .fi-modal-window-ctn {
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+    grid-template-rows: none;
+    min-height: 0;
+    padding: 0;
+}
+
+.fi-modal.fi-modal-slide-over > .fi-modal-window-ctn > .fi-modal-window {
+    height: 100% !important;
+    max-height: 100%;
+    min-height: 0;
+    border-radius: 0;
+}
+
+.fi-modal.fi-modal-slide-over.fi-modal-slide-over-from-end > .fi-modal-window-ctn > .fi-modal-window {
+    @apply rounded-s-2xl border-s border-stone-200 dark:border-white/10;
 }
 
 @media (max-width: 1023px) {

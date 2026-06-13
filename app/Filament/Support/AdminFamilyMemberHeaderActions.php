@@ -34,7 +34,7 @@ class AdminFamilyMemberHeaderActions
             ->stickyModalHeader()
             ->stickyModalFooter()
             ->modalHeading('Add new household member')
-            ->modalDescription('Create a new parish account and link it to this household. Use a slide-over panel so every field stays reachable on mobile and desktop.')
+            ->modalDescription('Create a parish account and link it to this household.')
             ->form([
                 Grid::make(['default' => 1, 'md' => 2])
                     ->schema([
@@ -111,7 +111,7 @@ class AdminFamilyMemberHeaderActions
             ->stickyModalHeader()
             ->stickyModalFooter()
             ->modalHeading('Add existing members to this household')
-            ->modalDescription('Choose one or more parish accounts to link here. Members already assigned elsewhere stay disabled until you turn on “Move from another household”.')
+            ->modalDescription('Select parish accounts to link here. Enable move when someone belongs to another household.')
             ->form([
                 Select::make('user_ids')
                     ->label('Member accounts')
