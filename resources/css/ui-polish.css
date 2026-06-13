@@ -222,7 +222,7 @@ html.dark .mobile-drawer-cta--give {
     font-weight: 600;
 }
 
-/* Maintenance page — Gen-Z parish vibe */
+/* Maintenance gate page — full-screen themes (shares launch card components) */
 .maintenance-page {
     min-height: 100dvh;
     display: flex;
@@ -230,103 +230,31 @@ html.dark .mobile-drawer-cta--give {
     justify-content: center;
     padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
     background:
-        radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--site-accent) 28%, transparent), transparent 42%),
-        radial-gradient(circle at 80% 0%, color-mix(in srgb, var(--site-brand) 35%, transparent), transparent 38%),
-        linear-gradient(160deg, var(--site-bg), color-mix(in srgb, var(--site-brand) 12%, var(--site-bg)));
+        radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--site-accent) 34%, transparent), transparent 40%),
+        radial-gradient(circle at 85% 10%, color-mix(in srgb, #f472b6 18%, transparent), transparent 36%),
+        radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--site-brand) 28%, transparent), transparent 42%),
+        linear-gradient(165deg, var(--site-bg), color-mix(in srgb, var(--site-brand) 14%, var(--site-bg)));
     color: var(--site-ink);
     overflow: hidden;
     position: relative;
 }
 
-.maintenance-page::before,
-.maintenance-page::after {
-    content: '';
-    position: absolute;
-    border-radius: 9999px;
-    filter: blur(60px);
-    opacity: 0.35;
-    animation: maintenanceFloat 12s ease-in-out infinite;
-    pointer-events: none;
+.maintenance-page--fullscreen,
+.maintenance-page--immersive {
+    width: 100%;
+    min-height: 100dvh;
+    height: 100dvh;
 }
 
-.maintenance-page::before {
-    width: 18rem;
-    height: 18rem;
-    top: -4rem;
-    right: -3rem;
-    background: var(--site-accent);
+.maintenance-body:has(.maintenance-page--fullscreen),
+.maintenance-body:has(.maintenance-page--immersive) {
+    overflow: hidden;
 }
 
-.maintenance-page::after {
-    width: 14rem;
-    height: 14rem;
-    bottom: -3rem;
-    left: -2rem;
-    background: var(--site-brand);
-    animation-delay: -4s;
-}
-
-.maintenance-shell {
+.maintenance-page .launch-shell {
     position: relative;
     z-index: 1;
-    width: min(100%, 26rem);
-}
-
-.maintenance-card {
-    border-radius: 1.75rem;
-    border: 1px solid color-mix(in srgb, var(--site-accent) 25%, transparent);
-    background: color-mix(in srgb, var(--site-surface) 88%, transparent);
-    backdrop-filter: blur(18px);
-    box-shadow:
-        0 28px 70px color-mix(in srgb, var(--site-brand) 18%, transparent),
-        inset 0 1px 0 color-mix(in srgb, white 35%, transparent);
-    padding: clamp(1.5rem, 4vw, 2.25rem);
-    text-align: center;
-}
-
-.maintenance-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    padding: 0.4rem 0.85rem;
-    border-radius: 9999px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--site-brand);
-    background: color-mix(in srgb, var(--site-accent) 18%, transparent);
-    animation: maintenancePulse 2.4s ease-in-out infinite;
-}
-
-.maintenance-badge-dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 9999px;
-    background: #22c55e;
-    box-shadow: 0 0 12px #22c55e;
-}
-
-.maintenance-title {
-    margin: 0 0 0.75rem;
-    font-size: clamp(1.75rem, 5vw, 2.35rem);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -0.04em;
-    background: linear-gradient(120deg, var(--site-brand), var(--site-accent), var(--site-brand));
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: gradientShift 8s ease infinite;
-}
-
-.maintenance-message {
-    margin: 0;
-    font-size: 1rem;
-    line-height: 1.65;
-    color: var(--site-ink-muted);
+    width: min(100%, 34rem);
 }
 
 .maintenance-progress {
@@ -334,7 +262,7 @@ html.dark .mobile-drawer-cta--give {
     height: 0.35rem;
     max-width: 12rem;
     border-radius: 9999px;
-    background: color-mix(in srgb, var(--site-brand) 10%, transparent);
+    background: color-mix(in srgb, var(--launch-accent, var(--site-brand)) 10%, transparent);
     overflow: hidden;
 }
 
@@ -343,76 +271,12 @@ html.dark .mobile-drawer-cta--give {
     height: 100%;
     width: 40%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--site-accent), color-mix(in srgb, var(--site-accent) 60%, white));
+    background: linear-gradient(
+        90deg,
+        var(--launch-accent, var(--site-accent)),
+        color-mix(in srgb, var(--launch-accent-2, var(--site-accent)) 60%, white)
+    );
     animation: maintenanceProgress 2.8s ease-in-out infinite;
-}
-
-.maintenance-chips {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-top: 1.25rem;
-}
-
-.maintenance-chip {
-    padding: 0.35rem 0.7rem;
-    border-radius: 9999px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--site-ink-muted);
-    background: color-mix(in srgb, var(--site-brand) 6%, var(--site-surface));
-}
-
-.maintenance-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-    margin-top: 1.5rem;
-}
-
-.maintenance-verse {
-    margin: 1.25rem 0 0;
-    padding-top: 1rem;
-    border-top: 1px solid color-mix(in srgb, var(--site-brand) 10%, transparent);
-    font-size: 0.85rem;
-    font-style: italic;
-    line-height: 1.55;
-    color: var(--site-ink-muted);
-}
-
-.maintenance-verse cite {
-    display: block;
-    margin-top: 0.35rem;
-    font-style: normal;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--site-accent);
-}
-
-.maintenance-admin-link {
-    margin-top: 1rem;
-    font-size: 0.78rem;
-    color: var(--site-ink-muted);
-}
-
-.maintenance-admin-link a {
-    color: var(--site-accent);
-    font-weight: 700;
-    text-decoration: none;
-}
-
-@keyframes maintenanceFloat {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(1.25rem) scale(1.05); }
-}
-
-@keyframes maintenancePulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.72; }
 }
 
 @keyframes maintenanceProgress {
@@ -1360,7 +1224,8 @@ html.dark .mobile-drawer-cta--give {
 }
 
 /* Theme: Parish classic (default) */
-.launch-page--theme-parish {
+.launch-page--theme-parish,
+.maintenance-page--theme-parish {
     --launch-accent: var(--site-accent);
     --launch-accent-2: #f472b6;
     --launch-accent-3: var(--site-brand);
@@ -1392,7 +1257,8 @@ html.dark .mobile-drawer-cta--give {
 }
 
 /* Theme: Neon pulse */
-.launch-page--theme-neon {
+.launch-page--theme-neon,
+.maintenance-page--theme-neon {
     --launch-accent: #00f5d4;
     --launch-accent-2: #7c3aed;
     --launch-accent-3: #f72585;
@@ -1484,7 +1350,8 @@ html.dark .mobile-drawer-cta--give {
 }
 
 /* Theme: Grand opening */
-.launch-page--theme-grand {
+.launch-page--theme-grand,
+.maintenance-page--theme-grand {
     --launch-accent: #dc2626;
     --launch-accent-2: #fbbf24;
     --launch-accent-3: #991b1b;
@@ -1520,7 +1387,8 @@ html.dark .mobile-drawer-cta--give {
 }
 
 /* Theme: Aurora mesh */
-.launch-page--theme-aurora {
+.launch-page--theme-aurora,
+.maintenance-page--theme-aurora {
     --launch-accent: #818cf8;
     --launch-accent-2: #f472b6;
     --launch-accent-3: #22d3ee;
@@ -1562,7 +1430,8 @@ html.dark .mobile-drawer-cta--give {
 }
 
 /* Theme: Party mode */
-.launch-page--theme-party {
+.launch-page--theme-party,
+.maintenance-page--theme-party {
     --launch-accent: #ff006e;
     --launch-accent-2: #ffbe0b;
     --launch-accent-3: #3a86ff;
@@ -1611,6 +1480,186 @@ html.dark .mobile-drawer-cta--give {
 .launch-page--theme-party .launch-countdown__unit:nth-child(1) { --i: -2; }
 .launch-page--theme-party .launch-countdown__unit:nth-child(2) { --i: 1; }
 .launch-page--theme-party .launch-countdown__unit:nth-child(3) { --i: -1; }
+
+.maintenance-page--theme-neon .launch-card {
+    border-color: rgba(0, 245, 212, 0.35);
+    background: rgba(10, 12, 28, 0.78);
+    box-shadow:
+        0 0 0 1px rgba(124, 58, 237, 0.25),
+        0 28px 80px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.maintenance-page--theme-neon .launch-title {
+    background: linear-gradient(120deg, #00f5d4, #7c3aed, #f72585, #00f5d4);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.maintenance-page--theme-neon .launch-message,
+.maintenance-page--theme-neon .launch-admin-link {
+    color: rgba(226, 232, 240, 0.78);
+}
+
+.maintenance-page--theme-neon .launch-badge,
+.maintenance-page--theme-neon .launch-chip {
+    color: #00f5d4;
+    background: rgba(0, 245, 212, 0.08);
+}
+
+.maintenance-page--theme-neon .launch-toolbar-btn {
+    color: #f8fafc;
+    border-color: rgba(0, 245, 212, 0.35);
+    background: rgba(8, 10, 24, 0.82);
+}
+
+.maintenance-page--theme-aurora .launch-card {
+    border-color: rgba(129, 140, 248, 0.28);
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.maintenance-page--theme-aurora .launch-orbit--one {
+    background: #818cf8;
+}
+
+.maintenance-page--theme-aurora .launch-orbit--two {
+    background: #f472b6;
+}
+
+.maintenance-page--theme-party .launch-title {
+    font-family: ui-rounded, "Avenir Next", system-ui, sans-serif;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+}
+
+.maintenance-page--theme-party .launch-card {
+    transform: rotate(-0.35deg);
+    border: 2px solid rgba(255, 0, 110, 0.14);
+    box-shadow: 6px 6px 0 rgba(58, 134, 255, 0.12);
+}
+
+/* Theme: Bold contrast (legacy slug: genz) */
+.launch-page--theme-bold,
+.maintenance-page--theme-bold,
+.launch-page--theme-genz,
+.maintenance-page--theme-genz {
+    --launch-accent: #ccff00;
+    --launch-accent-2: #ff007a;
+    --launch-accent-3: #00d4ff;
+    --launch-scissors: #ff007a;
+    --launch-cut-a: #ccff00;
+    --launch-cut-b: #ff007a;
+    --launch-copy: rgba(248, 250, 252, 0.82);
+    background:
+        radial-gradient(circle at 8% 18%, rgba(204, 255, 0, 0.28), transparent 34%),
+        radial-gradient(circle at 92% 12%, rgba(255, 0, 122, 0.32), transparent 36%),
+        radial-gradient(circle at 50% 100%, rgba(0, 212, 255, 0.22), transparent 42%),
+        linear-gradient(155deg, #09090f, #12121f 52%, #0a0a12);
+    color: #f8fafc;
+}
+
+.launch-page--theme-bold::after,
+.maintenance-page--theme-bold::after,
+.launch-page--theme-genz::after,
+.maintenance-page--theme-genz::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    background: repeating-linear-gradient(
+        180deg,
+        transparent 0,
+        transparent 2px,
+        rgba(255, 255, 255, 0.35) 2px,
+        rgba(255, 255, 255, 0.35) 3px
+    );
+}
+
+.launch-page--theme-bold .launch-card,
+.maintenance-page--theme-bold .launch-card,
+.launch-page--theme-genz .launch-card,
+.maintenance-page--theme-genz .launch-card {
+    border: 2px solid rgba(204, 255, 0, 0.45);
+    background: rgba(8, 8, 16, 0.82);
+    box-shadow:
+        0 0 0 1px rgba(255, 0, 122, 0.25),
+        0 0 48px rgba(0, 212, 255, 0.12),
+        8px 8px 0 rgba(255, 0, 122, 0.18);
+    transform: rotate(-0.6deg);
+}
+
+.launch-page--theme-bold .launch-title,
+.maintenance-page--theme-bold .launch-title,
+.launch-page--theme-genz .launch-title,
+.maintenance-page--theme-genz .launch-title {
+    font-family: ui-rounded, "Avenir Next", system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    background: linear-gradient(120deg, #ccff00, #00d4ff, #ff007a, #ccff00);
+    background-size: 240% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientShift 4s linear infinite, genzGlitch 3.2s steps(2, end) infinite;
+}
+
+.launch-page--theme-bold .launch-message,
+.launch-page--theme-bold .launch-admin-link,
+.maintenance-page--theme-bold .launch-message,
+.maintenance-page--theme-bold .launch-admin-link,
+.launch-page--theme-genz .launch-message,
+.launch-page--theme-genz .launch-admin-link,
+.maintenance-page--theme-genz .launch-message,
+.maintenance-page--theme-genz .launch-admin-link {
+    color: rgba(248, 250, 252, 0.78);
+}
+
+.launch-page--theme-bold .launch-badge,
+.launch-page--theme-bold .launch-chip,
+.maintenance-page--theme-bold .launch-badge,
+.maintenance-page--theme-bold .launch-chip,
+.launch-page--theme-genz .launch-badge,
+.launch-page--theme-genz .launch-chip,
+.maintenance-page--theme-genz .launch-badge,
+.maintenance-page--theme-genz .launch-chip {
+    color: #ccff00;
+    background: rgba(204, 255, 0, 0.1);
+    border: 1px solid rgba(204, 255, 0, 0.35);
+    transform: rotate(calc(var(--sticker-tilt, 0) * 1deg));
+}
+
+.maintenance-page--theme-bold .launch-chip:nth-child(odd),
+.maintenance-page--theme-genz .launch-chip:nth-child(odd) { --sticker-tilt: -3; }
+.maintenance-page--theme-bold .launch-chip:nth-child(even),
+.maintenance-page--theme-genz .launch-chip:nth-child(even) { --sticker-tilt: 2; }
+
+.launch-page--theme-bold .launch-toolbar-btn,
+.maintenance-page--theme-bold .launch-toolbar-btn,
+.launch-page--theme-genz .launch-toolbar-btn,
+.maintenance-page--theme-genz .launch-toolbar-btn {
+    color: #ccff00;
+    border-color: rgba(204, 255, 0, 0.45);
+    background: rgba(8, 8, 16, 0.88);
+    box-shadow: 0 0 18px rgba(255, 0, 122, 0.18);
+}
+
+.maintenance-page--theme-bold .maintenance-progress,
+.maintenance-page--theme-genz .maintenance-progress {
+    max-width: 14rem;
+    border: 1px solid rgba(204, 255, 0, 0.25);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.maintenance-page--theme-bold .maintenance-progress__bar,
+.maintenance-page--theme-genz .maintenance-progress__bar {
+    background: linear-gradient(90deg, #ccff00, #ff007a, #00d4ff, #ccff00);
+    background-size: 200% auto;
+    animation: maintenanceProgress 1.6s ease-in-out infinite, gradientShift 2.4s linear infinite;
+}
+
 .launch-page--theme-neon .launch-splash {
     background:
         radial-gradient(circle at 50% 15%, rgba(0, 245, 212, 0.16), transparent 45%),
@@ -1737,6 +1786,13 @@ html.dark .mobile-drawer-cta--give {
     100% { width: 100%; }
 }
 
+@keyframes genzGlitch {
+    0%, 92%, 100% { transform: translate(0); filter: none; }
+    93% { transform: translate(-2px, 1px); filter: hue-rotate(25deg); }
+    95% { transform: translate(2px, -1px); filter: hue-rotate(-20deg); }
+    97% { transform: translate(-1px, 0); }
+}
+
 @keyframes launchTitlePop {
     0% { transform: scale(1); }
     45% { transform: scale(1.04); }
@@ -1762,10 +1818,7 @@ html.dark .mobile-drawer-cta--give {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .maintenance-badge-dot,
     .maintenance-progress__bar,
-    .maintenance-shell::before,
-    .maintenance-shell::after,
     .launch-orbit,
     .launch-badge-dot,
     .launch-countdown__unit--pulse,
@@ -1779,5 +1832,11 @@ html.dark .mobile-drawer-cta--give {
     .launch-splash__progress-bar,
     .launch-splash__inner {
         animation: none !important;
+    }
+
+    .topic-card-aura__orb,
+    .topic-card-shimmer {
+        animation: none !important;
+        transition: none !important;
     }
 }

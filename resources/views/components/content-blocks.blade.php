@@ -51,6 +51,10 @@
                 :stats="$data['stats'] ?? []"
                 size="large"
                 :show-side-panel="true"
+                art-slug="home"
+                :art-title="$data['headline'] ?? $block->title"
+                art-context="page"
+                :art-content="trim(($data['subtitle'] ?? '').' '.($data['eyebrow'] ?? ''))"
             >
                 @if (! empty($data['primary_cta_label']))
                     <x-button href="{{ $resolveLink($data['primary_cta_url'] ?? '#') }}" hero>
@@ -70,12 +74,9 @@
             </x-hero>
             <x-scripture-ribbon text="God is spirit, and his worshippers must worship in the Spirit and in truth." reference="John 4:24" />
             <x-heavenly-comfort
-                :heading="$faithComfortHeading ?? null"
-                :subheading="$faithComfortSubheading ?? null"
-                :kicker="$faithComfortKicker ?? null"
+                :headers="$faithComfortHeaders ?? []"
                 :cards="$faithComfortCards ?? []"
             />
-            <x-faith-whispers variant="home" />
             @break
 
         @case('text_image')
@@ -157,28 +158,12 @@
 
         @case('ministry_cards')
             @php $items = $ministries->take($data['limit'] ?? 4); @endphp
-            <section class="page-section page-section--compact">
+            <section class="page-section page-section--compact home-showcase-section">
                 <div class="page-section-inner mx-auto max-w-7xl">
                     <x-section-heading :title="$data['heading'] ?? 'Our Ministries'" :subtitle="$data['subheading'] ?? null" />
                     <div class="bento-grid bento-grid--ministries mt-8">
                         @forelse ($items as $ministry)
-                            <a href="{{ route('ministries.show', $ministry->slug) }}" class="bento-tile group">
-                                <div class="bento-tile-media">
-                                    @if ($storageUrl($ministry->featured_image))
-                                        <img src="{{ $storageUrl($ministry->featured_image) }}" alt="{{ $ministry->name }}" loading="lazy" decoding="async" class="bento-tile-image">
-                                    @else
-                                        <div class="bento-tile-fallback"><span>{{ substr($ministry->name, 0, 1) }}</span></div>
-                                    @endif
-                                </div>
-                                <div class="bento-tile-body">
-                                    <span class="feed-sticker feed-sticker--inline">Ministry</span>
-                                    <h3 class="bento-tile-title">{{ $ministry->name }}</h3>
-                                    @if ($ministry->short_description)
-                                        <p class="bento-tile-desc">{{ $ministry->short_description }}</p>
-                                    @endif
-                                    <span class="bento-tile-link">Explore →</span>
-                                </div>
-                            </a>
+                            <x-ministry-card :ministry="$ministry" heading-tag="h3" />
                         @empty
                             <p class="feed-empty col-span-full">Ministries will appear here soon.</p>
                         @endforelse
@@ -196,7 +181,7 @@
 
         @case('event_list')
             @php $items = $events->take($data['limit'] ?? 3); @endphp
-            <section class="page-section page-section--compact">
+            <section class="page-section page-section--compact home-showcase-section">
                 <div class="page-section-inner mx-auto max-w-7xl">
                     <x-section-heading :title="$data['heading'] ?? 'Upcoming Events'" />
                     <div class="feed-grid mt-8">
@@ -204,19 +189,21 @@
                             <x-card
                                 href="{{ route('events.show', $event->slug) }}"
                                 :padding="false"
-                                @class(['feed-card overflow-hidden', 'feed-card--featured' => $loop->first])
+                                @class(['feed-card topic-card wow-card overflow-hidden', 'feed-card--featured' => $loop->first])
                             >
-                                <div class="feed-card-media">
-                                    @if ($storageUrl($event->featured_image))
-                                        <img src="{{ $storageUrl($event->featured_image) }}" alt="" class="feed-card-image" loading="lazy" decoding="async">
-                                    @else
-                                        <div class="feed-card-fallback feed-card-fallback--event">
-                                            <span class="feed-date-day">{{ $event->starts_at->format('d') }}</span>
-                                            <span class="feed-date-month">{{ $event->starts_at->format('M') }}</span>
-                                        </div>
-                                    @endif
-                                    <span class="feed-sticker">{{ $event->category ?? 'Event' }}</span>
-                                </div>
+                                <x-feed-card-media
+                                    :image="$event->featured_image"
+                                    :slug="$event->slug"
+                                    :title="$event->title"
+                                    context="event"
+                                    :alt="$event->title"
+                                    :sticker="$event->category ?? 'Event'"
+                                    :day="$event->starts_at->format('d')"
+                                    :month="$event->starts_at->format('M')"
+                                    :weekday="$event->starts_at->format('D')"
+                                    :category="$event->category"
+                                    :content="\App\Support\PageTopicArt::contentHintForRecord($event->description, null, null, $event->location, $event->category)"
+                                />
                                 <div class="feed-card-body">
                                     <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
                                         {{ $event->starts_at->format('l, j F') }}
@@ -243,30 +230,104 @@
             </section>
             @break
 
+        @case('news_list')
+            @php $items = $news->take($data['limit'] ?? 3); @endphp
+            <section class="page-section page-section--compact home-showcase-section">
+                <div class="page-section-inner mx-auto max-w-7xl">
+                    <x-section-heading
+                        :title="$data['heading'] ?? 'Latest News'"
+                        :subtitle="$data['subheading'] ?? null"
+                    />
+                    <div class="feed-grid feed-grid--news mt-8">
+                        @forelse ($items as $article)
+                            <x-card
+                                href="{{ route('news.show', $article->slug) }}"
+                                :padding="false"
+                                @class([
+                                    'feed-card topic-card wow-card overflow-hidden',
+                                    'feed-card--featured' => $loop->first,
+                                ])
+                            >
+                                <x-feed-card-media
+                                    :image="$article->featured_image"
+                                    :slug="$article->slug"
+                                    :title="$article->title"
+                                    context="news"
+                                    :alt="$article->title"
+                                    :sticker="$article->category ?: 'News'"
+                                    sticker-class="feed-sticker--violet"
+                                    :day="$article->published_at?->format('d')"
+                                    :month="$article->published_at?->format('M')"
+                                    :weekday="$article->published_at?->format('D')"
+                                    :category="$article->category"
+                                    :content="\App\Support\PageTopicArt::contentHintForRecord($article->body ?? null, $article->excerpt, null, null, $article->category)"
+                                />
+                                <div class="feed-card-body">
+                                    <time datetime="{{ $article->published_at?->toIso8601String() }}" class="feed-meta">
+                                        {{ $article->published_at?->format('j F Y') }}
+                                    </time>
+                                    <h3 class="feed-card-title">{{ $article->title }}</h3>
+                                    @if ($article->excerpt)
+                                        <p class="feed-card-desc line-clamp-3">{{ $article->excerpt }}</p>
+                                    @endif
+                                    <span class="feed-card-cta">Read more →</span>
+                                </div>
+                            </x-card>
+                        @empty
+                            <p class="feed-empty">News articles will appear here soon.</p>
+                        @endforelse
+                    </div>
+                    @if (! empty($data['link_label']))
+                        <div class="mt-10 text-center">
+                            <x-button href="{{ $resolveLink($data['link_url'] ?? route('news.index')) }}" variant="outline">
+                                {{ $data['link_label'] }}
+                            </x-button>
+                        </div>
+                    @endif
+                </div>
+            </section>
+            @break
+
         @case('sermon_list')
             @php $items = $sermons->take($data['limit'] ?? 3); @endphp
-            <section class="page-section page-section--compact">
+            <section class="page-section page-section--compact home-showcase-section">
                 <div class="page-section-inner mx-auto max-w-7xl">
                     <x-section-heading :title="$data['heading'] ?? 'Recent Sermons'" />
                     <div class="sermon-stack mt-8">
                         @forelse ($items as $sermon)
-                            <x-card class="sermon-card">
-                                <div class="sermon-card-top">
-                                    <div class="sermon-card-icon" aria-hidden="true">
-                                        <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6.75 6.75 0 006.75-6.75v-1.5m-6.75 1.5c-1.357 0-2.573.516-3.5 1.35m0 0c-1.128 1.019-2.25 1.519-3.5 1.519m9 2.25c-1.357 0-2.573-.516-3.5-1.35m0 0c-1.128-1.019-2.25-1.519-3.5-1.519m0 0V21m0-3.375c0-1.357.516-2.573 1.35-3.5m0 0c1.019-1.128 1.519-2.25 1.519-3.5"/></svg>
+                            <x-card class="sermon-card topic-card wow-card overflow-hidden">
+                                <div class="sermon-card-layout">
+                                    <div class="sermon-card-media wow-card-media">
+                                        <x-feed-card-media
+                                            :image="$sermon->featured_image ?? null"
+                                            :slug="$sermon->slug"
+                                            :title="$sermon->title"
+                                            context="sermon"
+                                            :alt="$sermon->title"
+                                            :sticker="$sermon->bible_passage"
+                                            :day="$sermon->preached_at?->format('d')"
+                                            :month="$sermon->preached_at?->format('M')"
+                                        :weekday="$sermon->preached_at?->format('D')"
+                                        :category="$sermon->category"
+                                        :content="\App\Support\PageTopicArt::contentHintForRecord($sermon->description ?? null, $sermon->summary ?? null, null, null, $sermon->bible_passage)"
+                                    />
                                     </div>
-                                    <div class="min-w-0 flex-1">
-                                        @if ($sermon->bible_passage)
-                                            <span class="feed-sticker feed-sticker--inline">{{ $sermon->bible_passage }}</span>
-                                        @endif
-                                        <h3 class="sermon-card-title">{{ $sermon->title }}</h3>
-                                        <p class="sermon-card-meta">{{ $sermon->speaker }} · {{ $sermon->preached_at?->format('j M Y') }}</p>
+                                    <div class="sermon-card-content">
+                                        <div class="sermon-card-top">
+                                            <div class="min-w-0 flex-1">
+                                                @if ($sermon->bible_passage)
+                                                    <span class="feed-sticker feed-sticker--inline">{{ $sermon->bible_passage }}</span>
+                                                @endif
+                                                <h3 class="sermon-card-title">{{ $sermon->title }}</h3>
+                                                <p class="sermon-card-meta">{{ $sermon->speaker }} · {{ $sermon->preached_at?->format('j M Y') }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="sermon-card-actions">
+                                            @if ($sermon->youtube_url)
+                                                <x-button href="{{ $sermon->youtube_url }}" variant="primary" class="!min-h-11 !text-sm" target="_blank" rel="noopener noreferrer">Watch</x-button>
+                                            @endif
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="sermon-card-actions">
-                                    @if ($sermon->youtube_url)
-                                        <x-button href="{{ $sermon->youtube_url }}" variant="primary" class="!min-h-11 !text-sm" target="_blank" rel="noopener noreferrer">Watch</x-button>
-                                    @endif
                                 </div>
                             </x-card>
                         @empty
@@ -286,23 +347,12 @@
 
         @case('gallery')
             @php $items = $albums->take($data['limit'] ?? 6); @endphp
-            <section class="page-section page-section--compact">
+            <section class="page-section page-section--compact home-showcase-section">
                 <div class="page-section-inner mx-auto max-w-7xl">
                     <x-section-heading :title="$data['heading'] ?? 'Gallery'" />
                     <div class="gallery-mosaic mt-8">
                         @forelse ($items as $album)
-                            <x-card :href="route('gallery.show', $album->slug)" :padding="false" class="gallery-tile overflow-hidden">
-                                <div class="gallery-tile-media">
-                                    @php
-                                        $coverVariant = str_contains(strtolower($album->slug), 'fellowship') ? 'fellowship' : 'worship';
-                                    @endphp
-                                    <img src="{{ galleryCoverUrl($album->cover_image, $coverVariant, $album) }}" alt="{{ $album->title }}" loading="lazy" decoding="async" class="gallery-tile-image">
-                                    <div class="gallery-tile-overlay">
-                                        <span class="feed-sticker">Album</span>
-                                        <h3 class="gallery-tile-title">{{ $album->title }}</h3>
-                                    </div>
-                                </div>
-                            </x-card>
+                            <x-gallery-tile-card :album="$album" />
                         @empty
                             <p class="feed-empty col-span-full">Gallery albums coming soon.</p>
                         @endforelse
@@ -411,58 +461,20 @@
                         </div>
 
                         @foreach ($locationsData as $index => $location)
-                            @php $service = $location['service']; @endphp
                             <div
                                 role="tabpanel"
-                                class="location-panel"
                                 data-location-panel
                                 data-location-index="{{ $index }}"
                                 id="location-panel-{{ $block->id ?? 'block' }}-{{ $index }}"
                                 aria-labelledby="location-tab-{{ $block->id ?? 'block' }}-{{ $index }}"
                                 @if ($index !== 0) hidden @endif
                             >
-                                <div class="flex items-start gap-4">
-                                    <div class="location-panel-icon shrink-0">
-                                        <svg class="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <h3 class="font-bold text-2xl text-ink">{{ $location['name'] }}</h3>
-                                        @if ($service?->frequency)
-                                            <p class="mt-1 text-sm font-medium text-brand">{{ $service->frequency }}</p>
-                                        @endif
-                                        @if ($service?->description)
-                                            <p class="mt-3 text-sm leading-relaxed text-ink-muted">{{ $service->description }}</p>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                @if ($service && ($service->service_day || $service->service_time || $service->formattedAddress()))
-                                    <dl class="mt-6 grid gap-3 sm:grid-cols-2">
-                                        @if ($service->service_day || $service->service_time)
-                                            <div class="rounded-xl bg-[var(--site-surface-2)] px-4 py-3">
-                                                <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">When</dt>
-                                                <dd class="mt-1 text-sm font-medium text-ink">
-                                                    {{ trim(($service->service_day ?? '') . ' · ' . ($service->service_time ?? ''), ' ·') }}
-                                                </dd>
-                                            </div>
-                                        @endif
-                                        @if ($service->formattedAddress())
-                                            <div class="rounded-xl bg-[var(--site-surface-2)] px-4 py-3 sm:col-span-2">
-                                                <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Address</dt>
-                                                <dd class="mt-1 text-sm text-ink">{{ $service->formattedAddress() }}</dd>
-                                            </div>
-                                        @endif
-                                    </dl>
-                                @endif
-
-                                <div class="mt-6 flex flex-wrap gap-3">
-                                    @if ($service?->map_link)
-                                        <x-button href="{{ $service->map_link }}" variant="outline" class="!min-h-11 !w-auto !px-4 !py-2 !text-sm" target="_blank" rel="noopener noreferrer">View Map</x-button>
-                                    @endif
-                                    <x-button href="{{ $resolveLink($data['link_url'] ?? route('services.index')) }}" variant="secondary" class="!min-h-11 !w-auto !px-4 !py-2 !text-sm">
-                                        {{ $data['link_label'] ?? 'All Service Times' }}
-                                    </x-button>
-                                </div>
+                                <x-location-tab-panel
+                                    :location-name="$location['name']"
+                                    :service="$location['service']"
+                                    :link-url="$resolveLink($data['link_url'] ?? route('services.index'))"
+                                    :link-label="$data['link_label'] ?? 'All Service Times'"
+                                />
                             </div>
                         @endforeach
                     </div>

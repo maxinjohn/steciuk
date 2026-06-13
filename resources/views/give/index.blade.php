@@ -10,6 +10,9 @@
         kicker="UK Parish · Giving"
         scripture="Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver."
         scripture-ref="2 Corinthians 9:7"
+        art-slug="give"
+        :art-title="$heading"
+        art-context="worship"
     />
 
     <section class="page-section page-section--compact">

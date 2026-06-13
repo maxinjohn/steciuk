@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Setting;
+use App\Services\LaunchModeService;
 use App\Services\MaintenanceModeService;
 use App\Support\AdminPanelConfig;
 use App\Support\SeedConfig;
@@ -48,7 +49,7 @@ class MaintenanceModeTest extends TestCase
 
         $response->assertStatus(503);
         $response->assertSee('Parish site refresh in progress.', false);
-        $response->assertSee('Site refresh mode', false);
+        $response->assertSee('Under maintenance', false);
     }
 
     public function test_service_times_button_hidden_when_no_active_services(): void
@@ -100,5 +101,59 @@ class MaintenanceModeTest extends TestCase
         MaintenanceModeService::disable();
 
         $this->get('/')->assertOk();
+    }
+
+    public function test_maintenance_page_renders_selected_theme(): void
+    {
+        MaintenanceModeService::saveGates([MaintenanceModeService::normalizeGate([
+            'id' => SitePathGate::newId('mg'),
+            'enabled' => true,
+            'label' => 'Neon refresh',
+            'scope' => SitePathGate::SCOPE_SITE,
+            'target_path' => '',
+            'path_match' => SitePathGate::MATCH_PREFIX,
+            'theme' => LaunchModeService::THEME_NEON,
+        ])]);
+
+        $this->get('/')
+            ->assertStatus(503)
+            ->assertSee('maintenance-page--theme-neon', false)
+            ->assertSee('data-maintenance-fullscreen', false);
+    }
+
+    public function test_maintenance_page_renders_bold_theme(): void
+    {
+        MaintenanceModeService::saveGates([MaintenanceModeService::normalizeGate([
+            'id' => SitePathGate::newId('mg'),
+            'enabled' => true,
+            'label' => 'Site maintenance',
+            'scope' => SitePathGate::SCOPE_SITE,
+            'target_path' => '',
+            'path_match' => SitePathGate::MATCH_PREFIX,
+            'theme' => LaunchModeService::THEME_BOLD,
+        ])]);
+
+        $this->get('/')
+            ->assertStatus(503)
+            ->assertSee('maintenance-page--theme-bold', false)
+            ->assertDontSee('Site maintenance · entire', false)
+            ->assertDontSee('entire site', false);
+    }
+
+    public function test_maintenance_page_does_not_show_admin_rule_name_for_site_wide_gate(): void
+    {
+        MaintenanceModeService::saveGates([MaintenanceModeService::normalizeGate([
+            'id' => SitePathGate::newId('mg'),
+            'enabled' => true,
+            'label' => 'Internal admin label only',
+            'scope' => SitePathGate::SCOPE_SITE,
+            'target_path' => '',
+            'path_match' => SitePathGate::MATCH_PREFIX,
+        ])]);
+
+        $this->get('/')
+            ->assertStatus(503)
+            ->assertDontSee('Internal admin label only', false)
+            ->assertDontSee('entire site', false);
     }
 }

@@ -77,7 +77,7 @@ class PageSeeder extends Seeder
         $bodies = ReferenceSiteContent::pageBodies();
         $fields = ReferenceSiteContent::pageFields();
 
-        $simple = static function (string $title, string $slug, string $template, string $heroTitle, string $heroSubtitle) use ($bodies, $fields): array {
+        $simple = static function (string $title, string $slug, string $template, string $heroTitle, string $heroSubtitle, bool $showHero = true) use ($bodies, $fields): array {
             $content = $bodies[$slug] ?? '';
             $pageFields = $fields[$slug] ?? [];
 
@@ -92,7 +92,8 @@ class PageSeeder extends Seeder
                 'template' => $template,
                 'sort_order' => 0,
                 'is_home' => false,
-                'show_hero' => false,
+                'show_hero' => $showHero,
+                'hero_style' => 'gradient',
             ];
         };
 
@@ -203,15 +204,15 @@ class PageSeeder extends Seeder
                 ],
                 [
                     'seed_key' => 'news',
-                    'type' => ContentBlockType::TextImage,
+                    'type' => ContentBlockType::NewsList,
                     'title' => 'Latest News',
                     'sort_order' => 6,
                     'content' => [
                         'heading' => 'Latest News',
-                        'body' => 'Gospel-centred news from across our five worship locations — prayer, mission, Holy Communion, and parish fellowship.',
+                        'subheading' => 'Gospel-centred news from across our five worship locations',
+                        'limit' => 3,
                         'link_url' => '/news',
                         'link_label' => 'Read All News',
-                        'image_alt' => 'Parish community gathering',
                     ],
                 ],
                 [

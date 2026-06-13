@@ -7,6 +7,8 @@ use App\Models\Page;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\AdminPanelConfig;
+use App\Support\FaithContent;
+use App\Support\GatePageCopy;
 use App\Support\SiteBrandingAssets;
 use App\Support\SitePathGate;
 use Carbon\CarbonInterface;
@@ -41,6 +43,11 @@ class LaunchModeService
     public const THEME_AURORA = 'aurora';
 
     public const THEME_PARTY = 'party';
+
+    public const THEME_BOLD = 'bold';
+
+    /** @deprecated Use THEME_BOLD */
+    public const THEME_GENZ = 'bold';
 
     public const PHASE_COUNTDOWN = 'countdown';
 
@@ -365,11 +372,12 @@ class LaunchModeService
     public static function themeOptions(): array
     {
         return [
-            self::THEME_PARISH => 'Parish classic — soft glass & gold',
-            self::THEME_NEON => 'Neon pulse — cyber Gen-Z glow',
-            self::THEME_GRAND => 'Grand opening — red ribbon & gold',
-            self::THEME_AURORA => 'Aurora mesh — dreamy colour wash',
-            self::THEME_PARTY => 'Party mode — loud stickers & pop',
+            self::THEME_PARISH => 'Parish classic — warm glass and gold',
+            self::THEME_NEON => 'Night glow — dark background, bright accents',
+            self::THEME_GRAND => 'Grand opening — ribbon red and gold',
+            self::THEME_AURORA => 'Aurora — soft colour wash',
+            self::THEME_PARTY => 'Celebration — bright colour and movement',
+            self::THEME_BOLD => 'Bold contrast — strong layout and typography',
         ];
     }
 
@@ -393,7 +401,10 @@ class LaunchModeService
 
     public static function normalizeTheme(mixed $theme): string
     {
-        $theme = (string) $theme;
+        $theme = match ((string) $theme) {
+            'genz' => self::THEME_BOLD,
+            default => (string) $theme,
+        };
 
         return array_key_exists($theme, self::themeOptions())
             ? $theme
@@ -481,23 +492,28 @@ class LaunchModeService
         $isRibbonLaunch = $launchStyle === self::STYLE_RIBBON;
         $showRibbonCeremony = $isRibbonLaunch && $phase === self::PHASE_RIBBON;
         $splash = self::splashData($gate);
+        $comfortVerse = self::gateComfortVerse($gate);
 
         return [
             'gateId' => (string) ($gate['id'] ?? ''),
             'phase' => $phase,
             'theme' => $theme,
-            'title' => self::gateText($gate, 'title', 'Something beautiful is on the way'),
-            'subtitle' => self::gateText($gate, 'subtitle', $isRibbonLaunch ? 'Grand opening' : 'Launch countdown'),
+            'title' => self::gateText($gate, 'title', GatePageCopy::LAUNCH_TITLE),
+            'subtitle' => self::gateText(
+                $gate,
+                'subtitle',
+                $isRibbonLaunch ? GatePageCopy::LAUNCH_SUBTITLE_RIBBON : GatePageCopy::LAUNCH_SUBTITLE_COUNTDOWN,
+            ),
             'message' => self::gateText(
                 $gate,
                 'message',
                 $isRibbonLaunch
-                    ? 'We are ready to unveil something special. A parish team member will cut the ribbon to go live.'
-                    : 'We are preparing a special moment for our parish family. Stay tuned — worship continues across the UK.',
+                    ? GatePageCopy::LAUNCH_MESSAGE_RIBBON
+                    : GatePageCopy::LAUNCH_MESSAGE_COUNTDOWN,
             ),
             'eventName' => self::gateText($gate, 'event_name'),
-            'verse' => self::gateText($gate, 'verse', 'Wait for the Lord; be strong and take heart and wait for the Lord.'),
-            'verseRef' => self::gateText($gate, 'verse_ref', 'Psalm 27:14'),
+            'verse' => $comfortVerse['text'],
+            'verseRef' => $comfortVerse['ref'],
             'countdownAt' => $countdownAt?->toIso8601String(),
             'showCountdown' => ! $isRibbonLaunch
                 && ($gate['show_countdown'] ?? true) !== false
@@ -653,7 +669,7 @@ class LaunchModeService
         return self::normalizeGate([
             'id' => SitePathGate::newId('lg'),
             'enabled' => false,
-            'label' => 'New countdown',
+            'label' => 'New launch rule',
             'scope' => self::SCOPE_SITE,
             'target_path' => '',
             'path_match' => self::MATCH_PREFIX,
@@ -665,9 +681,9 @@ class LaunchModeService
             'allow_admin_ribbon' => true,
             'allow_public_ribbon' => false,
             'event_name' => '',
-            'subtitle' => 'Launch countdown',
-            'title' => 'Something beautiful is on the way',
-            'message' => 'We are preparing a special moment for our parish family. Stay tuned — worship continues across the UK.',
+            'subtitle' => GatePageCopy::LAUNCH_SUBTITLE_COUNTDOWN,
+            'title' => GatePageCopy::LAUNCH_TITLE,
+            'message' => GatePageCopy::LAUNCH_MESSAGE_COUNTDOWN,
             'verse' => 'Wait for the Lord; be strong and take heart and wait for the Lord.',
             'verse_ref' => 'Psalm 27:14',
         ]);
@@ -704,12 +720,28 @@ class LaunchModeService
             'allow_admin_ribbon' => ($gate['allow_admin_ribbon'] ?? true) !== false && ($gate['allow_admin_ribbon'] ?? '1') !== '0',
             'allow_public_ribbon' => false,
             'event_name' => trim((string) ($gate['event_name'] ?? '')),
-            'subtitle' => trim((string) ($gate['subtitle'] ?? 'Launch countdown')),
+            'subtitle' => trim((string) ($gate['subtitle'] ?? GatePageCopy::LAUNCH_SUBTITLE_COUNTDOWN)),
             'title' => trim((string) ($gate['title'] ?? '')),
             'message' => trim((string) ($gate['message'] ?? '')),
             'verse' => trim((string) ($gate['verse'] ?? '')),
             'verse_ref' => trim((string) ($gate['verse_ref'] ?? '')),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $gate
+     * @return array{text: string, ref: string}
+     */
+    private static function gateComfortVerse(array $gate): array
+    {
+        $text = self::gateText($gate, 'verse', '');
+        $ref = self::gateText($gate, 'verse_ref', '');
+
+        if ($text !== '') {
+            return ['text' => $text, 'ref' => $ref];
+        }
+
+        return FaithContent::randomVerse('launch');
     }
 
     /**
@@ -764,7 +796,7 @@ class LaunchModeService
             'allow_admin_ribbon' => Setting::get('launch_mode_allow_ribbon_cut', '1') !== '0',
             'allow_public_ribbon' => false,
             'event_name' => Setting::get('launch_mode_event_name'),
-            'subtitle' => Setting::get('launch_mode_subtitle', 'Launch countdown'),
+            'subtitle' => Setting::get('launch_mode_subtitle', GatePageCopy::LAUNCH_SUBTITLE_COUNTDOWN),
             'title' => Setting::get('launch_mode_title'),
             'message' => Setting::get('launch_mode_message'),
             'verse' => Setting::get('launch_mode_verse'),

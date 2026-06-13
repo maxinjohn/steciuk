@@ -4,6 +4,7 @@
     'message' => 'We could not complete your request.',
     'verse' => null,
     'verseRef' => null,
+    'randomVerse' => true,
     'primaryLabel' => 'Back to home',
     'primaryUrl' => null,
     'secondaryLabel' => null,
@@ -13,9 +14,16 @@
 
 @php
     use App\Support\AdminPanelConfig;
+    use App\Support\FaithContent;
 
     $primaryUrl ??= url('/');
     $isAdmin = request()->is(AdminPanelConfig::pathPattern());
+
+    if ($randomVerse && ($verse === null || $verse === '')) {
+        $picked = FaithContent::randomVerse('error');
+        $verse = $picked['text'] !== '' ? $picked['text'] : null;
+        $verseRef ??= $picked['ref'] !== '' ? $picked['ref'] : null;
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="en-GB">

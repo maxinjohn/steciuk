@@ -80,7 +80,7 @@ class AdminUiTest extends TestCase
         $response->assertSee('admin-form-tabs', false);
         $response->assertDontSee('admin-form-tabs fi-sc-tabs fi-vertical', false);
         $response->assertSee('Identity', false);
-        $response->assertSee('Faith copy', false);
+        $response->assertSee('Church Identity', false);
     }
 
     public function test_mobile_admin_hides_top_sidebar_toggle(): void

@@ -29,7 +29,7 @@ class ErrorPagesTest extends TestCase
         $response->assertSee('Page not found', false);
         $response->assertSee('error-card', false);
         $response->assertSee('viewport', false);
-        $response->assertSee('Proverbs 3:5', false);
+        $response->assertSee('error-verse', false);
     }
 
     public function test_403_uses_fancy_error_page(): void
@@ -92,6 +92,7 @@ class ErrorPagesTest extends TestCase
 
         $response->assertStatus(500);
         $response->assertSee('Something went wrong', false);
+        $response->assertSee('error-verse', false);
         $response->assertDontSee('Secret internals', false);
         $response->assertDontSee('RuntimeException', false);
     }

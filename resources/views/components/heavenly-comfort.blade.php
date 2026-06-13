@@ -2,10 +2,19 @@
     'heading' => null,
     'subheading' => null,
     'kicker' => null,
+    'headers' => [],
     'cards' => [],
 ])
 
 @php
+    $defaultHeaders = [
+        [
+            'kicker' => 'For every believer',
+            'heading' => 'Rest in the Lord',
+            'subheading' => 'Scripture, prayer, and Holy Communion — anchors for daily faith in Christ',
+        ],
+    ];
+
     $defaultCards = [
         [
             'icon' => '🕊',
@@ -39,10 +48,29 @@
         ],
     ];
 
+    $headerPool = collect($headers)
+        ->filter(fn ($item) => ! empty($item['kicker'] ?? null) || ! empty($item['heading'] ?? null) || ! empty($item['subheading'] ?? null))
+        ->values();
+
+    if ($headerPool->isEmpty() && ($kicker || $heading || $subheading)) {
+        $headerPool = collect([[
+            'kicker' => $kicker,
+            'heading' => $heading,
+            'subheading' => $subheading,
+        ]]);
+    }
+
+    if ($headerPool->isEmpty()) {
+        $headerPool = collect($defaultHeaders);
+    }
+
     $comforts = collect($cards)->filter(fn ($item) => ! empty($item['title']))->values();
     if ($comforts->isEmpty()) {
         $comforts = collect($defaultCards);
     }
+
+    $index = (int) now()->format('w') % max($headerPool->count(), 1);
+    $header = $headerPool[$index];
 @endphp
 
 <section {{ $attributes->merge(['class' => 'heavenly-comfort']) }} aria-label="Comfort in Christ">
@@ -52,10 +80,10 @@
         <div class="heavenly-comfort-header">
             <p class="heavenly-comfort-kicker">
                 <span class="genz-kicker-dot" aria-hidden="true"></span>
-                {{ $kicker ?: 'For every believer' }}
+                {{ $header['kicker'] ?: 'For every believer' }}
             </p>
-            <h2 class="heavenly-comfort-title">{{ $heading ?: 'Rest in the Lord' }}</h2>
-            <p class="heavenly-comfort-subtitle">{{ $subheading ?: 'Scripture, prayer, and Holy Communion — anchors for daily faith in Christ' }}</p>
+            <h2 class="heavenly-comfort-title">{{ $header['heading'] ?: 'Rest in the Lord' }}</h2>
+            <p class="heavenly-comfort-subtitle">{{ $header['subheading'] ?: 'Scripture, prayer, and Holy Communion — anchors for daily faith in Christ' }}</p>
         </div>
         <div class="heavenly-comfort-grid" role="list">
             @foreach ($comforts as $item)

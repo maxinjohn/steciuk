@@ -10,6 +10,7 @@ enum ContentBlockType: string
     case Cta = 'cta';
     case MinistryCards = 'ministry_cards';
     case EventList = 'event_list';
+    case NewsList = 'news_list';
     case SermonList = 'sermon_list';
     case Gallery = 'gallery';
     case Faq = 'faq';
@@ -29,6 +30,7 @@ enum ContentBlockType: string
             self::Cta => 'Call to action',
             self::MinistryCards => 'Ministry cards',
             self::EventList => 'Event list',
+            self::NewsList => 'News list',
             self::SermonList => 'Sermon list',
             self::Gallery => 'Gallery preview',
             self::Faq => 'FAQ accordion',

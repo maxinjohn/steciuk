@@ -64,4 +64,15 @@ class MaintenanceAdminAccessTest extends TestCase
 
         $this->assertSame('ok', $response->getContent());
     }
+
+    public function test_logged_in_admin_still_sees_maintenance_on_public_site(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+        MaintenanceModeService::enable();
+
+        $this->actingAs($admin)
+            ->get('/')
+            ->assertStatus(503)
+            ->assertSee('Under maintenance', false);
+    }
 }

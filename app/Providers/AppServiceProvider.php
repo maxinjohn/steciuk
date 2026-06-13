@@ -15,6 +15,7 @@ use App\Services\SecurityLogger;
 use App\Services\SqliteHealth;
 use App\Services\SqliteOptimizer;
 use App\Support\SitePaths;
+use App\Support\SiteUrl;
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Resources\Events\RecordCreated;
@@ -56,6 +57,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        SiteUrl::configureRootUrl();
+
         Connection::resolverFor('sqlite', function ($connection, $database, $prefix, $config) {
             return new SQLiteConnection($connection, $database, $prefix, $config);
         });

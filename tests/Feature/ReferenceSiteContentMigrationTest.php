@@ -129,7 +129,9 @@ class ReferenceSiteContentMigrationTest extends TestCase
         $this->assertStringContainsString('What We Reject', $ourChurch);
         $this->assertStringContainsString('Evangelical Alliance Membership', $ourChurch);
         $this->assertStringContainsString('sola scriptura', strtolower($ourChurch));
-        $this->assertSame('Abide in Christ', Setting::get('faith_sanctuary_kicker'));
+        $ribbons = json_decode(Setting::get('faith_sanctuary_ribbons', '[]') ?: '[]', true) ?: [];
+        $this->assertGreaterThanOrEqual(20, count($ribbons));
+        $this->assertSame('In Christ\'s peace', $ribbons[0]['kicker'] ?? null);
         $this->assertSame('STECI worldwide motto', Setting::get('gospel_reminder_kicker'));
         $this->assertStringContainsString('assurance in grace', strtolower(Setting::get('faith_comfort_cards') ?? ''));
 

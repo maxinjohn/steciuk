@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Setting;
 use App\Support\ReferenceSiteContent;
+use App\Support\GatePageCopy;
 use App\Support\SeedConfig;
 use App\Support\SiteBrandingAssets;
 use App\Support\UkAddressFormatter;
@@ -57,14 +58,10 @@ class SettingsSeeder extends Seeder
             ['key' => 'admin_dashboard_verse', 'value' => 'Be still, and know that I am God.', 'group' => 'admin'],
             ['key' => 'admin_dashboard_verse_ref', 'value' => 'Psalm 46:10', 'group' => 'admin'],
             ['key' => 'maintenance_mode_enabled', 'value' => '0', 'group' => 'general'],
-            ['key' => 'maintenance_mode_message', 'value' => 'Our website is temporarily undergoing maintenance. Please check back soon.', 'group' => 'general'],
-            ['key' => 'maintenance_mode_title', 'value' => 'We\'ll be right back', 'group' => 'general'],
-            ['key' => 'maintenance_mode_badge', 'value' => 'Site refresh mode', 'group' => 'general'],
-            ['key' => 'maintenance_mode_chips', 'value' => json_encode([
-                ['label' => 'Worship continues'],
-                ['label' => 'UK parish'],
-                ['label' => 'Almost ready'],
-            ]), 'group' => 'general'],
+            ['key' => 'maintenance_mode_message', 'value' => GatePageCopy::MAINTENANCE_MESSAGE, 'group' => 'general'],
+            ['key' => 'maintenance_mode_title', 'value' => GatePageCopy::MAINTENANCE_TITLE, 'group' => 'general'],
+            ['key' => 'maintenance_mode_badge', 'value' => GatePageCopy::MAINTENANCE_BADGE, 'group' => 'general'],
+            ['key' => 'maintenance_mode_chips', 'value' => json_encode(GatePageCopy::maintenanceChipRows()), 'group' => 'general'],
             ['key' => 'maintenance_mode_verse', 'value' => 'Wait for the Lord; be strong and take heart and wait for the Lord.', 'group' => 'general'],
             ['key' => 'maintenance_mode_verse_ref', 'value' => 'Psalm 27:14', 'group' => 'general'],
             ['key' => 'maintenance_mode_show_service_times', 'value' => '1', 'group' => 'general'],
@@ -80,28 +77,17 @@ class SettingsSeeder extends Seeder
             ['key' => 'launch_mode_allow_ribbon_cut', 'value' => '1', 'group' => 'launch'],
             ['key' => 'launch_mode_launched_at', 'value' => '', 'group' => 'launch'],
             ['key' => 'launch_mode_event_name', 'value' => '', 'group' => 'launch'],
-            ['key' => 'launch_mode_subtitle', 'value' => 'Launch countdown', 'group' => 'launch'],
-            ['key' => 'launch_mode_title', 'value' => 'Something beautiful is on the way', 'group' => 'launch'],
-            ['key' => 'launch_mode_message', 'value' => 'We are preparing a special moment for our parish family. Stay tuned — worship continues across the UK.', 'group' => 'launch'],
+            ['key' => 'launch_mode_subtitle', 'value' => GatePageCopy::LAUNCH_SUBTITLE_COUNTDOWN, 'group' => 'launch'],
+            ['key' => 'launch_mode_title', 'value' => GatePageCopy::LAUNCH_TITLE, 'group' => 'launch'],
+            ['key' => 'launch_mode_message', 'value' => GatePageCopy::LAUNCH_MESSAGE_COUNTDOWN, 'group' => 'launch'],
             ['key' => 'launch_mode_verse', 'value' => 'Wait for the Lord; be strong and take heart and wait for the Lord.', 'group' => 'launch'],
             ['key' => 'launch_mode_verse_ref', 'value' => 'Psalm 27:14', 'group' => 'launch'],
             ['key' => 'logo', 'value' => $logoPath, 'group' => 'branding'],
             ['key' => 'favicon', 'value' => '/icons/favicon.svg', 'group' => 'branding'],
-            ['key' => 'faith_sanctuary_kicker', 'value' => 'In Christ\'s peace', 'group' => 'faith'],
-            ['key' => 'faith_sanctuary_note', 'value' => 'A quiet moment before you go — the Lord is near.', 'group' => 'faith'],
-            ['key' => 'faith_sanctuary_verses', 'value' => json_encode([
-                ['text' => 'Be still, and know that I am God.', 'ref' => 'Psalm 46:10'],
-                ['text' => 'Come to me, all you who are weary and burdened, and I will give you rest.', 'ref' => 'Matthew 11:28'],
-                ['text' => 'Peace I leave with you; my peace I give you.', 'ref' => 'John 14:27'],
-            ]), 'group' => 'faith'],
-            ['key' => 'faith_comfort_kicker', 'value' => 'Sanctuary for believers', 'group' => 'faith'],
-            ['key' => 'faith_comfort_heading', 'value' => 'Rest for the soul', 'group' => 'faith'],
-            ['key' => 'faith_comfort_subheading', 'value' => 'Gentle reminders of Christ’s presence — for worship, prayer, and daily faith', 'group' => 'faith'],
-            ['key' => 'faith_comfort_cards', 'value' => json_encode([
-                ['icon' => '🕊', 'title' => 'Peace in Christ', 'text' => 'His peace guards heart and mind as you draw near in worship and prayer.', 'ref' => 'Philippians 4:7'],
-                ['icon' => '🙏', 'title' => 'Rest in Prayer', 'text' => 'Bring every burden to the Lord — our parish family prays with you.', 'ref' => 'Matthew 11:28', 'link' => '/prayer-request', 'linkLabel' => 'Submit a prayer request'],
-                ['icon' => '📖', 'title' => 'Hope in Scripture', 'text' => 'Holy Scripture nourishes faith — through preaching, reading, and Holy Communion.', 'ref' => 'Romans 15:4', 'link' => '/sermons', 'linkLabel' => 'Listen to a sermon'],
-            ]), 'group' => 'faith'],
+            ['key' => 'faith_sanctuary_ribbons', 'value' => $reference['faith_sanctuary_ribbons']['value'], 'group' => 'faith'],
+            ['key' => 'faith_sanctuary_verses', 'value' => $reference['faith_sanctuary_verses']['value'], 'group' => 'faith'],
+            ['key' => 'faith_comfort_headers', 'value' => $reference['faith_comfort_headers']['value'], 'group' => 'faith'],
+            ['key' => 'faith_comfort_cards', 'value' => $reference['faith_comfort_cards']['value'], 'group' => 'faith'],
             ['key' => 'contact_office_heading', 'value' => $reference['contact_office_heading']['value'], 'group' => 'contact'],
             ['key' => 'contact_office_intro', 'value' => $reference['contact_office_intro']['value'], 'group' => 'contact'],
             ['key' => 'contact_form_heading', 'value' => $reference['contact_form_heading']['value'], 'group' => 'contact'],

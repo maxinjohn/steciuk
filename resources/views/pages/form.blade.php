@@ -21,14 +21,19 @@
         };
     @endphp
 
-    <x-page-intro
+    <x-hero
         :title="$page->hero_title ?? $page->title"
         :subtitle="$page->hero_subtitle"
-        kicker="Evangelical Oriental Protestant · Connect"
-        :scripture="$scripture"
-        :scripture-ref="$scriptureRef"
-        :show-strips="true"
+        :image="$page->featured_image"
+        badge="UK Parish"
+        size="small"
+        :art-slug="$page->slug"
+        :art-title="$page->hero_title ?? $page->title"
+        :art-context="\App\Support\PageTopicArt::contextForPage($page)"
+        :art-content="\App\Support\PageTopicArt::contentHintForPage($page)"
     />
+    <x-parish-action-strip class="parish-action-strip--compact" />
+    <x-scripture-ribbon :text="$scripture" :reference="$scriptureRef" />
 
     <section class="page-section page-section--article py-10 sm:py-12 md:py-14">
         <div class="page-section-inner mx-auto max-w-2xl">

@@ -5,6 +5,7 @@
 
 @php
     use App\Support\GivingUrl;
+    use App\Support\SafeUrl;
 
     $resolveUrl = function ($item): string {
         if (! empty($item->url) && empty($item->page_id)) {
@@ -12,7 +13,11 @@
                 return GivingUrl::route();
             }
 
-            return $item->url;
+            if (($item->is_external ?? false) || str_starts_with($item->url, 'http')) {
+                return $item->url;
+            }
+
+            return SafeUrl::resolve($item->url);
         }
 
         if ($item->page_id) {

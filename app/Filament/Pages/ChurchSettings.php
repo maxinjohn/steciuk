@@ -13,7 +13,6 @@ use App\Support\UkAddressFormatter;
 use App\Support\UkPostcode;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -95,13 +94,6 @@ class ChurchSettings extends Page
             'admin_dashboard_verse_ref' => Setting::get('admin_dashboard_verse_ref'),
             'logo' => Setting::get('logo'),
             'favicon' => Setting::get('favicon'),
-            'faith_sanctuary_kicker' => Setting::get('faith_sanctuary_kicker'),
-            'faith_sanctuary_note' => Setting::get('faith_sanctuary_note'),
-            'faith_sanctuary_verses' => json_decode(Setting::get('faith_sanctuary_verses', '[]') ?: '[]', true) ?: [],
-            'faith_comfort_kicker' => Setting::get('faith_comfort_kicker'),
-            'faith_comfort_heading' => Setting::get('faith_comfort_heading'),
-            'faith_comfort_subheading' => Setting::get('faith_comfort_subheading'),
-            'faith_comfort_cards' => json_decode(Setting::get('faith_comfort_cards', '[]') ?: '[]', true) ?: [],
             'contact_office_heading' => Setting::get('contact_office_heading'),
             'contact_office_intro' => Setting::get('contact_office_intro'),
             'contact_form_heading' => Setting::get('contact_form_heading'),
@@ -130,12 +122,6 @@ class ChurchSettings extends Page
         DB::transaction(function () use ($data): void {
             Setting::persistBatch(function () use ($data): void {
                 foreach ($data as $key => $value) {
-                    if (in_array($key, ['faith_sanctuary_verses', 'faith_comfort_cards'], true)) {
-                        Setting::set($key, json_encode($value ?? []), 'faith');
-
-                        continue;
-                    }
-
                     if (in_array($key, ['admin_use_church_logo', 'registration_captcha_enabled'], true)) {
                         Setting::set($key, ($value ?? false) ? '1' : '0', $key === 'admin_use_church_logo' ? 'branding' : 'security');
 
@@ -144,7 +130,6 @@ class ChurchSettings extends Page
 
                     $group = match (true) {
                         str_starts_with($key, 'contact_') => 'contact',
-                        str_starts_with($key, 'faith_') => 'faith',
                         str_starts_with($key, 'gospel_') => 'general',
                         str_starts_with($key, 'admin_') => 'admin',
                         str_starts_with($key, 'seo_') => 'seo',
@@ -312,44 +297,6 @@ class ChurchSettings extends Page
                                     TextInput::make('admin_dashboard_verse_ref')
                                         ->label('Verse reference')
                                         ->default('Psalm 46:10'),
-                                ]),
-                        ]),
-                    Tab::make('Faith copy')
-                        ->icon('heroicon-o-heart')
-                        ->schema([
-                            Section::make('Faith & comfort copy')
-                                ->description('Soothing Scripture and comfort sections shown across the site.')
-                                ->schema([
-                                    TextInput::make('faith_sanctuary_kicker')
-                                        ->label('Sanctuary ribbon kicker')
-                                        ->default('In Christ\'s peace'),
-                                    Textarea::make('faith_sanctuary_note')
-                                        ->label('Sanctuary ribbon closing note')
-                                        ->rows(2),
-                                    Repeater::make('faith_sanctuary_verses')
-                                        ->label('Rotating sanctuary verses')
-                                        ->schema([
-                                            Textarea::make('text')->required()->rows(2),
-                                            TextInput::make('ref')->label('Reference')->required(),
-                                        ])
-                                        ->columnSpanFull(),
-                                    TextInput::make('faith_comfort_kicker')
-                                        ->label('Heavenly comfort kicker'),
-                                    TextInput::make('faith_comfort_heading')
-                                        ->label('Heavenly comfort heading'),
-                                    TextInput::make('faith_comfort_subheading')
-                                        ->label('Heavenly comfort subheading'),
-                                    Repeater::make('faith_comfort_cards')
-                                        ->label('Comfort cards')
-                                        ->schema([
-                                            TextInput::make('icon')->default('🕊'),
-                                            TextInput::make('title')->required(),
-                                            Textarea::make('text')->required()->rows(2),
-                                            TextInput::make('ref')->label('Scripture reference')->required(),
-                                            TextInput::make('link')->label('Link URL'),
-                                            TextInput::make('linkLabel')->label('Link label'),
-                                        ])
-                                        ->columnSpanFull(),
                                 ]),
                         ]),
                 ], 'church-tab'),

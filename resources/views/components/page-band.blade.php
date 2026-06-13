@@ -2,10 +2,31 @@
     'title',
     'subtitle' => null,
     'kicker' => 'Evangelical Oriental Protestant Parish',
+    'artSlug' => null,
+    'artTitle' => null,
+    'artContext' => 'page',
+    'artContent' => null,
+    'artCategory' => null,
+    'showTopicArt' => true,
 ])
+
+@php
+    $artContentHint = \App\Support\SiteTopicArt::buildContentHint($artContent, $subtitle, $title);
+@endphp
 
 <section {{ $attributes->merge(['class' => 'page-band']) }}>
     <div class="page-band-bg" aria-hidden="true">
+        @if ($showTopicArt)
+            <x-topic-art-backdrop
+                :slug="$artSlug ?? $artTitle"
+                :title="$artTitle ?? $title"
+                :context="$artContext"
+                :content="$artContentHint"
+                :category="$artCategory"
+                variant="band"
+                class="page-band-topic-art"
+            />
+        @endif
         <span class="page-band-cross" aria-hidden="true">✝</span>
         <span class="page-band-orb page-band-orb--gold"></span>
         <span class="page-band-orb page-band-orb--navy"></span>

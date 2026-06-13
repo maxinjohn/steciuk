@@ -8,6 +8,7 @@ use App\Enums\PublishStatus;
 use App\Filament\Support\SettingsFormTabs;
 use App\Models\Page as SitePage;
 use App\Models\Setting;
+use App\Services\LaunchModeService;
 use App\Services\MaintenanceModeService;
 use App\Services\SecurityLogger;
 use App\Support\SitePathGate;
@@ -67,8 +68,6 @@ class SiteMaintenanceSettings extends Page
             'maintenance_mode_title' => Setting::get('maintenance_mode_title'),
             'maintenance_mode_badge' => Setting::get('maintenance_mode_badge'),
             'maintenance_mode_chips' => json_decode(Setting::get('maintenance_mode_chips', '[]') ?: '[]', true) ?: [],
-            'maintenance_mode_verse' => Setting::get('maintenance_mode_verse'),
-            'maintenance_mode_verse_ref' => Setting::get('maintenance_mode_verse_ref'),
             'maintenance_mode_show_service_times' => Setting::get('maintenance_mode_show_service_times', '1') !== '0',
             'maintenance_mode_service_times_url' => Setting::get('maintenance_mode_service_times_url'),
             'maintenance_mode_service_times_label' => Setting::get('maintenance_mode_service_times_label', 'Service times'),
@@ -163,8 +162,9 @@ class SiteMaintenanceSettings extends Page
                                         ->live()
                                         ->dehydrated(),
                                     TextInput::make('label')
-                                        ->label('Name')
-                                        ->placeholder('Site refresh, Liturgy page work…')
+                                        ->label('Admin rule name')
+                                        ->placeholder('Site maintenance, Liturgy page work…')
+                                        ->helperText('For your reference in admin only — not shown on the public maintenance page.')
                                         ->required()
                                         ->dehydrated(),
                                     Select::make('scope')
@@ -175,6 +175,12 @@ class SiteMaintenanceSettings extends Page
                                         ])
                                         ->default(SitePathGate::SCOPE_SITE)
                                         ->live()
+                                        ->dehydrated(),
+                                    Select::make('theme')
+                                        ->label('Page style')
+                                        ->options(MaintenanceModeService::themeOptions())
+                                        ->default(LaunchModeService::THEME_PARISH)
+                                        ->helperText('Visual style for the public maintenance page. Rule names are admin-only and never shown to visitors.')
                                         ->dehydrated(),
                                     Section::make('URL path')
                                         ->visible(fn ($get): bool => ($get('scope') ?? SitePathGate::SCOPE_SITE) === SitePathGate::SCOPE_PATH)
@@ -246,9 +252,7 @@ class SiteMaintenanceSettings extends Page
                                         ->dehydrated(),
                                     TextInput::make('id')->hidden()->dehydrated(),
                                 ])
-                                ->itemLabel(fn (array $state): ?string => filled($state['label'] ?? null)
-                                    ? (($state['enabled'] ?? false) ? '● ' : '○ ').($state['label'] ?? 'Maintenance')
-                                    : 'New maintenance rule')
+                                ->itemLabel(fn (array $state): ?string => SitePathGate::adminItemLabel($state, 'Maintenance'))
                                 ->collapsible()
                                 ->cloneable()
                                 ->addActionLabel('Add maintenance rule')
@@ -266,7 +270,7 @@ class SiteMaintenanceSettings extends Page
                                         ->placeholder('We\'ll be right back'),
                                     TextInput::make('maintenance_mode_badge')
                                         ->label('Status badge')
-                                        ->placeholder('Site refresh mode'),
+                                        ->placeholder('Under maintenance'),
                                     Repeater::make('maintenance_mode_chips')
                                         ->label('Highlight chips')
                                         ->schema([
@@ -279,10 +283,10 @@ class SiteMaintenanceSettings extends Page
                                         ->label('Message')
                                         ->rows(4)
                                         ->columnSpanFull(),
-                                    TextInput::make('maintenance_mode_verse')
-                                        ->label('Scripture line'),
-                                    TextInput::make('maintenance_mode_verse_ref')
-                                        ->label('Scripture reference'),
+                                    Placeholder::make('maintenance_comfort_verses')
+                                        ->label('Scripture quote')
+                                        ->content('Maintenance pages show a random comfort verse from **Site settings → Faith & comfort → Comfort verses**. Add or edit verses there.')
+                                        ->columnSpanFull(),
                                 ]),
                         ]),
                     Tab::make('Actions')

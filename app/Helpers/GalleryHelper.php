@@ -3,6 +3,7 @@
 use App\Models\GalleryAlbum;
 use App\Support\GalleryImageProcessor;
 use App\Support\SitePaths;
+use App\Support\SiteTopicArt;
 use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('galleryPlaceholderUrl')) {
@@ -64,6 +65,17 @@ if (! function_exists('galleryPhotoUrl')) {
     }
 }
 
+if (! function_exists('galleryCoverIsTopicArt')) {
+    function galleryCoverIsTopicArt(?string $path, ?GalleryAlbum $album = null): bool
+    {
+        if (($path === null || $path === '') && $album !== null) {
+            $path = $album->resolvedCoverPath();
+        }
+
+        return galleryResolvedPath($path, 'display') === null;
+    }
+}
+
 if (! function_exists('galleryCoverUrl')) {
     function galleryCoverUrl(?string $path, string $variant = 'worship', ?GalleryAlbum $album = null): string
     {
@@ -71,6 +83,20 @@ if (! function_exists('galleryCoverUrl')) {
             $path = $album->resolvedCoverPath();
         }
 
-        return galleryPhotoUrl($path, $variant, 'display');
+        $resolved = galleryResolvedPath($path, 'display');
+
+        if ($resolved !== null) {
+            if (str_starts_with($resolved, 'http')) {
+                return $resolved;
+            }
+
+            return public_upload_url($resolved) ?? SitePaths::publicStorageUrl($resolved);
+        }
+
+        if ($album !== null) {
+            return SiteTopicArt::mediaUrl($album->slug, $album->title, 'gallery', null, $album->description);
+        }
+
+        return galleryPlaceholderUrl($variant);
     }
 }

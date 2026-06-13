@@ -9,6 +9,10 @@
         :subtitle="$page->hero_subtitle"
         :image="$page->featured_image"
         size="small"
+        :art-slug="$page->slug"
+        :art-title="$page->hero_title ?? $page->title"
+        :art-context="\App\Support\PageTopicArt::contextForPage($page)"
+        :art-content="\App\Support\PageTopicArt::contentHintForPage($page)"
     />
 
     @if ($page->content)

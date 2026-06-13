@@ -50,8 +50,12 @@
         :accent="$page->accent_color ?? 'gold'"
         size="{{ ($page->layout_variant ?? 'standard') === 'immersive' ? 'immersive' : 'small' }}"
         badge="UK Parish"
+        :art-slug="$page->slug"
+        :art-title="$page->hero_title ?? $page->title"
+        :art-context="\App\Support\PageTopicArt::contextForPage($page)"
+        :art-content="\App\Support\PageTopicArt::contentHintForPage($page)"
     />
-    <x-parish-action-strip />
+    <x-parish-action-strip class="parish-action-strip--compact" />
 @endif
 
 @if ($page && $page->contentBlocks->isNotEmpty())
@@ -70,7 +74,7 @@
 {{ $slot }}
 
 @if ($showPageContent)
-    <section class="page-section page-section--compact page-section--article">
+    <section class="page-section page-section--compact page-section--article page-section--cms-body">
         <div @class([
             'page-section-inner mx-auto',
             'max-w-3xl' => ($page->layout_variant ?? 'standard') === 'standard',

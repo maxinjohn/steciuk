@@ -105,6 +105,26 @@ class AdminPanelConfig
     }
 
     /**
+     * Keep admin panel routes and admin Livewire working during maintenance.
+     * Public pages stay blocked for everyone, including signed-in parish admins.
+     */
+    public static function shouldBypassMaintenanceTraffic(Request $request): bool
+    {
+        if (static::shouldBypassLaunchGate($request)) {
+            return true;
+        }
+
+        if ($request->is('livewire/*') && (
+            static::refererIsAdminPanel($request->headers->get('referer'))
+            || static::originIsAdminPanel($request->headers->get('origin'))
+        )) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Never block parish admin sign-in, admin pages, or Filament Livewire traffic.
      */
     public static function shouldBypassAdminTraffic(Request $request): bool

@@ -12,6 +12,9 @@
             kicker="Evangelical Oriental Protestant · Parish life"
             scripture="Let us not give up meeting together, as some are in the habit of doing, but let us encourage one another."
             scripture-ref="Hebrews 10:25"
+            art-slug="events"
+            art-title="Parish Events"
+            art-context="event"
         />
 
         <section class="page-section page-section--compact">
@@ -21,22 +24,24 @@
                         <x-card
                             href="{{ route('events.show', $event->slug) }}"
                             :padding="false"
-                            @class([
-                                'feed-card overflow-hidden',
+                                @class([
+                                'feed-card topic-card wow-card overflow-hidden',
                                 'feed-card--featured' => $loop->first,
                             ])
                         >
-                            <div class="feed-card-media">
-                                @if ($event->featured_image)
-                                    <img src="{{ public_upload_url($event->featured_image) }}" alt="" class="feed-card-image" loading="lazy" decoding="async">
-                                @else
-                                    <div class="feed-card-fallback feed-card-fallback--event">
-                                        <span class="feed-date-day">{{ $event->starts_at->format('d') }}</span>
-                                        <span class="feed-date-month">{{ $event->starts_at->format('M') }}</span>
-                                    </div>
-                                @endif
-                                <span class="feed-sticker">Event</span>
-                            </div>
+                            <x-feed-card-media
+                                :image="$event->featured_image"
+                                :slug="$event->slug"
+                                :title="$event->title"
+                                context="event"
+                                :alt="$event->title"
+                                sticker="Event"
+                                :day="$event->starts_at->format('d')"
+                                :month="$event->starts_at->format('M')"
+                                :weekday="$event->starts_at->format('D')"
+                                :category="$event->category"
+                                :content="\App\Support\PageTopicArt::contentHintForRecord($event->description, null, null, $event->location, $event->category)"
+                            />
                             <div class="feed-card-body">
                                 <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
                                     {{ $event->starts_at->format('l, j F · g:i A') }}
@@ -60,9 +65,15 @@
                         <x-section-heading title="Past Events" subtitle="Recent gatherings from our parish calendar" kicker="Archive" align="left" />
                         <div class="past-events-grid">
                             @foreach ($past as $event)
-                                <a href="{{ route('events.show', $event->slug) }}" class="past-event-chip">
-                                    <span class="past-event-date">{{ $event->starts_at->format('j M Y') }}</span>
-                                    <span class="past-event-title">{{ $event->title }}</span>
+                                <a href="{{ route('events.show', $event->slug) }}" class="past-event-chip wow-chip">
+                                    <span class="past-event-date-badge" aria-hidden="true">
+                                        <span class="past-event-date-badge__day">{{ $event->starts_at->format('d') }}</span>
+                                        <span class="past-event-date-badge__month">{{ $event->starts_at->format('M') }}</span>
+                                    </span>
+                                    <span class="past-event-copy">
+                                        <span class="past-event-date">{{ $event->starts_at->format('l, j F Y') }}</span>
+                                        <span class="past-event-title">{{ $event->title }}</span>
+                                    </span>
                                 </a>
                             @endforeach
                         </div>

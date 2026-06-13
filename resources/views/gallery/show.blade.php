@@ -13,6 +13,10 @@
         :subtitle="$album->description"
         badge="Evangelical Oriental Protestant"
         size="small"
+        :art-slug="$album->slug"
+        :art-title="$album->title"
+        art-context="gallery"
+        :art-content="$album->description"
     />
     <x-parish-action-strip class="!py-3" />
 

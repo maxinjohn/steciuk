@@ -12,6 +12,9 @@
             kicker="Evangelical Oriental Protestant · UK"
             scripture="They devoted themselves to the apostles' teaching and to fellowship, to the breaking of bread and to prayer."
             scripture-ref="Acts 2:42"
+            art-slug="news"
+            art-title="Parish News"
+            art-context="news"
         />
 
         <section class="page-section page-section--compact">
@@ -22,25 +25,24 @@
                             :href="route('news.show', $article->slug)"
                             :padding="false"
                             @class([
-                                'feed-card overflow-hidden',
+                                'feed-card topic-card wow-card overflow-hidden',
                                 'feed-card--featured' => $loop->first,
                             ])
                         >
-                            <div class="feed-card-media">
-                                @if ($article->featured_image)
-                                    <img src="{{ public_upload_url($article->featured_image) }}" alt="{{ $article->title }}" loading="lazy" decoding="async" class="feed-card-image">
-                                @else
-                                    <div class="feed-card-fallback feed-card-fallback--news">
-                                        <span class="feed-date-day">{{ $article->published_at?->format('d') }}</span>
-                                        <span class="feed-date-month">{{ $article->published_at?->format('M') }}</span>
-                                    </div>
-                                @endif
-                                @if ($article->category)
-                                    <span class="feed-sticker feed-sticker--violet">{{ $article->category }}</span>
-                                @else
-                                    <span class="feed-sticker feed-sticker--violet">News</span>
-                                @endif
-                            </div>
+                            <x-feed-card-media
+                                :image="$article->featured_image"
+                                :slug="$article->slug"
+                                :title="$article->title"
+                                context="news"
+                                :alt="$article->title"
+                                :sticker="$article->category ?: 'News'"
+                                sticker-class="feed-sticker--violet"
+                                :day="$article->published_at?->format('d')"
+                                :month="$article->published_at?->format('M')"
+                                :weekday="$article->published_at?->format('D')"
+                                :category="$article->category"
+                                :content="\App\Support\PageTopicArt::contentHintForRecord($article->body ?? null, $article->excerpt, null, null, $article->category)"
+                            />
                             <div class="feed-card-body">
                                 <time datetime="{{ $article->published_at?->toIso8601String() }}" class="feed-meta">
                                     {{ $article->published_at?->format('j F Y') }}

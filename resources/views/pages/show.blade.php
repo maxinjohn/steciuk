@@ -8,6 +8,10 @@
         <x-page-intro
             :title="$page->hero_title ?? $page->title"
             :subtitle="$page->hero_subtitle"
+            :art-slug="$page->slug"
+            :art-title="$page->hero_title ?? $page->title"
+            :art-context="\App\Support\PageTopicArt::contextForPage($page)"
+            :art-content="\App\Support\PageTopicArt::contentHintForPage($page)"
         />
     @endif
 

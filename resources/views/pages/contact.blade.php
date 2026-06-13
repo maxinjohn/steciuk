@@ -4,12 +4,20 @@
 @section('description', $page->seo_description ?? strip_tags($page->content))
 
 @section('content')
-    <x-page-intro
+    <x-hero
         :title="$page->hero_title ?? $page->title"
         :subtitle="$page->hero_subtitle ?? 'Reach our parish office for worship, pastoral care, or prayer'"
-        kicker="UK Parish · Connect"
-        scripture="The Lord is near to all who call on him, to all who call on him in truth."
-        scripture-ref="Psalm 145:18"
+        :image="$page->featured_image"
+        badge="UK Parish"
+        size="small"
+        :art-slug="$page->slug"
+        :art-title="$page->hero_title ?? $page->title"
+        :art-context="\App\Support\PageTopicArt::contextForPage($page)"
+        :art-content="\App\Support\PageTopicArt::contentHintForPage($page)"
+    />
+    <x-scripture-ribbon
+        text="The Lord is near to all who call on him, to all who call on him in truth."
+        reference="Psalm 145:18"
     />
 
     <section class="page-section page-section--compact">

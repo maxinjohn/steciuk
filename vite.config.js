@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/css/filament/admin/theme.css',
                 'resources/js/app.js',
                 'resources/js/launch-countdown.js',
+                'resources/js/maintenance-page.js',
                 'resources/js/admin-sidebar.js',
                 'resources/js/admin-session.js',
             ],

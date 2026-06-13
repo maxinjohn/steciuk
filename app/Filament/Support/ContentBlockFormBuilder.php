@@ -126,6 +126,7 @@ class ContentBlockFormBuilder
             ContentBlockType::Cta,
             ContentBlockType::MinistryCards,
             ContentBlockType::EventList,
+            ContentBlockType::NewsList,
             ContentBlockType::SermonList,
             ContentBlockType::Gallery,
             ContentBlockType::Faq,
@@ -141,6 +142,7 @@ class ContentBlockFormBuilder
             ContentBlockType::ImageText,
             ContentBlockType::MinistryCards,
             ContentBlockType::EventList,
+            ContentBlockType::NewsList,
             ContentBlockType::SermonList,
             ContentBlockType::Gallery,
             ContentBlockType::Location,
@@ -203,6 +205,7 @@ class ContentBlockFormBuilder
             ContentBlockType::ImageText,
             ContentBlockType::MinistryCards,
             ContentBlockType::EventList,
+            ContentBlockType::NewsList,
             ContentBlockType::SermonList,
             ContentBlockType::Gallery,
             ContentBlockType::Quote,
@@ -250,6 +253,7 @@ class ContentBlockFormBuilder
         $withLimit = [
             ContentBlockType::MinistryCards,
             ContentBlockType::EventList,
+            ContentBlockType::NewsList,
             ContentBlockType::SermonList,
             ContentBlockType::Gallery,
         ];
