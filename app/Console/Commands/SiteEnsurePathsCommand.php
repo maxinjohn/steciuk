@@ -5,11 +5,10 @@ namespace App\Console\Commands;
 use App\Support\SiteBrandingAssets;
 use App\Support\SitePaths;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 
 class SiteEnsurePathsCommand extends Command
 {
-    protected $signature = 'site:ensure-paths {--link : Create the public/storage symlink if missing}';
+    protected $signature = 'site:ensure-paths {--link : Recreate the public/storage symlink when missing or wrong}';
 
     protected $description = 'Create configured storage, upload, database, and SQLite paths for production';
 
@@ -21,16 +20,17 @@ class SiteEnsurePathsCommand extends Command
         SitePaths::ensureSqliteDatabaseFile();
         SiteBrandingAssets::syncDefaultLogoSetting();
 
-        $linked = SitePaths::ensurePublicStorageLink();
+        $before = SitePaths::publicStorageLinkDetail();
 
-        if ($this->option('link') && ! $linked) {
-            Artisan::call('storage:link');
-            $linked = SitePaths::ensurePublicStorageLink();
+        if ($this->option('link') || ! $before['ok']) {
+            SitePaths::ensurePublicStorageLink();
         }
+
+        $after = SitePaths::publicStorageLinkDetail();
 
         $paths = array_filter([
             'Storage' => SitePaths::configuredPath('storage') ?? storage_path(),
-            'Public uploads' => SitePaths::configuredPath('public_uploads') ?? storage_path('app/public'),
+            'Public uploads' => SitePaths::publicUploadsRoot(),
             'Private uploads' => SitePaths::configuredPath('private_uploads') ?? storage_path('app/private'),
             'SQLite database' => config('database.connections.sqlite.database'),
         ]);
@@ -42,7 +42,20 @@ class SiteEnsurePathsCommand extends Command
         }
 
         $this->newLine();
-        $this->line('Public storage link: '.($linked ? 'ok' : 'missing — run php artisan site:ensure-paths --link'));
+        $this->line('Public storage link: '.($after['ok'] ? 'ok' : 'needs attention'));
+        $this->line('  Expected: '.$after['expected']);
+
+        if ($before['current'] !== null) {
+            $this->line('  Previous: '.$before['current']);
+        }
+
+        $this->line('  Current: '.($after['current'] ?? 'missing'));
+
+        if (! $after['ok']) {
+            $this->components->warn('Symlink still wrong — run: rm -f public/storage && php artisan site:ensure-paths --link');
+
+            return self::FAILURE;
+        }
 
         return self::SUCCESS;
     }

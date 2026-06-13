@@ -339,6 +339,28 @@ class SitePaths
         \App\Services\SqliteOptimizer::initializeNewDatabase($database);
     }
 
+    public static function publicStorageLinkDetail(): array
+    {
+        self::syncPublicDiskConfig();
+
+        $link = public_path('storage');
+        $expected = realpath(self::publicUploadsRoot()) ?: self::publicUploadsRoot();
+        $current = null;
+
+        if (is_link($link)) {
+            $current = realpath($link) ?: readlink($link);
+        } elseif (is_dir($link)) {
+            $current = realpath($link) ?: $link;
+        }
+
+        return [
+            'link' => $link,
+            'expected' => $expected,
+            'current' => is_string($current) ? $current : null,
+            'ok' => is_string($current) && $current === $expected,
+        ];
+    }
+
     public static function ensurePublicStorageLink(): bool
     {
         self::syncPublicDiskConfig();
@@ -459,16 +481,13 @@ class SitePaths
             );
         }
 
-        $link = public_path('storage');
-        $linkOk = is_link($link) || (is_dir($link) && file_exists($link));
+        $linkDetail = self::publicStorageLinkDetail();
         $checks[] = self::check(
-            $linkOk || is_file(self::publicUploadsRoot().'/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/')),
+            $linkDetail['ok'],
             'Public storage link',
-            is_link($link)
-                ? $link.' -> '.readlink($link)
-                : ($linkOk
-                    ? $link
-                    : 'missing symlink — /storage is served by Laravel from '.self::publicUploadsRoot()),
+            $linkDetail['ok']
+                ? $linkDetail['link'].' -> '.$linkDetail['expected']
+                : 'points to '.($linkDetail['current'] ?? 'missing').' — expected '.$linkDetail['expected'].' (run php artisan site:ensure-paths --link)',
         );
 
         $checks[] = self::check(
