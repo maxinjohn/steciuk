@@ -74,6 +74,124 @@ class SitePaths
         return self::resolve(self::configuredRaw($key) ?? $default);
     }
 
+    public static function publicStorageBaseUrl(): string
+    {
+        return rtrim((string) config('filesystems.disks.public.url', '/storage'), '/');
+    }
+
+    public static function publicStorageUrl(?string $relativePath = ''): string
+    {
+        $base = self::publicStorageBaseUrl();
+        $relativePath = ltrim(trim((string) $relativePath), '/');
+
+        if ($relativePath === '') {
+            return $base !== '' ? $base : '/';
+        }
+
+        return ($base !== '' ? $base : '').'/'.$relativePath;
+    }
+
+    public static function normalizeUploadRelativePath(?string $path): ?string
+    {
+        if ($path === null || trim($path) === '') {
+            return null;
+        }
+
+        $path = trim(str_replace('\\', '/', $path));
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return null;
+        }
+
+        $publicBase = trim(self::publicStorageBaseUrl(), '/');
+
+        if ($publicBase !== '' && str_starts_with(ltrim($path, '/'), $publicBase.'/')) {
+            $path = substr(ltrim($path, '/'), strlen($publicBase) + 1);
+        }
+
+        if (str_starts_with($path, '/storage/')) {
+            $path = substr($path, strlen('/storage/'));
+        } elseif (str_starts_with($path, 'storage/')) {
+            $path = substr($path, strlen('storage/'));
+        }
+
+        $path = ltrim($path, '/');
+
+        return $path !== '' ? $path : null;
+    }
+
+    public static function publicUploadExists(?string $path): bool
+    {
+        $relative = self::normalizeUploadRelativePath($path);
+
+        if ($relative === null) {
+            return false;
+        }
+
+        $absolute = self::publicUploadsRoot().'/'. $relative;
+
+        return is_file($absolute);
+    }
+
+    public static function publicUploadsRoot(): string
+    {
+        $configured = self::configuredPath('public_uploads');
+
+        if ($configured !== null) {
+            return $configured;
+        }
+
+        $diskRoot = config('filesystems.disks.public.root');
+
+        if (is_string($diskRoot) && $diskRoot !== '') {
+            return realpath($diskRoot) ?: $diskRoot;
+        }
+
+        return storage_path('app/public');
+    }
+
+    public static function ensurePublicDiskConfigured(): void
+    {
+        $public = self::configuredPath('public_uploads');
+
+        if ($public === null) {
+            return;
+        }
+
+        config([
+            'filesystems.disks.public.root' => $public,
+            'filesystems.disks.public.url' => env('PUBLIC_STORAGE_URL', '/storage'),
+            'filesystems.links' => [
+                public_path('storage') => $public,
+            ],
+        ]);
+    }
+
+    public static function ensureBrandingUploadDirectory(?int $mode = null): ?string
+    {
+        return self::ensureDirectoryExists(
+            self::publicUploadsRoot().'/settings/branding',
+            $mode,
+        );
+    }
+
+    public static function writePublicUpload(string $relativePath, string $contents): bool
+    {
+        self::ensurePublicDiskConfigured();
+
+        $relativePath = ltrim(str_replace('\\', '/', $relativePath), '/');
+
+        if ($relativePath === '' || str_contains($relativePath, '..')) {
+            return false;
+        }
+
+        $absolute = self::publicUploadsRoot().'/'.$relativePath;
+
+        self::ensureParentDirectoryForFile($absolute);
+
+        return @file_put_contents($absolute, $contents) !== false;
+    }
+
     public static function directoryMode(): int
     {
         $mode = config('site.dir_mode', '0775');
@@ -144,35 +262,35 @@ class SitePaths
     public static function ensureConfiguredDataPaths(): void
     {
         $verifiedFlag = storage_path('framework/.site-paths-verified');
-
-        if (is_file($verifiedFlag)) {
-            return;
-        }
-
+        $alreadyVerified = is_file($verifiedFlag);
         $mode = self::directoryMode();
 
-        self::ensureLaravelStorageLayout(
-            self::configuredPath('storage') ?? storage_path(),
-            $mode,
-        );
+        if (! $alreadyVerified) {
+            self::ensureLaravelStorageLayout(
+                self::configuredPath('storage') ?? storage_path(),
+                $mode,
+            );
 
-        self::ensureParentDirectoryForFile(self::configuredRaw('database'), $mode);
+            self::ensureParentDirectoryForFile(self::configuredRaw('database'), $mode);
 
-        self::ensureDirectoryExists(
-            self::configuredPath('public_uploads') ?? storage_path('app/public'),
-            $mode,
-        );
+            self::ensureDirectoryExists(
+                self::configuredPath('public_uploads') ?? storage_path('app/public'),
+                $mode,
+            );
 
-        self::ensureDirectoryExists(
-            self::configuredPath('private_uploads') ?? storage_path('app/private'),
-            $mode,
-        );
+            self::ensureDirectoryExists(
+                self::configuredPath('private_uploads') ?? storage_path('app/private'),
+                $mode,
+            );
 
-        self::ensureCommonUploadDirectories($mode);
+            self::ensureCommonUploadDirectories($mode);
+
+            @file_put_contents($verifiedFlag, now()->toIso8601String());
+        }
 
         SiteBrandingAssets::ensureParishLogoInUploads();
-
-        @file_put_contents($verifiedFlag, now()->toIso8601String());
+        SiteBrandingAssets::syncDefaultLogoSetting();
+        self::ensurePublicStorageLink();
     }
 
     public static function ensureCommonUploadDirectories(?int $mode = null): void
@@ -216,21 +334,41 @@ class SitePaths
         $link = public_path('storage');
         $target = config('filesystems.disks.public.root');
 
-        if (! is_string($target) || $target === '' || ! is_dir($target)) {
+        if (! is_string($target) || $target === '') {
             return false;
+        }
+
+        if (! is_dir($target)) {
+            self::ensureDirectoryExists($target);
         }
 
         $targetPath = realpath($target) ?: $target;
 
+        if (! is_dir($targetPath)) {
+            return false;
+        }
+
         if (is_link($link)) {
             $linked = realpath($link) ?: readlink($link);
 
-            return $linked === $targetPath;
+            return $linked === $targetPath
+                || (is_string($linked) && realpath($linked) === $targetPath);
         }
 
         if (file_exists($link)) {
-            return is_dir($link);
+            if (is_dir($link) && ! is_link($link)) {
+                $linkReal = realpath($link);
+                $targetReal = realpath($targetPath);
+
+                return $linkReal !== false
+                    && $targetReal !== false
+                    && $linkReal === $targetReal;
+            }
+
+            return false;
         }
+
+        self::ensureDirectoryExists(dirname($link));
 
         try {
             return @symlink($targetPath, $link);
@@ -369,14 +507,20 @@ class SitePaths
         );
 
         $syncedLogo = public_path('storage/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/'));
+        $uploadRoot = config('filesystems.disks.public.root');
+        $uploadLogo = is_string($uploadRoot)
+            ? rtrim($uploadRoot, '/\\').'/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/')
+            : $syncedLogo;
         $checks[] = self::check(
-            is_file($syncedLogo) || is_file($bundledLogo),
+            is_file($uploadLogo) || is_file($syncedLogo) || is_file($bundledLogo),
             'Synced parish logo in storage',
-            is_file($syncedLogo)
-                ? 'storage/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/')
-                : (is_file($bundledLogo)
-                    ? 'run php artisan site:ensure-paths --link'
-                    : 'missing bundled logo'),
+            is_file($uploadLogo)
+                ? self::normalizeUploadRelativePath(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE)
+                : (is_file($syncedLogo)
+                    ? 'storage/'.ltrim(\App\Support\SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, '/')
+                    : (is_file($bundledLogo)
+                        ? 'run php artisan site:ensure-paths --link'
+                        : 'missing bundled logo')),
         );
 
         $eaukMark = public_path('images/eauk/member-logo-small.png');

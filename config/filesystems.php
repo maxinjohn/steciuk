@@ -33,7 +33,7 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => env('PRIVATE_STORAGE_PATH', storage_path('app/private')),
-            'serve' => true,
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
@@ -43,6 +43,7 @@ return [
             'root' => env('PUBLIC_STORAGE_PATH', storage_path('app/public')),
             'url' => env('PUBLIC_STORAGE_URL', '/storage'),
             'visibility' => 'public',
+            'serve' => true,
             'throw' => false,
             'report' => false,
         ],

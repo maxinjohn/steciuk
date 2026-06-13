@@ -14,7 +14,7 @@
 
 @php
     $imageUrl = $image
-        ? (str_starts_with($image, 'http') ? $image : asset('storage/' . ltrim($image, '/')))
+        ? (str_starts_with($image, 'http') ? $image : public_upload_url($image))
         : null;
 
     $sizeClasses = match ($size) {

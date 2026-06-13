@@ -18,7 +18,7 @@
             return null;
         }
 
-        return str_starts_with($path, 'http') ? $path : asset('storage/' . ltrim($path, '/'));
+        return str_starts_with($path, 'http') ? $path : public_upload_url($path);
     };
 
     $youtubeEmbed = function (?string $url): ?string {

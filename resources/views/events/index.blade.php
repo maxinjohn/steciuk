@@ -27,7 +27,7 @@
                         >
                             <div class="feed-card-media">
                                 @if ($event->featured_image)
-                                    <img src="{{ asset('storage/'.$event->featured_image) }}" alt="" class="feed-card-image" loading="lazy" decoding="async">
+                                    <img src="{{ public_upload_url($event->featured_image) }}" alt="" class="feed-card-image" loading="lazy" decoding="async">
                                 @else
                                     <div class="feed-card-fallback feed-card-fallback--event">
                                         <span class="feed-date-day">{{ $event->starts_at->format('d') }}</span>

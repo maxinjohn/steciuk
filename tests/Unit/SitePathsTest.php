@@ -64,18 +64,23 @@ class SitePathsTest extends TestCase
 
     public function test_ensure_configured_data_paths_creates_external_public_upload_directory(): void
     {
+        @unlink(storage_path('framework/.site-paths-verified'));
+
         $relative = '../site_data/testing/auto-uploads-'.bin2hex(random_bytes(4));
         $absolute = base_path($relative);
 
         $this->assertDirectoryDoesNotExist($absolute);
 
-        config(['site.paths.public_uploads' => $relative]);
+        config([
+            'site.paths.public_uploads' => $relative,
+            'filesystems.disks.public.root' => $absolute,
+        ]);
 
         SitePaths::ensureConfiguredDataPaths();
 
         $this->assertDirectoryExists($absolute);
 
-        rmdir($absolute);
+        \Illuminate\Support\Facades\File::deleteDirectory($absolute);
         @rmdir(dirname($absolute));
     }
 
@@ -92,7 +97,7 @@ class SitePathsTest extends TestCase
         $this->assertFileExists($database);
 
         unlink($database);
-        rmdir(dirname($database));
+        \Illuminate\Support\Facades\File::deleteDirectory(dirname($database));
     }
 
     public function test_ensure_common_upload_directories_creates_admin_upload_folders(): void
@@ -107,5 +112,23 @@ class SitePathsTest extends TestCase
         $this->assertDirectoryExists($publicRoot.'/gallery/photos');
 
         \Illuminate\Support\Facades\File::deleteDirectory($publicRoot);
+    }
+
+    public function test_public_storage_url_uses_configured_base(): void
+    {
+        config(['filesystems.disks.public.url' => '/media']);
+
+        $this->assertSame(
+            '/media/settings/branding/logo.png',
+            SitePaths::publicStorageUrl('settings/branding/logo.png'),
+        );
+    }
+
+    public function test_normalize_upload_relative_path_strips_storage_prefix(): void
+    {
+        $this->assertSame(
+            'settings/branding/logo.png',
+            SitePaths::normalizeUploadRelativePath('/storage/settings/branding/logo.png'),
+        );
     }
 }

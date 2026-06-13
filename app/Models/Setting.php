@@ -111,14 +111,20 @@ class Setting extends Model
             return $path;
         }
 
-        if (str_starts_with($path, '/storage/') || str_starts_with($path, '/images/')) {
-            return $path;
+        if (str_starts_with($path, '/images/') || str_starts_with($path, 'images/')) {
+            return str_starts_with($path, '/') ? $path : '/'.$path;
         }
 
-        if (str_starts_with($path, '/')) {
-            return $path;
+        if (str_starts_with($path, '/icons/') || str_starts_with($path, 'icons/')) {
+            return str_starts_with($path, '/') ? $path : '/'.$path;
         }
 
-        return '/storage/'.ltrim($path, '/');
+        $relative = \App\Support\SitePaths::normalizeUploadRelativePath($path);
+
+        if ($relative === null) {
+            return str_starts_with($path, '/') ? $path : '/'.$path;
+        }
+
+        return \App\Support\SitePaths::publicStorageUrl($relative);
     }
 }
