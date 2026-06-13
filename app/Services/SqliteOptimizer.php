@@ -62,7 +62,16 @@ class SqliteOptimizer
         $markerPath = dirname($resolvedPath).'/.sqlite-wal-ready';
 
         if (is_file($markerPath)) {
-            return;
+            try {
+                $targetJournal = strtolower((string) config('database.connections.sqlite.journal_mode', 'wal'));
+                $currentJournal = strtolower((string) $pdo->query('PRAGMA journal_mode')->fetchColumn());
+
+                if ($currentJournal === $targetJournal) {
+                    return;
+                }
+            } catch (Throwable) {
+                @unlink($markerPath);
+            }
         }
 
         static::applyFileLevelPragmas($pdo, $markerPath);
@@ -81,6 +90,7 @@ class SqliteOptimizer
         $pdo = new PDO('sqlite:'.$resolvedPath, null, null, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ]);
+        $pdo->exec('PRAGMA busy_timeout = '.(int) config('database.connections.sqlite.busy_timeout', 10000));
 
         static::applyFileLevelPragmas($pdo, $markerPath);
         static::applyConnectionPragmas($pdo);
@@ -179,7 +189,7 @@ class SqliteOptimizer
 
     private static function applyConnectionPragmas(PDO $pdo): void
     {
-        $busyTimeout = (int) config('database.connections.sqlite.busy_timeout', 60000);
+        $busyTimeout = (int) config('database.connections.sqlite.busy_timeout', 10000);
         static::execWithRetry($pdo, 'PRAGMA busy_timeout = '.$busyTimeout);
         static::execWithRetry($pdo, 'PRAGMA foreign_keys = ON');
 
@@ -203,12 +213,13 @@ class SqliteOptimizer
         }
     }
 
-    private static function execWithRetry(?PDO $pdo, string $statement, int $attempts = 8): void
+    private static function execWithRetry(?PDO $pdo, string $statement, ?int $attempts = null): void
     {
         if ($pdo === null) {
             return;
         }
 
+        $attempts ??= max(1, (int) config('database.connections.sqlite.lock_retry_attempts', 3));
         $delayMs = 25;
 
         for ($attempt = 1; $attempt <= $attempts; $attempt++) {

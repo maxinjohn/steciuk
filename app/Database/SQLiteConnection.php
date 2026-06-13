@@ -13,7 +13,7 @@ class SQLiteConnection extends BaseSQLiteConnection
      */
     protected function run($query, $bindings, Closure $callback)
     {
-        $attempts = max(1, (int) ($this->getConfig('lock_retry_attempts') ?? 8));
+        $attempts = max(1, (int) ($this->getConfig('lock_retry_attempts') ?? 3));
         $delayMs = max(1, (int) ($this->getConfig('lock_retry_delay_ms') ?? 25));
 
         for ($attempt = 1; $attempt <= $attempts; $attempt++) {

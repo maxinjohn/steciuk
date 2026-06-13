@@ -57,4 +57,22 @@ class SqliteHealthTest extends TestCase
         $this->assertTrue(SitePaths::isAbsolute($path));
         $this->assertSame(base_path('storage/database/database.sqlite'), $path);
     }
+
+    public function test_fast_healthy_skips_repeated_integrity_checks(): void
+    {
+        $database = storage_path('framework/testing/sqlite-fast-'.bin2hex(random_bytes(4)).'.sqlite');
+        config(['database.connections.sqlite.database' => $database]);
+
+        SitePaths::ensureParentDirectoryForFile($database);
+        touch($database);
+        SqliteOptimizer::initializeNewDatabase($database);
+        SqliteHealth::migrateIfNeeded();
+
+        $this->assertTrue(SqliteHealth::isHealthy($database));
+        SqliteHealth::rememberHealthy($database);
+        $this->assertTrue(SqliteHealth::fastHealthy($database));
+
+        @unlink($database);
+        SqliteHealth::removeSidecarFiles($database);
+    }
 }

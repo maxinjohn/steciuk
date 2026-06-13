@@ -38,11 +38,11 @@ return [
             'database' => env('DB_DATABASE', storage_path('database/database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => env('DB_BUSY_TIMEOUT', 60000),
+            'busy_timeout' => env('DB_BUSY_TIMEOUT', 10000),
             'journal_mode' => env('DB_JOURNAL_MODE', 'wal'),
             'synchronous' => env('DB_SYNCHRONOUS', 'normal'),
             'wal_autocheckpoint' => env('DB_WAL_AUTOCHECKPOINT', 2000),
-            'lock_retry_attempts' => env('DB_LOCK_RETRY_ATTEMPTS', 8),
+            'lock_retry_attempts' => env('DB_LOCK_RETRY_ATTEMPTS', 3),
             'lock_retry_delay_ms' => env('DB_LOCK_RETRY_DELAY_MS', 25),
             'transaction_mode' => 'DEFERRED',
             'pragmas' => [

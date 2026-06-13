@@ -11,6 +11,8 @@ use Throwable;
 
 class SqliteHealth
 {
+    private const READY_MARKER = '.sqlite-ready';
+
     public static function databasePath(): ?string
     {
         if (config('database.default') !== 'sqlite') {
@@ -37,9 +39,7 @@ class SqliteHealth
         }
 
         try {
-            $pdo = new PDO('sqlite:'.$path, null, null, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            ]);
+            $pdo = static::openReadOnlyPdo($path);
             $result = (string) $pdo->query('PRAGMA integrity_check')->fetchColumn();
             $pdo = null;
 
@@ -58,9 +58,7 @@ class SqliteHealth
         }
 
         try {
-            $pdo = new PDO('sqlite:'.$path, null, null, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            ]);
+            $pdo = static::openReadOnlyPdo($path);
             $table = $pdo->query(
                 "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'migrations' LIMIT 1",
             )->fetchColumn();
@@ -75,6 +73,81 @@ class SqliteHealth
     public static function isHealthy(?string $path = null): bool
     {
         return static::integrityOk($path) && static::schemaReady($path);
+    }
+
+    public static function fingerprint(string $path): ?string
+    {
+        $mtime = @filemtime($path);
+        $size = @filesize($path);
+
+        if ($mtime === false || $size === false) {
+            return null;
+        }
+
+        return $mtime.'-'.$size;
+    }
+
+    public static function rememberHealthy(string $path): void
+    {
+        $fingerprint = static::fingerprint($path);
+
+        if ($fingerprint === null) {
+            return;
+        }
+
+        @file_put_contents(dirname($path).'/'.static::READY_MARKER, $fingerprint);
+    }
+
+    public static function fastHealthy(string $path): bool
+    {
+        $fingerprint = static::fingerprint($path);
+
+        if ($fingerprint === null) {
+            return false;
+        }
+
+        $marker = dirname($path).'/'.static::READY_MARKER;
+
+        return is_file($marker) && trim((string) @file_get_contents($marker)) === $fingerprint;
+    }
+
+    public static function tableExists(string $table, ?string $path = null): bool
+    {
+        $path ??= static::databasePath();
+
+        if ($path === null || $path === ':memory:' || ! is_file($path)) {
+            return false;
+        }
+
+        try {
+            $pdo = static::openReadOnlyPdo($path);
+            $quoted = $pdo->quote($table);
+            $name = $pdo->query(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name = {$quoted} LIMIT 1",
+            )->fetchColumn();
+            $pdo = null;
+
+            return is_string($name) && $name === $table;
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    public static function journalMode(?string $path = null): ?string
+    {
+        $path ??= static::databasePath();
+
+        if ($path === null || $path === ':memory:' || ! is_file($path)) {
+            return null;
+        }
+
+        try {
+            $pdo = static::openReadOnlyPdo($path);
+
+            return strtolower((string) $pdo->query('PRAGMA journal_mode')->fetchColumn());
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     public static function purgeConnections(): void
@@ -99,6 +172,7 @@ class SqliteHealth
         static::purgeConnections();
         Artisan::call('migrate', ['--force' => true]);
         static::purgeConnections();
+        static::rememberHealthy($path);
     }
 
     /**
@@ -128,7 +202,7 @@ class SqliteHealth
     {
         $directory = dirname($databasePath);
 
-        foreach (['.sqlite-wal-ready'] as $marker) {
+        foreach (['.sqlite-wal-ready', static::READY_MARKER] as $marker) {
             $path = $directory.'/'.$marker;
 
             if (is_file($path)) {
@@ -249,7 +323,19 @@ class SqliteHealth
             );
         }
 
+        static::rememberHealthy($path);
+
         return $path;
+    }
+
+    protected static function openReadOnlyPdo(string $path): PDO
+    {
+        $pdo = new PDO('sqlite:'.$path, null, null, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        ]);
+        $pdo->exec('PRAGMA busy_timeout = 5000');
+
+        return $pdo;
     }
 
     public static function ensureReady(): void
@@ -262,7 +348,17 @@ class SqliteHealth
 
         $path = static::databasePath();
 
-        if ($path === null || static::isHealthy($path)) {
+        if ($path === null) {
+            return;
+        }
+
+        if (static::fastHealthy($path)) {
+            return;
+        }
+
+        if (static::isHealthy($path)) {
+            static::rememberHealthy($path);
+
             return;
         }
 
