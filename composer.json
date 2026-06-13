@@ -32,6 +32,8 @@
         "files": [
             "app/Helpers/HtmlHelper.php",
             "app/Helpers/GalleryHelper.php",
+            "app/Helpers/CardMediaHelper.php",
+            "app/Helpers/PageMediaHelper.php",
             "app/Helpers/StorageHelper.php"
         ]
     },

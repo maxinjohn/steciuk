@@ -37,6 +37,7 @@ class AdminSmokeTest extends TestCase
         return [
             AdminPanelConfig::url(),
             AdminPanelConfig::url('church-settings'),
+            AdminPanelConfig::url('faith-comfort'),
             AdminPanelConfig::url('site-maintenance'),
             AdminPanelConfig::url('site-launch'),
             AdminPanelConfig::url('site-content-settings'),

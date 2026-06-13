@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TopicArtController;
 use App\Http\Controllers\LaunchRibbonController;
 use App\Http\Controllers\DonationReportController;
 use App\Http\Controllers\EventController;
@@ -31,6 +32,11 @@ Route::post('/launch/cut-ribbon', LaunchRibbonController::class)
 
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
+
+Route::get('/topic-art/{topic}/{seed}.svg', TopicArtController::class)
+    ->where('topic', '[a-z0-9-]+')
+    ->where('seed', '[a-z0-9-]+')
+    ->name('topic-art.show');
 
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');

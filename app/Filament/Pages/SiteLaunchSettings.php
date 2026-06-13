@@ -10,6 +10,7 @@ use App\Models\Page as SitePage;
 use App\Models\Setting;
 use App\Services\LaunchModeService;
 use App\Services\SecurityLogger;
+use App\Support\GatePageCopy;
 use App\Support\SitePathGate;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -228,8 +229,9 @@ class SiteLaunchSettings extends Page
                                         ->live()
                                         ->dehydrated(),
                                     TextInput::make('label')
-                                        ->label('Name')
-                                        ->placeholder('Liturgy page launch')
+                                        ->label('Admin rule name')
+                                        ->placeholder('Site launch, Liturgy page launch')
+                                        ->helperText('For your reference in admin only — not shown on the public launch page.')
                                         ->required()
                                         ->dehydrated(),
                                     Select::make('scope')
@@ -251,10 +253,10 @@ class SiteLaunchSettings extends Page
                                         ->live()
                                         ->dehydrated(),
                                     Select::make('theme')
-                                        ->label('Visitor page theme')
+                                        ->label('Page style')
                                         ->options(LaunchModeService::themeOptions())
                                         ->default(LaunchModeService::THEME_PARISH)
-                                        ->helperText('Pick a look for the public gate page — from classic parish to loud Gen-Z party mode.')
+                                        ->helperText('Visual style for the public launch page. Rule names are admin-only.')
                                         ->dehydrated(),
                                     DateTimePicker::make('countdown_at')
                                         ->label('Countdown ends at')
@@ -317,18 +319,21 @@ class SiteLaunchSettings extends Page
                                         ->collapsed()
                                         ->schema([
                                             TextInput::make('event_name')->label('Event name (optional)')->dehydrated(),
-                                            TextInput::make('subtitle')->label('Badge line')->default('Launch countdown')->dehydrated(),
+                                            TextInput::make('subtitle')->label('Badge line')->default(GatePageCopy::LAUNCH_SUBTITLE_COUNTDOWN)->dehydrated(),
                                             TextInput::make('title')->label('Headline')->dehydrated(),
                                             Textarea::make('message')->label('Message')->rows(3)->columnSpanFull()->dehydrated(),
-                                            TextInput::make('verse')->label('Scripture line')->dehydrated(),
-                                            TextInput::make('verse_ref')->label('Scripture reference')->dehydrated(),
+                                            TextInput::make('verse')
+                                                ->label('Scripture line')
+                                                ->helperText('Leave blank to show a random comfort verse from Site settings → Faith & comfort.')
+                                                ->dehydrated(),
+                                            TextInput::make('verse_ref')
+                                                ->label('Scripture reference')
+                                                ->dehydrated(),
                                         ]),
                                     TextInput::make('id')->hidden()->dehydrated(),
                                     TextInput::make('launched_at')->hidden()->dehydrated(),
                                 ])
-                                ->itemLabel(fn (array $state): ?string => filled($state['label'] ?? null)
-                                    ? (($state['enabled'] ?? false) ? '● ' : '○ ').($state['label'] ?? 'Countdown')
-                                    : 'New countdown')
+                                ->itemLabel(fn (array $state): ?string => SitePathGate::adminItemLabel($state, 'Launch rule'))
                                 ->collapsible()
                                 ->cloneable()
                                 ->addActionLabel('Add countdown')
@@ -342,7 +347,7 @@ class SiteLaunchSettings extends Page
                                 ->schema([
                                     Placeholder::make('help_copy')
                                         ->hiddenLabel()
-                                        ->content("**Countdown timer** — visitors see a ticking clock. When it hits zero, the page goes live automatically. No ribbon.\n\n**Cut the ribbon** — no countdown. Visitors see the ribbon ceremony; only signed-in parish admins can cut the ribbon to go live.\n\nPick a **theme** for each gate. Maintenance mode always wins if both are on."),
+                                        ->content("**Countdown timer** — visitors see a ticking clock. When it hits zero, the page goes live automatically.\n\n**Cut the ribbon** — no countdown. Visitors see the ribbon ceremony; only signed-in parish admins can cut the ribbon to go live.\n\nChoose a **page style** for each rule. Maintenance mode always wins if both are on."),
                                 ]),
                         ]),
                 ], 'launch-tab'),

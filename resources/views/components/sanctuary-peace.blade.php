@@ -1,6 +1,7 @@
 @props([
     'kicker' => null,
     'note' => null,
+    'ribbons' => [],
     'verses' => [],
 ])
 
@@ -15,14 +16,32 @@
         ['text' => 'Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.', 'ref' => 'Philippians 4:6'],
     ];
 
-    $pool = collect($verses)->filter(fn ($item) => ! empty($item['text']))->values();
-    if ($pool->isEmpty()) {
-        $pool = collect($defaultVerses);
+    $defaultRibbons = [
+        ['kicker' => 'Abide in Christ', 'note' => 'Go in peace — the Lord goes with you. Grace and peace from our parish family.'],
+    ];
+
+    $versePool = collect($verses)->filter(fn ($item) => ! empty($item['text']))->values();
+    if ($versePool->isEmpty()) {
+        $versePool = collect($defaultVerses);
     }
 
-    $verse = $pool[(int) now()->format('w') % $pool->count()];
-    $kickerText = $kicker ?: 'Abide in Christ';
-    $noteText = $note ?: 'Go in peace — the Lord goes with you. Grace and peace from our parish family.';
+    $ribbonPool = collect($ribbons)
+        ->filter(fn ($item) => ! empty($item['kicker'] ?? null) || ! empty($item['note'] ?? null))
+        ->values();
+
+    if ($ribbonPool->isEmpty() && ($kicker || $note)) {
+        $ribbonPool = collect([['kicker' => $kicker, 'note' => $note]]);
+    }
+
+    if ($ribbonPool->isEmpty()) {
+        $ribbonPool = collect($defaultRibbons);
+    }
+
+    $index = (int) now()->format('w') % max($versePool->count(), 1);
+    $verse = $versePool[$index];
+    $ribbon = $ribbonPool[$index % $ribbonPool->count()];
+    $kickerText = $ribbon['kicker'] ?: 'Abide in Christ';
+    $noteText = $ribbon['note'] ?: 'Go in peace — the Lord goes with you. Grace and peace from our parish family.';
 @endphp
 
 <aside {{ $attributes->merge(['class' => 'sanctuary-peace']) }} aria-label="Scripture of peace">

@@ -2,8 +2,10 @@
 
 namespace Tests\Unit;
 
+use App\Enums\UserRole;
 use App\Http\Middleware\CheckSiteMaintenance;
 use App\Models\Setting;
+use App\Models\User;
 use App\Support\AdminPanelConfig;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -62,6 +64,17 @@ class AdminPanelConfigTest extends TestCase
         $response = $middleware->handle($request, fn () => response('ok'));
 
         $this->assertSame('ok', $response->getContent());
+    }
+
+    public function test_maintenance_traffic_bypass_does_not_skip_public_pages_for_admins(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::SuperAdmin]);
+
+        $request = Request::create('/', 'GET');
+        $this->actingAs($admin);
+
+        $this->assertFalse(AdminPanelConfig::shouldBypassMaintenanceTraffic($request));
+        $this->assertTrue(AdminPanelConfig::shouldBypassAdminTraffic($request));
     }
 
     public function test_is_admin_livewire_request_detects_filament_login_snapshot(): void

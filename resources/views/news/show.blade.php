@@ -35,7 +35,17 @@
             ['label' => 'News', 'url' => route('news.index')],
             ['label' => $article->title, 'current' => true],
         ]" />
-        <x-hero :title="$article->title" :subtitle="$article->excerpt" :image="$article->featured_image" size="small">
+        <x-hero
+            :title="$article->title"
+            :subtitle="$article->excerpt"
+            :image="$article->featured_image"
+            size="small"
+            :art-slug="$article->slug"
+            :art-title="$article->title"
+            art-context="news"
+            :art-content="$article->content"
+            :art-category="$article->category"
+        >
             @if ($article->published_at)
                 <time datetime="{{ $article->published_at->toIso8601String() }}" class="hero-meta-chip">
                     {{ $article->published_at->format('j F Y') }}

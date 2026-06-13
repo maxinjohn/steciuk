@@ -11,6 +11,9 @@
             kicker="Evangelical Oriental Protestant · Resources"
             scripture="Your word is a lamp to my feet and a light to my path."
             scripture-ref="Psalm 119:105"
+            art-slug="resources"
+            art-title="Liturgy & Parish Forms"
+            art-context="resource"
         />
 
         <section class="page-section page-section--compact">
@@ -32,9 +35,18 @@
                                     $downloadUrl = $resource->external_url
                                         ?: ($resource->file_path ? public_upload_url($resource->file_path) : null);
                                 @endphp
-                                <x-card class="resource-row">
-                                    <div class="resource-row-icon" aria-hidden="true">
-                                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                                <x-card class="resource-row wow-card">
+                                    <div class="resource-row-media wow-card-media">
+                                        <x-card-media
+                                            :image="null"
+                                            :slug="$resource->slug"
+                                            :title="$resource->title"
+                                            context="resource"
+                                            :alt="$resource->title"
+                                            class="resource-row-thumb"
+                                        />
+                                        <div class="topic-card-shade" aria-hidden="true"></div>
+                                        <div class="topic-card-vignette" aria-hidden="true"></div>
                                     </div>
                                     <div class="resource-row-copy">
                                         <h3 class="resource-row-title">{{ $resource->title }}</h3>

@@ -39,7 +39,7 @@ class LaunchModeTest extends TestCase
             ->assertSee('launch-countdown', false)
             ->assertSee('data-launch-fullscreen', false)
             ->assertSee('aria-label="Full screen"', false)
-            ->assertSee('Something beautiful is on the way', false);
+            ->assertSee('Opening soon', false);
     }
 
     public function test_path_scoped_launch_blocks_only_matching_url(): void
@@ -84,7 +84,7 @@ class LaunchModeTest extends TestCase
 
         $this->get('/')
             ->assertStatus(503)
-            ->assertSee('Site refresh mode', false)
+            ->assertSee('Under maintenance', false)
             ->assertDontSee('launch-countdown', false);
     }
 

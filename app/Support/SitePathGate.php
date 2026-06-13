@@ -86,18 +86,41 @@ final class SitePathGate
     }
 
     /**
+     * Admin-facing label for status lists and notifications.
+     *
      * @param  array<string, mixed>  $gate
      */
     public static function summaryLabel(array $gate): string
     {
-        $label = trim((string) ($gate['label'] ?? 'Gate'));
+        $label = trim((string) ($gate['label'] ?? 'Rule'));
 
         if (($gate['scope'] ?? self::SCOPE_SITE) === self::SCOPE_PATH) {
             $path = self::normalizePath($gate['target_path'] ?? '');
 
-            return $path !== '' ? "{$label} · /{$path}" : $label;
+            return $path !== '' ? "{$label} — /{$path}" : "{$label} — path not set";
         }
 
-        return "{$label} · entire site";
+        return "{$label} — entire public site";
+    }
+
+    /**
+     * Compact label for admin repeater rows.
+     *
+     * @param  array<string, mixed>  $gate
+     */
+    public static function adminItemLabel(array $gate, string $fallback = 'Rule'): string
+    {
+        $prefix = ($gate['enabled'] ?? false) ? '● ' : '○ ';
+        $name = trim((string) ($gate['label'] ?? '')) ?: $fallback;
+
+        if (($gate['scope'] ?? self::SCOPE_SITE) === self::SCOPE_PATH) {
+            $path = self::normalizePath($gate['target_path'] ?? '');
+
+            return $path !== ''
+                ? "{$prefix}{$name} · /{$path}"
+                : "{$prefix}{$name} · path not set";
+        }
+
+        return "{$prefix}{$name} · entire public site";
     }
 }

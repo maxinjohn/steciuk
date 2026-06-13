@@ -33,6 +33,7 @@ class LaunchModeServiceTest extends TestCase
         $this->assertSame(LaunchModeService::STYLE_COUNTDOWN, LaunchModeService::normalizeLaunchStyle('auto'));
         $this->assertSame(LaunchModeService::STYLE_RIBBON, LaunchModeService::normalizeLaunchStyle('event'));
         $this->assertSame(LaunchModeService::THEME_NEON, LaunchModeService::normalizeTheme('neon'));
+        $this->assertSame(LaunchModeService::THEME_BOLD, LaunchModeService::normalizeTheme('genz'));
         $this->assertSame(LaunchModeService::THEME_PARISH, LaunchModeService::normalizeTheme('unknown'));
     }
 

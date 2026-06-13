@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Service;
 use App\Models\Setting;
 use App\Support\AdminPanelConfig;
+use App\Support\FaithContent;
+use App\Support\GatePageCopy;
 use App\Support\SitePathGate;
 use Illuminate\Http\Request;
 
@@ -203,7 +205,7 @@ class MaintenanceModeService
             }
         }
 
-        return ['Worship continues', 'UK parish', 'Almost ready'];
+        return GatePageCopy::maintenanceChips();
     }
 
     /**
@@ -212,17 +214,18 @@ class MaintenanceModeService
     public static function viewData(?array $gate = null): array
     {
         $gate ??= self::primaryGate();
+        $comfortVerse = self::comfortVerse($gate);
 
         return [
             'status' => 503,
-            'title' => self::gateText($gate, 'title', Setting::text('maintenance_mode_title', 'We\'ll be right back')),
-            'badge' => self::gateText($gate, 'badge', Setting::text('maintenance_mode_badge', 'Site refresh mode')),
+            'title' => self::gateText($gate, 'title', Setting::text('maintenance_mode_title', GatePageCopy::MAINTENANCE_TITLE)),
+            'badge' => self::gateText($gate, 'badge', Setting::text('maintenance_mode_badge', GatePageCopy::MAINTENANCE_BADGE)),
             'message' => self::gateText(
                 $gate,
                 'message',
                 Setting::text(
                     'maintenance_mode_message',
-                    'We are refreshing the parish site. Check back soon — worship continues across the UK.',
+                    GatePageCopy::MAINTENANCE_MESSAGE,
                 ),
             ),
             'chips' => self::chips(),
@@ -231,15 +234,27 @@ class MaintenanceModeService
             'serviceTimesLabel' => self::serviceTimesLabel(),
             'showEmail' => self::showEmailCta($gate),
             'contactEmail' => Setting::get('contact_email'),
-            'verse' => Setting::text(
-                'maintenance_mode_verse',
-                'Wait for the Lord; be strong and take heart and wait for the Lord.',
-            ),
-            'verseRef' => Setting::text('maintenance_mode_verse_ref', 'Psalm 27:14'),
+            'verse' => $comfortVerse['text'],
+            'verseRef' => $comfortVerse['ref'],
             'siteName' => Setting::get('site_name', config('app.name')),
             'adminUrl' => AdminPanelConfig::url('login'),
-            'gateLabel' => $gate !== null ? SitePathGate::summaryLabel($gate) : '',
+            'theme' => self::normalizeTheme($gate !== null ? ($gate['theme'] ?? LaunchModeService::THEME_PARISH) : LaunchModeService::THEME_PARISH),
+            'scope' => $gate !== null ? ($gate['scope'] ?? SitePathGate::SCOPE_SITE) : SitePathGate::SCOPE_SITE,
+            'targetPath' => $gate !== null ? ($gate['target_path'] ?? '') : '',
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function themeOptions(): array
+    {
+        return LaunchModeService::themeOptions();
+    }
+
+    public static function normalizeTheme(mixed $theme): string
+    {
+        return LaunchModeService::normalizeTheme($theme);
     }
 
     public static function shouldBypass(string $path): bool
@@ -275,8 +290,11 @@ class MaintenanceModeService
 
     public static function shouldBypassRequest(Request $request): bool
     {
-        return self::shouldBypass(trim($request->path(), '/'))
-            || AdminPanelConfig::shouldBypassAdminTraffic($request);
+        if (self::shouldBypass(trim($request->path(), '/'))) {
+            return true;
+        }
+
+        return AdminPanelConfig::shouldBypassMaintenanceTraffic($request);
     }
 
     public static function adminStatusSummary(): string
@@ -310,6 +328,7 @@ class MaintenanceModeService
             'message' => '',
             'show_service_times' => true,
             'show_email' => true,
+            'theme' => LaunchModeService::THEME_PARISH,
         ]);
     }
 
@@ -340,7 +359,18 @@ class MaintenanceModeService
             'message' => trim((string) ($gate['message'] ?? '')),
             'show_service_times' => ($gate['show_service_times'] ?? true) !== false && ($gate['show_service_times'] ?? '1') !== '0',
             'show_email' => ($gate['show_email'] ?? true) !== false && ($gate['show_email'] ?? '1') !== '0',
+            'theme' => self::normalizeTheme($gate['theme'] ?? LaunchModeService::THEME_PARISH),
         ];
+    }
+
+    /**
+     * @return array{text: string, ref: string}
+     */
+    private static function comfortVerse(?array $gate): array
+    {
+        unset($gate);
+
+        return FaithContent::randomVerse('maintenance');
     }
 
     /**

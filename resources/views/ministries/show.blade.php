@@ -11,6 +11,10 @@
             :image="$ministry->featured_image"
             badge="Evangelical Oriental Protestant"
             size="small"
+            :art-slug="$ministry->slug"
+            :art-title="$ministry->name"
+            art-context="ministry"
+            :art-content="\App\Support\PageTopicArt::contentHintForRecord($ministry->description, $ministry->short_description)"
         />
         <x-parish-action-strip class="!py-3" />
 

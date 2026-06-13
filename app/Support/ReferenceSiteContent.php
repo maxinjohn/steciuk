@@ -122,28 +122,16 @@ class ReferenceSiteContent
                 'value' => 'Whether you need pastoral support, information about worship in your area, or wish to join our parish — write to us and we will respond as soon as we can.',
                 'group' => 'contact',
             ],
-            'faith_sanctuary_kicker' => [
-                'value' => 'Abide in Christ',
-                'group' => 'faith',
-            ],
-            'faith_sanctuary_note' => [
-                'value' => 'Go in peace — the Lord goes with you. Grace and peace from our parish family.',
+            'faith_sanctuary_ribbons' => [
+                'value' => json_encode(FaithCopyLibrary::sanctuaryRibbons(), JSON_UNESCAPED_UNICODE),
                 'group' => 'faith',
             ],
             'faith_sanctuary_verses' => [
                 'value' => json_encode(self::faithSanctuaryVerses(), JSON_UNESCAPED_UNICODE),
                 'group' => 'faith',
             ],
-            'faith_comfort_kicker' => [
-                'value' => 'For every believer',
-                'group' => 'faith',
-            ],
-            'faith_comfort_heading' => [
-                'value' => 'Rest in the Lord',
-                'group' => 'faith',
-            ],
-            'faith_comfort_subheading' => [
-                'value' => 'Scripture, prayer, and Holy Communion — anchors for daily faith in Christ',
+            'faith_comfort_headers' => [
+                'value' => json_encode(FaithCopyLibrary::comfortHeaders(), JSON_UNESCAPED_UNICODE),
                 'group' => 'faith',
             ],
             'faith_comfort_cards' => [
@@ -154,19 +142,11 @@ class ReferenceSiteContent
     }
 
     /**
-     * @return list<array{text: string, ref: string}>
+     * @return list<array{text: string, ref: string, only_on?: string}>
      */
     public static function faithSanctuaryVerses(): array
     {
-        return [
-            ['text' => 'Be still, and know that I am God.', 'ref' => 'Psalm 46:10'],
-            ['text' => 'Come to me, all you who are weary and burdened, and I will give you rest.', 'ref' => 'Matthew 11:28'],
-            ['text' => 'Peace I leave with you; my peace I give you.', 'ref' => 'John 14:27'],
-            ['text' => 'The Lord is my shepherd; I shall not want.', 'ref' => 'Psalm 23:1'],
-            ['text' => 'Cast all your anxiety on him because he cares for you.', 'ref' => '1 Peter 5:7'],
-            ['text' => 'Trust in the Lord with all your heart and lean not on your own understanding.', 'ref' => 'Proverbs 3:5'],
-            ['text' => 'The Lord bless you and keep you; the Lord make his face shine on you.', 'ref' => 'Numbers 6:24–25'],
-        ];
+        return FaithVerseLibrary::all();
     }
 
     /**

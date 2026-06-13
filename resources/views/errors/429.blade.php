@@ -9,8 +9,6 @@
     code="429"
     title="Too many requests"
     :message="$retryMessage"
-    verse="The Lord is good to those whose hope is in him, to the one who seeks him."
-    verse-ref="Lamentations 3:25"
     primary-label="Back to home"
     :primary-url="url('/')"
     secondary-label="Try again"

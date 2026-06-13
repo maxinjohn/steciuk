@@ -6,6 +6,7 @@ use App\Enums\AccountStatus;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Support\SeedConfig;
+use App\Support\SiteUrl;
 use Database\Seeders\ReferenceDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,6 +14,40 @@ use Tests\TestCase;
 class NavigationTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_cms_ministry_pages_render_topic_art_backdrop(): void
+    {
+        config(['site.seed.mode' => \App\Support\SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(\Database\Seeders\ReferenceDataSeeder::class);
+
+        foreach (['choir', 'sunday-school', 'prayer-groups'] as $slug) {
+            $response = $this->get('/'.$slug);
+
+            $response->assertOk();
+            $response->assertSee('/topic-art/'.$slug.'/', false);
+            $response->assertSee('hero-art-showcase', false);
+        }
+
+        $bandResponse = $this->get('/events');
+        $bandResponse->assertOk();
+        $bandResponse->assertSee('topic-art-backdrop', false);
+        $bandResponse->assertSee('/topic-art/event/', false);
+    }
+
+    public function test_contact_and_prayer_pages_use_hero_art_showcase(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        foreach (['/contact', '/prayer-request', '/login', '/register'] as $path) {
+            $response = $this->get($path);
+
+            $response->assertOk();
+            $response->assertSee('hero-art-showcase', false);
+            $response->assertSee('hero-grid--with-art', false);
+            $response->assertDontSee('page-band-topic-art', false);
+        }
+    }
 
     public function test_desktop_menu_markup_and_logo_on_internal_pages(): void
     {
@@ -41,17 +76,32 @@ class NavigationTest extends TestCase
         }
     }
 
-    public function test_home_includes_faith_whispers_and_spark_strip(): void
+    public function test_home_includes_comfort_section_news_feed_and_spark_strip(): void
     {
         config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
         $this->seed(ReferenceDataSeeder::class);
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('faith-whispers', false)
+            ->assertSee('heavenly-comfort', false)
             ->assertSee('faith-spark-strip', false)
             ->assertSee('Anchored in Christ', false)
-            ->assertSee('Faith for the journey', false);
+            ->assertSee('feed-grid--news', false)
+            ->assertSee('Latest News', false);
+    }
+
+    public function test_menu_links_respect_app_url_port(): void
+    {
+        config([
+            'app.url' => 'http://localhost:8123',
+            'site.seed.mode' => SeedConfig::MODE_BOOTSTRAP,
+        ]);
+        SiteUrl::configureRootUrl();
+        $this->seed(ReferenceDataSeeder::class);
+
+        $this->get('/events')
+            ->assertOk()
+            ->assertSee('http://localhost:8123/events', false);
     }
 
     public function test_footer_shows_single_eauk_trust_mark_in_about_column(): void

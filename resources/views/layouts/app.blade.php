@@ -134,8 +134,7 @@
 
         <x-faith-spark-strip />
         <x-sanctuary-peace
-            :kicker="$faithSanctuaryKicker ?? null"
-            :note="$faithSanctuaryNote ?? null"
+            :ribbons="$faithSanctuaryRibbons ?? []"
             :verses="$faithSanctuaryVerses ?? []"
         />
         <x-gospel-reminder />

@@ -87,6 +87,8 @@ class Page extends Model implements HasMedia
             if ($page->isDirty('custom_js')) {
                 $page->custom_js = \App\Support\CustomAssetSanitizer::js($page->custom_js);
             }
+
+            \App\Support\PageTopicArt::syncHeroStyleForTopicArt($page);
         });
 
         static::deleted(function (Page $page): void {

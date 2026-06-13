@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Filament\Pages\ChurchSettings;
+use App\Filament\Pages\FaithComfortSettings;
 use App\Filament\Pages\EmailTemplatesSettings;
 use App\Filament\Pages\GivingSettings;
 use App\Filament\Pages\MailSettings;
@@ -93,7 +94,8 @@ class AdminQuickLinks
                 'group' => 'Site settings',
                 'hint' => 'Church identity, public copy, and email',
                 'items' => [
-                    self::pageLink('Church & faith', ChurchSettings::class, 'Name, contact, faith comfort text, footer'),
+                    self::pageLink('Church & faith', ChurchSettings::class, 'Parish name, contact, SEO, gospel bar, admin copy'),
+                    self::pageLink('Faith & comfort', FaithComfortSettings::class, 'Rotating Scripture, sanctuary ribbon, comfort cards'),
                     self::pageLink('Maintenance mode', SiteMaintenanceSettings::class, 'Public maintenance page for site refreshes'),
                     self::pageLink('Launch countdown', SiteLaunchSettings::class, 'Pre-launch countdown for the site or a specific URL'),
                     self::pageLink('Public site copy', SiteContentSettings::class, 'Announcements, listings, prayer & giving text'),

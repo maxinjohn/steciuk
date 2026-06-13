@@ -12,34 +12,16 @@
             kicker="Evangelical Oriental Protestant · Serve"
             scripture="To equip his people for works of service, so that the body of Christ may be built up."
             scripture-ref="Ephesians 4:12"
+            art-slug="ministries"
+            art-title="Ministries & Mission"
+            art-context="ministry"
         />
 
         <section class="page-section page-section--compact">
             <div class="page-section-inner mx-auto max-w-7xl">
                 <div class="bento-grid bento-grid--ministries">
                     @forelse ($ministries as $ministry)
-                        <x-card
-                            :href="route('ministries.show', $ministry->slug)"
-                            :padding="false"
-                            class="bento-tile overflow-hidden"
-                        >
-                            <div class="bento-tile-media">
-                                @if ($ministry->featured_image)
-                                    <img src="{{ public_upload_url($ministry->featured_image) }}" alt="{{ $ministry->name }}" loading="lazy" decoding="async" class="bento-tile-image">
-                                @else
-                                    <div class="bento-tile-fallback">
-                                        <span>{{ strtoupper(substr($ministry->name, 0, 1)) }}</span>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="bento-tile-body">
-                                <h2 class="bento-tile-title">{{ $ministry->name }}</h2>
-                                @if ($ministry->short_description)
-                                    <p class="bento-tile-desc line-clamp-2">{{ $ministry->short_description }}</p>
-                                @endif
-                                <span class="bento-tile-link">Explore →</span>
-                            </div>
-                        </x-card>
+                        <x-ministry-card :ministry="$ministry" heading-tag="h2" />
                     @empty
                         <p class="feed-empty">Ministries coming soon.</p>
                     @endforelse

@@ -4,13 +4,20 @@
 @section('description', 'Register for a parish member account on the STECI UK Parish website.')
 
 @section('content')
-    <x-page-intro
+    <x-hero
         title="Create Your Parish Account"
         subtitle="Register as a member of the St. Thomas Evangelical Church of India – UK Parish"
-        kicker="Parish membership · UK"
-        scripture="For it is by grace you have been saved, through faith — and this is not from yourselves, it is the gift of God."
-        scripture-ref="Ephesians 2:8"
-        :show-strips="true"
+        eyebrow="Parish membership · UK"
+        badge="UK Parish"
+        size="small"
+        art-slug="register"
+        art-title="Create Your Parish Account"
+        art-content="Register and join the parish family as a new member"
+    />
+    <x-parish-action-strip class="parish-action-strip--compact" />
+    <x-scripture-ribbon
+        text="For it is by grace you have been saved, through faith — and this is not from yourselves, it is the gift of God."
+        reference="Ephesians 2:8"
     />
 
     <section class="page-section page-section--article py-10 sm:py-12 md:py-14">

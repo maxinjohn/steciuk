@@ -6,6 +6,7 @@ use App\Enums\MenuLocation;
 use App\Models\MenuItem;
 use App\Models\Page;
 use App\Support\GivingUrl;
+use App\Support\SafeUrl;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -13,7 +14,7 @@ class MenuCache
 {
     private const TTL_SECONDS = 3600;
 
-    private const ALL_TREES_CACHE_KEY = 'menu.trees.all.v4';
+    private const ALL_TREES_CACHE_KEY = 'menu.trees.all.v5';
 
     public static function load(MenuLocation $location): Collection
     {
@@ -120,10 +121,15 @@ class MenuCache
     {
         return collect($tree)->map(static fn (array $item): object => (object) [
             'label' => $item['label'],
-            'url' => $item['url'],
+            'url' => static::publicUrl($item['url'], (bool) ($item['is_external'] ?? false)),
             'target' => $item['target'],
             'is_external' => $item['is_external'],
-            'children' => collect($item['children'] ?? [])->map(static fn (array $child): object => (object) $child),
+            'children' => collect($item['children'] ?? [])->map(static fn (array $child): object => (object) [
+                'label' => $child['label'],
+                'url' => static::publicUrl($child['url'], (bool) ($child['is_external'] ?? false)),
+                'target' => $child['target'],
+                'is_external' => $child['is_external'],
+            ]),
         ]);
     }
 
@@ -179,28 +185,48 @@ class MenuCache
             $slug = $item->relationLoaded('page') ? $item->page?->slug : Page::query()->whereKey($item->page_id)->value('slug');
 
             if ($slug === 'home') {
-                return route('home');
+                return '/';
             }
 
             if ($slug === 'give') {
-                return GivingUrl::route();
+                return '/give';
             }
 
-            return $slug ? route('pages.show', $slug) : '#';
+            return $slug ? '/'.$slug : '#';
         }
 
         if ($item->url) {
             if (GivingUrl::pointsToGivePage($item->url)) {
-                return GivingUrl::route();
+                return '/give';
             }
 
             if ($item->is_external || str_starts_with($item->url, 'http')) {
                 return $item->url;
             }
 
-            return url($item->url);
+            return str_starts_with($item->url, '/') ? $item->url : '/'.ltrim($item->url, '/');
         }
 
         return '#';
+    }
+
+    private static function publicUrl(string $url, bool $isExternal): string
+    {
+        if ($url === '#') {
+            return $url;
+        }
+
+        if ($isExternal || str_starts_with($url, 'http') || str_starts_with($url, 'mailto:') || str_starts_with($url, 'tel:')) {
+            if (! $isExternal && str_starts_with($url, 'http')) {
+                $path = parse_url($url, PHP_URL_PATH) ?: '/';
+                $query = parse_url($url, PHP_URL_QUERY);
+
+                return SafeUrl::resolve($query ? $path.'?'.$query : $path);
+            }
+
+            return $url;
+        }
+
+        return SafeUrl::resolve($url);
     }
 }

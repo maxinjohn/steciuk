@@ -14,7 +14,7 @@ class MenuCacheTest extends TestCase
 
     public function test_load_all_rebuilds_invalid_cached_menu_payload(): void
     {
-        Cache::put('menu.trees.all.v4', ['header' => 'broken'], now()->addHour());
+        Cache::put('menu.trees.all.v5', ['header' => 'broken'], now()->addHour());
 
         $trees = MenuCache::loadAll();
 

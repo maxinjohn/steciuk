@@ -63,7 +63,7 @@
                 <div class="launch-ribbon-screen__scanlines" aria-hidden="true"></div>
 
                 <header class="launch-ribbon-screen__header">
-                    <p class="launch-ribbon-screen__kicker">{{ $subtitle ?: 'Grand opening' }}</p>
+                    <p class="launch-ribbon-screen__kicker">{{ $subtitle ?: 'Opening ceremony' }}</p>
                     @if ($eventName)
                         <p class="launch-ribbon-screen__event">{{ $eventName }}</p>
                     @endif
@@ -199,7 +199,7 @@
                         @if ($scope === 'path' && $targetPath)
                             <span class="launch-chip">{{ $targetPath }}</span>
                         @else
-                            <span class="launch-chip">Almost live</span>
+                            <span class="launch-chip">Coming soon</span>
                         @endif
                     </div>
 

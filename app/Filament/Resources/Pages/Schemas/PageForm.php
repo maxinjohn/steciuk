@@ -7,6 +7,7 @@ use App\Filament\Support\ChurchRichEditor;
 use App\Filament\Support\PublishStatusSelect;
 use App\Filament\Support\SecureFileUpload;
 use App\Models\Page;
+use App\Support\PageTopicArt;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -91,6 +92,33 @@ class PageForm
                                 TextInput::make('hero_title'),
                                 TextInput::make('hero_subtitle'),
                                 SecureFileUpload::image('featured_image', 'pages/featured'),
+                                Placeholder::make('topic_art_preview')
+                                    ->label('Auto topic art')
+                                    ->content(function (?Page $record, callable $get): string {
+                                        $slug = (string) ($get('slug') ?? $record?->slug ?? '');
+                                        $title = (string) ($get('hero_title') ?: $get('title') ?: $record?->title ?? '');
+                                        $content = (string) ($get('content') ?? $record?->content ?? '');
+
+                                        if ($slug === '' && $title === '') {
+                                            return 'Save the page with a title and slug — a matching illustration is chosen automatically from the name and content when no hero photo is uploaded.';
+                                        }
+
+                                        $topic = PageTopicArt::resolveTopic(
+                                            $slug,
+                                            $title,
+                                            $record ? PageTopicArt::contextForPage($record) : PageTopicArt::contextForSlug($slug),
+                                            $content,
+                                        );
+
+                                        $uploaded = PageTopicArt::hasRealFeaturedImage($get('featured_image') ?? $record?->featured_image);
+
+                                        if ($uploaded) {
+                                            return 'Hero photo uploaded — that image is shown. Remove it to use auto topic art ('.PageTopicArt::topicLabel($topic).').';
+                                        }
+
+                                        return 'No hero photo — visitors will see dynamic '.PageTopicArt::topicLabel($topic).' art generated from this page’s slug, title, and body text.';
+                                    })
+                                    ->columnSpanFull(),
                             ]),
                         Tab::make('Design')
                             ->icon('heroicon-o-paint-brush')

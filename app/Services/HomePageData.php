@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Cache;
 
 class HomePageData
 {
-    private const CACHE_KEY = 'home.page.data.v6';
+    private const CACHE_KEY = 'home.page.data.v9';
 
     private const CACHE_TTL_SECONDS = 3600;
 
@@ -69,8 +69,11 @@ class HomePageData
             'page' => $page,
             'services' => Service::query()
                 ->select([
-                    'id', 'title', 'location', 'address', 'service_day', 'service_time',
-                    'frequency', 'description', 'map_link', 'sort_order', 'status',
+                    'id', 'title', 'location', 'address', 'address_line_1', 'address_line_2',
+                    'city', 'county', 'postcode', 'service_day', 'service_time', 'frequency',
+                    'schedule_type', 'schedule_data', 'language', 'description', 'map_link',
+                    'online_stream_link', 'contact_person', 'contact_email', 'contact_phone',
+                    'sort_order', 'status',
                 ])
                 ->where('status', 'active')
                 ->orderBy('sort_order')

@@ -34,6 +34,9 @@ class ProductionReadinessTest extends TestCase
 
     public function test_site_doctor_passes_on_fresh_install(): void
     {
+        $this->artisan('site:ensure-paths --link')
+            ->assertSuccessful();
+
         $this->artisan('site:doctor')
             ->assertSuccessful();
     }
