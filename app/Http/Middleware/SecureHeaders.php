@@ -64,9 +64,11 @@ class SecureHeaders
             ]));
         }
 
-        if (\App\Support\AdminPanelConfig::isAdminRequest($request)) {
+        if (\App\Support\AdminPanelConfig::isAdminRequest($request)
+            || \App\Support\MemberPortalRoutes::isPortalRequest($request)) {
             $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
             $response->headers->set('Pragma', 'no-cache');
+            $response->headers->set('Expires', '0');
         } elseif ($request->is('sitemap.xml', 'robots.txt', 'manifest.webmanifest', 'sw.js')) {
             $response->headers->set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
         } elseif ($request->isMethod('GET') && ! $request->is('livewire/*')) {

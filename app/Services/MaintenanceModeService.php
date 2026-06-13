@@ -26,7 +26,19 @@ class MaintenanceModeService
     {
         $adminPath = trim(AdminPanelConfig::path(), '/');
 
-        if (in_array($path, ['up', 'sitemap.xml', 'robots.txt'], true)) {
+        if (in_array($path, [
+            'up',
+            'sitemap.xml',
+            'robots.txt',
+            'login',
+            'register',
+            'registration/pending',
+            'forgot-password',
+        ], true)) {
+            return true;
+        }
+
+        if (str_starts_with($path, 'reset-password/')) {
             return true;
         }
 

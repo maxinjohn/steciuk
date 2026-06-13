@@ -59,6 +59,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 | Request::HEADER_X_FORWARDED_PORT
                 | Request::HEADER_X_FORWARDED_PROTO,
         );
+
+        $middleware->redirectGuestsTo(function (Request $request): string {
+            if (AdminPanelConfig::isAdminRequest($request)) {
+                return AdminPanelConfig::url('login');
+            }
+
+            return route('login');
+        });
+
+        $middleware->redirectUsersTo(fn () => route('account'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
@@ -90,15 +100,15 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             if ($e instanceof AuthenticationException) {
-                if ($request->expectsJson()) {
+                if ($request->expectsJson() || $request->hasHeader('X-Livewire')) {
                     return ErrorResponse::json(401);
                 }
 
-                if (! $request->is(AdminPanelConfig::pathPattern())) {
-                    return ErrorResponse::view(401, $request);
+                if ($request->is(AdminPanelConfig::pathPattern())) {
+                    return null;
                 }
 
-                return null;
+                return redirect()->guest($e->redirectTo($request) ?? route('login'));
             }
 
             if ($e instanceof TokenMismatchException) {

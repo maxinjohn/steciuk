@@ -8,14 +8,19 @@ class Seo
 {
     /** URL path segments reserved for application routes (not CMS page slugs). */
     public const RESERVED_SLUGS = [
+        'account',
         'admin',
         'events',
+        'forgot-password',
         'gallery',
         'give',
+        'login',
         'manifest.webmanifest',
         'ministries',
         'news',
         'offline',
+        'register',
+        'registration',
         'resources',
         'robots.txt',
         'sermons',

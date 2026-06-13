@@ -121,4 +121,22 @@ class MemberPortalTest extends TestCase
         $this->assertSame('jane@example.com', $conversation->guest_email);
         $this->assertTrue($conversation->unread_by_admin);
     }
+
+    public function test_unauthenticated_account_redirects_to_login(): void
+    {
+        $this->get(route('account'))
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_authenticated_user_visiting_login_redirects_to_account(): void
+    {
+        $member = User::factory()->create([
+            'role' => UserRole::Member,
+            'account_status' => AccountStatus::Approved,
+        ]);
+
+        $this->actingAs($member)
+            ->get(route('login'))
+            ->assertRedirect(route('account'));
+    }
 }
