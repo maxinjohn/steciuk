@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Controllers\PublicUploadController;
 use App\Database\SQLiteConnection;
+use App\Database\SQLiteConnector;
 use App\Filament\Auth\Login;
 use App\Http\Middleware\ThrottleAdminLogin;
 use App\Listeners\FilamentAdminAuditListener;
@@ -39,8 +40,13 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->configureTestingDatabase();
+
+        $this->app->bind('db.connector.sqlite', SQLiteConnector::class);
+
         $this->applyCustomDataPaths();
         $this->normalizeSqliteDatabasePath();
+        $this->capSqliteBusyTimeout();
 
         if ($storagePath = SitePaths::configuredPath('storage')) {
             $this->app->useStoragePath($storagePath);
@@ -55,9 +61,12 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureTrustedProxies();
 
-        SitePaths::ensureConfiguredDataPaths();
-        SqliteHealth::ensureReady();
-        SitePaths::ensurePublicStorageLink();
+        if ($this->shouldBootstrapDatabase()) {
+            SitePaths::ensureConfiguredDataPaths();
+            SqliteHealth::ensureReady();
+            SitePaths::ensurePublicStorageLink();
+        }
+
         $this->registerPublicUploadRoute();
 
         Event::listen(ConnectionEstablished::class, function (ConnectionEstablished $event): void {
@@ -68,7 +77,9 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(MigrationsEnded::class, SyncReferenceDataAfterMigration::class);
 
-        MailConfigService::applyFromSettings();
+        if ($this->shouldBootstrapDatabase()) {
+            MailConfigService::applyFromSettings();
+        }
 
         Password::defaults(function () {
             return Password::min(12)
@@ -208,6 +219,65 @@ class AppServiceProvider extends ServiceProvider
         );
     }
 
+    private function shouldBootstrapDatabase(): bool
+    {
+        if ($this->app->environment('testing')) {
+            return false;
+        }
+
+        if (! $this->app->runningInConsole()) {
+            return true;
+        }
+
+        $command = $_SERVER['argv'][1] ?? '';
+
+        return in_array($command, [
+            'serve',
+            'queue:work',
+            'schedule:work',
+            'schedule:run',
+            'migrate',
+            'db:optimize-sqlite',
+            'db:repair-sqlite',
+            'site:ensure-paths',
+            'site:bootstrap',
+        ], true);
+    }
+
+    private function configureTestingDatabase(): void
+    {
+        $env = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV');
+
+        if ($env !== 'testing') {
+            return;
+        }
+
+        config([
+            'database.default' => 'sqlite',
+            'database.connections.sqlite.database' => ':memory:',
+            'database.connections.sqlite.busy_timeout' => 30000,
+        ]);
+    }
+
+    private function capSqliteBusyTimeout(): void
+    {
+        if (config('database.default') !== 'sqlite') {
+            return;
+        }
+
+        $configured = (int) config('database.connections.sqlite.busy_timeout', 10000);
+        $maxExecution = (int) ini_get('max_execution_time');
+
+        if ($maxExecution > 0) {
+            $cap = max(1000, ($maxExecution - 5) * 1000);
+            $configured = min($configured, $cap);
+        } else {
+            $configured = min($configured, 10000);
+        }
+
+        config(['database.connections.sqlite.busy_timeout' => $configured]);
+    }
+
     private function normalizeSqliteDatabasePath(): void
     {
         if (config('database.default') !== 'sqlite') {
@@ -227,6 +297,10 @@ class AppServiceProvider extends ServiceProvider
 
     private function applyCustomDataPaths(): void
     {
+        if ($this->app->environment('testing')) {
+            return;
+        }
+
         if ($database = SitePaths::configuredPath('database')) {
             config(['database.connections.sqlite.database' => $database]);
         }

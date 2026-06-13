@@ -299,7 +299,6 @@ class SitePaths
         }
 
         SiteBrandingAssets::ensureParishLogoInUploads();
-        SiteBrandingAssets::syncDefaultLogoSetting();
         self::ensurePublicStorageLink();
     }
 
@@ -473,13 +472,40 @@ class SitePaths
                 $integrityOk ? 'ok' : 'corrupt — run php artisan db:repair-sqlite --force',
             );
 
-            $journalMode = \App\Services\SqliteOptimizer::journalMode();
+            $journalMode = \App\Services\SqliteHealth::journalMode($resolvedDatabase);
             $checks[] = self::check(
                 $integrityOk && $journalMode === 'wal',
                 'SQLite WAL mode',
                 $journalMode === 'wal' ? 'wal' : ($journalMode ?? 'unknown').' — restart app after php artisan config:clear',
             );
+
+            $busyTimeout = (int) config('database.connections.sqlite.busy_timeout', 10000);
+            $checks[] = self::check(
+                $busyTimeout > 0 && $busyTimeout <= 25000,
+                'SQLite busy timeout',
+                $busyTimeout <= 25000
+                    ? "{$busyTimeout}ms"
+                    : "{$busyTimeout}ms — set DB_BUSY_TIMEOUT=10000 in .env and run php artisan config:clear",
+            );
         }
+
+        $sessionDriver = (string) config('session.driver');
+        $checks[] = self::check(
+            config('database.default') !== 'sqlite' || $sessionDriver !== 'database',
+            'Session driver',
+            $sessionDriver === 'database'
+                ? 'database — use SESSION_DRIVER=file to reduce SQLite lock contention'
+                : $sessionDriver,
+        );
+
+        $cacheStore = (string) config('cache.default');
+        $checks[] = self::check(
+            config('database.default') !== 'sqlite' || $cacheStore !== 'database',
+            'Cache store',
+            $cacheStore === 'database'
+                ? 'database — use CACHE_STORE=file to reduce SQLite lock contention'
+                : $cacheStore,
+        );
 
         $linkDetail = self::publicStorageLinkDetail();
         $checks[] = self::check(
@@ -510,16 +536,26 @@ class SitePaths
         );
 
         if (config('database.default') === 'sqlite') {
+            $resolvedDatabase = is_string(config('database.connections.sqlite.database'))
+                ? (self::resolve(config('database.connections.sqlite.database')) ?? config('database.connections.sqlite.database'))
+                : null;
+            $migrationsReady = is_string($resolvedDatabase) && $resolvedDatabase !== ':memory:'
+                ? \App\Services\SqliteHealth::tableExists('migrations', $resolvedDatabase)
+                : Schema::hasTable('migrations');
+            $pagesReady = is_string($resolvedDatabase) && $resolvedDatabase !== ':memory:'
+                ? \App\Services\SqliteHealth::tableExists('pages', $resolvedDatabase)
+                : Schema::hasTable('pages');
+
             $checks[] = self::check(
-                Schema::hasTable('migrations'),
+                $migrationsReady,
                 'Database migrations',
-                Schema::hasTable('migrations') ? 'applied' : 'missing — run php artisan migrate --force',
+                $migrationsReady ? 'applied' : 'missing — run php artisan migrate --force',
             );
 
             $checks[] = self::check(
-                Schema::hasTable('pages'),
+                $pagesReady,
                 'Pages table',
-                Schema::hasTable('pages') ? 'ready' : 'missing — run php artisan migrate --force',
+                $pagesReady ? 'ready' : 'missing — run php artisan migrate --force',
             );
         }
 
