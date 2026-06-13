@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './ui-polish.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -1008,7 +1009,7 @@ html.dark {
     }
 
     .mobile-sheet {
-        --mobile-drawer-width: 13.25rem;
+        --mobile-drawer-width: 17.5rem;
         --mobile-drawer-gap: 0.625rem;
         --mobile-drawer-inset: max(0.625rem, env(safe-area-inset-right, 0px));
 

@@ -557,6 +557,17 @@ class SitePaths
                 'Pages table',
                 $pagesReady ? 'ready' : 'missing — run php artisan migrate --force',
             );
+
+            if ($pagesReady) {
+                $referenceDataReady = ! \App\Database\ReferenceDataMigrator::needsSync();
+                $checks[] = self::check(
+                    $referenceDataReady,
+                    'Reference data',
+                    $referenceDataReady
+                        ? 'complete'
+                        : 'incomplete — run php artisan migrate --force',
+                );
+            }
         }
 
         if (config('session.driver') === 'database') {

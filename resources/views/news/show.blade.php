@@ -31,6 +31,10 @@
 
 @section('content')
     <article>
+        <x-breadcrumbs :items="[
+            ['label' => 'News', 'url' => route('news.index')],
+            ['label' => $article->title, 'current' => true],
+        ]" />
         <x-hero :title="$article->title" :subtitle="$article->excerpt" :image="$article->featured_image" size="small">
             @if ($article->published_at)
                 <time datetime="{{ $article->published_at->toIso8601String() }}" class="hero-meta-chip">

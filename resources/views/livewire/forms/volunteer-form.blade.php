@@ -14,18 +14,16 @@
                 <input type="text" id="volunteer-website" wire:model="website" tabindex="-1" autocomplete="off">
             </div>
 
-            @error('form')
-                <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{{ $message }}</div>
-            @enderror
+            <x-form-error-banner />
 
             <div>
-                <label for="volunteer-name" class="form-label">Full Name <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="volunteer-name" class="form-label">Full Name <span class="form-required" aria-hidden="true">*</span></label>
                 <input type="text" id="volunteer-name" wire:model.blur="name" class="form-input" required autocomplete="name" aria-required="true" @error('name') aria-invalid="true" aria-describedby="volunteer-name-error" @enderror>
                 @error('name')<p id="volunteer-name-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
 
             <div>
-                <label for="volunteer-email" class="form-label">Email Address <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="volunteer-email" class="form-label">Email Address <span class="form-required" aria-hidden="true">*</span></label>
                 <input type="email" id="volunteer-email" wire:model.blur="email" class="form-input" required autocomplete="email" aria-required="true" @error('email') aria-invalid="true" aria-describedby="volunteer-email-error" @enderror>
                 @error('email')<p id="volunteer-email-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
@@ -37,7 +35,7 @@
             </div>
 
             <div>
-                <label for="volunteer-ministry" class="form-label">Ministry Interest <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="volunteer-ministry" class="form-label">Ministry Interest <span class="form-required" aria-hidden="true">*</span></label>
                 <input type="text" id="volunteer-ministry" wire:model.blur="ministry_interest" class="form-input" required aria-required="true" placeholder="e.g. Choir, Sunday School, Youth" @error('ministry_interest') aria-invalid="true" aria-describedby="volunteer-ministry-error" @enderror>
                 @error('ministry_interest')<p id="volunteer-ministry-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>

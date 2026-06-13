@@ -39,6 +39,9 @@
 @endphp
 
 @if ($showPageHero)
+    @if ($page && ! $page->is_home)
+        <x-breadcrumbs :items="[['label' => $page->title, 'current' => true]]" />
+    @endif
     <x-hero
         :title="$page->hero_title ?? $page->title"
         :subtitle="$page->hero_subtitle"

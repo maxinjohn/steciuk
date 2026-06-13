@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Database\ReferenceDataMigrator;
 use App\Services\SqliteHealth;
 use Illuminate\Console\Command;
 
@@ -31,10 +32,17 @@ class RepairSqliteCommand extends Command
 
         $healthy = SqliteHealth::isHealthy($path);
 
-        if ($healthy) {
+        if ($healthy && ! ReferenceDataMigrator::needsSync()) {
             $this->components->info('SQLite database is healthy: '.$path);
 
             return self::SUCCESS;
+        }
+
+        if ($healthy && ReferenceDataMigrator::needsSync()) {
+            $this->components->warn('SQLite schema is healthy but reference data is incomplete: '.$path);
+            $this->line('Running migrate to sync missing reference records...');
+
+            return $this->call('migrate', ['--force' => true]);
         }
 
         if (! $this->option('force') && ! $this->confirm('SQLite is corrupt or missing schema. Rebuild reference data now?')) {

@@ -22,6 +22,7 @@ class AdminReliabilityTest extends TestCase
         parent::setUp();
 
         config(['security.block_suspicious_requests' => true]);
+        $this->clearPublicLivewireRateLimiter();
         $this->seed(ReferenceDataSeeder::class);
     }
 
@@ -32,28 +33,34 @@ class AdminReliabilityTest extends TestCase
 
         MaintenanceModeService::enable();
 
-        $request = Request::create('/livewire/update', 'POST', [
-            'components' => [
-                [
-                    'snapshot' => json_encode(['memo' => ['name' => 'app.filament.pages.dashboard']]),
-                    'calls' => [],
+        foreach (['app.filament.pages.dashboard', 'filament.livewire.sidebar'] as $componentName) {
+            $request = Request::create('/livewire/update', 'POST', [
+                'components' => [
+                    [
+                        'snapshot' => json_encode(['memo' => ['name' => $componentName]]),
+                        'calls' => [],
+                    ],
                 ],
-            ],
-        ]);
-        $request->headers->set('X-Livewire', '');
+            ]);
+            $request->headers->set('X-Livewire', '');
 
-        $middleware = new CheckSiteMaintenance;
-        $response = $middleware->handle($request, fn () => response('ok'));
+            $middleware = new CheckSiteMaintenance;
+            $response = $middleware->handle($request, fn () => response('ok'));
 
-        $this->assertSame('ok', $response->getContent());
+            $this->assertSame('ok', $response->getContent(), "Failed for {$componentName}");
+        }
     }
 
     public function test_public_livewire_requests_get_json_503_during_maintenance_mode(): void
     {
         MaintenanceModeService::enable();
 
-        $response = $this->withHeaders(['X-Livewire' => ''])
-            ->postJson('/livewire/update', [
+        $token = 'test-csrf-token';
+
+        $response = $this->withSession(['_token' => $token])
+            ->withHeaders(['X-Livewire' => ''])
+            ->post('/livewire/update', [
+                '_token' => $token,
                 'components' => [],
             ]);
 

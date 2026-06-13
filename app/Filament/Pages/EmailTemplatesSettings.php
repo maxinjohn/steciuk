@@ -29,7 +29,7 @@ class EmailTemplatesSettings extends Page
 
     protected static ?string $navigationLabel = 'Email templates';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 6;
 
     protected static ?string $title = 'Parish email templates';
 

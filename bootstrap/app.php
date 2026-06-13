@@ -3,6 +3,7 @@
 use App\Http\Middleware\AdminSessionTimeout;
 use App\Http\Middleware\BlockSuspiciousRequests;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\CheckSiteLaunch;
 use App\Http\Middleware\CheckSiteMaintenance;
 use App\Http\Middleware\EnsureApprovedMemberAccount;
 use App\Http\Middleware\ForceHttps;
@@ -37,8 +38,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(ForceHttps::class);
         $middleware->prepend(BlockSuspiciousRequests::class);
         $middleware->append(SecureHeaders::class);
-        $middleware->append(CheckSiteMaintenance::class);
         $middleware->append(ThrottlePublicForms::class);
+        $middleware->appendToGroup('web', CheckSiteMaintenance::class);
+        $middleware->appendToGroup('web', CheckSiteLaunch::class);
         $middleware->appendToGroup('web', AdminSessionTimeout::class);
         $middleware->appendToGroup('web', ShareSiteLayoutData::class);
 
@@ -125,7 +127,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 : 500;
 
             if ($request->expectsJson() || $request->hasHeader('X-Livewire')) {
-                $reload = AdminPanelConfig::shouldTrackAdminSession($request)
+                $reload = AdminPanelConfig::shouldBypassAdminTraffic($request)
                     && in_array($status, [401, 403, 419, 429, 500, 503], true);
 
                 return ErrorResponse::json($status, reload: $reload);

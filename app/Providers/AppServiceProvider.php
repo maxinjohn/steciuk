@@ -26,6 +26,7 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Database\Events\MigrationsEnded;
+use Illuminate\Database\Events\NoPendingMigrations;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
@@ -76,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(MigrationsEnded::class, SyncReferenceDataAfterMigration::class);
+        Event::listen(NoPendingMigrations::class, SyncReferenceDataAfterMigration::class);
 
         if ($this->shouldBootstrapDatabase()) {
             MailConfigService::applyFromSettings();

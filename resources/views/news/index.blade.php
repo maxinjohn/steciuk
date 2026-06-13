@@ -5,6 +5,7 @@
 
 @section('content')
     <x-page-shell :page="$page" suppress-content>
+        <x-breadcrumbs :items="[['label' => 'News', 'current' => true]]" />
         <x-page-intro
             title="Parish News"
             subtitle="Gospel-centred news — worship, prayer, mission, and fellowship across Britain"

@@ -39,6 +39,9 @@
                         @include('filament.admin.partials.dock-icon', ['icon' => $item['icon']])
                     </span>
                     <span class="admin-dock-label">{{ $item['label'] }}</span>
+                    @if (! empty($item['badge']))
+                        <span class="admin-dock-item__badge">{{ $item['badge'] > 99 ? '99+' : $item['badge'] }}</span>
+                    @endif
                 </a>
             @endif
         @endforeach

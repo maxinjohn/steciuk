@@ -97,7 +97,10 @@
         <div class="mark" aria-hidden="true">✝</div>
         <h1>You're offline</h1>
         <p>Please check your connection. Previously visited pages may still be available when you return.</p>
-        <a href="/">Try again</a>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;align-items:center;">
+            <a href="/">Try again</a>
+            <button type="button" onclick="window.location.reload()" style="min-height:2.85rem;padding:0.65rem 1.25rem;border-radius:9999px;border:1px solid var(--offline-border);background:transparent;color:var(--offline-ink);font-weight:600;cursor:pointer;">Reload page</button>
+        </div>
     </div>
 </body>
 </html>

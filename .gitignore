@@ -45,6 +45,7 @@ _ide_helper_models.php
 !/storage/framework/testing/.gitignore
 /storage/framework/views/*
 !/storage/framework/views/.gitignore
+/storage/framework/.site-paths-verified
 /storage/logs/*
 !/storage/logs/.gitignore
 /storage/app/public/*

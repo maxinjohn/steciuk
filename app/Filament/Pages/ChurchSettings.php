@@ -8,7 +8,6 @@ use App\Filament\Support\SecureFileUpload;
 use App\Filament\Support\SettingsFormTabs;
 use App\Filament\Support\UkAddressFormSchema;
 use App\Models\Setting;
-use App\Services\MaintenanceModeService;
 use App\Services\SecurityLogger;
 use App\Support\UkAddressFormatter;
 use App\Support\UkPostcode;
@@ -86,8 +85,6 @@ class ChurchSettings extends Page
             'seo_default_og_image' => Setting::get('seo_default_og_image'),
             'theme_color' => Setting::get('theme_color', '#d4cabb'),
             'pwa_short_name' => Setting::get('pwa_short_name', 'STECI UK'),
-            'maintenance_mode_enabled' => MaintenanceModeService::isEnabled(),
-            'maintenance_mode_message' => Setting::get('maintenance_mode_message'),
             'registration_captcha_enabled' => Setting::get('registration_captcha_enabled', '1') !== '0',
             'admin_use_church_logo' => Setting::get('admin_use_church_logo', '1') !== '0',
             'gospel_reminder_kicker' => Setting::get('gospel_reminder_kicker'),
@@ -115,8 +112,6 @@ class ChurchSettings extends Page
     public function save(): void
     {
         $data = $this->form->getState();
-        $maintenanceEnabled = (bool) ($data['maintenance_mode_enabled'] ?? false);
-        unset($data['maintenance_mode_enabled']);
 
         $data['contact_postcode'] = UkPostcode::normalize($data['contact_postcode'] ?? '')
             ?? trim((string) ($data['contact_postcode'] ?? ''));
@@ -132,7 +127,7 @@ class ChurchSettings extends Page
             country: $data['contact_country'] ?? null,
         );
 
-        DB::transaction(function () use ($data, $maintenanceEnabled): void {
+        DB::transaction(function () use ($data): void {
             Setting::persistBatch(function () use ($data): void {
                 foreach ($data as $key => $value) {
                     if (in_array($key, ['faith_sanctuary_verses', 'faith_comfort_cards'], true)) {
@@ -164,12 +159,6 @@ class ChurchSettings extends Page
 
             if (filled($data['logo'] ?? null)) {
                 \App\Support\SiteBrandingAssets::processUploadedLogo($data['logo']);
-            }
-
-            if ($maintenanceEnabled) {
-                MaintenanceModeService::enable();
-            } else {
-                MaintenanceModeService::disable();
             }
         });
 
@@ -283,15 +272,6 @@ class ChurchSettings extends Page
                                 ]),
                             Section::make('Site behaviour')
                                 ->schema([
-                                    Toggle::make('maintenance_mode_enabled')
-                                        ->label('Maintenance mode')
-                                        ->helperText('When on, visitors see a maintenance page. Admin stays accessible.')
-                                        ->live(),
-                                    Textarea::make('maintenance_mode_message')
-                                        ->label('Maintenance message')
-                                        ->rows(3)
-                                        ->columnSpanFull()
-                                        ->visible(fn ($get): bool => (bool) $get('maintenance_mode_enabled')),
                                     Toggle::make('registration_captcha_enabled')
                                         ->label('Registration security check (CAPTCHA)')
                                         ->helperText('Cloudflare Turnstile on member registration and the public contact form. Turn off for local testing or if the widget is unavailable. You can also set TURNSTILE_ENABLED=false in .env to disable it on this server.')

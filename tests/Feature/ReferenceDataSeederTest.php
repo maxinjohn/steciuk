@@ -26,6 +26,7 @@ class ReferenceDataSeederTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'admin@steciuk.org']);
         $this->assertDatabaseHas('pages', ['slug' => 'home']);
         $this->assertDatabaseHas('settings', ['key' => 'church_name']);
+        $this->assertDatabaseHas('gallery_albums', ['slug' => 'parish-worship-services']);
         $this->assertGreaterThan(20, MenuItem::query()->count());
     }
 

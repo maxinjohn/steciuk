@@ -5,6 +5,7 @@
 
 @section('content')
     <x-page-shell :page="$page" suppress-content>
+        <x-breadcrumbs :items="[['label' => 'Ministries', 'current' => true]]" />
         <x-page-intro
             title="Ministries & Mission"
             subtitle="Sunday School, prayer, choir, and outreach — serving Christ together"

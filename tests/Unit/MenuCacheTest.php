@@ -4,11 +4,14 @@ namespace Tests\Unit;
 
 use App\Enums\MenuLocation;
 use App\Services\MenuCache;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class MenuCacheTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_load_all_rebuilds_invalid_cached_menu_payload(): void
     {
         Cache::put('menu.trees.all.v4', ['header' => 'broken'], now()->addHour());

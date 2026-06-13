@@ -5,6 +5,7 @@
 
 @section('content')
     <x-page-shell :page="$page" suppress-content>
+        <x-breadcrumbs :items="[['label' => 'Gallery', 'current' => true]]" />
         <x-page-intro
             title="Worship & Fellowship"
             subtitle="Holy Communion, prayer, and parish life in pictures"

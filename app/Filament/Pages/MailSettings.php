@@ -32,7 +32,7 @@ class MailSettings extends Page
 
     protected static ?string $navigationLabel = 'Email setup';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $title = 'Email & SMTP Setup';
 

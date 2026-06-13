@@ -23,17 +23,18 @@ class AdminLoginTest extends TestCase
         parent::setUp();
 
         RateLimiter::clear(ThrottleAdminLogin::key(request(), 'admin@steciuk.org'));
+        $this->clearAdminLoginRateLimiters('admin@steciuk.org');
 
         $this->seed(ReferenceDataSeeder::class);
     }
 
     public function test_admin_can_sign_in_with_default_credentials(): void
     {
-        Livewire::test(Login::class)
-            ->fillForm([
-                'email' => 'admin@steciuk.org',
-                'password' => 'password',
-            ])
+        $this->fillAdminLoginForm(
+            Livewire::test(Login::class),
+            'admin@steciuk.org',
+            'password',
+        )
             ->call('authenticate')
             ->assertHasNoFormErrors();
 
@@ -42,11 +43,11 @@ class AdminLoginTest extends TestCase
 
     public function test_admin_login_normalizes_email_case_and_whitespace(): void
     {
-        Livewire::test(Login::class)
-            ->fillForm([
-                'email' => '  ADMIN@STECIUK.ORG ',
-                'password' => 'password',
-            ])
+        $this->fillAdminLoginForm(
+            Livewire::test(Login::class),
+            '  ADMIN@STECIUK.ORG ',
+            'password',
+        )
             ->call('authenticate')
             ->assertHasNoFormErrors();
 
@@ -57,11 +58,11 @@ class AdminLoginTest extends TestCase
 
     public function test_admin_login_shows_clear_message_for_wrong_password(): void
     {
-        Livewire::test(Login::class)
-            ->fillForm([
-                'email' => 'admin@steciuk.org',
-                'password' => 'not-the-password',
-            ])
+        $this->fillAdminLoginForm(
+            Livewire::test(Login::class),
+            'admin@steciuk.org',
+            'not-the-password',
+        )
             ->call('authenticate')
             ->assertHasFormErrors(['email']);
     }
@@ -81,11 +82,11 @@ class AdminLoginTest extends TestCase
         ], 'security');
 
         for ($attempt = 0; $attempt < 3; $attempt++) {
-            Livewire::test(Login::class)
-                ->fillForm([
-                    'email' => $blocked->email,
-                    'password' => 'password',
-                ])
+            $this->fillAdminLoginForm(
+                Livewire::test(Login::class),
+                $blocked->email,
+                'password',
+            )
                 ->call('authenticate')
                 ->assertHasFormErrors(['email'])
                 ->assertSee('does not have permission to access the parish admin panel', false);

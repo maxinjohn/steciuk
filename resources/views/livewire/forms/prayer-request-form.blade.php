@@ -14,12 +14,10 @@
                 <input type="text" id="prayer-website" wire:model="website" tabindex="-1" autocomplete="off">
             </div>
 
-            @error('form')
-                <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{{ $message }}</div>
-            @enderror
+            <x-form-error-banner />
 
             <div>
-                <label for="prayer-name" class="form-label">Your Name <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="prayer-name" class="form-label">Your Name <span class="form-required" aria-hidden="true">*</span></label>
                 <input type="text" id="prayer-name" wire:model.blur="name" class="form-input" required autocomplete="name" aria-required="true" @error('name') aria-invalid="true" aria-describedby="prayer-name-error" @enderror>
                 @error('name')<p id="prayer-name-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
@@ -31,7 +29,7 @@
             </div>
 
             <div>
-                <label for="prayer-request" class="form-label">Prayer Request <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="prayer-request" class="form-label">Prayer Request <span class="form-required" aria-hidden="true">*</span></label>
                 <textarea id="prayer-request" wire:model.blur="request" rows="6" class="form-input resize-y" required aria-required="true" placeholder="Share your prayer need…" @error('request') aria-invalid="true" aria-describedby="prayer-request-error" @enderror></textarea>
                 @error('request')<p id="prayer-request-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>

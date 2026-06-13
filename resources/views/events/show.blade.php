@@ -39,6 +39,10 @@
 
 @section('content')
     <article>
+        <x-breadcrumbs :items="[
+            ['label' => 'Events', 'url' => route('events.index')],
+            ['label' => $event->title, 'current' => true],
+        ]" />
         <x-hero :title="$event->title" :subtitle="$event->location" :image="$event->featured_image" size="small">
             <time datetime="{{ $event->starts_at->toIso8601String() }}" class="hero-meta-chip">
                 {{ $event->starts_at->format('l, j F Y · g:i A') }}

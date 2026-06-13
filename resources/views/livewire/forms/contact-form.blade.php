@@ -15,18 +15,16 @@
                 <input type="text" id="contact-website" wire:model="website" tabindex="-1" autocomplete="off">
             </div>
 
-            @error('form')
-                <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{{ $message }}</div>
-            @enderror
+            <x-form-error-banner />
 
             <div>
-                <label for="contact-name" class="form-label">Full Name <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="contact-name" class="form-label">Full Name <span class="form-required" aria-hidden="true">*</span></label>
                 <input type="text" id="contact-name" wire:model.blur="name" class="form-input" required autocomplete="name" aria-required="true" @error('name') aria-invalid="true" aria-describedby="contact-name-error" @enderror>
                 @error('name')<p id="contact-name-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
 
             <div>
-                <label for="contact-email" class="form-label">Email Address <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="contact-email" class="form-label">Email Address <span class="form-required" aria-hidden="true">*</span></label>
                 <input type="email" id="contact-email" wire:model.blur="email" class="form-input" required autocomplete="email" aria-required="true" @error('email') aria-invalid="true" aria-describedby="contact-email-error" @enderror>
                 @error('email')<p id="contact-email-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
@@ -38,7 +36,7 @@
             </div>
 
             <div>
-                <label for="contact-message" class="form-label">Message <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="contact-message" class="form-label">Message <span class="form-required" aria-hidden="true">*</span></label>
                 <textarea id="contact-message" wire:model.blur="message" rows="5" class="form-input resize-y" required aria-required="true" @error('message') aria-invalid="true" aria-describedby="contact-message-error" @enderror></textarea>
                 @error('message')<p id="contact-message-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>

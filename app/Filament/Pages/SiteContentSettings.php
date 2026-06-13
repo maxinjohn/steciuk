@@ -30,7 +30,7 @@ class SiteContentSettings extends Page
 
     protected static ?string $navigationLabel = 'Public site copy';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $title = 'Public Site Copy';
 

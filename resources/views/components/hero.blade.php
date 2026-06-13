@@ -111,6 +111,20 @@
                     </div>
                 </aside>
             @endif
+            @if ($showSidePanel)
+                <aside class="hero-side-panel hero-side-panel--stacked lg:hidden" aria-label="Parish worship">
+                    <div class="hero-panel hero-panel--glass">
+                        <div class="hero-panel-sticker">Monthly worship</div>
+                        <p class="hero-panel-kicker">UK Parish · STECI</p>
+                        <h2 class="hero-panel-title">Scripture · Gospel · Sacraments</h2>
+                        <p class="hero-panel-text">Monthly worship, expository preaching, and intercessory prayer across five cities — confessing Christ as Lord in the evangelical Oriental Protestant tradition of the Saint Thomas Christian Church.</p>
+                        <a href="{{ url('/our-church') }}" class="hero-panel-link">
+                            Our beliefs
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                </aside>
+            @endif
         </div>
     </div>
 

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Page;
+use App\Database\ReferenceDataMigrator;
 use Illuminate\Console\Command;
 
 class SiteBootstrapIfEmptyCommand extends Command
@@ -14,13 +14,13 @@ class SiteBootstrapIfEmptyCommand extends Command
 
     public function handle(): int
     {
-        if (Page::query()->exists()) {
+        if (! ReferenceDataMigrator::needsSync()) {
             $this->components->info('Reference data already present — bootstrap skipped.');
 
             return self::SUCCESS;
         }
 
-        $this->components->warn('No pages found — running migrate to provision reference data.');
+        $this->components->warn('Reference data is incomplete — running migrate to sync missing records.');
 
         return $this->call('migrate', [
             '--force' => $this->option('force'),

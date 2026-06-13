@@ -4,6 +4,10 @@
 @section('description', $album->description ?? 'Photo album from ' . $siteName)
 
 @section('content')
+    <x-breadcrumbs :items="[
+        ['label' => 'Gallery', 'url' => route('gallery.index')],
+        ['label' => $album->title, 'current' => true],
+    ]" />
     <x-hero
         :title="$album->title"
         :subtitle="$album->description"

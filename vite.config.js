@@ -10,13 +10,14 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/css/filament/admin/theme.css',
                 'resources/js/app.js',
+                'resources/js/launch-countdown.js',
                 'resources/js/admin-sidebar.js',
                 'resources/js/admin-session.js',
             ],
             refresh: true,
-            fonts: [
+                fonts: [
                 bunny('Plus Jakarta Sans', {
-                    weights: [400, 600, 700],
+                    weights: [400, 600, 700, 800],
                 }),
             ],
         }),
