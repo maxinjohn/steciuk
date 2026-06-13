@@ -4,7 +4,10 @@ namespace Tests;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use App\Filament\Auth\Login;
+use App\Http\Middleware\ThrottleAdminLogin;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -28,6 +31,28 @@ abstract class TestCase extends BaseTestCase
         if (config('database.default') === 'sqlite') {
             DB::connection()->getPdo()->exec('PRAGMA busy_timeout = 30000');
         }
+    }
+
+    /**
+     * @param  \Livewire\Features\SupportTesting\Testable  $component
+     * @return \Livewire\Features\SupportTesting\Testable
+     */
+    protected function fillAdminLoginForm($component, string $email, string $password)
+    {
+        return $component
+            ->set('data.email', $email)
+            ->set('data.password', $password);
+    }
+
+    protected function clearAdminLoginRateLimiters(?string $email = null): void
+    {
+        RateLimiter::clear(ThrottleAdminLogin::key(request(), $email));
+        RateLimiter::clear('livewire-rate-limiter:'.sha1(Login::class.'|authenticate|'.request()->ip()));
+    }
+
+    protected function clearPublicLivewireRateLimiter(): void
+    {
+        RateLimiter::clear('livewire-form:'.request()->ip());
     }
 
     private function forceTestingDatabaseEnv(): void

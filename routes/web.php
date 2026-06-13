@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LaunchRibbonController;
 use App\Http\Controllers\DonationReportController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GalleryController;
@@ -24,6 +25,9 @@ Route::get('/', HomeController::class)->name('home');
 Route::get('/manifest.webmanifest', ManifestController::class)->name('manifest');
 Route::get('/sw.js', ServiceWorkerController::class)->name('sw');
 Route::get('/offline', OfflineController::class)->name('offline');
+
+Route::post('/launch/cut-ribbon', LaunchRibbonController::class)
+    ->name('launch.cut-ribbon');
 
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');

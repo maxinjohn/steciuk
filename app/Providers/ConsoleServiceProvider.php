@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\MaintenanceModeCommand;
 use App\Console\Commands\OptimizeSqliteCommand;
 use App\Console\Commands\RepairSqliteCommand;
 use App\Console\Commands\SiteBootstrapCommand;
@@ -18,6 +19,7 @@ class ConsoleServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->commands([
+            MaintenanceModeCommand::class,
             OptimizeSqliteCommand::class,
             RepairSqliteCommand::class,
             SiteBootstrapCommand::class,

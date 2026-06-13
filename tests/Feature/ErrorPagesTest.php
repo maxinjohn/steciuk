@@ -105,7 +105,7 @@ class ErrorPagesTest extends TestCase
         $response = $this->get('/__test/maintenance');
 
         $response->assertStatus(503);
-        $response->assertSee('Temporarily unavailable', false);
-        $response->assertSee('error-code', false);
+        $response->assertSee('maintenance-page', false);
+        $response->assertSee('We&#039;ll be right back', false);
     }
 }

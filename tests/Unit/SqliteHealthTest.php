@@ -21,6 +21,7 @@ class SqliteHealthTest extends TestCase
 
         $this->assertSame(realpath($database), realpath($repaired));
         $this->assertTrue(SqliteHealth::isHealthy($repaired));
+        $this->assertFalse(\App\Database\ReferenceDataMigrator::needsSync());
         $this->assertNotEmpty(glob(dirname($database).'/backups/database-corrupt-*.sqlite'));
 
         @unlink($database);

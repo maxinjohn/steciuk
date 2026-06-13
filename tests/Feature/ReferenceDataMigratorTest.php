@@ -73,4 +73,31 @@ class ReferenceDataMigratorTest extends TestCase
         $this->assertDatabaseHas('gallery_albums', ['slug' => 'parish-worship-services']);
         $this->assertDatabaseHas('gallery_albums', ['slug' => 'custom-parish-album', 'id' => $customAlbum->id]);
     }
+
+    public function test_migrate_with_nothing_pending_still_syncs_missing_reference_gallery(): void
+    {
+        GalleryPhoto::query()->delete();
+        GalleryAlbum::query()->delete();
+
+        $this->assertTrue(\App\Database\ReferenceDataMigrator::needsSync());
+
+        $this->artisan('migrate', ['--force' => true])->assertSuccessful();
+
+        $this->assertFalse(\App\Database\ReferenceDataMigrator::needsSync());
+        $this->assertDatabaseHas('gallery_albums', ['slug' => 'parish-worship-services']);
+        $this->assertSame(8, GalleryPhoto::query()->count());
+    }
+
+    public function test_migrate_with_nothing_pending_restores_other_missing_reference_types(): void
+    {
+        \App\Models\Event::query()->where('slug', 'uk-parish-fellowship-day')->delete();
+        \App\Models\News::query()->where('slug', 'lent-prayer-week-uk-parish')->delete();
+        \App\Models\Setting::query()->where('key', 'church_name')->delete();
+
+        $this->artisan('migrate', ['--force' => true])->assertSuccessful();
+
+        $this->assertDatabaseHas('events', ['slug' => 'uk-parish-fellowship-day']);
+        $this->assertDatabaseHas('news', ['slug' => 'lent-prayer-week-uk-parish']);
+        $this->assertDatabaseHas('settings', ['key' => 'church_name']);
+    }
 }

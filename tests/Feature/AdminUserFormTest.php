@@ -26,17 +26,15 @@ class AdminUserFormTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(CreateUser::class)
-            ->fillForm([
-                'first_name' => 'Test',
-                'last_name' => 'Member',
-                'email' => 'test.member@example.com',
-                'password' => 'Password123!',
-                'role' => UserRole::Member->value,
-                'pronouns' => 'he/him',
-                'gender' => 'male',
-                'phone' => '07700900123',
-                'preferred_worship_location' => 'Manchester',
-            ])
+            ->set('data.first_name', 'Test')
+            ->set('data.last_name', 'Member')
+            ->set('data.email', 'test.member@example.com')
+            ->set('data.password', 'Password123!Extra')
+            ->set('data.role', UserRole::Member->value)
+            ->set('data.pronouns', 'he/him')
+            ->set('data.gender', 'male')
+            ->set('data.phone', '07700900123')
+            ->set('data.preferred_worship_location', 'Manchester')
             ->call('create')
             ->assertHasNoFormErrors();
 

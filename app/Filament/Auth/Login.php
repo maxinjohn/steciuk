@@ -26,7 +26,7 @@ class Login extends \Filament\Auth\Pages\Login
 
     public function form(Schema $schema): Schema
     {
-        return $schema
+        return parent::form($schema)
             ->components(array_filter([
                 $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),

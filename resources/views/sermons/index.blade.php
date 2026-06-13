@@ -5,6 +5,7 @@
 
 @section('content')
     <x-page-shell :page="$page" suppress-content>
+        <x-breadcrumbs :items="[['label' => 'Sermons', 'current' => true]]" />
         <x-page-intro
             title="Expository Preaching"
             subtitle="Sermons from Holy Scripture — for the testimony of Jesus Christ"

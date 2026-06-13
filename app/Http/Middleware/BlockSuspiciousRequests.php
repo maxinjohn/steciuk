@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\SecurityLogger;
+use App\Support\AdminPanelConfig;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +25,7 @@ class BlockSuspiciousRequests
             return $next($request);
         }
 
-        if ($request->hasHeader('X-Livewire') && \App\Support\AdminPanelConfig::shouldTrackAdminSession($request)) {
+        if (AdminPanelConfig::shouldBypassAdminTraffic($request)) {
             return $next($request);
         }
 

@@ -14,18 +14,16 @@
                 <input type="text" id="event-website" wire:model="website" tabindex="-1" autocomplete="off">
             </div>
 
-            @error('form')
-                <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{{ $message }}</div>
-            @enderror
+            <x-form-error-banner />
 
             <div>
-                <label for="event-name-field" class="form-label">Full Name <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="event-name-field" class="form-label">Full Name <span class="form-required" aria-hidden="true">*</span></label>
                 <input type="text" id="event-name-field" wire:model.blur="name" class="form-input" required autocomplete="name" aria-required="true" @error('name') aria-invalid="true" aria-describedby="event-name-error" @enderror>
                 @error('name')<p id="event-name-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
 
             <div>
-                <label for="event-email" class="form-label">Email Address <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="event-email" class="form-label">Email Address <span class="form-required" aria-hidden="true">*</span></label>
                 <input type="email" id="event-email" wire:model.blur="email" class="form-input" required autocomplete="email" aria-required="true" @error('email') aria-invalid="true" aria-describedby="event-email-error" @enderror>
                 @error('email')<p id="event-email-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
@@ -37,7 +35,7 @@
             </div>
 
             <div>
-                <label for="event-message" class="form-label">Message <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="event-message" class="form-label">Message <span class="form-required" aria-hidden="true">*</span></label>
                 <textarea id="event-message" wire:model.blur="message" rows="4" class="form-input resize-y" required aria-required="true" @error('message') aria-invalid="true" aria-describedby="event-message-error" @enderror></textarea>
                 @error('message')<p id="event-message-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>

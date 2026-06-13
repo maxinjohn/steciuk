@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Database\ReferenceDataMigrator;
 use App\Support\SitePaths;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -352,11 +353,15 @@ class SqliteHealth
             return;
         }
 
-        if (static::fastHealthy($path)) {
+        if (static::fastHealthy($path) && ! ReferenceDataMigrator::needsSync()) {
             return;
         }
 
         if (static::isHealthy($path)) {
+            if (ReferenceDataMigrator::needsSync()) {
+                ReferenceDataMigrator::sync();
+            }
+
             static::rememberHealthy($path);
 
             return;

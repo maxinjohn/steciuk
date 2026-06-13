@@ -4,6 +4,7 @@ namespace App\Filament\Support;
 
 use App\Models\Family;
 use App\Models\User;
+use App\Support\FamilyLabel;
 use Illuminate\Database\Eloquent\Builder;
 
 class HouseholdMemberOptions

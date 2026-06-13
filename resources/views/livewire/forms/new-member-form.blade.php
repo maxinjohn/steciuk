@@ -14,9 +14,7 @@
                 <input type="text" id="member-website" wire:model="website" tabindex="-1" autocomplete="off">
             </div>
 
-            @error('form')
-                <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{{ $message }}</div>
-            @enderror
+            <x-form-error-banner />
 
             @guest
                 <p class="rounded-xl border border-[var(--site-border)] bg-[var(--site-surface)] px-4 py-3 text-sm text-ink-muted">
@@ -27,19 +25,19 @@
             @endguest
 
             <div>
-                <label for="member-name" class="form-label">Full Name <span class="text-red-600" aria-hidden="true">*</span></label>
+                <label for="member-name" class="form-label">Full Name <span class="form-required" aria-hidden="true">*</span></label>
                 <input type="text" id="member-name" wire:model.blur="name" class="form-input" required autocomplete="name" aria-required="true" @error('name') aria-invalid="true" aria-describedby="member-name-error" @enderror>
                 @error('name')<p id="member-name-error" class="form-error" role="alert">{{ $message }}</p>@enderror
             </div>
 
             <div class="grid gap-5 sm:grid-cols-2">
                 <div>
-                    <label for="member-email" class="form-label">Email Address <span class="text-red-600" aria-hidden="true">*</span></label>
+                    <label for="member-email" class="form-label">Email Address <span class="form-required" aria-hidden="true">*</span></label>
                     <input type="email" id="member-email" wire:model.blur="email" class="form-input" required autocomplete="email" aria-required="true" @error('email') aria-invalid="true" aria-describedby="member-email-error" @enderror>
                     @error('email')<p id="member-email-error" class="form-error" role="alert">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label for="member-phone" class="form-label">Phone Number <span class="text-red-600" aria-hidden="true">*</span></label>
+                    <label for="member-phone" class="form-label">Phone Number <span class="form-required" aria-hidden="true">*</span></label>
                     <input type="tel" id="member-phone" wire:model.blur="phone" class="form-input" required autocomplete="tel" aria-required="true" @error('phone') aria-invalid="true" aria-describedby="member-phone-error" @enderror>
                     @error('phone')<p id="member-phone-error" class="form-error" role="alert">{{ $message }}</p>@enderror
                 </div>

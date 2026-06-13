@@ -5,7 +5,7 @@
     $heading = Setting::text('admin_welcome_heading', 'Welcome - manage your parish with peace');
     $body = Setting::text(
         'admin_welcome_body',
-        'On phones and tablets, use the bottom bar for Home, Worship, Events, and Menu. Tap Menu for the full sidebar, then choose a page.',
+        \App\Support\AdminMobileDock::mobileHint(),
     );
     $verse = Setting::text('admin_dashboard_verse', 'Be still, and know that I am God.');
     $verseRef = Setting::text('admin_dashboard_verse_ref', 'Psalm 46:10');

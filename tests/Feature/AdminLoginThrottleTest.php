@@ -23,6 +23,7 @@ class AdminLoginThrottleTest extends TestCase
         parent::setUp();
 
         RateLimiter::clear(ThrottleAdminLogin::key(request(), 'admin@steciuk.org'));
+        $this->clearAdminLoginRateLimiters('admin@steciuk.org');
 
         config([
             'site.seed.mode' => SeedConfig::MODE_BOOTSTRAP,
@@ -36,22 +37,22 @@ class AdminLoginThrottleTest extends TestCase
     public function test_admin_login_locks_out_after_max_failed_attempts(): void
     {
         for ($attempt = 0; $attempt < 3; $attempt++) {
-            Livewire::test(Login::class)
-                ->fillForm([
-                    'email' => 'admin@steciuk.org',
-                    'password' => 'wrong-password-'.$attempt,
-                ])
+            $this->fillAdminLoginForm(
+                Livewire::test(Login::class),
+                'admin@steciuk.org',
+                'wrong-password-'.$attempt,
+            )
                 ->call('authenticate')
                 ->assertHasFormErrors(['email']);
         }
 
         $this->assertTrue(ThrottleAdminLogin::isLocked(request(), 'admin@steciuk.org'));
 
-        Livewire::test(Login::class)
-            ->fillForm([
-                'email' => 'admin@steciuk.org',
-                'password' => 'password',
-            ])
+        $this->fillAdminLoginForm(
+            Livewire::test(Login::class),
+            'admin@steciuk.org',
+            'password',
+        )
             ->call('authenticate')
             ->assertHasFormErrors(['email']);
 
@@ -71,20 +72,20 @@ class AdminLoginThrottleTest extends TestCase
         RateLimiter::clear(ThrottleAdminLogin::key(request(), 'cleared@steciuk.org'));
 
         for ($attempt = 0; $attempt < 2; $attempt++) {
-            Livewire::test(Login::class)
-                ->fillForm([
-                    'email' => 'cleared@steciuk.org',
-                    'password' => 'wrong-password',
-                ])
+            $this->fillAdminLoginForm(
+                Livewire::test(Login::class),
+                'cleared@steciuk.org',
+                'wrong-password',
+            )
                 ->call('authenticate')
                 ->assertHasFormErrors(['email']);
         }
 
-        Livewire::test(Login::class)
-            ->fillForm([
-                'email' => 'cleared@steciuk.org',
-                'password' => 'password',
-            ])
+        $this->fillAdminLoginForm(
+            Livewire::test(Login::class),
+            'cleared@steciuk.org',
+            'password',
+        )
             ->call('authenticate')
             ->assertHasNoFormErrors();
 
