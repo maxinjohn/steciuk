@@ -126,6 +126,12 @@
                     @endauth
                 </div>
             </div>
+            <div class="site-header-veena" aria-hidden="true">
+                <svg class="site-header-veena__svg" viewBox="0 0 1440 28" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <path class="site-header-veena__fill" d="M0,0 H1440 V11 C1230,11 1110,28 720,28 C330,28 210,11 0,11 Z"/>
+                    <path class="site-header-veena__stroke" d="M0,11 C210,11 330,28 720,28 C1110,28 1230,11 1440,11" fill="none"/>
+                </svg>
+            </div>
         </header>
 
         <main id="main-content" class="flex-1 lg:pb-0">
