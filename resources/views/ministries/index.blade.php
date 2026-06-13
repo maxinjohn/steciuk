@@ -24,7 +24,7 @@
                         >
                             <div class="bento-tile-media">
                                 @if ($ministry->featured_image)
-                                    <img src="{{ asset('storage/' . ltrim($ministry->featured_image, '/')) }}" alt="{{ $ministry->name }}" loading="lazy" decoding="async" class="bento-tile-image">
+                                    <img src="{{ public_upload_url($ministry->featured_image) }}" alt="{{ $ministry->name }}" loading="lazy" decoding="async" class="bento-tile-image">
                                 @else
                                     <div class="bento-tile-fallback">
                                         <span>{{ strtoupper(substr($ministry->name, 0, 1)) }}</span>

@@ -62,7 +62,13 @@ class Seo
             return $path;
         }
 
-        return asset('storage/'.ltrim($path, '/'));
+        $relative = SitePaths::normalizeUploadRelativePath($path);
+
+        if ($relative === null) {
+            return null;
+        }
+
+        return url(SitePaths::publicStorageUrl($relative));
     }
 
     public static function canonicalUrl(?string $override = null): string

@@ -7,6 +7,26 @@ use Tests\TestCase;
 
 class SettingAssetUrlTest extends TestCase
 {
+    public function test_asset_url_uses_configured_public_storage_url(): void
+    {
+        config(['filesystems.disks.public.url' => '/media']);
+
+        $this->assertSame(
+            '/media/settings/branding/steci-parish-logo.png',
+            Setting::assetUrl('settings/branding/steci-parish-logo.png'),
+        );
+    }
+
+    public function test_asset_url_normalizes_legacy_storage_prefix(): void
+    {
+        config(['filesystems.disks.public.url' => '/storage']);
+
+        $this->assertSame(
+            '/storage/settings/branding/steci-parish-logo.png',
+            Setting::assetUrl('/storage/settings/branding/steci-parish-logo.png'),
+        );
+    }
+
     public function test_asset_url_uses_root_relative_storage_path(): void
     {
         $this->assertSame(

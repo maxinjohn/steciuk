@@ -46,11 +46,12 @@ class SiteBrandingAssets
     }
 
     /**
-     * Copy git-tracked branding assets into the public uploads disk when missing or outdated.
+     * Copy git-tracked branding assets into settings/branding on the public uploads disk.
      */
     public static function ensureParishLogoInUploads(): string
     {
-        SitePaths::ensureCommonUploadDirectories();
+        SitePaths::ensurePublicDiskConfigured();
+        SitePaths::ensureBrandingUploadDirectory();
 
         $logoSynced = self::syncBundledAsset(self::bundledLogoPath(), self::UPLOAD_LOGO_RELATIVE);
         self::syncBundledAsset(self::bundledMarkPath(), self::UPLOAD_MARK_RELATIVE);
@@ -59,9 +60,7 @@ class SiteBrandingAssets
             SiteLogoProcessor::process(self::UPLOAD_LOGO_RELATIVE);
         }
 
-        $disk = Storage::disk('public');
-
-        if ($disk->exists(self::UPLOAD_LOGO_RELATIVE)) {
+        if (SitePaths::publicUploadExists(self::UPLOAD_LOGO_RELATIVE)) {
             return self::UPLOAD_LOGO_RELATIVE;
         }
 
@@ -90,7 +89,7 @@ class SiteBrandingAssets
 
         if ($disk->exists(self::UPLOAD_MARK_RELATIVE)) {
             return Setting::assetUrl(self::UPLOAD_MARK_RELATIVE)
-                ?? '/storage/'.self::UPLOAD_MARK_RELATIVE;
+                ?? SitePaths::publicStorageUrl(self::UPLOAD_MARK_RELATIVE);
         }
 
         if (self::bundledMarkExists()) {
@@ -121,7 +120,17 @@ class SiteBrandingAssets
         $path = $logoPath ?? Setting::get('logo');
 
         if ($path) {
-            return Setting::assetUrl($path) ?? '/'.ltrim((string) $path, '/');
+            $url = Setting::assetUrl($path);
+
+            if ($url !== null && SitePaths::publicUploadExists($path)) {
+                return $url;
+            }
+
+            if (self::isParishLogo($path) && self::bundledLogoExists()) {
+                return '/'.self::BUNDLED_LOGO_PUBLIC;
+            }
+
+            return $url ?? '/'.ltrim((string) $path, '/');
         }
 
         if (self::bundledLogoExists()) {
@@ -137,15 +146,19 @@ class SiteBrandingAssets
             return false;
         }
 
-        $disk = Storage::disk('public');
+        $destination = SitePaths::publicUploadsRoot().'/'.ltrim($uploadRelative, '/');
 
-        if ($disk->exists($uploadRelative) && filemtime($bundledPath) <= $disk->lastModified($uploadRelative)) {
+        if (is_file($destination) && filemtime($bundledPath) <= filemtime($destination)) {
             return false;
         }
 
-        $disk->put($uploadRelative, (string) file_get_contents($bundledPath));
+        $contents = file_get_contents($bundledPath);
 
-        return true;
+        if ($contents === false) {
+            return false;
+        }
+
+        return SitePaths::writePublicUpload($uploadRelative, $contents);
     }
 
     public static function syncDefaultLogoSetting(bool $forceLegacy = true): void
@@ -157,11 +170,23 @@ class SiteBrandingAssets
         $uploadPath = self::ensureParishLogoInUploads();
         $current = trim((string) Setting::get('logo', ''));
 
-        if ($forceLegacy && ! in_array($current, self::LEGACY_LOGO_VALUES, true)) {
+        if ($forceLegacy && in_array($current, self::LEGACY_LOGO_VALUES, true)) {
+            Setting::set('logo', $uploadPath, 'branding');
+
             return;
         }
 
-        Setting::set('logo', $uploadPath, 'branding');
+        if ($current === ''
+            || str_starts_with($current, '/images/branding/')
+            || str_starts_with($current, 'images/branding/')) {
+            Setting::set('logo', $uploadPath, 'branding');
+
+            return;
+        }
+
+        if (self::isParishLogo($current) && ! SitePaths::publicUploadExists($current)) {
+            Setting::set('logo', $uploadPath, 'branding');
+        }
     }
 
     public static function isParishLogo(?string $path): bool

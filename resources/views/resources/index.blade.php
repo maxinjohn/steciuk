@@ -30,7 +30,7 @@
                             @foreach ($items as $resource)
                                 @php
                                     $downloadUrl = $resource->external_url
-                                        ?: ($resource->file_path ? asset('storage/' . ltrim($resource->file_path, '/')) : null);
+                                        ?: ($resource->file_path ? public_upload_url($resource->file_path) : null);
                                 @endphp
                                 <x-card class="resource-row">
                                     <div class="resource-row-icon" aria-hidden="true">

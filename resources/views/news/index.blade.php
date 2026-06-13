@@ -27,7 +27,7 @@
                         >
                             <div class="feed-card-media">
                                 @if ($article->featured_image)
-                                    <img src="{{ asset('storage/' . ltrim($article->featured_image, '/')) }}" alt="{{ $article->title }}" loading="lazy" decoding="async" class="feed-card-image">
+                                    <img src="{{ public_upload_url($article->featured_image) }}" alt="{{ $article->title }}" loading="lazy" decoding="async" class="feed-card-image">
                                 @else
                                     <div class="feed-card-fallback feed-card-fallback--news">
                                         <span class="feed-date-day">{{ $article->published_at?->format('d') }}</span>

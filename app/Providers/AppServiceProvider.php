@@ -229,12 +229,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         if ($public = SitePaths::configuredPath('public_uploads')) {
-            config([
-                'filesystems.disks.public.root' => $public,
-                'filesystems.links' => [
-                    public_path('storage') => $public,
-                ],
-            ]);
+            SitePaths::ensurePublicDiskConfigured();
         }
     }
 

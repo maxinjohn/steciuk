@@ -118,7 +118,8 @@ class SiteLogoProcessor
             $disk = Storage::disk('public');
 
             if ($disk->exists($markPath)) {
-                return Setting::assetUrl($markPath) ?? '/storage/'.ltrim($markPath, '/');
+                return Setting::assetUrl($markPath)
+                    ?? SitePaths::publicStorageUrl($markPath);
             }
 
             if (self::process($logoPath)) {

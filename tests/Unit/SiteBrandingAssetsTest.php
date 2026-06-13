@@ -2,14 +2,18 @@
 
 namespace Tests\Unit;
 
+use App\Models\Setting;
 use App\Support\SiteBrandingAssets;
 use App\Support\SiteLogoProcessor;
+use App\Support\SitePaths;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SiteBrandingAssetsTest extends TestCase
 {
+    use RefreshDatabase;
     public function test_bundled_parish_logo_exists_in_public_images(): void
     {
         $this->assertTrue(SiteBrandingAssets::bundledLogoExists());
@@ -27,8 +31,8 @@ class SiteBrandingAssetsTest extends TestCase
         $path = SiteBrandingAssets::ensureParishLogoInUploads();
 
         $this->assertSame(SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, $path);
-        Storage::disk('public')->assertExists(SiteBrandingAssets::UPLOAD_LOGO_RELATIVE);
-        Storage::disk('public')->assertExists(SiteBrandingAssets::UPLOAD_MARK_RELATIVE);
+        $this->assertTrue(SitePaths::publicUploadExists(SiteBrandingAssets::UPLOAD_LOGO_RELATIVE));
+        $this->assertTrue(SitePaths::publicUploadExists(SiteBrandingAssets::UPLOAD_MARK_RELATIVE));
     }
 
     public function test_is_parish_logo_detects_upload_and_bundled_paths(): void
@@ -67,5 +71,43 @@ class SiteBrandingAssetsTest extends TestCase
 
         $this->assertTrue(SiteLogoProcessor::process($logoPath));
         Storage::disk('public')->assertExists(SiteLogoProcessor::markPathFor($logoPath));
+    }
+
+    public function test_ensure_parish_logo_copies_into_custom_public_storage_path_only(): void
+    {
+        $absolute = storage_path('framework/testing/custom-branding-'.bin2hex(random_bytes(4)));
+
+        config(['site.paths.public_uploads' => $absolute]);
+        SitePaths::ensurePublicDiskConfigured();
+
+        $path = SiteBrandingAssets::ensureParishLogoInUploads();
+
+        $this->assertSame(SiteBrandingAssets::UPLOAD_LOGO_RELATIVE, $path);
+        $this->assertFileExists($absolute.'/settings/branding/steci-parish-logo.png');
+        $this->assertFileExists($absolute.'/settings/branding/steci-parish-logo-mark.png');
+        $this->assertDirectoryDoesNotExist($absolute.'/gallery');
+        $this->assertDirectoryDoesNotExist($absolute.'/events');
+
+        \Illuminate\Support\Facades\File::deleteDirectory($absolute);
+    }
+
+    public function test_sync_default_logo_setting_points_to_upload_path_on_custom_storage(): void
+    {
+        $absolute = storage_path('framework/testing/custom-logo-setting-'.bin2hex(random_bytes(4)));
+
+        config(['site.paths.public_uploads' => $absolute]);
+        SitePaths::ensurePublicDiskConfigured();
+
+        Setting::set('logo', '/images/branding/steci-parish-logo.png', 'branding');
+
+        SiteBrandingAssets::syncDefaultLogoSetting();
+
+        $this->assertSame(
+            SiteBrandingAssets::UPLOAD_LOGO_RELATIVE,
+            Setting::get('logo'),
+        );
+        $this->assertFileExists($absolute.'/settings/branding/steci-parish-logo.png');
+
+        \Illuminate\Support\Facades\File::deleteDirectory($absolute);
     }
 }

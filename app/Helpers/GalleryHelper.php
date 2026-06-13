@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\SitePaths;
 use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('galleryPhotoUrl')) {
@@ -13,7 +14,7 @@ if (! function_exists('galleryPhotoUrl')) {
             }
 
             if (Storage::disk('public')->exists($normalized)) {
-                return asset('storage/'.$normalized);
+                return public_upload_url($normalized) ?? SitePaths::publicStorageUrl($normalized);
             }
         }
 

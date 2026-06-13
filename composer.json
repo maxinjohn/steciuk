@@ -31,7 +31,8 @@
         },
         "files": [
             "app/Helpers/HtmlHelper.php",
-            "app/Helpers/GalleryHelper.php"
+            "app/Helpers/GalleryHelper.php",
+            "app/Helpers/StorageHelper.php"
         ]
     },
     "autoload-dev": {
