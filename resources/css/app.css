@@ -157,10 +157,29 @@ html.dark {
     @media (max-width: 1299px) {
         .site-header {
             border-bottom: none;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .site-header::before {
+            bottom: auto;
+            height: calc(100% - clamp(0.875rem, 3.2vw, 1.375rem));
         }
 
         .site-header::after {
             display: none;
+        }
+
+        .site-header-inner {
+            background: var(--site-glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid color-mix(in srgb, var(--site-glass-border) 72%, transparent);
+        }
+
+        .is-home .site-header:not(.site-header--elevated) .site-header-inner {
+            background: color-mix(in srgb, var(--site-glass) 82%, transparent);
+            border-bottom-color: color-mix(in srgb, var(--site-accent) 18%, var(--site-glass-border));
         }
 
         .site-header-veena {
@@ -170,12 +189,18 @@ html.dark {
             line-height: 0;
             margin-top: -1px;
             pointer-events: none;
+            filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--site-brand) 10%, transparent));
         }
 
         .site-header-veena__svg {
             display: block;
             width: 100%;
-            height: clamp(0.875rem, 2.8vw, 1.125rem);
+            height: clamp(1rem, 3.6vw, 1.5rem);
+        }
+
+        .site-header-veena__glow {
+            fill: url(#site-header-veena-glow);
+            opacity: 0.55;
         }
 
         .site-header-veena__fill {
@@ -186,15 +211,55 @@ html.dark {
             fill: color-mix(in srgb, var(--site-glass) 82%, transparent);
         }
 
+        .site-header-veena__stop--start {
+            stop-color: var(--site-accent);
+            stop-opacity: 0.95;
+        }
+
+        .site-header-veena__stop--mid {
+            stop-color: var(--site-accent);
+            stop-opacity: 0.72;
+        }
+
+        .site-header-veena__stop--end {
+            stop-color: color-mix(in srgb, var(--site-brand) 55%, var(--site-accent));
+            stop-opacity: 0.45;
+        }
+
+        .site-header-veena__glow-stop--core {
+            stop-color: var(--site-accent);
+            stop-opacity: 0.22;
+        }
+
+        .site-header-veena__glow-stop--edge {
+            stop-color: var(--site-accent);
+            stop-opacity: 0;
+        }
+
         .site-header-veena__stroke {
-            stroke: var(--site-accent);
-            stroke-width: 1.75;
+            stroke: url(#site-header-veena-accent);
+            stroke-width: 2;
             vector-effect: non-scaling-stroke;
-            opacity: 0.82;
+            opacity: 0.92;
+        }
+
+        .site-header-veena__inner {
+            stroke: color-mix(in srgb, var(--site-accent) 55%, white);
+            stroke-width: 1;
+            vector-effect: non-scaling-stroke;
+            opacity: 0.38;
+        }
+
+        .site-header--elevated .site-header-inner {
+            background: var(--site-glass);
+        }
+
+        .site-header--elevated .site-header-veena__fill {
+            fill: var(--site-glass);
         }
 
         .is-home #main-content > :first-child.hero-modern {
-            margin-top: -0.125rem;
+            margin-top: -0.25rem;
         }
     }
 

@@ -127,9 +127,22 @@
                 </div>
             </div>
             <div class="site-header-veena" aria-hidden="true">
-                <svg class="site-header-veena__svg" viewBox="0 0 1440 28" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                    <path class="site-header-veena__fill" d="M0,0 H1440 V11 C1230,11 1110,28 720,28 C330,28 210,11 0,11 Z"/>
-                    <path class="site-header-veena__stroke" d="M0,11 C210,11 330,28 720,28 C1110,28 1230,11 1440,11" fill="none"/>
+                <svg class="site-header-veena__svg" viewBox="0 0 1440 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="site-header-veena-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" class="site-header-veena__stop site-header-veena__stop--start"/>
+                            <stop offset="42%" class="site-header-veena__stop site-header-veena__stop--mid"/>
+                            <stop offset="100%" class="site-header-veena__stop site-header-veena__stop--end"/>
+                        </linearGradient>
+                        <radialGradient id="site-header-veena-glow" cx="14%" cy="88%" r="38%">
+                            <stop offset="0%" class="site-header-veena__glow-stop site-header-veena__glow-stop--core"/>
+                            <stop offset="100%" class="site-header-veena__glow-stop site-header-veena__glow-stop--edge"/>
+                        </radialGradient>
+                    </defs>
+                    <path class="site-header-veena__glow" d="M0,0 H1440 V12 H560 C430,12 240,40 0,40 V0 Z"/>
+                    <path class="site-header-veena__fill" d="M0,0 H1440 V12 H560 C430,12 240,40 0,40 V0 Z"/>
+                    <path class="site-header-veena__stroke" d="M1440,12 H560 C430,12 240,40 0,40" fill="none"/>
+                    <path class="site-header-veena__inner" d="M0,36 Q220,30 560,12" fill="none"/>
                 </svg>
             </div>
         </header>
