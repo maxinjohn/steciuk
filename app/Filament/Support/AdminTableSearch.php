@@ -2,6 +2,7 @@
 
 namespace App\Filament\Support;
 
+use App\Models\Donation;
 use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -71,6 +72,33 @@ class AdminTableSearch
 
                 if ($familyId = self::numericId($term)) {
                     $query->orWhere("{$table}.id", $familyId);
+                }
+            });
+        }
+    }
+
+    /**
+     * @param  Builder<Donation>  $query
+     */
+    public static function applyDonations(Builder $query, string $search): void
+    {
+        foreach (self::terms($search) as $term) {
+            $like = '%'.$term.'%';
+            $table = $query->getModel()->getTable();
+
+            $query->where(function (Builder $query) use ($like, $table, $term): void {
+                $query
+                    ->where("{$table}.reference", 'like', $like)
+                    ->orWhere("{$table}.status", 'like', $like)
+                    ->orWhereHas('user', function (Builder $query) use ($like): void {
+                        self::applyPersonNameSearch($query, $like);
+                    })
+                    ->orWhereHas('family', function (Builder $query) use ($like, $term): void {
+                        self::applyFamilyMatch($query, $like, $term);
+                    });
+
+                if ($familyId = self::numericId($term)) {
+                    $query->orWhere("{$table}.family_id", $familyId);
                 }
             });
         }

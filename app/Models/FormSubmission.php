@@ -53,4 +53,37 @@ class FormSubmission extends Model
 
         return [];
     }
+
+    public function submitterName(): string
+    {
+        $data = $this->normalizedData();
+
+        if (filled($data['name'] ?? null)) {
+            return trim((string) $data['name']);
+        }
+
+        $composed = trim(trim((string) ($data['first_name'] ?? '')).' '.trim((string) ($data['last_name'] ?? '')));
+
+        return $composed !== '' ? $composed : 'Anonymous';
+    }
+
+    public function submitterEmail(): ?string
+    {
+        $email = $this->normalizedData()['email'] ?? null;
+
+        return filled($email) ? trim((string) $email) : null;
+    }
+
+    public function previewText(): ?string
+    {
+        $data = $this->normalizedData();
+
+        foreach (['message', 'subject', 'notes', 'enquiry', 'request'] as $key) {
+            if (filled($data[$key] ?? null)) {
+                return trim((string) $data[$key]);
+            }
+        }
+
+        return null;
+    }
 }

@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Table;
@@ -38,11 +39,18 @@ class MembersRelationManager extends RelationManager
                     ->label('Add parish user')
                     ->icon('heroicon-o-user-plus')
                     ->visible(fn (): bool => auth()->user()?->can('update', $panel) ?? false)
+                    ->slideOver()
+                    ->modalWidth(Width::TwoExtraLarge)
+                    ->stickyModalHeader()
+                    ->stickyModalFooter()
+                    ->modalHeading('Add parish user to panel')
+                    ->modalDescription('Choose an active site user who is not already listed on this panel.')
                     ->form([
                         Select::make('user_id')
                             ->label('Parish user')
                             ->required()
                             ->searchable()
+                            ->preload()
                             ->options(fn (): array => PanelMemberOptions::options($panel))
                             ->getSearchResultsUsing(fn (string $search): array => PanelMemberOptions::options($panel, $search))
                             ->getOptionLabelUsing(fn ($value): ?string => PanelMemberOptions::labelForId((int) $value))

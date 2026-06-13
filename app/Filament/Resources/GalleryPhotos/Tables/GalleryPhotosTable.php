@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\GalleryPhotos\Tables;
 
 use App\Filament\Support\AdminMediaColumn;
+use App\Filament\Support\CompactTableActions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\Support\CompactTableActions;
-use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Table;
 
 class GalleryPhotosTable
@@ -27,11 +27,13 @@ class GalleryPhotosTable
                 AdminMediaColumn::storageImage('image_path', 'Preview'),
                 TextColumn::make('status')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sort_order')
                     ->label('Order')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('alt_text')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),

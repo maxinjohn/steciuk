@@ -9,6 +9,7 @@ use App\Filament\Resources\Families\FamilyResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Support\AdminTableSearch;
 use App\Filament\Support\AdminUserTableActions;
+use App\Models\Designation;
 use App\Models\Family;
 use App\Models\Role;
 use App\Models\User;
@@ -21,6 +22,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\RecordActionsPosition;
@@ -37,7 +39,7 @@ class UsersTable
         return $table
             ->modifyQueryUsing(function (Builder $query): Builder {
                 return $query
-                    ->orderByRaw("CASE WHEN account_status = ? AND role = ? THEN 0 ELSE 1 END", [
+                    ->orderByRaw('CASE WHEN account_status = ? AND role = ? THEN 0 ELSE 1 END', [
                         AccountStatus::Pending->value,
                         UserRole::Member->value,
                     ])
@@ -68,18 +70,19 @@ class UsersTable
                         UserRole::Editor->value => 'info',
                         default => 'success',
                     })
-                    ->searchable()
                     ->sortable(),
                 TextColumn::make('designation.name')
                     ->label('Designation')
                     ->placeholder('—')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('panels.name')
                     ->label('Panels')
                     ->badge()
                     ->separator(', ')
                     ->placeholder('—')
-                    ->sortable(false),
+                    ->sortable(false)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('member_status')
                     ->label('Status')
                     ->badge()
@@ -171,7 +174,8 @@ class UsersTable
                     ->formatStateUsing(fn (?string $state, User $record): string => $record->preferred_worship_location
                         ?? $record->family?->preferred_worship_location
                         ?? '—')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('postcode')
                     ->label('Postcode')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -193,7 +197,7 @@ class UsersTable
                     ->options(Role::options()),
                 SelectFilter::make('designation_id')
                     ->label('Designation')
-                    ->options(fn (): array => \App\Models\Designation::options()),
+                    ->options(fn (): array => Designation::options()),
                 SelectFilter::make('panels')
                     ->label('Panel')
                     ->relationship('panels', 'name')
@@ -246,6 +250,10 @@ class UsersTable
                     BulkAction::make('assignToFamily')
                         ->label('Assign to family')
                         ->icon('heroicon-o-user-group')
+                        ->slideOver()
+                        ->modalWidth(Width::TwoExtraLarge)
+                        ->stickyModalHeader()
+                        ->stickyModalFooter()
                         ->form([
                             Select::make('family_id')
                                 ->label('Family household')
