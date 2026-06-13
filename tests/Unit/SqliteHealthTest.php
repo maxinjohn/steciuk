@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Services\SqliteHealth;
+use App\Services\SqliteOptimizer;
 use App\Support\SitePaths;
 use Tests\TestCase;
 
@@ -19,8 +20,28 @@ class SqliteHealthTest extends TestCase
         $repaired = SqliteHealth::repair(forceBootstrap: false);
 
         $this->assertSame(realpath($database), realpath($repaired));
-        $this->assertTrue(SqliteHealth::integrityOk($repaired));
+        $this->assertTrue(SqliteHealth::isHealthy($repaired));
         $this->assertNotEmpty(glob(dirname($database).'/backups/database-corrupt-*.sqlite'));
+
+        @unlink($database);
+        SqliteHealth::removeSidecarFiles($database);
+    }
+
+    public function test_migrate_if_needed_builds_schema_without_wiping_integrity_ok_file(): void
+    {
+        $database = storage_path('framework/testing/sqlite-migrate-'.bin2hex(random_bytes(4)).'.sqlite');
+        config(['database.connections.sqlite.database' => $database]);
+
+        SitePaths::ensureParentDirectoryForFile($database);
+        touch($database);
+        SqliteOptimizer::initializeNewDatabase($database);
+
+        $this->assertTrue(SqliteHealth::integrityOk($database));
+        $this->assertFalse(SqliteHealth::schemaReady($database));
+
+        SqliteHealth::migrateIfNeeded();
+
+        $this->assertTrue(SqliteHealth::schemaReady($database));
 
         @unlink($database);
         SqliteHealth::removeSidecarFiles($database);

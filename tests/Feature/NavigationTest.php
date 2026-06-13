@@ -164,15 +164,17 @@ class NavigationTest extends TestCase
             ->assertDontSee('/new-member', false);
     }
 
-    public function test_guest_header_shows_member_chip_on_mobile(): void
+    public function test_guest_header_hides_member_chip_on_mobile(): void
     {
         config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
         $this->seed(ReferenceDataSeeder::class);
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('data-member-chip', false)
-            ->assertSee('site-member-chip-label', false);
+            ->assertSee('site-member-chip hidden min-[1300px]:block', false)
+            ->assertSee('data-close-mobile-menu', false)
+            ->assertSee('mobile-drawer-footer', false)
+            ->assertSee('mobile-drawer-auth-link', false);
     }
 
     public function test_mobile_menu_uses_vanilla_navigation_markup(): void
@@ -184,14 +186,64 @@ class NavigationTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('id="mobile-menu"', false);
+        $response->assertSee('mobile-drawer', false);
+        $response->assertSee('mobile-drawer-footer', false);
+        $response->assertSee('mobile-drawer-auth-link', false);
         $response->assertSee('data-mobile-nav-trigger', false);
         $response->assertSee('data-mobile-nav-panel', false);
         $response->assertSee('data-menu-panel', false);
         $response->assertSee('data-close-mobile-menu', false);
         $response->assertSee('min-[1300px]:hidden', false);
         $response->assertSee('mobile-dock-wrap min-[1300px]:hidden', false);
+        $response->assertDontSee('mobile-quick-grid', false);
         $response->assertDontSee('mobile-theme-toggle', false);
         $response->assertDontSee('x-data="{ mobileOpen: false }"', false);
+
+        $mobileMenu = $this->extractMobileMenuHtml($response->getContent());
+        $navList = $this->extractMobileNavListHtml($response->getContent());
+        $this->assertStringNotContainsString('Member area', $navList);
+        $this->assertStringContainsString('Sign in', $mobileMenu);
+        $this->assertStringContainsString('Join parish', $mobileMenu);
+    }
+
+    private function extractMobileMenuHtml(string $html): string
+    {
+        $start = strpos($html, 'id="mobile-menu"');
+
+        if ($start === false) {
+            return '';
+        }
+
+        $end = strpos($html, '</nav>', $start);
+
+        return $end === false ? substr($html, $start) : substr($html, $start, $end - $start);
+    }
+
+    private function extractMobileNavListHtml(string $html): string
+    {
+        $mobileMenu = $this->extractMobileMenuHtml($html);
+        $start = strpos($mobileMenu, 'class="mobile-nav-list"');
+
+        if ($start === false) {
+            return $mobileMenu;
+        }
+
+        $end = strpos($mobileMenu, '</div>', $start);
+
+        return $end === false ? substr($mobileMenu, $start) : substr($mobileMenu, $start, $end - $start);
+    }
+
+    private function extractDesktopNavHtml(string $html): string
+    {
+        $start = strpos($html, 'class="desktop-nav-list"');
+
+        if ($start === false) {
+            return '';
+        }
+
+        $end = strpos($html, '</ul>', $start);
+
+        return $end === false ? substr($html, $start) : substr($html, $start, $end - $start);
     }
 
     public function test_desktop_submenu_panels_render_for_nested_menu_items(): void
@@ -202,7 +254,12 @@ class NavigationTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertOk();
+        $response->assertSee('desktop-nav-dock', false);
+        $response->assertSee('desktop-nav-drop', false);
         $response->assertSee('menu-dropdown-panel', false);
+
+        $desktopNav = $this->extractDesktopNavHtml($response->getContent());
+        $this->assertStringNotContainsString('Member area', $desktopNav);
         $response->assertSee('Welcome', false);
         $response->assertSee('Service Times', false);
         $response->assertSee('Join the parish', false);

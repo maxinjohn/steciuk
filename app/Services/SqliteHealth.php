@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Support\SitePaths;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use PDO;
 use RuntimeException;
 use Throwable;
@@ -48,6 +49,58 @@ class SqliteHealth
         }
     }
 
+    public static function schemaReady(?string $path = null): bool
+    {
+        $path ??= static::databasePath();
+
+        if ($path === null || $path === ':memory:' || ! is_file($path)) {
+            return false;
+        }
+
+        try {
+            $pdo = new PDO('sqlite:'.$path, null, null, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ]);
+            $table = $pdo->query(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'migrations' LIMIT 1",
+            )->fetchColumn();
+            $pdo = null;
+
+            return is_string($table) && $table === 'migrations';
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    public static function isHealthy(?string $path = null): bool
+    {
+        return static::integrityOk($path) && static::schemaReady($path);
+    }
+
+    public static function purgeConnections(): void
+    {
+        $connection = config('database.default');
+
+        if (! is_string($connection) || $connection === '') {
+            return;
+        }
+
+        DB::purge($connection);
+    }
+
+    public static function migrateIfNeeded(): void
+    {
+        $path = static::databasePath();
+
+        if ($path === null || static::schemaReady($path)) {
+            return;
+        }
+
+        static::purgeConnections();
+        Artisan::call('migrate', ['--force' => true]);
+        static::purgeConnections();
+    }
+
     /**
      * @return list<string>
      */
@@ -75,7 +128,7 @@ class SqliteHealth
     {
         $directory = dirname($databasePath);
 
-        foreach (['.sqlite-wal-ready', '.sqlite-pragmas.lock'] as $marker) {
+        foreach (['.sqlite-wal-ready'] as $marker) {
             $path = $directory.'/'.$marker;
 
             if (is_file($path)) {
@@ -160,13 +213,15 @@ class SqliteHealth
         Artisan::call('cache:clear');
     }
 
-    public static function repair(bool $forceBootstrap = true): string
+    public static function repair(bool $forceBootstrap = false): string
     {
         $path = static::databasePath();
 
         if ($path === null) {
             throw new RuntimeException('SQLite database path is not configured.');
         }
+
+        static::purgeConnections();
 
         if (is_file($path) && ! static::integrityOk($path)) {
             static::quarantine($path, 'corrupt');
@@ -175,6 +230,7 @@ class SqliteHealth
         }
 
         static::recreateEmptyDatabase($path);
+        static::purgeConnections();
 
         Artisan::call('migrate', ['--force' => true]);
 
@@ -183,9 +239,14 @@ class SqliteHealth
         }
 
         Artisan::call('cache:clear');
+        static::purgeConnections();
 
-        if (! static::integrityOk($path)) {
-            throw new RuntimeException('SQLite repair completed but integrity check still failed.');
+        if (! static::isHealthy($path)) {
+            throw new RuntimeException(
+                'SQLite repair completed but database is still not ready '
+                .'(integrity: '.(static::integrityOk($path) ? 'ok' : 'failed')
+                .', schema: '.(static::schemaReady($path) ? 'ok' : 'missing').').',
+            );
         }
 
         return $path;
@@ -201,18 +262,20 @@ class SqliteHealth
 
         $path = static::databasePath();
 
-        if ($path === null || static::integrityOk($path)) {
+        if ($path === null || static::isHealthy($path)) {
             return;
         }
 
-        if (app()->environment('local', 'testing')) {
-            app()->booted(static fn (): bool => static::repair());
+        if (! static::integrityOk($path)) {
+            if (app()->environment('production')) {
+                throw new RuntimeException(
+                    'SQLite database is corrupt. Restore from backup with: php artisan db:repair-sqlite --force',
+                );
+            }
 
             return;
         }
 
-        throw new RuntimeException(
-            'SQLite database is corrupt. Restore from backup with: php artisan db:repair-sqlite --force',
-        );
+        static::migrateIfNeeded();
     }
 }

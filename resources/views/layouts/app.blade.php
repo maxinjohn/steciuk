@@ -115,112 +115,11 @@
                             <span class="site-member-chip-label">Account</span>
                         </a>
                     @else
-                        <x-site-member-chip class="min-[1300px]:hidden" />
+                        <x-site-member-chip class="hidden min-[1300px]:block" />
                     @endauth
                 </div>
             </div>
         </header>
-
-        <div
-            id="mobile-menu-overlay"
-            class="mobile-overlay fixed min-[1300px]:hidden"
-            aria-hidden="true"
-        ></div>
-
-        <nav
-            id="mobile-menu"
-            class="mobile-sheet fixed min-[1300px]:hidden"
-            aria-label="Mobile navigation"
-            aria-hidden="true"
-        >
-            <div class="mobile-sheet-header">
-                <div class="min-w-0 flex-1">
-                    <span class="mobile-sheet-badge">
-                        <span class="mobile-sheet-badge-dot" aria-hidden="true"></span>
-                        UK Parish
-                    </span>
-                    <p class="mobile-sheet-title">Parish menu</p>
-                    <p class="mobile-sheet-subtitle">{{ $siteMotto }}</p>
-                </div>
-                <button type="button" id="mobile-menu-close" class="icon-btn" aria-label="Close menu">
-                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="mobile-sheet-body">
-                <p class="mobile-section-kicker">Parish navigation</p>
-                <x-menu :items="$navMenu" variant="mobile" />
-
-                <p class="mobile-section-kicker mt-8">Quick access</p>
-                <div class="mobile-quick-scroll">
-                <div class="mobile-quick-grid">
-                    <a href="{{ url('/service-times') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--gold">
-                        <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
-                        <span>
-                            <span class="mobile-quick-label">Holy Communion</span>
-                            <span class="mobile-quick-desc">Service times · 5 cities</span>
-                        </span>
-                    </a>
-                    <a href="{{ url('/online-worship') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--sky">
-                        <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg></span>
-                        <span>
-                            <span class="mobile-quick-label">Online Worship</span>
-                            <span class="mobile-quick-desc">Sermons & live stream</span>
-                        </span>
-                    </a>
-                    <a href="{{ url('/prayer-request') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--rose">
-                        <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg></span>
-                        <span>
-                            <span class="mobile-quick-label">Prayer Request</span>
-                            <span class="mobile-quick-desc">Intercession ministry</span>
-                        </span>
-                    </a>
-                    <a href="{{ url('/contact') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--navy">
-                        <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg></span>
-                        <span>
-                            <span class="mobile-quick-label">Contact Us</span>
-                            <span class="mobile-quick-desc">Get in touch</span>
-                        </span>
-                    </a>
-                    <a href="{{ url('/news') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--violet">
-                        <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z"/></svg></span>
-                        <span>
-                            <span class="mobile-quick-label">News</span>
-                            <span class="mobile-quick-desc">Latest updates</span>
-                        </span>
-                    </a>
-                    @if ($showGiveButton ?? filled($donationLink))
-                        <a href="{{ $givePageUrl ?? route('give') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--emerald">
-                            <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12a2.625 2.625 0 10-2.625-2.625zM12 4.875V19.5m0 0l-3-3m3 3l3-3"/></svg></span>
-                            <span>
-                                <span class="mobile-quick-label">Give</span>
-                                <span class="mobile-quick-desc">Support ministry</span>
-                            </span>
-                        </a>
-                    @endif
-                    @auth
-                        <a href="{{ route('account') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--navy">
-                            <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg></span>
-                            <span>
-                                <span class="mobile-quick-label">My Account</span>
-                                <span class="mobile-quick-desc">Profile & parish links</span>
-                            </span>
-                        </a>
-                    @else
-                        <a href="{{ route('register') }}" data-close-mobile-menu class="mobile-quick-link mobile-quick-link--gold">
-                            <span class="mobile-quick-icon"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg></span>
-                            <span>
-                                <span class="mobile-quick-label">Member area</span>
-                                <span class="mobile-quick-desc">Sign in · Join the parish</span>
-                            </span>
-                        </a>
-                    @endauth
-                </div>
-                </div>
-            </div>
-        </nav>
 
         <main id="main-content" class="flex-1 lg:pb-0">
             @yield('content')
@@ -360,6 +259,46 @@
         </footer>
 
     </div>
+
+    <div
+        id="mobile-menu-overlay"
+        class="mobile-overlay min-[1300px]:hidden"
+        aria-hidden="true"
+    ></div>
+
+    <nav
+        id="mobile-menu"
+        class="mobile-sheet mobile-drawer min-[1300px]:hidden"
+        aria-label="Mobile navigation"
+        aria-hidden="true"
+    >
+        <div class="mobile-sheet-header mobile-drawer-header">
+            <p class="mobile-drawer-title">Menu</p>
+            <button type="button" id="mobile-menu-close" class="mobile-drawer-close icon-btn" aria-label="Close menu">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="mobile-sheet-body mobile-drawer-body">
+            <x-menu :items="$mobileDrawerMenu" variant="mobile" />
+
+            <div class="mobile-drawer-footer">
+                @auth
+                    <a href="{{ route('account') }}" data-close-mobile-menu class="mobile-drawer-cta">
+                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                        My account
+                    </a>
+                @else
+                    <div class="mobile-drawer-auth">
+                        <a href="{{ route('login') }}" data-close-mobile-menu class="mobile-drawer-auth-link">Sign in</a>
+                        <a href="{{ route('register') }}" data-close-mobile-menu class="mobile-drawer-auth-link mobile-drawer-auth-link--primary">Join parish</a>
+                    </div>
+                @endauth
+            </div>
+        </div>
+    </nav>
 
     <div class="mobile-dock-wrap min-[1300px]:hidden">
         <nav class="mobile-dock" aria-label="Quick navigation">

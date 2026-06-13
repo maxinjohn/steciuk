@@ -65,64 +65,84 @@
 @endphp
 
 @if ($variant === 'desktop')
-    <div class="desktop-nav-shell">
-    <ul class="desktop-nav-list" role="menubar">
-        @foreach ($items as $item)
-            @php
-                $hasChildren = $item->children->isNotEmpty();
-                $url = $resolveUrl($item);
-                $target = $resolveTarget($item);
-                $useMega = $hasChildren && $item->children->count() >= 4;
-                $path = trim(parse_url($url, PHP_URL_PATH) ?: '/', '/');
-                $isActive = $path === ''
-                    ? request()->routeIs('home')
-                    : request()->is($path, $path . '/*');
-            @endphp
-            <li class="menu-nav-item relative" role="none" data-menu-item>
-                @if ($hasChildren)
-                    <button
-                        type="button"
-                        class="menu-link-desktop menu-nav-trigger {{ $isActive ? 'is-active' : '' }}"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        data-menu-trigger
-                    >
-                        {{ $item->label }}
-                        <svg class="menu-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                        </svg>
-                    </button>
-                    <div
-                        @class(['menu-dropdown-panel menu-mega' => $useMega, 'menu-dropdown-panel menu-dropdown' => ! $useMega])
-                        role="menu"
-                        data-menu-panel
-                    >
-                        <div @class(['menu-dropdown-body menu-mega-grid' => $useMega, 'menu-dropdown-body' => ! $useMega])>
-                            @foreach ($item->children as $child)
-                                <a
-                                    href="{{ $resolveUrl($child) }}"
-                                    @if ($resolveTarget($child)) target="{{ $resolveTarget($child) }}" @if ($resolveTarget($child) === '_blank') rel="noopener noreferrer" @endif @endif
-                                    @class(['menu-mega-link' => $useMega])
-                                    role="menuitem"
-                                >
-                                    {{ $child->label }}
-                                </a>
-                            @endforeach
+    <div class="desktop-nav-dock desktop-nav-shell">
+        <ul class="desktop-nav-list" role="menubar">
+            @foreach ($items as $item)
+                @php
+                    $hasChildren = $item->children->isNotEmpty();
+                    $url = $resolveUrl($item);
+                    $target = $resolveTarget($item);
+                    $useGrid = $hasChildren && $item->children->count() >= 4;
+                    $path = trim(parse_url($url, PHP_URL_PATH) ?: '/', '/');
+                    $isActive = $path === ''
+                        ? request()->routeIs('home')
+                        : request()->is($path, $path . '/*');
+                @endphp
+                <li class="desktop-nav-item menu-nav-item" role="none" data-menu-item>
+                    <div class="desktop-nav-drop">
+                    @if ($hasChildren)
+                        <button
+                            type="button"
+                            class="desktop-nav-trigger menu-link-desktop menu-nav-trigger {{ $isActive ? 'is-active' : '' }}"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            data-menu-trigger
+                        >
+                            <span class="desktop-nav-label">{{ $item->label }}</span>
+                            <svg class="menu-chevron desktop-nav-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                            </svg>
+                        </button>
+                        <div
+                            @class([
+                                'desktop-nav-flyout menu-dropdown-panel',
+                                'desktop-nav-flyout--grid menu-mega' => $useGrid,
+                                'desktop-nav-flyout--list menu-dropdown' => ! $useGrid,
+                            ])
+                            role="menu"
+                            data-menu-panel
+                        >
+                            <div @class([
+                                'desktop-nav-flyout-panel menu-dropdown-body',
+                                'desktop-nav-flyout-grid menu-mega-grid' => $useGrid,
+                            ])>
+                                @foreach ($item->children as $child)
+                                    @php $childIcon = $iconFor($child->label); @endphp
+                                    <a
+                                        href="{{ $resolveUrl($child) }}"
+                                        @if ($resolveTarget($child)) target="{{ $resolveTarget($child) }}" @if ($resolveTarget($child) === '_blank') rel="noopener noreferrer" @endif @endif
+                                        @class(['desktop-nav-flyout-link', 'menu-mega-link' => $useGrid])
+                                        role="menuitem"
+                                    >
+                                        @if ($useGrid)
+                                            <span class="desktop-nav-flyout-tile">
+                                                <span class="desktop-nav-flyout-icon" aria-hidden="true">
+                                                    @include('components.partials.menu-icon', ['name' => $childIcon])
+                                                </span>
+                                                <span class="desktop-nav-flyout-text">{{ $child->label }}</span>
+                                            </span>
+                                        @else
+                                            <span class="desktop-nav-flyout-text">{{ $child->label }}</span>
+                                        @endif
+                                        <span class="desktop-nav-flyout-arrow" aria-hidden="true">→</span>
+                                    </a>
+                                @endforeach
+                            </div>
                         </div>
+                    @else
+                        <a
+                            href="{{ $url }}"
+                            @if ($target) target="{{ $target }}" @if ($target === '_blank') rel="noopener noreferrer" @endif @endif
+                            class="desktop-nav-link menu-link-desktop {{ $isActive ? 'is-active' : '' }}"
+                            role="menuitem"
+                        >
+                            <span class="desktop-nav-label">{{ $item->label }}</span>
+                        </a>
+                    @endif
                     </div>
-                @else
-                    <a
-                        href="{{ $url }}"
-                        @if ($target) target="{{ $target }}" @if ($target === '_blank') rel="noopener noreferrer" @endif @endif
-                        class="menu-link-desktop {{ $isActive ? 'is-active' : '' }}"
-                        role="menuitem"
-                    >
-                        {{ $item->label }}
-                    </a>
-                @endif
-            </li>
-        @endforeach
-    </ul>
+                </li>
+            @endforeach
+        </ul>
     </div>
 @elseif ($variant === 'mobile')
     <div class="mobile-nav-list" role="menu">
@@ -141,13 +161,13 @@
                         data-mobile-nav-trigger
                         aria-expanded="false"
                     >
-                        <span class="flex min-w-0 flex-1 items-center gap-3">
+                        <span class="flex min-w-0 flex-1 items-center gap-2.5">
                             <span class="menu-link-mobile-icon" aria-hidden="true">
                                 @include('components.partials.menu-icon', ['name' => $icon])
                             </span>
                             <span class="truncate">{{ $item->label }}</span>
                         </span>
-                        <svg class="menu-link-mobile-chevron h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+                        <svg class="menu-link-mobile-chevron h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                         </svg>
                     </button>

@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SecureHeaders
 {
+    private const CLOUDFLARE_SCRIPT_SOURCES = 'https://static.cloudflareinsights.com https://challenges.cloudflare.com';
+
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
@@ -32,7 +34,7 @@ class SecureHeaders
         if (config('security.csp_enabled') && ! \App\Support\AdminPanelConfig::isAdminRequest($request)) {
             $csp = implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com https://static.cloudflareinsights.com https://challenges.cloudflare.com",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.google.com ".self::CLOUDFLARE_SCRIPT_SOURCES,
                 "style-src 'self' 'unsafe-inline' {$fontCdn}",
                 "img-src 'self' data: blob: https:",
                 "font-src 'self' data: {$fontCdn}",
@@ -51,7 +53,7 @@ class SecureHeaders
         if (\App\Support\AdminPanelConfig::isAdminRequest($request) && config('security.csp_enabled')) {
             $response->headers->set('Content-Security-Policy', implode('; ', [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
                 "style-src 'self' 'unsafe-inline' {$fontCdn}",
                 "img-src 'self' data: blob: https:",
                 "font-src 'self' data: {$fontCdn}",

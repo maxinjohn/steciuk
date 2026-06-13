@@ -29,15 +29,15 @@ class RepairSqliteCommand extends Command
             return self::FAILURE;
         }
 
-        $healthy = SqliteHealth::integrityOk($path);
+        $healthy = SqliteHealth::isHealthy($path);
 
         if ($healthy) {
-            $this->components->info('SQLite integrity check passed: '.$path);
+            $this->components->info('SQLite database is healthy: '.$path);
 
             return self::SUCCESS;
         }
 
-        if (! $this->option('force') && ! $this->confirm('SQLite is corrupt or unreadable. Rebuild reference data now?')) {
+        if (! $this->option('force') && ! $this->confirm('SQLite is corrupt or missing schema. Rebuild reference data now?')) {
             $this->components->warn('Aborted.');
 
             return self::FAILURE;

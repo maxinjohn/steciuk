@@ -64,6 +64,14 @@ class AdminUiTest extends TestCase
             ->assertDontSee('admin-dock-wrap', false);
     }
 
+    public function test_admin_login_page_does_not_preload_form_tab_script(): void
+    {
+        $response = $this->get(AdminPanelConfig::loginPath());
+
+        $response->assertOk();
+        $response->assertDontSee('admin-form-tabs-', false);
+    }
+
     public function test_settings_pages_use_horizontal_form_tabs(): void
     {
         $response = $this->actingAs($this->admin)->get(AdminPanelConfig::url('church-settings'));

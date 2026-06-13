@@ -84,3 +84,19 @@
     patchFetchForAdminFailures();
     hookLivewireFailures();
 })();
+
+const bootAdminFormTabs = () => {
+    if (! document.querySelector('.admin-form-tabs')) {
+        return;
+    }
+
+    void import('./admin-form-tabs.js');
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootAdminFormTabs);
+} else {
+    bootAdminFormTabs();
+}
+
+document.addEventListener('livewire:navigated', bootAdminFormTabs);
