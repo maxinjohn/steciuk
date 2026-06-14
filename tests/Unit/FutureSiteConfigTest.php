@@ -65,23 +65,32 @@ class FutureSiteConfigTest extends TestCase
         );
     }
 
-    public function test_speculation_rules_use_document_prefetch_only(): void
+    public function test_speculation_is_disabled_by_default(): void
     {
-        Config::set('site.future.enabled', true);
+        Config::set('site.future.speculation_rules', false);
+
+        $this->assertFalse(FutureSiteConfig::speculationEnabled());
+    }
+
+    public function test_speculation_rules_payload_is_empty_when_disabled(): void
+    {
         Config::set('site.future.speculation_rules', true);
         Config::set('site.future.speculation_paths', [
             '/service-times',
             '/events',
         ]);
 
-        $request = Request::create('/prayer-request', 'GET');
-        $rules = FutureSiteConfig::speculationRulesPayload($request);
+        Setting::set('public_ui_experience', json_encode([
+            'enabled' => true,
+            'speculation_rules' => true,
+            'reading_progress' => true,
+            'heavenly_atmosphere' => true,
+        ]), 'public_ui');
 
-        $this->assertArrayHasKey('prefetch', $rules);
-        $this->assertCount(2, $rules['prefetch']);
-        $this->assertSame('document', $rules['prefetch'][0]['source']);
-        $this->assertSame('conservative', $rules['prefetch'][0]['eagerness']);
-        $this->assertArrayNotHasKey('prerender', $rules);
+        $request = Request::create('/prayer-request', 'GET');
+
+        $this->assertFalse(FutureSiteConfig::speculationEnabled());
+        $this->assertSame([], FutureSiteConfig::speculationRulesPayload($request));
     }
 
     public function test_future_features_can_be_disabled(): void

@@ -83,7 +83,7 @@ return [
 
     'future' => [
         'enabled' => env('SITE_FUTURE_UI', true),
-        'speculation_rules' => env('SITE_FUTURE_SPECULATION', true),
+        'speculation_rules' => env('SITE_FUTURE_SPECULATION', false),
         'reading_progress' => env('SITE_FUTURE_READING_PROGRESS', true),
         'speculation_paths' => [
             '/service-times',

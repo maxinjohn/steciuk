@@ -83,7 +83,7 @@ final class PublicUiCopyLibrary
     {
         return [
             'enabled' => true,
-            'speculation_rules' => true,
+            'speculation_rules' => false,
             'reading_progress' => true,
             'heavenly_atmosphere' => true,
         ];

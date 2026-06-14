@@ -11,9 +11,7 @@ class FutureSiteConfig
 
     public static function speculationEnabled(): bool
     {
-        $toggles = PublicUiContent::experienceToggles();
-
-        return $toggles['enabled'] && $toggles['speculation_rules'];
+        return false;
     }
 
     public static function readingProgressEnabled(): bool

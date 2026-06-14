@@ -323,12 +323,20 @@ class NavigationTest extends TestCase
         config(['site.future.enabled' => true]);
         $this->seed(ReferenceDataSeeder::class);
 
+        \App\Models\Setting::set('public_ui_experience', json_encode([
+            'enabled' => true,
+            'speculation_rules' => true,
+            'reading_progress' => true,
+            'heavenly_atmosphere' => true,
+        ]), 'public_ui');
+
         $response = $this->get(route('home'));
 
         $response->assertOk();
-        $response->assertSee('type="speculationrules"', false);
-        $response->assertSee('"source":"document"', false);
-        $response->assertDontSee('"source":"list"', false);
+        $response->assertSee('data-reading-progress=', false);
+        $response->assertDontSee('type="speculationrules"', false);
+        $response->assertDontSee('rel="preload"', false);
+        $response->assertDontSee('rel="modulepreload"', false);
         $response->assertDontSee('parish-pulse-bar', false);
     }
 

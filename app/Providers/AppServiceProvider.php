@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
@@ -60,6 +61,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         SiteUrl::configureRootUrl();
+
+        Vite::usePreloadTagAttributes(static fn () => false);
 
         Connection::resolverFor('sqlite', function ($connection, $database, $prefix, $config) {
             return new SQLiteConnection($connection, $database, $prefix, $config);
