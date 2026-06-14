@@ -62,10 +62,9 @@
                             </div>
                         </x-card>
                     @empty
-                        <div class="feed-empty feed-empty--rich col-span-full">
-                            <p class="feed-empty__title">News coming soon</p>
-                            <p class="feed-empty__text">Parish updates and stories will appear here as they are published.</p>
-                        </div>
+                        <x-heavenly-empty title="News coming soon" context="news">
+                            Parish updates and stories will appear here as they are published.
+                        </x-heavenly-empty>
                     @endforelse
                 </div>
 

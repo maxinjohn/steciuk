@@ -5,7 +5,9 @@ namespace App\Support;
 use App\Enums\ContentBlockType;
 use App\Enums\MenuLocation;
 use App\Models\Page;
+use App\Support\ContextScripture;
 use App\Models\Setting;
+use App\Support\AdminPanelConfig;
 use App\Services\MenuCache;
 use App\Services\ServiceLocations;
 use App\Support\NextWorshipChip;
@@ -80,6 +82,9 @@ class SiteLayoutData
             'serviceLocations' => ServiceLocations::names(),
             'nextWorshipChip' => NextWorshipChip::resolve(),
             'needsLivewire' => self::needsLivewire(),
+            'contextScripture' => ContextScripture::forRequest(),
+            'showContextScriptureNudge' => self::showContextScriptureNudge(),
+            'divineWhispers' => ContextScripture::divineWhispers(),
             'headerMenu' => self::withoutMemberAreaMenu($menus[MenuLocation::Header->value]),
             'footerMenu' => $menus[MenuLocation::Footer->value],
             'mobileMenu' => $menus[MenuLocation::Mobile->value],
@@ -131,6 +136,33 @@ class SiteLayoutData
         }
 
         return false;
+    }
+
+    public static function showContextScriptureNudge(): bool
+    {
+        if (AdminPanelConfig::isAdminRequest(request())) {
+            return false;
+        }
+
+        return ! request()->routeIs(
+            'home',
+            'login',
+            'register',
+            'password.request',
+            'password.reset',
+            'registration.pending',
+            'account',
+            'account.giving.export',
+            'events.index',
+            'events.show',
+            'news.index',
+            'news.show',
+            'sermons.index',
+            'gallery.index',
+            'gallery.show',
+            'ministries.index',
+            'ministries.show',
+        );
     }
 
     public static function forget(): void

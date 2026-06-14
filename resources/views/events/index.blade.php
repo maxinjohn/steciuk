@@ -64,11 +64,14 @@
                             </div>
                         </x-card>
                     @empty
-                        <div class="feed-empty feed-empty--rich col-span-full">
-                            <p class="feed-empty__title">No upcoming events right now</p>
-                            <p class="feed-empty__text">Join us for worship across our UK locations — times are updated regularly.</p>
-                            <x-button href="{{ url('/service-times') }}" variant="outline" class="feed-empty__action">View worship times</x-button>
-                        </div>
+                        <x-heavenly-empty
+                            title="No upcoming events right now"
+                            context="events"
+                            :action-href="url('/service-times')"
+                            action-label="View worship times"
+                        >
+                            Join us for worship across our UK locations — times are updated regularly.
+                        </x-heavenly-empty>
                     @endforelse
                 </div>
 

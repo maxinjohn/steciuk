@@ -12,7 +12,11 @@
             $class,
         ])
     >
-        <span class="next-worship-chip__dot" aria-hidden="true"></span>
+        @if (! empty($chip['is_live']))
+            <span class="next-worship-chip__dot" aria-hidden="true"></span>
+        @else
+            <span class="next-worship-chip__cross" aria-hidden="true">✝</span>
+        @endif
         <span class="next-worship-chip__copy">
             <span class="next-worship-chip__label">{{ $chip['label'] ?? 'Worship' }}</span>
             @if (! empty($chip['detail']))

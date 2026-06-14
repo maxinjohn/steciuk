@@ -2,7 +2,7 @@
     'reference' => null,
 ])
 
-<aside class="gospel-reminder" aria-label="Parish witness">
+<aside {{ $attributes->merge(['class' => 'gospel-reminder']) }} aria-label="Parish witness">
     <div class="gospel-reminder-glow" aria-hidden="true"></div>
     <div class="gospel-reminder-inner mx-auto max-w-7xl">
         <span class="gospel-reminder-cross" aria-hidden="true">✝</span>

@@ -75,11 +75,14 @@
                             </div>
                         </x-card>
                     @empty
-                        <div class="feed-empty feed-empty--rich">
-                            <p class="feed-empty__title">Sermons coming soon</p>
-                            <p class="feed-empty__text">Recent messages will be listed here once published.</p>
-                            <x-button href="{{ url('/sermons') }}" variant="outline" class="feed-empty__action">Browse sermons</x-button>
-                        </div>
+                        <x-heavenly-empty
+                            title="Sermons coming soon"
+                            context="sermons"
+                            :action-href="url('/sermons')"
+                            action-label="Browse sermons"
+                        >
+                            Recent messages will be listed here once published.
+                        </x-heavenly-empty>
                     @endforelse
                 </div>
 

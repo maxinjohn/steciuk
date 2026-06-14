@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './ui-polish.css';
 @import './modern-perf.css';
+@import './faith-genz.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 

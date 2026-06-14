@@ -70,6 +70,17 @@ html.dark .hero-stat {
     flex-shrink: 0;
 }
 
+.next-worship-chip__cross {
+    font-size: 0.625rem;
+    line-height: 1;
+    color: color-mix(in srgb, var(--site-accent) 75%, var(--site-ink-muted));
+    flex-shrink: 0;
+}
+
+.next-worship-chip--live .next-worship-chip__cross {
+    color: var(--site-accent);
+}
+
 .next-worship-chip--live .next-worship-chip__dot {
     animation: pulse 1.6s ease-in-out infinite;
     box-shadow: 0 0 0 0 color-mix(in srgb, var(--site-accent) 45%, transparent);

@@ -31,5 +31,5 @@
 @endif
 
 @if ($showScripture)
-    <x-scripture-ribbon :text="$scripture" :reference="$scriptureRef" />
+    <x-scripture-ribbon :text="$scripture" :reference="$scriptureRef" class="scripture-ribbon--page-intro" />
 @endif

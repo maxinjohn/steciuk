@@ -23,10 +23,9 @@
                     @forelse ($albums as $album)
                         <x-gallery-tile-card :album="$album" />
                     @empty
-                        <div class="feed-empty feed-empty--rich col-span-full">
-                            <p class="feed-empty__title">Gallery albums coming soon</p>
-                            <p class="feed-empty__text">Photos from worship and fellowship will appear here.</p>
-                        </div>
+                        <x-heavenly-empty title="Gallery albums coming soon" context="gallery">
+                            Photos from worship and fellowship will appear here.
+                        </x-heavenly-empty>
                     @endforelse
                 </div>
 

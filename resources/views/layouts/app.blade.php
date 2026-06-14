@@ -131,15 +131,20 @@
         </header>
 
         <main id="main-content" class="flex-1 lg:pb-0">
+            @if ($showContextScriptureNudge ?? false)
+                <x-context-scripture-nudge />
+            @endif
             @yield('content')
         </main>
 
+        <x-divine-whisper-bar :whispers="$divineWhispers ?? []" />
         <x-faith-spark-strip />
         <x-sanctuary-peace
             :ribbons="$faithSanctuaryRibbons ?? []"
             :verses="$faithSanctuaryVerses ?? []"
+            class="sanctuary-peace--genz"
         />
-        <x-gospel-reminder />
+        <x-gospel-reminder class="gospel-reminder--genz" />
 
         <footer class="site-footer lg:pb-0" aria-label="Site footer">
             <div class="site-content-shell mx-auto max-w-7xl py-12 lg:py-16">
@@ -316,6 +321,9 @@
     </nav>
 
     <div class="mobile-dock-wrap min-[1300px]:hidden">
+        @if (! request()->routeIs('login', 'register', 'password.request', 'password.reset', 'registration.pending', 'account'))
+            <x-prayer-fab />
+        @endif
         @if (! request()->routeIs('home'))
             <x-next-worship-chip :chip="$nextWorshipChip ?? null" class="mobile-dock-worship-chip" />
         @endif

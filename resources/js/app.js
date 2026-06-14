@@ -619,6 +619,91 @@ const initCardMediaSkeletons = () => {
     });
 };
 
+const showBlessingToast = (message) => {
+    let toast = document.getElementById('blessing-toast');
+
+    if (! toast) {
+        toast = document.createElement('div');
+        toast.id = 'blessing-toast';
+        toast.className = 'blessing-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+    }
+
+    toast.innerHTML = `<span class="blessing-toast__icon" aria-hidden="true">✝</span><span>${message}</span>`;
+    toast.classList.add('is-visible');
+    hapticTap(14);
+
+    window.clearTimeout(showBlessingToast._timer);
+    showBlessingToast._timer = window.setTimeout(() => {
+        toast.classList.remove('is-visible');
+    }, 2600);
+};
+
+const initDivineWhisperBar = () => {
+    const bar = document.querySelector('[data-divine-whisper-bar]');
+
+    if (! bar || bar.dataset.whisperBound === 'true') {
+        return;
+    }
+
+    bar.dataset.whisperBound = 'true';
+
+    const lines = [...bar.querySelectorAll('[data-divine-whisper-line]')];
+
+    if (lines.length <= 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    let index = lines.findIndex((line) => line.classList.contains('is-active'));
+
+    if (index < 0) {
+        index = 0;
+        lines[0]?.classList.add('is-active');
+    }
+
+    window.setInterval(() => {
+        lines[index]?.classList.remove('is-active');
+        index = (index + 1) % lines.length;
+        lines[index]?.classList.add('is-active');
+    }, 7000);
+};
+
+const initFormBlessings = () => {
+    const celebrate = (node) => {
+        if (! node || node.dataset.blessed === 'true') {
+            return;
+        }
+
+        node.dataset.blessed = 'true';
+        node.classList.add('is-blessed');
+        showBlessingToast('Prayers received — grace & peace');
+    };
+
+    document.querySelectorAll('.form-success-gen-z').forEach(celebrate);
+
+    if (! window.__formBlessingObserver) {
+        window.__formBlessingObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (!(node instanceof Element)) {
+                        return;
+                    }
+
+                    if (node.matches('.form-success-gen-z')) {
+                        celebrate(node);
+                    }
+
+                    node.querySelectorAll?.('.form-success-gen-z').forEach(celebrate);
+                });
+            });
+        });
+
+        window.__formBlessingObserver.observe(document.body, { childList: true, subtree: true });
+    }
+};
+
 const initMobileDock = () => {
     const toggle = document.getElementById('mobile-menu-toggle');
     const closeButton = document.getElementById('mobile-menu-close');
@@ -831,6 +916,8 @@ const initPublicSiteUi = () => {
     initViewTransitions();
     initShareButtons();
     initCardMediaSkeletons();
+    initDivineWhisperBar();
+    initFormBlessings();
     initScrollReveal();
 
     if ('requestIdleCallback' in window) {
@@ -855,5 +942,7 @@ document.addEventListener('livewire:navigated', () => {
     initHapticFeedback();
     initShareButtons();
     initCardMediaSkeletons();
+    initDivineWhisperBar();
+    initFormBlessings();
     initScrollReveal();
 });

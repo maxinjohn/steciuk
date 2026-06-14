@@ -31,6 +31,7 @@
                 <a
                     href="{{ $item['href'] ?? url('/our-church') }}"
                     class="faith-spark-chip"
+                    @if (! preg_match('#^https?://#i', (string) ($item['href'] ?? ''))) data-prefetch-link @endif
                     role="listitem"
                 >
                     <span class="faith-spark-chip__icon" aria-hidden="true">✝</span>
