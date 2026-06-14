@@ -15,6 +15,31 @@ class FaithContent
     }
 
     /**
+     * Verses for the public trust-bar ticker (admin pool, then prefilled global library).
+     *
+     * @return list<array{text: string, ref: string}>
+     */
+    public static function trustBarVerses(): array
+    {
+        $verses = self::sanctuaryVerses();
+
+        if ($verses !== []) {
+            return array_map(static fn (array $verse): array => [
+                'text' => $verse['text'],
+                'ref' => $verse['ref'],
+            ], $verses);
+        }
+
+        return array_map(static fn (array $verse): array => [
+            'text' => $verse['text'],
+            'ref' => $verse['ref'],
+        ], self::filterVerses(
+            self::mapReferenceVerses(ReferenceSiteContent::faithSanctuaryVerses()),
+            fn (array $verse): bool => ($verse['only_on'] ?? '') === '',
+        ));
+    }
+
+    /**
      * @return array{text: string, ref: string}
      */
     public static function randomVerse(?string $context = null): array

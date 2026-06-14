@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', $page?->seo_title ?? 'Gallery')
+@section('title', \App\Support\Seo::documentTitle($page?->seo_title ?? 'Gallery', null, $siteName))
 @section('description', $page?->seo_description ?? 'Photo gallery from STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page" suppress-content>
+    <x-page-shell :page="$page" suppress-content suppress-hero>
         <x-breadcrumbs :items="[['label' => 'Gallery', 'current' => true]]" />
         <x-page-intro
             title="Worship & Fellowship"
@@ -15,6 +15,8 @@
             art-slug="gallery"
             art-title="Worship & Fellowship"
             art-context="gallery"
+            :show-strips="true"
+            :show-trust-bar="true"
         />
 
         <section class="page-section page-section--compact">
@@ -23,7 +25,9 @@
                     @forelse ($albums as $album)
                         <x-gallery-tile-card :album="$album" />
                     @empty
-                        <p class="feed-empty">Gallery albums coming soon.</p>
+                        <x-heavenly-empty title="Gallery albums coming soon" context="gallery">
+                            Photos from worship and fellowship will appear here.
+                        </x-heavenly-empty>
                     @endforelse
                 </div>
 

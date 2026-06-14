@@ -44,6 +44,11 @@ class SiteTopicArtTest extends TestCase
         );
     }
 
+    public function test_gallery_context_resolves_to_gallery_topic(): void
+    {
+        $this->assertSame('gallery', SiteTopicArt::resolve('manchester-2026', 'Manchester Photos', 'gallery'));
+    }
+
     public function test_gallery_cover_url_uses_topic_art_when_no_photo(): void
     {
         $album = GalleryAlbum::factory()->create([

@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Sermons\Schemas;
 
 use App\Filament\Support\PublishStatusSelect;
+use App\Filament\Support\SecureFileUpload;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -25,18 +25,10 @@ class SermonForm
                 TextInput::make('bible_passage'),
                 Textarea::make('description')
                     ->columnSpanFull(),
-                FileUpload::make('audio_file')
-                    ->label('Audio')
-                    ->acceptedFileTypes(['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav'])
-                    ->directory('sermons/audio')
-                    ->disk('public')
-                    ->maxSize(51200),
-                FileUpload::make('pdf_file')
-                    ->label('PDF notes')
-                    ->acceptedFileTypes(['application/pdf'])
-                    ->directory('sermons/pdf')
-                    ->disk('public')
-                    ->maxSize(10240),
+                SecureFileUpload::file('audio_file', 'sermons/audio', 51200, ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav'])
+                    ->label('Audio'),
+                SecureFileUpload::file('pdf_file', 'sermons/pdf', 10240, ['application/pdf'])
+                    ->label('PDF notes'),
                 TextInput::make('youtube_url')
                     ->url(),
                 TextInput::make('category'),

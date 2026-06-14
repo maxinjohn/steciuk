@@ -28,6 +28,19 @@ const shouldBypassServiceWorker = (pathname) => {
     return MEMBER_BYPASS_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + '/'));
 };
 
+const cacheFirst = (request) =>
+    caches.open(CACHE).then((cache) =>
+        cache.match(request).then((cached) =>
+            cached || fetch(request).then((response) => {
+                if (response.ok) {
+                    cache.put(request, response.clone());
+                }
+
+                return response;
+            })
+        )
+    );
+
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE).then((cache) => cache.add(OFFLINE_URL)).then(() => self.skipWaiting())
@@ -51,27 +64,33 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    const isStaticAsset =
-        url.pathname.startsWith('/build/') ||
-        url.pathname.match(/\\.(css|js|woff2?|png|jpg|jpeg|webp|svg|ico|webmanifest)\$/);
-
-    if (isStaticAsset) {
-        event.respondWith(
-            caches.open(CACHE).then((cache) =>
-                cache.match(event.request).then((cached) =>
-                    cached || fetch(event.request).then((response) => {
-                        if (response.ok) cache.put(event.request, response.clone());
-                        return response;
-                    })
-                )
-            )
-        );
+    if (url.pathname === '/sitemap.xml' || url.pathname === '/robots.txt') {
         return;
     }
 
-    event.respondWith(
-        fetch(event.request).catch(() => caches.match(OFFLINE_URL))
-    );
+    const isStaticAsset =
+        url.pathname.startsWith('/build/') ||
+        url.pathname.startsWith('/topic-art/') ||
+        url.pathname.match(/\\.(css|js|woff2?|png|jpg|jpeg|webp|svg|ico|webmanifest|xml|txt)\$/);
+
+    if (isStaticAsset) {
+        event.respondWith(cacheFirst(event.request));
+        return;
+    }
+
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => response)
+                .catch(() =>
+                    caches.match(event.request).then((cached) => cached || caches.match(OFFLINE_URL))
+                )
+        );
+
+        return;
+    }
+
+    event.respondWith(fetch(event.request));
 });
 JS;
 

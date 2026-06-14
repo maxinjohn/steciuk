@@ -88,6 +88,8 @@
                         </div>
                     @endif
 
+                    <x-next-worship-chip :chip="$nextWorshipChip ?? null" class="mb-3 sm:mb-4 lg:hidden" />
+
                     @if ($eyebrow)
                         <p class="hero-eyebrow">{{ $eyebrow }}</p>
                     @endif
@@ -110,6 +112,7 @@
                             src="{{ $topicArtUrl }}"
                             alt=""
                             loading="eager"
+                            fetchpriority="high"
                             decoding="async"
                             class="hero-art-showcase__image"
                         >
@@ -208,6 +211,7 @@
                             src="{{ $topicArtUrl }}"
                             alt=""
                             loading="eager"
+                            fetchpriority="high"
                             decoding="async"
                             class="hero-art-showcase__image"
                         >

@@ -9,7 +9,7 @@
                 <span class="genz-kicker-dot" aria-hidden="true"></span>
                 Heaven-minded · Scripture-fed
             </p>
-            <h2 class="faith-whispers__title">Faith for the journey</h2>
+            <h2 class="faith-whispers__title">{{ $variant === 'compact' ? 'Grace & generosity' : 'Faith for the journey' }}</h2>
         </div>
         <div class="faith-whispers__grid" role="list">
             @foreach ([

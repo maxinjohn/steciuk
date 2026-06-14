@@ -7,9 +7,11 @@ use App\Enums\PublishStatus;
 use App\Models\ContentBlock;
 use App\Models\Page;
 use App\Models\User;
+use App\Support\NavigationMenuCatalog;
 use App\Support\ReferenceSiteContent;
 use App\Support\SeedConfig;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class PageSeeder extends Seeder
 {
@@ -81,7 +83,9 @@ class PageSeeder extends Seeder
             $content = $bodies[$slug] ?? '';
             $pageFields = $fields[$slug] ?? [];
 
-            return [
+            $inReferenceMenu = NavigationMenuCatalog::pageIsInReferenceMenu($slug);
+
+            $payload = [
                 'title' => $title,
                 'slug' => $slug,
                 'hero_title' => $heroTitle,
@@ -95,6 +99,15 @@ class PageSeeder extends Seeder
                 'show_hero' => $showHero,
                 'hero_style' => 'gradient',
             ];
+
+            if (Schema::hasColumn('pages', 'show_in_menu')) {
+                $payload['show_in_menu'] = $inReferenceMenu;
+                $payload['menu_parent_seed_key'] = $inReferenceMenu
+                    ? NavigationMenuCatalog::referenceParentSeedKeyForPageSlug($slug)
+                    : null;
+            }
+
+            return $payload;
         };
 
         return [
@@ -149,6 +162,10 @@ class PageSeeder extends Seeder
             'template' => 'home',
             'sort_order' => 0,
             'is_home' => true,
+            ...(Schema::hasColumn('pages', 'show_in_menu') ? [
+                'show_in_menu' => true,
+                'menu_parent_seed_key' => null,
+            ] : []),
             'content_blocks' => [
                 [
                     'seed_key' => 'hero',

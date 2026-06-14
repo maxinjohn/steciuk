@@ -24,12 +24,18 @@ class Ministry extends Model implements HasMedia
         'meeting_time',
         'sort_order',
         'status',
+        'show_in_menu',
+        'menu_parent_seed_key',
+        'menu_label',
+        'menu_sort_order',
     ];
 
     protected function casts(): array
     {
         return [
             'sort_order' => 'integer',
+            'show_in_menu' => 'boolean',
+            'menu_sort_order' => 'integer',
         ];
     }
 
@@ -41,8 +47,15 @@ class Ministry extends Model implements HasMedia
             }
         });
 
-        static::saved(fn () => \App\Services\SiteCache::forgetPublicContent());
-        static::deleted(fn () => \App\Services\SiteCache::forgetPublicContent());
+        static::saved(function (Ministry $ministry): void {
+            \App\Services\SiteCache::forgetPublicContent();
+            \App\Services\NavigationMenuSync::syncMinistry($ministry);
+        });
+
+        static::deleted(function (Ministry $ministry): void {
+            \App\Services\SiteCache::forgetPublicContent();
+            \App\Services\NavigationMenuSync::removeMinistry($ministry);
+        });
     }
 
     public static function generateUniqueSlug(string $name, ?int $ignoreId = null): string

@@ -1,4 +1,5 @@
 // PWA + dark mode + scroll reveal + install prompt + mobile dock + gallery lightbox
+import './future-ready.js';
 
 const updateThemeColor = () => {
     const meta = document.querySelector('meta[name="theme-color"]');
@@ -386,14 +387,39 @@ const initMobileNav = () => {
 
 const initScrollReveal = () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const selector = '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .faith-whisper-card, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip, .heavenly-comfort-card, .hero-gen-z';
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    const selector = isMobile
+        ? '.hero-gen-z, .hero-modern .hero-badge, .hero-modern .hero-title, .hero-modern .hero-actions, .page-section--compact:first-of-type .section-head, .page-section--compact:first-of-type .feed-card:first-child, .page-section--compact:first-of-type .bento-grid > *:first-child, .heavenly-empty, .faith-spark-chip, .faith-whisper-card, .form-success-gen-z, .next-worship-chip, .page-band, .giving-method-card'
+        : '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .faith-whisper-card, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-verse, .heavenly-comfort-card, .hero-gen-z, .heavenly-empty, .faith-spark-chip, .evangelical-trust-bar, .detail-share-row, .page-band, .giving-method-card, .faith-whispers';
+
+    const staggerParents = '.feed-grid, .feed-grid--news, .sermon-stack, .gallery-mosaic, .bento-grid, .past-events-grid';
+
+    const applyStagger = (element) => {
+        const card = element.closest('.feed-card, .sermon-card, .gallery-tile, .bento-tile, .past-event-chip, .resource-row') ?? element;
+        const parent = card.parentElement;
+
+        if (! parent || ! parent.matches(staggerParents)) {
+            return;
+        }
+
+        const index = [...parent.children].indexOf(card);
+
+        if (index < 0) {
+            return;
+        }
+
+        element.style.setProperty('--reveal-delay', `${Math.min(index * 55, 330)}ms`);
+    };
 
     const elements = document.querySelectorAll(selector);
 
     if (! elements.length) return;
 
     if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-        elements.forEach((el) => el.classList.add('is-visible'));
+        document.querySelectorAll('.animate-fade-up, .glass-card, .feed-card, .hero-gen-z').forEach((el) => {
+            el.classList.add('is-visible');
+        });
 
         return;
     }
@@ -407,10 +433,17 @@ const initScrollReveal = () => {
                 }
             });
         },
-        { threshold: 0.06, rootMargin: '0px 0px -24px 0px' }
+        { threshold: 0.06, rootMargin: isMobile ? '0px 0px 0px 0px' : '0px 0px -24px 0px' }
     );
 
     elements.forEach((el) => {
+        if (el.dataset.revealBound === 'true') {
+            return;
+        }
+
+        el.dataset.revealBound = 'true';
+        applyStagger(el);
+
         const rect = el.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
             el.classList.add('is-visible');
@@ -421,15 +454,359 @@ const initScrollReveal = () => {
     });
 };
 
+const prefetchedUrls = new Set();
+
+const prefetchUrl = (href) => {
+    if (! href || prefetchedUrls.has(href)) {
+        return;
+    }
+
+    try {
+        const url = new URL(href, window.location.origin);
+
+        if (url.origin !== window.location.origin || url.pathname === window.location.pathname) {
+            return;
+        }
+
+        prefetchedUrls.add(href);
+
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = url.pathname + url.search;
+        document.head.appendChild(link);
+    } catch {
+        // Ignore malformed URLs.
+    }
+};
+
+const initLinkPrefetch = () => {
+    document.querySelectorAll('[data-prefetch-link]').forEach((anchor) => {
+        if (anchor.dataset.prefetchBound === 'true') {
+            return;
+        }
+
+        anchor.dataset.prefetchBound = 'true';
+
+        const href = anchor.getAttribute('href');
+
+        if (! href) {
+            return;
+        }
+
+        const warm = () => prefetchUrl(href);
+
+        anchor.addEventListener('touchstart', warm, { passive: true, once: true });
+        anchor.addEventListener('mouseenter', warm, { passive: true, once: true });
+        anchor.addEventListener('focus', warm, { passive: true, once: true });
+    });
+};
+
+const hapticTap = (duration = 8) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    if (typeof navigator.vibrate === 'function') {
+        navigator.vibrate(duration);
+    }
+};
+
+const initHapticFeedback = () => {
+    document.querySelectorAll('.mobile-dock-item:not(.mobile-dock-item--menu)').forEach((item) => {
+        if (item.dataset.hapticBound === 'true') {
+            return;
+        }
+
+        item.dataset.hapticBound = 'true';
+        item.addEventListener('click', () => hapticTap(6), { passive: true });
+    });
+
+    document.querySelectorAll('.hero-actions .btn-primary, .parish-action-strip .btn-primary').forEach((button) => {
+        if (button.dataset.hapticBound === 'true') {
+            return;
+        }
+
+        button.dataset.hapticBound = 'true';
+        button.addEventListener('click', () => hapticTap(10), { passive: true });
+    });
+
+    document.querySelectorAll('.prayer-fab').forEach((fab) => {
+        if (fab.dataset.hapticBound === 'true') {
+            return;
+        }
+
+        fab.dataset.hapticBound = 'true';
+        fab.addEventListener('click', () => hapticTap(8), { passive: true });
+    });
+};
+
+const initViewTransitions = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    document.documentElement.classList.add('view-transitions-enabled');
+};
+
+const showShareToast = (message) => {
+    let toast = document.getElementById('share-toast');
+
+    if (! toast) {
+        toast = document.createElement('div');
+        toast.id = 'share-toast';
+        toast.className = 'share-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.classList.add('is-visible');
+
+    window.clearTimeout(showShareToast._timer);
+    showShareToast._timer = window.setTimeout(() => {
+        toast.classList.remove('is-visible');
+    }, 2200);
+};
+
+const initShareButtons = () => {
+    document.querySelectorAll('[data-share]').forEach((button) => {
+        if (button.dataset.shareBound === 'true') {
+            return;
+        }
+
+        button.dataset.shareBound = 'true';
+
+        button.addEventListener('click', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const url = button.dataset.shareUrl || window.location.href;
+            const title = button.dataset.shareTitle || document.title;
+            const label = button.querySelector('[data-share-label]');
+            const payload = { title, text: title, url };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(payload);
+                    hapticTap(10);
+                    return;
+                } catch (error) {
+                    if (error?.name === 'AbortError') {
+                        return;
+                    }
+                }
+            }
+
+            try {
+                await navigator.clipboard.writeText(url);
+                button.classList.add('is-copied');
+                if (label) {
+                    label.textContent = 'Copied';
+                }
+                hapticTap(12);
+                showShareToast('Link copied');
+                window.setTimeout(() => {
+                    button.classList.remove('is-copied');
+                    if (label) {
+                        label.textContent = button.dataset.shareDefaultLabel || 'Share';
+                    }
+                }, 1800);
+            } catch {
+                showShareToast('Copy the link from your browser bar');
+            }
+        });
+
+        const label = button.querySelector('[data-share-label]');
+        if (label) {
+            button.dataset.shareDefaultLabel = label.textContent.trim();
+        }
+    });
+};
+
+const initCardMediaSkeletons = () => {
+    document.querySelectorAll('.feed-card-media, .resource-row-media, .gallery-tile-media').forEach((media) => {
+        if (media.dataset.skeletonBound === 'true') {
+            return;
+        }
+
+        media.dataset.skeletonBound = 'true';
+
+        const image = media.querySelector('img');
+
+        if (! image) {
+            media.classList.add('is-loaded');
+            return;
+        }
+
+        const markLoaded = () => media.classList.add('is-loaded');
+
+        if (image.classList.contains('card-media-image--topic') || image.classList.contains('card-media-image--dynamic')) {
+            markLoaded();
+            return;
+        }
+
+        if (image.complete) {
+            markLoaded();
+            return;
+        }
+
+        image.addEventListener('load', markLoaded, { once: true });
+        image.addEventListener('error', markLoaded, { once: true });
+    });
+};
+
+const showBlessingToast = (message) => {
+    let toast = document.getElementById('blessing-toast');
+
+    if (! toast) {
+        toast = document.createElement('div');
+        toast.id = 'blessing-toast';
+        toast.className = 'blessing-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+    }
+
+    toast.replaceChildren();
+    const icon = document.createElement('span');
+    icon.className = 'blessing-toast__icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '✝';
+    const copy = document.createElement('span');
+    copy.textContent = message;
+    toast.append(icon, copy);
+    toast.classList.add('is-visible');
+    hapticTap(14);
+
+    window.clearTimeout(showBlessingToast._timer);
+    showBlessingToast._timer = window.setTimeout(() => {
+        toast.classList.remove('is-visible');
+    }, 2600);
+};
+
+const initDivineWhisperBar = () => {
+    const bar = document.querySelector('[data-divine-whisper-bar]');
+
+    if (! bar || bar.dataset.whisperBound === 'true') {
+        return;
+    }
+
+    bar.dataset.whisperBound = 'true';
+
+    const lines = [...bar.querySelectorAll('[data-divine-whisper-line]')];
+
+    if (lines.length <= 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    let index = lines.findIndex((line) => line.classList.contains('is-active'));
+
+    if (index < 0) {
+        index = 0;
+        lines[0]?.classList.add('is-active');
+    }
+
+    if (window.__divineWhisperInterval) {
+        window.clearInterval(window.__divineWhisperInterval);
+    }
+
+    window.__divineWhisperInterval = window.setInterval(() => {
+        lines[index]?.classList.remove('is-active');
+        index = (index + 1) % lines.length;
+        lines[index]?.classList.add('is-active');
+    }, 7000);
+};
+
+const initFormBlessings = () => {
+    const celebrate = (node) => {
+        if (! node || node.dataset.blessed === 'true') {
+            return;
+        }
+
+        node.dataset.blessed = 'true';
+        node.classList.add('is-blessed');
+        showBlessingToast('Prayers received — grace & peace');
+    };
+
+    document.querySelectorAll('.form-success-gen-z').forEach(celebrate);
+
+    if (! window.__formBlessingObserver) {
+        window.__formBlessingObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (!(node instanceof Element)) {
+                        return;
+                    }
+
+                    if (node.matches('.form-success-gen-z')) {
+                        celebrate(node);
+                    }
+
+                    node.querySelectorAll?.('.form-success-gen-z').forEach(celebrate);
+                });
+            });
+        });
+
+        document.querySelectorAll('.form-gen-z, .contact-form-card, .member-portal-card, main').forEach((root) => {
+            window.__formBlessingObserver.observe(root, { childList: true, subtree: true });
+        });
+    }
+};
+
+const unlockMobileMenuScrollIfNeeded = () => {
+    if (! document.body.classList.contains('mobile-menu-open')) {
+        return;
+    }
+
+    const menu = document.getElementById('mobile-menu');
+    const overlay = document.getElementById('mobile-menu-overlay');
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const siteShell = document.getElementById('site-shell');
+
+    menu?.classList.remove('is-open');
+    overlay?.classList.remove('is-open');
+    toggle?.classList.remove('is-active');
+    toggle?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('mobile-menu-open');
+    siteShell?.removeAttribute('inert');
+    siteShell?.removeAttribute('aria-hidden');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    menu?.setAttribute('aria-hidden', 'true');
+    overlay?.setAttribute('aria-hidden', 'true');
+};
+
+const initFeedRailScrollHint = () => {
+    document.querySelectorAll('.home-showcase-section .feed-grid, .home-showcase-section .feed-grid--news, .home-showcase-section .sermon-stack, .feed-rail.feed-grid, .feed-rail.feed-grid--news').forEach((rail) => {
+        if (rail.dataset.scrollHintBound === 'true' || rail.querySelector('.feed-empty--heavenly, .feed-empty--rich')) {
+            return;
+        }
+
+        rail.dataset.scrollHintBound = 'true';
+        rail.classList.add('feed-rail--hint');
+
+        rail.addEventListener('scroll', () => {
+            rail.classList.remove('feed-rail--hint');
+            rail.classList.add('feed-rail--scrolled');
+        }, { passive: true, once: true });
+    });
+};
+
 const initMobileDock = () => {
     const toggle = document.getElementById('mobile-menu-toggle');
     const closeButton = document.getElementById('mobile-menu-close');
     const menu = document.getElementById('mobile-menu');
     const overlay = document.getElementById('mobile-menu-overlay');
 
-    if (! toggle || ! menu) {
+    if (! toggle || ! menu || toggle.dataset.dockBound === 'true') {
         return;
     }
+
+    toggle.dataset.dockBound = 'true';
 
     const collapseMobileSections = () => {
         document.querySelectorAll('[data-mobile-nav-section]').forEach((section) => {
@@ -514,6 +891,12 @@ const initMobileDock = () => {
 
 const initMemberChip = () => {
     document.querySelectorAll('[data-member-chip]').forEach((root) => {
+        if (root.dataset.memberChipBound === 'true') {
+            return;
+        }
+
+        root.dataset.memberChipBound = 'true';
+
         const trigger = root.querySelector('[data-member-chip-trigger]');
         const panel = root.querySelector('[data-member-chip-panel]');
 
@@ -628,6 +1011,14 @@ const initPublicSiteUi = () => {
     initMobileDock();
     initMobileNav();
     initMemberChip();
+    initLinkPrefetch();
+    initHapticFeedback();
+    initViewTransitions();
+    initShareButtons();
+    initCardMediaSkeletons();
+    initDivineWhisperBar();
+    initFormBlessings();
+    initFeedRailScrollHint();
     initScrollReveal();
 
     if ('requestIdleCallback' in window) {
@@ -646,7 +1037,15 @@ window.addEventListener('load', () => {
 });
 window.addEventListener('resize', syncDesktopNavLayout, { passive: true });
 document.addEventListener('livewire:navigated', () => {
+    unlockMobileMenuScrollIfNeeded();
     initDesktopNav();
     initMobileNav();
+    initLinkPrefetch();
+    initHapticFeedback();
+    initShareButtons();
+    initCardMediaSkeletons();
+    initDivineWhisperBar();
+    initFormBlessings();
+    initFeedRailScrollHint();
     initScrollReveal();
 });

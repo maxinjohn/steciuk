@@ -5,6 +5,7 @@ namespace App\Database;
 use App\Enums\MenuLocation;
 use App\Models\MenuItem;
 use App\Models\Page;
+use App\Services\NavigationMenuSync;
 use App\Support\ReferenceSiteContent;
 use Illuminate\Support\Facades\Schema;
 
@@ -35,6 +36,8 @@ class ReferenceMenuApplicator
             $this->pruneOrphanedSeeds($menuLocation, $structure);
             $this->pruneLegacyDuplicates($menuLocation);
         }
+
+        NavigationMenuSync::applyAll();
     }
 
     /**

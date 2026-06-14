@@ -54,7 +54,69 @@ class Seo
             return '';
         }
 
-        return Str::limit(trim(strip_tags($text)), $limit, '…');
+        return self::metaText(Str::limit(trim(strip_tags($text)), $limit, '…'));
+    }
+
+    /**
+     * Normalize text for document titles and meta tags.
+     * Blade @section('name', 'value') escapes once; decode before a single output escape.
+     */
+    public static function metaText(?string $text): string
+    {
+        if ($text === null) {
+            return '';
+        }
+
+        $plain = trim(strip_tags($text));
+
+        if ($plain === '') {
+            return '';
+        }
+
+        do {
+            $decoded = html_entity_decode($plain, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if ($decoded === $plain) {
+                break;
+            }
+            $plain = $decoded;
+        } while (true);
+
+        return preg_replace('/\s+/u', ' ', $plain) ?? $plain;
+    }
+
+    /**
+     * Standard document title: "Primary | STECI UK Parish" or "Primary | Section | Site".
+     */
+    public static function documentTitle(
+        ?string $primary,
+        ?string $section = null,
+        ?string $siteName = null,
+    ): string {
+        $siteName = self::metaText($siteName) ?: 'STECI UK Parish';
+        $primary = self::metaText($primary);
+        $section = self::metaText($section);
+
+        if ($primary === '') {
+            return $siteName;
+        }
+
+        // CMS seo_title and detail pages are often pre-formatted with " | " segments.
+        if (str_contains($primary, ' | ')) {
+            return $primary;
+        }
+
+        $primaryLower = strtolower($primary);
+        $siteLower = strtolower($siteName);
+
+        if (str_contains($primaryLower, $siteLower)) {
+            return $primary;
+        }
+
+        if ($section !== '' && ! str_contains($primaryLower, strtolower($section))) {
+            return "{$primary} | {$section} | {$siteName}";
+        }
+
+        return "{$primary} | {$siteName}";
     }
 
     public static function absoluteAsset(?string $path): ?string

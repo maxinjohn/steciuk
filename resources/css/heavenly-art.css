@@ -1,0 +1,330 @@
+/* Site-wide heavenly / evangelical art layer — content & footer only, header untouched */
+
+#site-shell {
+    position: relative;
+    isolation: isolate;
+}
+
+.heavenly-atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.heavenly-atmosphere__mesh {
+    position: absolute;
+    inset: 0;
+    opacity: 0.45;
+    background:
+        radial-gradient(ellipse 55% 40% at 12% 18%, color-mix(in srgb, var(--site-accent) 14%, transparent), transparent 62%),
+        radial-gradient(ellipse 45% 35% at 88% 24%, color-mix(in srgb, #c4b5fd 12%, transparent), transparent 58%),
+        radial-gradient(ellipse 70% 50% at 50% 100%, color-mix(in srgb, var(--site-brand) 10%, transparent), transparent 65%);
+}
+
+.heavenly-atmosphere__orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(48px);
+    animation: heavenlyBreath 14s ease-in-out infinite;
+}
+
+.heavenly-atmosphere__orb--gold {
+    top: 8%;
+    right: 6%;
+    width: min(22rem, 38vw);
+    height: min(22rem, 38vw);
+    background: color-mix(in srgb, var(--site-accent) 22%, transparent);
+    animation-delay: -2s;
+}
+
+.heavenly-atmosphere__orb--violet {
+    top: 42%;
+    left: -4%;
+    width: min(18rem, 32vw);
+    height: min(18rem, 32vw);
+    background: color-mix(in srgb, #c4b5fd 18%, transparent);
+    animation-delay: -6s;
+}
+
+.heavenly-atmosphere__orb--cyan {
+    bottom: 12%;
+    right: 18%;
+    width: min(14rem, 28vw);
+    height: min(14rem, 28vw);
+    background: color-mix(in srgb, #67e8f9 14%, transparent);
+    animation-delay: -9s;
+}
+
+.heavenly-atmosphere__ray {
+    position: absolute;
+    width: 1px;
+    height: 42vh;
+    background: linear-gradient(
+        180deg,
+        transparent,
+        color-mix(in srgb, var(--site-accent) 35%, transparent) 45%,
+        transparent
+    );
+    opacity: 0.35;
+    transform-origin: top center;
+    animation: heavenlyRayDrift 18s ease-in-out infinite;
+}
+
+.heavenly-atmosphere__ray--left {
+    top: 0;
+    left: 18%;
+    transform: rotate(12deg);
+}
+
+.heavenly-atmosphere__ray--right {
+    top: 0;
+    right: 22%;
+    transform: rotate(-10deg);
+    animation-delay: -7s;
+}
+
+.heavenly-atmosphere__cross-field {
+    position: absolute;
+    inset: 0;
+}
+
+.heavenly-atmosphere__cross {
+    position: absolute;
+    font-size: 0.625rem;
+    color: color-mix(in srgb, var(--site-accent) 28%, transparent);
+    opacity: 0.35;
+    animation: heavenlyCrossFloat 20s ease-in-out infinite;
+}
+
+.heavenly-atmosphere__cross:nth-child(1) { top: 14%; left: 8%; animation-delay: 0s; }
+.heavenly-atmosphere__cross:nth-child(2) { top: 28%; left: 72%; animation-delay: -3s; font-size: 0.75rem; }
+.heavenly-atmosphere__cross:nth-child(3) { top: 52%; left: 14%; animation-delay: -6s; }
+.heavenly-atmosphere__cross:nth-child(4) { top: 68%; left: 84%; animation-delay: -9s; }
+.heavenly-atmosphere__cross:nth-child(5) { top: 38%; left: 46%; animation-delay: -12s; font-size: 0.5rem; }
+.heavenly-atmosphere__cross:nth-child(6) { top: 78%; left: 38%; animation-delay: -15s; }
+.heavenly-atmosphere__cross:nth-child(7) { top: 18%; left: 56%; animation-delay: -4s; font-size: 0.5rem; }
+.heavenly-atmosphere__cross:nth-child(8) { top: 88%; left: 62%; animation-delay: -11s; }
+
+@keyframes heavenlyRayDrift {
+    0%, 100% { opacity: 0.2; transform: rotate(12deg) scaleY(0.92); }
+    50% { opacity: 0.45; transform: rotate(14deg) scaleY(1.05); }
+}
+
+@keyframes heavenlyCrossFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.22; }
+    50% { transform: translateY(-8px) rotate(6deg); opacity: 0.42; }
+}
+
+#main-content,
+.site-footer,
+.divine-whisper-bar,
+.faith-spark-strip,
+.sanctuary-peace,
+.gospel-reminder,
+.faith-pillars-wrap {
+    position: relative;
+    z-index: 1;
+}
+
+/* Richer site mesh */
+html:not(.dark) .site-mesh {
+    background-image:
+        radial-gradient(ellipse 90% 60% at 100% -8%, color-mix(in srgb, var(--site-accent) 20%, transparent), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 0% 100%, color-mix(in srgb, var(--site-brand) 16%, transparent), transparent 55%),
+        radial-gradient(ellipse 80% 45% at 50% 0%, color-mix(in srgb, #c4b5fd 8%, transparent), transparent 70%),
+        radial-gradient(ellipse 55% 35% at 50% -5%, color-mix(in srgb, var(--site-accent) 12%, transparent), transparent 65%),
+        linear-gradient(180deg, color-mix(in srgb, var(--site-bg) 88%, var(--site-surface-2)) 0%, var(--site-bg) 45%, color-mix(in srgb, var(--site-surface-2) 40%, var(--site-bg)) 100%);
+}
+
+html.dark .site-mesh {
+    background-image:
+        radial-gradient(ellipse 80% 50% at 100% -10%, color-mix(in srgb, var(--site-accent) 14%, transparent), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 0% 100%, color-mix(in srgb, #818cf8 10%, transparent), transparent 50%),
+        radial-gradient(ellipse 70% 45% at 50% 0%, color-mix(in srgb, var(--site-brand) 12%, transparent), transparent 60%);
+}
+
+/* Page band heavenly extras */
+.page-band-heavenly-rays {
+    position: absolute;
+    inset: 0;
+    background:
+        conic-gradient(from 210deg at 18% 0%, color-mix(in srgb, var(--site-accent) 16%, transparent), transparent 28%),
+        conic-gradient(from 330deg at 82% 0%, color-mix(in srgb, #c4b5fd 14%, transparent), transparent 26%);
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.page-band-cross--ghost {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(4rem, 14vw, 9rem);
+    color: color-mix(in srgb, var(--site-accent) 8%, transparent);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.page-band-inner {
+    position: relative;
+    z-index: 2;
+}
+
+/* Topic art heavenly halo */
+.topic-heavenly-halo {
+    position: absolute;
+    inset: 8%;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--site-accent) 22%, transparent);
+    box-shadow:
+        0 0 40px color-mix(in srgb, var(--site-accent) 18%, transparent),
+        inset 0 0 30px color-mix(in srgb, #c4b5fd 10%, transparent);
+    pointer-events: none;
+    animation: heavenlyBreath 9s ease-in-out infinite;
+}
+
+.topic-heavenly-rays {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, color-mix(in srgb, var(--site-accent) 20%, transparent), transparent 68%);
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+}
+
+/* Section ornaments on all page sections */
+.page-section {
+    position: relative;
+}
+
+.page-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(12rem, 40%);
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--site-accent) 45%, transparent),
+        transparent
+    );
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.page-section--compact::before {
+    width: min(8rem, 30%);
+}
+
+/* Heavenly cards site-wide */
+.card-modern,
+.feed-card,
+.form-gen-z,
+.member-portal-card,
+.bento-tile {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-modern::after,
+.feed-card::after,
+.form-gen-z::after,
+.member-portal-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 80% 50% at 100% 0%, color-mix(in srgb, var(--site-accent) 8%, transparent), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 0% 100%, color-mix(in srgb, #c4b5fd 6%, transparent), transparent 50%);
+    opacity: 0.85;
+}
+
+/* Member portal heavenly polish */
+.member-portal {
+    position: relative;
+}
+
+.member-portal::before {
+    content: '✝';
+    position: absolute;
+    top: 1.5rem;
+    right: max(1rem, env(safe-area-inset-right));
+    font-size: clamp(3rem, 8vw, 5rem);
+    color: color-mix(in srgb, var(--site-accent) 10%, transparent);
+    pointer-events: none;
+    animation: heavenlyBreath 12s ease-in-out infinite;
+}
+
+.member-portal-card,
+.member-portal-hero {
+    border: 1px solid color-mix(in srgb, var(--site-accent) 16%, var(--site-border));
+    box-shadow:
+        0 1px 0 color-mix(in srgb, var(--site-accent) 12%, transparent),
+        0 12px 40px color-mix(in srgb, var(--site-brand) 8%, transparent);
+}
+
+.member-portal-icon-ring {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--site-accent) 12%, transparent);
+}
+
+/* Scripture ribbon glow */
+.scripture-ribbon {
+    position: relative;
+}
+
+.scripture-ribbon::before {
+    content: '';
+    position: absolute;
+    inset: -20% 10%;
+    background: radial-gradient(ellipse 70% 80% at 50% 50%, color-mix(in srgb, var(--site-accent) 12%, transparent), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.scripture-ribbon-inner {
+    position: relative;
+    z-index: 1;
+}
+
+/* Evangelical trust bar heavenly edge */
+.evangelical-trust-bar {
+    position: relative;
+}
+
+.evangelical-trust-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--site-accent) 8%, transparent) 50%,
+        transparent
+    );
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .heavenly-atmosphere__orb,
+    .heavenly-atmosphere__ray,
+    .heavenly-atmosphere__cross,
+    .topic-heavenly-halo,
+    .member-portal::before {
+        animation: none;
+    }
+}
+
+html.save-data-mode .heavenly-atmosphere,
+html.save-data-mode .topic-heavenly-halo,
+html.save-data-mode .topic-heavenly-rays,
+html.save-data-mode .page-band-heavenly-rays,
+html.save-data-mode .page-band-cross--ghost,
+html.save-data-mode .heavenly-atmosphere__cross-field {
+    display: none !important;
+}

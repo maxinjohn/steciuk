@@ -1,9 +1,13 @@
 @extends('layouts.app')
 
-@section('title', $ministry->name . ' | Ministries | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle($ministry->name, 'Ministries', $siteName))
 @section('description', $ministry->short_description ?? strip_tags($ministry->description))
 
 @section('content')
+    <x-breadcrumbs :items="[
+        ['label' => 'Ministries', 'url' => route('ministries.index')],
+        ['label' => $ministry->name, 'current' => true],
+    ]" />
     <article>
         <x-hero
             :title="$ministry->name"
@@ -16,7 +20,8 @@
             art-context="ministry"
             :art-content="\App\Support\PageTopicArt::contentHintForRecord($ministry->description, $ministry->short_description)"
         />
-        <x-parish-action-strip class="!py-3" />
+        <x-detail-share-row :title="$ministry->name" class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" />
+        <x-faith-page-bridge />
 
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
             <div class="page-section-inner mx-auto max-w-7xl">

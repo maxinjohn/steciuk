@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ($article->seo_title ?? $article->title) . ' | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle($article->seo_title ?? $article->title, 'News', $siteName))
 @section('description', $article->seo_description ?? $article->excerpt ?? strip_tags($article->content))
 @section('og_type', 'article')
 @if ($article->featured_image)
@@ -46,12 +46,21 @@
             :art-content="$article->content"
             :art-category="$article->category"
         >
-            @if ($article->published_at)
-                <time datetime="{{ $article->published_at->toIso8601String() }}" class="hero-meta-chip">
-                    {{ $article->published_at->format('j F Y') }}
-                </time>
-            @endif
+            <div class="hero-meta-row">
+                @if ($article->published_at)
+                    <time datetime="{{ $article->published_at->toIso8601String() }}" class="hero-meta-chip">
+                        {{ $article->published_at->format('j F Y') }}
+                    </time>
+                @endif
+                <x-share-chip
+                    variant="hero"
+                    :url="url()->current()"
+                    :title="$article->title"
+                />
+            </div>
         </x-hero>
+
+        <x-faith-page-bridge />
 
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
             <div class="page-section-inner mx-auto max-w-3xl">
@@ -66,5 +75,10 @@
                 </div>
             </div>
         </section>
+
+        <x-scripture-ribbon
+            text="They devoted themselves to the apostles' teaching and to fellowship, to the breaking of bread and to prayer."
+            reference="Acts 2:42"
+        />
     </article>
 @endsection

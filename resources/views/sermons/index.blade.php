@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', $page?->seo_title ?? 'Sermons')
+@section('title', \App\Support\Seo::documentTitle($page?->seo_title ?? 'Sermons', null, $siteName))
 @section('description', $page?->seo_description ?? 'Biblical teaching from STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page" suppress-content>
+    <x-page-shell :page="$page" suppress-content suppress-hero>
         <x-breadcrumbs :items="[['label' => 'Sermons', 'current' => true]]" />
         <x-page-intro
             title="Expository Preaching"
@@ -15,6 +15,8 @@
             art-slug="sermons"
             art-title="Expository Preaching"
             art-context="sermon"
+            :show-strips="true"
+            :show-trust-bar="true"
         />
 
         <section class="page-section page-section--compact">
@@ -36,6 +38,7 @@
                                         :weekday="$sermon->preached_at?->format('D')"
                                         :category="$sermon->category"
                                         :content="\App\Support\PageTopicArt::contentHintForRecord($sermon->description ?? null, $sermon->summary ?? null, null, null, $sermon->bible_passage)"
+                                        :priority="$loop->first ? 'high' : 'lazy'"
                                     />
                                 </div>
                                 <div class="sermon-card-content">
@@ -47,6 +50,12 @@
                                             <h2 class="sermon-card-title">{{ $sermon->title }}</h2>
                                             <p class="sermon-card-meta">{{ $sermon->speaker }} · {{ $sermon->preached_at?->format('j F Y') }}</p>
                                         </div>
+                                        @if ($sermon->youtube_url)
+                                            <x-share-chip
+                                                :url="$sermon->youtube_url"
+                                                :title="$sermon->title"
+                                            />
+                                        @endif
                                     </div>
 
                                     @if ($sermon->description)
@@ -68,7 +77,14 @@
                             </div>
                         </x-card>
                     @empty
-                        <p class="feed-empty">Sermons will appear here soon.</p>
+                        <x-heavenly-empty
+                            title="Sermons coming soon"
+                            context="sermons"
+                            :action-href="url('/sermons')"
+                            action-label="Browse sermons"
+                        >
+                            Recent messages will be listed here once published.
+                        </x-heavenly-empty>
                     @endforelse
                 </div>
 

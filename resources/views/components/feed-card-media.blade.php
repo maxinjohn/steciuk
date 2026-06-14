@@ -11,16 +11,19 @@
     'day' => null,
     'month' => null,
     'weekday' => null,
+    'priority' => 'lazy',
 ])
 
 @php
     $topic = cardMediaTopic($slug, $title, $context, $category, $content);
+    $isTopicArt = cardMediaIsTopicArt($image);
 @endphp
 
 <div
     @class([
         'feed-card-media topic-card-media wow-card-media',
         'feed-card-media--dated' => filled($day) && filled($month),
+        'is-loaded' => $isTopicArt,
     ])
     data-topic="{{ $topic }}"
 >
@@ -38,6 +41,7 @@
         :category="$category"
         :content="$content"
         :alt="$alt"
+        :priority="$priority"
         class="feed-card-image"
     />
 

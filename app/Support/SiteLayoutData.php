@@ -2,10 +2,15 @@
 
 namespace App\Support;
 
+use App\Enums\ContentBlockType;
 use App\Enums\MenuLocation;
+use App\Models\Page;
+use App\Support\ContextScripture;
 use App\Models\Setting;
+use App\Support\AdminPanelConfig;
 use App\Services\MenuCache;
 use App\Services\ServiceLocations;
+use App\Support\NextWorshipChip;
 use Illuminate\Support\Collection;
 
 class SiteLayoutData
@@ -75,6 +80,16 @@ class SiteLayoutData
             'contactFormHeading' => $settings['contact_form_heading'] ?? 'Send a Message',
             'contactFormIntro' => $settings['contact_form_intro'] ?? 'Whether you need pastoral support, information about Holy Communion, or wish to join our parish — write to us and we will respond as soon as we can.',
             'serviceLocations' => ServiceLocations::names(),
+            'nextWorshipChip' => NextWorshipChip::resolve(),
+            'needsLivewire' => self::needsLivewire(),
+            'contextScripture' => ContextScripture::forRequest(),
+            'showContextScriptureNudge' => self::showContextScriptureNudge(),
+            'divineWhispers' => ContextScripture::divineWhispers(),
+            'faithSparkStrip' => PublicUiContent::sparkStrip(),
+            'parishActionStrip' => PublicUiContent::actionStrip(),
+            'pageIntroDefaults' => PublicUiContent::pageIntroDefaults(),
+            'prayerFab' => PublicUiContent::prayerFab(),
+            'heavenlyAtmosphereEnabled' => PublicUiContent::heavenlyAtmosphereEnabled(),
             'headerMenu' => self::withoutMemberAreaMenu($menus[MenuLocation::Header->value]),
             'footerMenu' => $menus[MenuLocation::Footer->value],
             'mobileMenu' => $menus[MenuLocation::Mobile->value],
@@ -91,6 +106,75 @@ class SiteLayoutData
         ];
 
         return self::$resolved;
+    }
+
+    public static function needsLivewire(): bool
+    {
+        $request = request();
+
+        if ($request->routeIs(
+            'home',
+            'login',
+            'register',
+            'password.request',
+            'password.reset',
+            'registration.pending',
+            'account',
+            'account.giving.export',
+            'events.show',
+            'ministries.show',
+        )) {
+            return true;
+        }
+
+        if ($request->routeIs('pages.show')) {
+            $slug = (string) $request->route('slug', '');
+
+            return Page::query()
+                ->where('slug', $slug)
+                ->where(function ($query): void {
+                    $query
+                        ->whereIn('template', ['contact', 'form'])
+                        ->orWhereHas('contentBlocks', fn ($blocks) => $blocks->where('type', ContentBlockType::Contact));
+                })
+                ->exists();
+        }
+
+        return false;
+    }
+
+    public static function showContextScriptureNudge(): bool
+    {
+        if (AdminPanelConfig::isAdminRequest(request())) {
+            return false;
+        }
+
+        return ! request()->routeIs(
+            'home',
+            'login',
+            'register',
+            'password.request',
+            'password.reset',
+            'registration.pending',
+            'account',
+            'account.giving.export',
+            'give',
+            'events.index',
+            'events.show',
+            'news.index',
+            'news.show',
+            'sermons.index',
+            'gallery.index',
+            'gallery.show',
+            'ministries.index',
+            'ministries.show',
+            'services.index',
+            'resources.index',
+        ) && ! (request()->routeIs('pages.show') && in_array((string) request()->route('slug', ''), [
+            'contact',
+            'prayer-request',
+            'give',
+        ], true));
     }
 
     public static function forget(): void

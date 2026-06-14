@@ -1,6 +1,7 @@
 @props([
     'page' => null,
     'suppressContent' => false,
+    'suppressHero' => false,
     'services' => collect(),
     'ministries' => collect(),
     'events' => collect(),
@@ -29,7 +30,8 @@
 
 @php
     $hasBlockHero = $page?->hasHeroContentBlock() ?? false;
-    $showPageHero = $page
+    $showPageHero = ! $suppressHero
+        && $page
         && $page->show_hero
         && ! $hasBlockHero
         && ($page->hero_title || $page->hero_subtitle || $page->featured_image);
@@ -55,7 +57,7 @@
         :art-context="\App\Support\PageTopicArt::contextForPage($page)"
         :art-content="\App\Support\PageTopicArt::contentHintForPage($page)"
     />
-    <x-parish-action-strip class="parish-action-strip--compact" />
+    <x-faith-page-bridge />
 @endif
 
 @if ($page && $page->contentBlocks->isNotEmpty())
@@ -69,6 +71,10 @@
         :albums="$albums ?? collect()"
         :accent="$page->accent_color ?? 'gold'"
     />
+@endif
+
+@if ($page?->is_home)
+    <x-faith-whispers variant="home" class="page-section page-section--compact" />
 @endif
 
 {{ $slot }}

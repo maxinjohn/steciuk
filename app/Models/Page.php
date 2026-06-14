@@ -42,6 +42,10 @@ class Page extends Model implements HasMedia
         'hero_style',
         'show_hero',
         'is_home',
+        'show_in_menu',
+        'menu_parent_seed_key',
+        'menu_label',
+        'menu_sort_order',
         'created_by',
         'updated_by',
     ];
@@ -53,6 +57,8 @@ class Page extends Model implements HasMedia
             'sort_order' => 'integer',
             'is_home' => 'boolean',
             'show_hero' => 'boolean',
+            'show_in_menu' => 'boolean',
+            'menu_sort_order' => 'integer',
         ];
     }
 
@@ -73,6 +79,7 @@ class Page extends Model implements HasMedia
         static::saved(function (Page $page): void {
             \App\Services\SiteCache::forgetPageContext($page->slug);
             \App\Services\SiteCache::forgetSitemap();
+            \App\Services\NavigationMenuSync::syncPage($page);
 
             if ($page->is_home) {
                 \App\Services\HomePageData::forget();
@@ -94,6 +101,7 @@ class Page extends Model implements HasMedia
         static::deleted(function (Page $page): void {
             \App\Services\SiteCache::forgetPageContext($page->slug);
             \App\Services\SiteCache::forgetSitemap();
+            \App\Services\NavigationMenuSync::removePage($page);
 
             if ($page->is_home) {
                 \App\Services\HomePageData::forget();

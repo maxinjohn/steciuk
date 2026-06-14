@@ -71,4 +71,31 @@ return [
         'short_name' => env('ADMIN_PANEL_SHORT_NAME', 'Parish Admin'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Future-ready public site (progressive enhancement)
+    |--------------------------------------------------------------------------
+    |
+    | Speculation Rules, adaptive perf, reading progress.
+    | All features degrade safely on older browsers.
+    |
+    */
+
+    'future' => [
+        'enabled' => env('SITE_FUTURE_UI', true),
+        'speculation_rules' => env('SITE_FUTURE_SPECULATION', true),
+        'reading_progress' => env('SITE_FUTURE_READING_PROGRESS', true),
+        'speculation_paths' => [
+            '/service-times',
+            '/prayer-request',
+            '/give',
+            '/events',
+            '/sermons',
+            '/contact',
+        ],
+        'speculation_prerender_paths' => [
+            '/service-times',
+        ],
+    ],
+
 ];

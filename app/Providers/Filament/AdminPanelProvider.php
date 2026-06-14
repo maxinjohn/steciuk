@@ -58,6 +58,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarFullyCollapsibleOnDesktop()
             ->sidebarWidth('18rem')
             ->maxContentWidth(Width::Full)
+            ->spa(hasPrefetching: false)
             ->databaseTransactions(
                 config('database.default') !== 'sqlite' && ! app()->environment('testing'),
             )

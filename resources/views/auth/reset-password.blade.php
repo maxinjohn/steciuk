@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Reset Password | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle('Reset Password', null, $siteName))
 @section('description', 'Choose a new password for your STECI UK Parish member account.')
 
 @section('content')
@@ -14,7 +14,11 @@
         art-title="Reset password"
         art-content="Choose a new secure password for your parish member account"
     />
-    <x-parish-action-strip class="parish-action-strip--compact" />
+    <x-faith-page-bridge />
+    <x-scripture-ribbon
+        text="The Lord is near to all who call on him, to all who call on him in truth."
+        reference="Psalm 145:18"
+    />
 
     <section class="page-section page-section--article py-10 sm:py-12 md:py-14">
         <div class="page-section-inner mx-auto max-w-xl">

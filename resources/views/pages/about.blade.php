@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $page->seo_title ?? $page->title . ' | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle($page->seo_title ?? $page->title, null, $siteName))
 @section('description', $page->seo_description ?? strip_tags($page->content))
 
 @section('content')
@@ -20,7 +20,7 @@
         <x-eauk-member-panel />
         <x-faith-pillars class="!py-6 sm:!py-8" />
     @else
-        <x-parish-action-strip class="!py-3" />
+        <x-faith-page-bridge />
     @endif
 
     @if ($page->content)

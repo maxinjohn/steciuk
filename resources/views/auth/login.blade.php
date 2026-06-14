@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Sign In | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle('Sign In', null, $siteName))
 @section('description', 'Sign in to your STECI UK Parish member account.')
 
 @section('content')
@@ -14,7 +14,7 @@
         art-title="Sign In"
         art-content="Sign in to your parish member account and member portal"
     />
-    <x-parish-action-strip class="parish-action-strip--compact" />
+    <x-faith-page-bridge />
     <x-scripture-ribbon
         text="The Lord is near to all who call on him, to all who call on him in truth."
         reference="Psalm 145:18"

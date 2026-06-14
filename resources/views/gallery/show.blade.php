@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $album->title . ' | Gallery | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle($album->title, 'Gallery', $siteName))
 @section('description', $album->description ?? 'Photo album from ' . $siteName)
 
 @section('content')
@@ -18,7 +18,8 @@
         art-context="gallery"
         :art-content="$album->description"
     />
-    <x-parish-action-strip class="!py-3" />
+    <x-detail-share-row :title="$album->title" class="page-section-inner mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" />
+    <x-faith-page-bridge />
 
     <section
         class="page-section page-section--article py-10 sm:py-12 md:py-16"
@@ -59,7 +60,9 @@
             </div>
 
             @if ($album->photos->isEmpty())
-                <p class="rounded-2xl bg-surface p-10 text-center text-ink-muted shadow-sm">No photos in this album yet.</p>
+                <x-heavenly-empty context="gallery" title="No photos in this album yet">
+                    Worship moments from this album will appear here once uploaded.
+                </x-heavenly-empty>
             @endif
 
             <div class="site-divider mt-10 pt-8">

@@ -12,6 +12,12 @@
     $url = pageTopicArtUrl($slug, $title, $context, $content, $category);
 @endphp
 
+@if (in_array($variant, ['hero', 'band'], true))
+    @push('head')
+        <link rel="preload" as="image" href="{{ $url }}">
+    @endpush
+@endif
+
 <div
     {{ $attributes->class([
         'topic-art-backdrop',
@@ -23,7 +29,8 @@
     <img
         src="{{ $url }}"
         alt=""
-        loading="{{ $variant === 'hero' ? 'eager' : 'lazy' }}"
+        loading="{{ in_array($variant, ['hero', 'band'], true) ? 'eager' : 'lazy' }}"
+        @if (in_array($variant, ['hero', 'band'], true)) fetchpriority="high" @endif
         decoding="async"
         @class([
             'topic-art-backdrop__image card-media-image card-media-image--topic card-media-image--dynamic',
@@ -37,6 +44,8 @@
     <div class="topic-card-mesh"></div>
     <div class="topic-card-scanlines"></div>
     <div class="topic-card-shade"></div>
+    <div class="topic-heavenly-rays"></div>
+    <div class="topic-heavenly-halo"></div>
     <div class="topic-art-backdrop__veil"></div>
     <div class="topic-card-frame">
         <span class="topic-card-frame__corner topic-card-frame__corner--tl"></span>

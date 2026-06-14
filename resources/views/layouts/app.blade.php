@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-color-light="{{ $themeColor ?? '#d4cabb' }}" data-theme-color-dark="#131316">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-color-light="{{ $themeColor ?? '#d4cabb' }}" data-theme-color-dark="#131316"
+    @if (\App\Support\FutureSiteConfig::enabled())
+        data-speculation-prefetch="{{ implode('|', \App\Support\FutureSiteConfig::speculationPrefetchPaths()) }}"
+        data-reading-progress="{{ \App\Support\FutureSiteConfig::readingProgressForRequest() ? '1' : '0' }}"
+    @endif
+>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
@@ -49,7 +54,9 @@
     <link rel="dns-prefetch" href="https://fonts.bunny.net">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @livewireStyles
+    @if ($needsLivewire ?? false)
+        @livewireStyles
+    @endif
 
     @php
         $schema = array_filter([
@@ -75,6 +82,7 @@
     </script>
 
     @stack('head')
+    <x-speculation-rules />
 </head>
 <body @class([
     'site-body site-mesh has-mobile-dock min-h-screen flex flex-col min-[1300px]:pb-0',
@@ -85,6 +93,10 @@
         <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-[var(--site-brand)] focus:px-4 focus:py-2 focus:text-white focus:shadow-lg">
             Skip to main content
         </a>
+
+        @if ($heavenlyAtmosphereEnabled ?? true)
+            <x-heavenly-atmosphere />
+        @endif
 
         <x-site-announcement />
 
@@ -129,15 +141,23 @@
         </header>
 
         <main id="main-content" class="flex-1 lg:pb-0">
+            @if ($showContextScriptureNudge ?? false)
+                <x-context-scripture-nudge />
+            @endif
             @yield('content')
         </main>
 
-        <x-faith-spark-strip />
+        <x-divine-whisper-bar :whispers="$divineWhispers ?? []" />
+        <x-faith-spark-strip
+            :kicker="$faithSparkStrip['kicker'] ?? null"
+            :items="$faithSparkStrip['items'] ?? []"
+        />
         <x-sanctuary-peace
             :ribbons="$faithSanctuaryRibbons ?? []"
             :verses="$faithSanctuaryVerses ?? []"
+            class="sanctuary-peace--genz"
         />
-        <x-gospel-reminder />
+        <x-gospel-reminder class="gospel-reminder--genz" />
 
         <footer class="site-footer lg:pb-0" aria-label="Site footer">
             <div class="site-content-shell mx-auto max-w-7xl py-12 lg:py-16">
@@ -313,22 +333,33 @@
         </div>
     </nav>
 
+    @if (! request()->routeIs('login', 'register', 'password.request', 'password.reset', 'registration.pending', 'account'))
+        <x-prayer-fab
+            :label="$prayerFab['label'] ?? 'Pray'"
+            :url="$prayerFab['url'] ?? '/prayer-request'"
+            :aria-label="$prayerFab['aria_label'] ?? 'Submit a prayer request'"
+        />
+    @endif
+
     <div class="mobile-dock-wrap min-[1300px]:hidden">
+        @if (! request()->routeIs('home'))
+            <x-next-worship-chip :chip="$nextWorshipChip ?? null" class="mobile-dock-worship-chip" />
+        @endif
         <nav class="mobile-dock" aria-label="Quick navigation">
-        <a href="{{ route('home') }}" class="mobile-dock-item {{ request()->routeIs('home') ? 'is-active' : '' }}">
+        <a href="{{ route('home') }}" class="mobile-dock-item {{ request()->routeIs('home') ? 'is-active' : '' }}" data-prefetch-link>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
             Home
         </a>
-        <a href="{{ url('/service-times') }}" class="mobile-dock-item {{ request()->is('service-times*', 'online-worship*', 'sermons*') ? 'is-active' : '' }}">
+        <a href="{{ url('/service-times') }}" class="mobile-dock-item {{ request()->is('service-times*', 'online-worship*', 'sermons*') ? 'is-active' : '' }}" data-prefetch-link>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             Worship
         </a>
-        <a href="{{ url('/events') }}" class="mobile-dock-item {{ request()->is('events*') ? 'is-active' : '' }}">
+        <a href="{{ url('/events') }}" class="mobile-dock-item {{ request()->is('events*') ? 'is-active' : '' }}" data-prefetch-link>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
             Events
         </a>
         @if ($showGiveButton ?? filled($donationLink))
-        <a href="{{ $givePageUrl ?? route('give') }}" class="mobile-dock-item {{ request()->routeIs('give') ? 'is-active' : '' }}">
+        <a href="{{ $givePageUrl ?? route('give') }}" class="mobile-dock-item {{ request()->routeIs('give') ? 'is-active' : '' }}" data-prefetch-link>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
             Give
         </a>
@@ -353,7 +384,9 @@
         </div>
     </div>
 
-    @livewireScripts
+    @if ($needsLivewire ?? false)
+        @livewireScripts
+    @endif
     @stack('scripts')
 
     <style>[x-cloak]{display:none!important}</style>

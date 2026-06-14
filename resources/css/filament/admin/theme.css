@@ -1503,3 +1503,54 @@
 .dark .launch-pages-list__view {
     @apply text-slate-300;
 }
+
+.admin-idle-warning {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(var(--admin-dock-height, 5rem) + 1rem);
+    z-index: 60;
+    max-width: min(22rem, calc(100vw - 2rem));
+    padding: 0.875rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    background: rgba(255, 251, 235, 0.96);
+    color: #78350f;
+    box-shadow: 0 16px 32px rgba(120, 53, 15, 0.12);
+}
+
+.admin-idle-warning__title {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.admin-idle-warning__text {
+    margin: 0.25rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+}
+
+.dark .admin-idle-warning {
+    background: rgba(69, 26, 3, 0.92);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #fde68a;
+}
+
+/* Public experience settings — Gen Z tab polish */
+.settings-form-tabs .fi-tabs-item-label {
+    letter-spacing: 0.02em;
+}
+
+.settings-form-tabs .fi-section-header-heading {
+    background: linear-gradient(90deg, #92400e, #b45309 45%, #7c3aed);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.dark .settings-form-tabs .fi-section-header-heading {
+    background: linear-gradient(90deg, #fbbf24, #fcd34d 50%, #c4b5fd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}

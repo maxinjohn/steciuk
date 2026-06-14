@@ -7,6 +7,7 @@ use App\Filament\Pages\FaithComfortSettings;
 use App\Filament\Pages\EmailTemplatesSettings;
 use App\Filament\Pages\GivingSettings;
 use App\Filament\Pages\MailSettings;
+use App\Filament\Pages\PublicExperienceSettings;
 use App\Filament\Pages\SiteContentSettings;
 use App\Filament\Pages\SiteLaunchSettings;
 use App\Filament\Pages\SiteMaintenanceSettings;
@@ -96,6 +97,7 @@ class AdminQuickLinks
                 'items' => [
                     self::pageLink('Church & faith', ChurchSettings::class, 'Parish name, contact, SEO, gospel bar, admin copy'),
                     self::pageLink('Faith & comfort', FaithComfortSettings::class, 'Rotating Scripture, sanctuary ribbon, comfort cards'),
+                    self::pageLink('Public experience', PublicExperienceSettings::class, 'Spark strip, action cards, whispers, Gen Z toggles'),
                     self::pageLink('Maintenance mode', SiteMaintenanceSettings::class, 'Public maintenance page for site refreshes'),
                     self::pageLink('Launch countdown', SiteLaunchSettings::class, 'Pre-launch countdown for the site or a specific URL'),
                     self::pageLink('Public site copy', SiteContentSettings::class, 'Announcements, listings, prayer & giving text'),

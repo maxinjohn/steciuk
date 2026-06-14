@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', $page?->seo_title ?? 'News')
+@section('title', \App\Support\Seo::documentTitle($page?->seo_title ?? 'News', null, $siteName))
 @section('description', $page?->seo_description ?? 'Latest news from STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page" suppress-content>
+    <x-page-shell :page="$page" suppress-content suppress-hero>
         <x-breadcrumbs :items="[['label' => 'News', 'current' => true]]" />
         <x-page-intro
             title="Parish News"
@@ -15,11 +15,13 @@
             art-slug="news"
             art-title="Parish News"
             art-context="news"
+            :show-strips="true"
+            :show-trust-bar="true"
         />
 
         <section class="page-section page-section--compact">
             <div class="page-section-inner mx-auto max-w-7xl">
-                <div class="feed-grid feed-grid--news">
+                <div class="feed-grid feed-grid--news feed-rail">
                     @forelse ($articles as $article)
                         <x-card
                             :href="route('news.show', $article->slug)"
@@ -42,11 +44,18 @@
                                 :weekday="$article->published_at?->format('D')"
                                 :category="$article->category"
                                 :content="\App\Support\PageTopicArt::contentHintForRecord($article->body ?? null, $article->excerpt, null, null, $article->category)"
+                                :priority="$loop->first ? 'high' : 'lazy'"
                             />
                             <div class="feed-card-body">
-                                <time datetime="{{ $article->published_at?->toIso8601String() }}" class="feed-meta">
-                                    {{ $article->published_at?->format('j F Y') }}
-                                </time>
+                                <div class="feed-card-head">
+                                    <time datetime="{{ $article->published_at?->toIso8601String() }}" class="feed-meta">
+                                        {{ $article->published_at?->format('j F Y') }}
+                                    </time>
+                                    <x-share-chip
+                                        :url="route('news.show', $article->slug)"
+                                        :title="$article->title"
+                                    />
+                                </div>
                                 <h2 class="feed-card-title">{{ $article->title }}</h2>
                                 @if ($article->excerpt)
                                     <p class="feed-card-desc line-clamp-3">{{ $article->excerpt }}</p>
@@ -55,7 +64,9 @@
                             </div>
                         </x-card>
                     @empty
-                        <p class="feed-empty">No news articles yet.</p>
+                        <x-heavenly-empty title="News coming soon" context="news">
+                            Parish updates and stories will appear here as they are published.
+                        </x-heavenly-empty>
                     @endforelse
                 </div>
 

@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', $page?->seo_title ?? 'Events')
+@section('title', \App\Support\Seo::documentTitle($page?->seo_title ?? 'Events', null, $siteName))
 @section('description', $page?->seo_description ?? 'Upcoming events at STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page" suppress-content>
+    <x-page-shell :page="$page" suppress-content suppress-hero>
         <x-breadcrumbs :items="[['label' => 'Events', 'current' => true]]" />
         <x-page-intro
             title="Parish Events"
@@ -15,11 +15,13 @@
             art-slug="events"
             art-title="Parish Events"
             art-context="event"
+            :show-strips="true"
+            :show-trust-bar="true"
         />
 
         <section class="page-section page-section--compact">
             <div class="page-section-inner mx-auto max-w-7xl">
-                <div class="feed-grid">
+                <div class="feed-grid feed-rail">
                     @forelse ($upcoming as $event)
                         <x-card
                             href="{{ route('events.show', $event->slug) }}"
@@ -41,11 +43,21 @@
                                 :weekday="$event->starts_at->format('D')"
                                 :category="$event->category"
                                 :content="\App\Support\PageTopicArt::contentHintForRecord($event->description, null, null, $event->location, $event->category)"
+                                :priority="$loop->first ? 'high' : 'lazy'"
                             />
                             <div class="feed-card-body">
-                                <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
-                                    {{ $event->starts_at->format('l, j F · g:i A') }}
-                                </time>
+                                <div class="feed-card-head">
+                                    <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
+                                        {{ $event->starts_at->format('l, j F · g:i A') }}
+                                    </time>
+                                    <div class="feed-card-head__actions">
+                                        <x-event-when-chip :at="$event->starts_at" />
+                                        <x-share-chip
+                                            :url="route('events.show', $event->slug)"
+                                            :title="$event->title"
+                                        />
+                                    </div>
+                                </div>
                                 <h3 class="feed-card-title">{{ $event->title }}</h3>
                                 @if ($event->location)
                                     <p class="feed-card-desc">{{ $event->location }}</p>
@@ -54,7 +66,14 @@
                             </div>
                         </x-card>
                     @empty
-                        <p class="feed-empty">No upcoming events. Check back soon.</p>
+                        <x-heavenly-empty
+                            title="No upcoming events right now"
+                            context="events"
+                            :action-href="url('/service-times')"
+                            action-label="View worship times"
+                        >
+                            Join us for worship across our UK locations — times are updated regularly.
+                        </x-heavenly-empty>
                     @endforelse
                 </div>
 

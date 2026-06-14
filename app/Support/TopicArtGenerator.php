@@ -61,7 +61,7 @@ final class TopicArtGenerator
         $hash = crc32($seed.'-particles');
         $particles = [];
 
-        for ($i = 0; $i < 14; $i++) {
+        for ($i = 0; $i < 22; $i++) {
             $particles[] = [
                 'x' => 40 + (($hash >> ($i * 3)) % 720),
                 'y' => 24 + (($hash >> ($i * 5 + 2)) % 452),
@@ -127,7 +127,7 @@ final class TopicArtGenerator
                 'violet' => '#818cf8',
                 'cyan' => '#22d3ee',
             ],
-            'pastoral-care', 'leadership', 'contact', 'safeguarding', 'login', 'forgot-password', 'reset-password' => [
+            'pastoral-care', 'leadership', 'contact', 'safeguarding', 'login', 'account', 'forgot-password', 'reset-password' => [
                 'accent' => '#c4b5fd',
                 'accentSoft' => '#ddd6fe',
                 'violet' => '#a78bfa',
@@ -262,6 +262,9 @@ final class TopicArtGenerator
 <rect width="800" height="500" filter="url(#{$id}-noise)" opacity="0.55"/>
 {$monogramMarkup}
 <g opacity="0.95">{$particleMarkup}</g>
+<g opacity="0.14" transform="translate(400 250)">
+  <path d="M0-18V18M-14 0H14" stroke="{$accents['accentSoft']}" stroke-width="2.5" stroke-linecap="round"/>
+</g>
 <path d="M48 48 H148 M48 48 V148 M752 48 H652 M752 48 V148 M48 452 H148 M48 452 V352 M752 452 H652 M752 452 V352" fill="none" stroke="{$accents['accentSoft']}" stroke-width="2" opacity="0.22" stroke-linecap="round"/>
 <rect x="20" y="20" width="760" height="460" rx="30" fill="none" stroke="{$palette['goldLight']}" stroke-width="1.5" opacity="0.16"/>
 <path d="M0 468 Q200 430 400 468 T800 468" fill="none" stroke="{$accents['accent']}" stroke-width="1.5" opacity="0.18"/>

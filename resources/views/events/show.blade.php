@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $event->title . ' | Events | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle($event->title, 'Events', $siteName))
 @section('description', strip_tags($event->description))
 @section('og_type', 'article')
 @if ($event->featured_image)
@@ -54,13 +54,23 @@
             :art-content="$event->description"
             :art-category="$event->category"
         >
-            <time datetime="{{ $event->starts_at->toIso8601String() }}" class="hero-meta-chip">
-                {{ $event->starts_at->format('l, j F Y · g:i A') }}
-                @if ($event->ends_at)
-                    – {{ $event->ends_at->format('g:i A') }}
-                @endif
-            </time>
+            <div class="hero-meta-row">
+                <time datetime="{{ $event->starts_at->toIso8601String() }}" class="hero-meta-chip">
+                    {{ $event->starts_at->format('l, j F Y · g:i A') }}
+                    @if ($event->ends_at)
+                        – {{ $event->ends_at->format('g:i A') }}
+                    @endif
+                </time>
+                <x-event-when-chip :at="$event->starts_at" />
+                <x-share-chip
+                    variant="hero"
+                    :url="url()->current()"
+                    :title="$event->title"
+                />
+            </div>
         </x-hero>
+
+        <x-faith-page-bridge />
 
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
             <div class="page-section-inner mx-auto max-w-7xl">
@@ -121,5 +131,10 @@
                 </div>
             </div>
         </section>
+
+        <x-scripture-ribbon
+            text="Let us not give up meeting together, as some are in the habit of doing, but let us encourage one another."
+            reference="Hebrews 10:25"
+        />
     </article>
 @endsection
