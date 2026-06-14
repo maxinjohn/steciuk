@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\ContentBlockType;
 use App\Enums\MenuLocation;
 use App\Models\Page;
 use App\Models\Setting;
@@ -121,7 +122,11 @@ class SiteLayoutData
 
             return Page::query()
                 ->where('slug', $slug)
-                ->whereIn('template', ['contact', 'form'])
+                ->where(function ($query): void {
+                    $query
+                        ->whereIn('template', ['contact', 'form'])
+                        ->orWhereHas('contentBlocks', fn ($blocks) => $blocks->where('type', ContentBlockType::Contact));
+                })
                 ->exists();
         }
 

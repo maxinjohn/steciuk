@@ -41,23 +41,6 @@ const cacheFirst = (request) =>
         )
     );
 
-const staleWhileRevalidate = (request) =>
-    caches.open(CACHE).then((cache) =>
-        cache.match(request).then((cached) => {
-            const networkFetch = fetch(request)
-                .then((response) => {
-                    if (response.ok) {
-                        cache.put(request, response.clone());
-                    }
-
-                    return response;
-                })
-                .catch(() => cached);
-
-            return cached || networkFetch;
-        })
-    );
-
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE).then((cache) => cache.add(OFFLINE_URL)).then(() => self.skipWaiting())
@@ -81,24 +64,27 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    if (url.pathname === '/sitemap.xml' || url.pathname === '/robots.txt') {
+        return;
+    }
+
     const isStaticAsset =
         url.pathname.startsWith('/build/') ||
         url.pathname.startsWith('/topic-art/') ||
-        url.pathname.match(/\\.(css|js|woff2?|png|jpg|jpeg|webp|svg|ico|webmanifest)\$/);
+        url.pathname.match(/\\.(css|js|woff2?|png|jpg|jpeg|webp|svg|ico|webmanifest|xml|txt)\$/);
 
     if (isStaticAsset) {
         event.respondWith(cacheFirst(event.request));
         return;
     }
 
-    const acceptsHtml = (event.request.headers.get('accept') || '').includes('text/html');
-    const isNavigation = event.request.mode === 'navigate' || acceptsHtml;
-
-    if (isNavigation) {
+    if (event.request.mode === 'navigate') {
         event.respondWith(
             fetch(event.request)
                 .then((response) => {
-                    if (response.ok) {
+                    const cacheControl = response.headers.get('cache-control') || '';
+
+                    if (response.ok && ! cacheControl.includes('no-store')) {
                         caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
                     }
 
@@ -112,7 +98,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    event.respondWith(staleWhileRevalidate(event.request));
+    event.respondWith(fetch(event.request));
 });
 JS;
 

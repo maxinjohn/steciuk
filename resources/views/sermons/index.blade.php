@@ -19,7 +19,7 @@
 
         <section class="page-section page-section--compact">
             <div class="page-section-inner mx-auto max-w-7xl">
-                <div class="sermon-stack feed-rail">
+                <div class="sermon-stack">
                     @forelse ($sermons as $sermon)
                         <x-card class="sermon-card topic-card wow-card overflow-hidden">
                             <div class="sermon-card-layout">

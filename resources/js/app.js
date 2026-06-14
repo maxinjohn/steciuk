@@ -395,13 +395,14 @@ const initScrollReveal = () => {
     const staggerParents = '.feed-grid, .feed-grid--news, .sermon-stack, .gallery-mosaic, .bento-grid, .past-events-grid';
 
     const applyStagger = (element) => {
-        const parent = element.closest(staggerParents);
+        const card = element.closest('.feed-card, .sermon-card, .gallery-tile, .bento-tile, .past-event-chip, .resource-row') ?? element;
+        const parent = card.parentElement;
 
-        if (! parent) {
+        if (! parent || ! parent.matches(staggerParents)) {
             return;
         }
 
-        const index = [...parent.children].indexOf(element);
+        const index = [...parent.children].indexOf(card);
 
         if (index < 0) {
             return;
@@ -435,6 +436,11 @@ const initScrollReveal = () => {
     );
 
     elements.forEach((el) => {
+        if (el.dataset.revealBound === 'true') {
+            return;
+        }
+
+        el.dataset.revealBound = 'true';
         applyStagger(el);
 
         const rect = el.getBoundingClientRect();
@@ -516,6 +522,27 @@ const initViewTransitions = () => {
     document.documentElement.classList.add('view-transitions-enabled');
 };
 
+const showShareToast = (message) => {
+    let toast = document.getElementById('share-toast');
+
+    if (! toast) {
+        toast = document.createElement('div');
+        toast.id = 'share-toast';
+        toast.className = 'share-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.classList.add('is-visible');
+
+    window.clearTimeout(showShareToast._timer);
+    showShareToast._timer = window.setTimeout(() => {
+        toast.classList.remove('is-visible');
+    }, 2200);
+};
+
 const initShareButtons = () => {
     document.querySelectorAll('[data-share]').forEach((button) => {
         if (button.dataset.shareBound === 'true') {
@@ -524,14 +551,19 @@ const initShareButtons = () => {
 
         button.dataset.shareBound = 'true';
 
-        button.addEventListener('click', async () => {
+        button.addEventListener('click', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
             const url = button.dataset.shareUrl || window.location.href;
             const title = button.dataset.shareTitle || document.title;
+            const label = button.querySelector('[data-share-label]');
             const payload = { title, text: title, url };
 
             if (navigator.share) {
                 try {
                     await navigator.share(payload);
+                    hapticTap(10);
                     return;
                 } catch (error) {
                     if (error?.name === 'AbortError') {
@@ -543,12 +575,47 @@ const initShareButtons = () => {
             try {
                 await navigator.clipboard.writeText(url);
                 button.classList.add('is-copied');
+                if (label) {
+                    label.textContent = 'Copied';
+                }
                 hapticTap(12);
-                window.setTimeout(() => button.classList.remove('is-copied'), 1800);
+                showShareToast('Link copied');
+                window.setTimeout(() => {
+                    button.classList.remove('is-copied');
+                    if (label) {
+                        label.textContent = button.dataset.shareDefaultLabel || 'Share';
+                    }
+                }, 1800);
             } catch {
-                window.prompt('Copy this link', url);
+                showShareToast('Copy the link from your browser bar');
             }
         });
+
+        const label = button.querySelector('[data-share-label]');
+        if (label) {
+            button.dataset.shareDefaultLabel = label.textContent.trim();
+        }
+    });
+};
+
+const initCardMediaSkeletons = () => {
+    document.querySelectorAll('.feed-card-media').forEach((media) => {
+        const image = media.querySelector('img');
+
+        if (! image) {
+            media.classList.add('is-loaded');
+            return;
+        }
+
+        const markLoaded = () => media.classList.add('is-loaded');
+
+        if (image.complete) {
+            markLoaded();
+            return;
+        }
+
+        image.addEventListener('load', markLoaded, { once: true });
+        image.addEventListener('error', markLoaded, { once: true });
     });
 };
 
@@ -763,6 +830,7 @@ const initPublicSiteUi = () => {
     initHapticFeedback();
     initViewTransitions();
     initShareButtons();
+    initCardMediaSkeletons();
     initScrollReveal();
 
     if ('requestIdleCallback' in window) {
@@ -786,5 +854,6 @@ document.addEventListener('livewire:navigated', () => {
     initLinkPrefetch();
     initHapticFeedback();
     initShareButtons();
+    initCardMediaSkeletons();
     initScrollReveal();
 });

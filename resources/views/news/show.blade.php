@@ -46,16 +46,18 @@
             :art-content="$article->content"
             :art-category="$article->category"
         >
-            @if ($article->published_at)
-                <time datetime="{{ $article->published_at->toIso8601String() }}" class="hero-meta-chip">
-                    {{ $article->published_at->format('j F Y') }}
-                </time>
-            @endif
-            <x-share-chip
-                :url="url()->current()"
-                :title="$article->title"
-                class="mt-3"
-            />
+            <div class="hero-meta-row">
+                @if ($article->published_at)
+                    <time datetime="{{ $article->published_at->toIso8601String() }}" class="hero-meta-chip">
+                        {{ $article->published_at->format('j F Y') }}
+                    </time>
+                @endif
+                <x-share-chip
+                    variant="hero"
+                    :url="url()->current()"
+                    :title="$article->title"
+                />
+            </div>
         </x-hero>
 
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">

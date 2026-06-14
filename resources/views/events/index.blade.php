@@ -48,10 +48,13 @@
                                     <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
                                         {{ $event->starts_at->format('l, j F · g:i A') }}
                                     </time>
-                                    <x-share-chip
-                                        :url="route('events.show', $event->slug)"
-                                        :title="$event->title"
-                                    />
+                                    <div class="feed-card-head__actions">
+                                        <x-event-when-chip :at="$event->starts_at" />
+                                        <x-share-chip
+                                            :url="route('events.show', $event->slug)"
+                                            :title="$event->title"
+                                        />
+                                    </div>
                                 </div>
                                 <h3 class="feed-card-title">{{ $event->title }}</h3>
                                 @if ($event->location)

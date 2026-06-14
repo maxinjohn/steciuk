@@ -19,7 +19,7 @@
 
         <section class="page-section page-section--compact">
             <div class="page-section-inner mx-auto max-w-7xl">
-                <div class="gallery-mosaic feed-rail">
+                <div class="gallery-mosaic">
                     @forelse ($albums as $album)
                         <x-gallery-tile-card :album="$album" />
                     @empty

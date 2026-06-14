@@ -213,10 +213,13 @@
                                         <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
                                             {{ $event->starts_at->format('l, j F') }}
                                         </time>
-                                        <x-share-chip
-                                            :url="route('events.show', $event->slug)"
-                                            :title="$event->title"
-                                        />
+                                        <div class="feed-card-head__actions">
+                                            <x-event-when-chip :at="$event->starts_at" />
+                                            <x-share-chip
+                                                :url="route('events.show', $event->slug)"
+                                                :title="$event->title"
+                                            />
+                                        </div>
                                     </div>
                                     <h3 class="feed-card-title">{{ $event->title }}</h3>
                                     @if ($event->location)
@@ -281,10 +284,12 @@
                                         <time datetime="{{ $article->published_at?->toIso8601String() }}" class="feed-meta">
                                             {{ $article->published_at?->format('j F Y') }}
                                         </time>
-                                        <x-share-chip
-                                            :url="route('news.show', $article->slug)"
-                                            :title="$article->title"
-                                        />
+                                        <div class="feed-card-head__actions">
+                                            <x-share-chip
+                                                :url="route('news.show', $article->slug)"
+                                                :title="$article->title"
+                                            />
+                                        </div>
                                     </div>
                                     <h3 class="feed-card-title">{{ $article->title }}</h3>
                                     @if ($article->excerpt)

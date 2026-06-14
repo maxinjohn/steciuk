@@ -14,6 +14,8 @@ class NextWorshipChip
 
     private const CACHE_TTL_SECONDS = 300;
 
+    private const DEFAULT_LIVE_WINDOW_HOURS = 2;
+
     /**
      * @return array{label: string, detail: string, url: string, is_live: bool}|null
      */
@@ -34,7 +36,20 @@ class NextWorshipChip
                     continue;
                 }
 
-                if ($best === null || $candidate['starts_at']->lt($best['starts_at'])) {
+                if ($best === null) {
+                    $best = $candidate;
+
+                    continue;
+                }
+
+                if (! empty($candidate['is_live']) && empty($best['is_live'])) {
+                    $best = $candidate;
+
+                    continue;
+                }
+
+                if (! empty($candidate['is_live']) === ! empty($best['is_live'])
+                    && $candidate['starts_at']->lt($best['starts_at'])) {
                     $best = $candidate;
                 }
             }
@@ -53,7 +68,7 @@ class NextWorshipChip
     }
 
     /**
-     * @return array{service: Service, starts_at: CarbonInterface, ends_at: CarbonInterface|null}|null
+     * @return array{service: Service, starts_at: CarbonInterface, ends_at: CarbonInterface|null, is_live?: bool}|null
      */
     private static function nextOccurrence(Service $service): ?array
     {
@@ -61,11 +76,7 @@ class NextWorshipChip
         $data = ServiceSchedule::normalizeData($type, $service->schedule_data ?? []);
         $now = Carbon::now();
 
-        if ($type === ServiceScheduleType::OneTime) {
-            return self::occurrenceFromRow($service, $data['occurrences'][0] ?? [], $now);
-        }
-
-        if ($type === ServiceScheduleType::Multiple) {
+        if ($type === ServiceScheduleType::OneTime || $type === ServiceScheduleType::Multiple) {
             foreach (collect($data['occurrences'] ?? [])->sortBy('date') as $occurrence) {
                 $match = self::occurrenceFromRow($service, $occurrence, $now);
 
@@ -88,6 +99,12 @@ class NextWorshipChip
         $time = (string) ($data['start_time'] ?? '10:30');
         $endTime = filled($data['end_time'] ?? null) ? (string) $data['end_time'] : null;
 
+        $liveNow = self::liveRecurringOccurrence($service, $weekday, $time, $endTime, $now);
+
+        if ($liveNow !== null) {
+            return $liveNow;
+        }
+
         $startsAt = self::nextWeekdayStart($weekday, $time, $stepWeeks, $now);
 
         if ($startsAt === null) {
@@ -102,8 +119,44 @@ class NextWorshipChip
     }
 
     /**
+     * @return array{service: Service, starts_at: CarbonInterface, ends_at: CarbonInterface|null, is_live: bool}|null
+     */
+    private static function liveRecurringOccurrence(
+        Service $service,
+        string $weekday,
+        string $time,
+        ?string $endTime,
+        CarbonInterface $now,
+    ): ?array {
+        $target = self::matchWeekdayNumber($weekday);
+
+        if ($target === null || (int) $now->dayOfWeek !== $target) {
+            return null;
+        }
+
+        $startsAt = self::buildDateTime($now->toDateString(), $time);
+
+        if ($startsAt === null || $startsAt->gt($now)) {
+            return null;
+        }
+
+        $endsAt = self::resolveEndTime($startsAt, $endTime);
+
+        if ($endsAt->lt($now)) {
+            return null;
+        }
+
+        return [
+            'service' => $service,
+            'starts_at' => $startsAt,
+            'ends_at' => $endsAt,
+            'is_live' => true,
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $occurrence
-     * @return array{service: Service, starts_at: CarbonInterface, ends_at: CarbonInterface|null}|null
+     * @return array{service: Service, starts_at: CarbonInterface, ends_at: CarbonInterface|null, is_live?: bool}|null
      */
     private static function occurrenceFromRow(Service $service, array $occurrence, CarbonInterface $now): ?array
     {
@@ -113,7 +166,7 @@ class NextWorshipChip
 
         $startsAt = self::buildDateTime((string) $occurrence['date'], (string) ($occurrence['start_time'] ?? '10:30'));
 
-        if ($startsAt === null || $startsAt->lt($now)) {
+        if ($startsAt === null) {
             return null;
         }
 
@@ -121,11 +174,39 @@ class NextWorshipChip
             ? self::buildDateTime((string) $occurrence['date'], (string) $occurrence['end_time'])
             : null;
 
+        if ($startsAt->gt($now)) {
+            return [
+                'service' => $service,
+                'starts_at' => $startsAt,
+                'ends_at' => $endsAt,
+            ];
+        }
+
+        $effectiveEnd = self::resolveEndTime($startsAt, filled($occurrence['end_time'] ?? null) ? (string) $occurrence['end_time'] : null);
+
+        if ($effectiveEnd->lt($now)) {
+            return null;
+        }
+
         return [
             'service' => $service,
             'starts_at' => $startsAt,
-            'ends_at' => $endsAt,
+            'ends_at' => $effectiveEnd,
+            'is_live' => true,
         ];
+    }
+
+    private static function resolveEndTime(CarbonInterface $startsAt, ?string $endTime): CarbonInterface
+    {
+        if (filled($endTime)) {
+            $endsAt = self::buildDateTime($startsAt->toDateString(), $endTime);
+
+            if ($endsAt !== null && $endsAt->gte($startsAt)) {
+                return $endsAt;
+            }
+        }
+
+        return $startsAt->copy()->addHours(self::DEFAULT_LIVE_WINDOW_HOURS);
     }
 
     private static function nextWeekdayStart(string $weekday, string $time, int $stepWeeks, CarbonInterface $now): ?CarbonInterface
@@ -148,7 +229,7 @@ class NextWorshipChip
 
             $startsAt = self::buildDateTime($candidateDay->toDateString(), $time);
 
-            if ($startsAt !== null && $startsAt->gte($now)) {
+            if ($startsAt !== null && $startsAt->gt($now)) {
                 return $startsAt;
             }
 
@@ -189,7 +270,7 @@ class NextWorshipChip
     }
 
     /**
-     * @param  array{service: Service, starts_at: CarbonInterface, ends_at: CarbonInterface|null}  $match
+     * @param  array{service: Service, starts_at: CarbonInterface, ends_at: CarbonInterface|null, is_live?: bool}  $match
      * @return array{label: string, detail: string, url: string, is_live: bool}
      */
     private static function present(array $match): array
@@ -200,8 +281,8 @@ class NextWorshipChip
         $endsAt = $match['ends_at'];
         $now = Carbon::now();
 
-        $isLive = $startsAt->lte($now)
-            && ($endsAt === null || $endsAt->gte($now->copy()->subMinutes(10)));
+        $isLive = ! empty($match['is_live'])
+            || ($startsAt->lte($now) && $endsAt !== null && $endsAt->gte($now));
 
         if ($isLive) {
             $label = 'Worship now';
@@ -216,11 +297,14 @@ class NextWorshipChip
         }
 
         $location = trim((string) ($service->location ?: $service->title));
+        $url = $isLive && filled($service->online_stream_link)
+            ? url('/online-worship')
+            : url('/service-times');
 
         return [
             'label' => $label,
             'detail' => $location,
-            'url' => url('/service-times'),
+            'url' => $url,
             'is_live' => $isLive,
         ];
     }

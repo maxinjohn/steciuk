@@ -6215,7 +6215,14 @@ html.dark {
 
     .sermon-card-top {
         display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
         gap: 1rem;
+    }
+
+    .sermon-card-top .share-chip {
+        flex-shrink: 0;
+        margin-top: 0.125rem;
     }
 
     .sermon-card-icon {

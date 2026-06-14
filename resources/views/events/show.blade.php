@@ -54,17 +54,20 @@
             :art-content="$event->description"
             :art-category="$event->category"
         >
-            <time datetime="{{ $event->starts_at->toIso8601String() }}" class="hero-meta-chip">
-                {{ $event->starts_at->format('l, j F Y · g:i A') }}
-                @if ($event->ends_at)
-                    – {{ $event->ends_at->format('g:i A') }}
-                @endif
-            </time>
-            <x-share-chip
-                :url="url()->current()"
-                :title="$event->title"
-                class="mt-3"
-            />
+            <div class="hero-meta-row">
+                <time datetime="{{ $event->starts_at->toIso8601String() }}" class="hero-meta-chip">
+                    {{ $event->starts_at->format('l, j F Y · g:i A') }}
+                    @if ($event->ends_at)
+                        – {{ $event->ends_at->format('g:i A') }}
+                    @endif
+                </time>
+                <x-event-when-chip :at="$event->starts_at" />
+                <x-share-chip
+                    variant="hero"
+                    :url="url()->current()"
+                    :title="$event->title"
+                />
+            </div>
         </x-hero>
 
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
