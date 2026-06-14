@@ -540,12 +540,26 @@ const initHapticFeedback = () => {
     });
 };
 
-const initViewTransitions = () => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+const suppressSkippedViewTransitionErrors = () => {
+    if (window.__viewTransitionErrorBound) {
         return;
     }
 
-    document.documentElement.classList.add('view-transitions-enabled');
+    window.__viewTransitionErrorBound = true;
+
+    window.addEventListener('unhandledrejection', (event) => {
+        const reason = event.reason;
+
+        if (reason?.name !== 'AbortError') {
+            return;
+        }
+
+        const message = String(reason?.message ?? '');
+
+        if (message.includes('Transition') || message.includes('transition')) {
+            event.preventDefault();
+        }
+    });
 };
 
 const showShareToast = (message) => {
@@ -967,6 +981,22 @@ const initPWA = () => {
     const installBtn = document.getElementById('pwa-install-btn');
     const dismissBtn = document.getElementById('pwa-dismiss-btn');
 
+    const canShowCustomInstallBanner = () => {
+        if (! banner || ! installBtn) {
+            return false;
+        }
+
+        if (localStorage.getItem('pwa-dismissed')) {
+            return false;
+        }
+
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            return false;
+        }
+
+        return true;
+    };
+
     const showBanner = () => {
         if (!banner) return;
         banner.hidden = false;
@@ -982,12 +1012,13 @@ const initPWA = () => {
     };
 
     window.addEventListener('beforeinstallprompt', (e) => {
+        if (! canShowCustomInstallBanner()) {
+            return;
+        }
+
         e.preventDefault();
         deferredPrompt = e;
-
-        if (!localStorage.getItem('pwa-dismissed')) {
-            showBanner();
-        }
+        showBanner();
     });
 
     installBtn?.addEventListener('click', async () => {
@@ -1005,6 +1036,7 @@ const initPWA = () => {
 };
 
 const initPublicSiteUi = () => {
+    suppressSkippedViewTransitionErrors();
     initHeaderScroll();
     initDesktopNav();
     initLocationTabs();
@@ -1013,7 +1045,6 @@ const initPublicSiteUi = () => {
     initMemberChip();
     initLinkPrefetch();
     initHapticFeedback();
-    initViewTransitions();
     initShareButtons();
     initCardMediaSkeletons();
     initDivineWhisperBar();
