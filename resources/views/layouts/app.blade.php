@@ -81,7 +81,6 @@
     </script>
 
     @stack('head')
-    <x-speculation-rules />
 </head>
 <body @class([
     'site-body site-mesh has-mobile-dock min-h-screen flex flex-col min-[1300px]:pb-0',

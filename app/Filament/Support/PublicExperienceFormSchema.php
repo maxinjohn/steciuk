@@ -98,7 +98,9 @@ final class PublicExperienceFormSchema
                                     ->default(true),
                                 Toggle::make('public_ui_experience.speculation_rules')
                                     ->label('Smart link prefetch (Speculation Rules)')
-                                    ->default(true),
+                                    ->helperText('Disabled site-wide. Same-origin warm-up uses hover prefetch in the main menu instead.')
+                                    ->disabled()
+                                    ->dehydrated(false),
                                 Toggle::make('public_ui_experience.reading_progress')
                                     ->label('Reading progress bar on articles')
                                     ->default(true),

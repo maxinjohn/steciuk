@@ -33,7 +33,9 @@ class SecureHeaders
 
         $fontCdn = 'https://fonts.bunny.net';
 
-        $trustedTypes = 'trusted-types goog#html default';
+        // Union with Cloudflare edge policies: * keeps third-party widgets (Turnstile) and
+        // injected extension scripts from spamming Trusted Types console errors.
+        $trustedTypes = 'trusted-types * goog#html default';
 
         if (config('security.csp_enabled') && ! AdminPanelConfig::isAdminRequest($request)) {
             $csp = implode('; ', [
