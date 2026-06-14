@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-color-light="{{ $themeColor ?? '#d4cabb' }}" data-theme-color-dark="#131316"
     @if (\App\Support\FutureSiteConfig::enabled())
-        data-speculation-prefetch="{{ implode('|', \App\Support\FutureSiteConfig::speculationPrefetchPathsForRequest()) }}"
         data-reading-progress="{{ \App\Support\FutureSiteConfig::readingProgressForRequest() ? '1' : '0' }}"
     @endif
 >

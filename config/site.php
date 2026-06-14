@@ -93,9 +93,7 @@ return [
             '/sermons',
             '/contact',
         ],
-        'speculation_prerender_paths' => [
-            '/service-times',
-        ],
+        'speculation_prerender_paths' => [],
     ],
 
 ];

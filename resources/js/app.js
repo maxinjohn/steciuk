@@ -456,8 +456,22 @@ const initScrollReveal = () => {
 
 const prefetchedUrls = new Set();
 
+const canPrefetchLinks = () => {
+    const root = document.documentElement;
+
+    if (root.classList.contains('save-data-mode') || root.classList.contains('connection-slow')) {
+        return false;
+    }
+
+    if (navigator.connection?.saveData) {
+        return false;
+    }
+
+    return true;
+};
+
 const prefetchUrl = (href) => {
-    if (! href || prefetchedUrls.has(href)) {
+    if (! canPrefetchLinks() || ! href || prefetchedUrls.has(href)) {
         return;
     }
 

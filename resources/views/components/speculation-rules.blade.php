@@ -1,18 +1,6 @@
 @if (\App\Support\FutureSiteConfig::speculationEnabled())
     @php
-        $prefetch = \App\Support\FutureSiteConfig::speculationPrefetchPathsForRequest();
-        $prerender = \App\Support\FutureSiteConfig::speculationPrerenderPathsForRequest();
-        $rules = array_filter([
-            'prefetch' => $prefetch !== [] ? [[
-                'source' => 'list',
-                'urls' => array_map(fn (string $path) => url($path), $prefetch),
-            ]] : null,
-            'prerender' => $prerender !== [] ? [[
-                'source' => 'list',
-                'urls' => array_map(fn (string $path) => url($path), $prerender),
-                'eagerness' => 'moderate',
-            ]] : null,
-        ]);
+        $rules = \App\Support\FutureSiteConfig::speculationRulesPayload();
     @endphp
     @if ($rules !== [])
         <script type="speculationrules">

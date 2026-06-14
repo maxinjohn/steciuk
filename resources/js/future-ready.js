@@ -1,5 +1,5 @@
 /**
- * Forward-ready client layer: network adaptation, speculation fallback, reading progress, theme hints.
+ * Forward-ready client layer: network adaptation, reading progress, theme hints.
  * Designed to degrade gracefully on older browsers while using modern APIs when available.
  */
 (() => {
@@ -28,32 +28,6 @@
         connection?.addEventListener?.('change', () => {
             root.classList.toggle('save-data-mode', Boolean(connection.saveData));
             root.classList.toggle('connection-slow', connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
-        });
-    };
-
-    const initSpeculationFallback = () => {
-        if (root.classList.contains('save-data-mode') || !('HTMLScriptElement' in window)) {
-            return;
-        }
-
-        if (document.querySelector('script[type="speculationrules"]')) {
-            return;
-        }
-
-        const paths = (root.dataset.speculationPrefetch || '')
-            .split('|')
-            .map((item) => item.trim())
-            .filter(Boolean);
-
-        paths.forEach((path) => {
-            try {
-                const link = document.createElement('link');
-                link.rel = 'prefetch';
-                link.href = path;
-                document.head.appendChild(link);
-            } catch {
-                // Ignore malformed paths.
-            }
         });
     };
 
@@ -119,7 +93,6 @@
 
     const boot = () => {
         initNetworkAdaptation();
-        initSpeculationFallback();
         initReadingProgress();
         initSystemThemeHint();
         initHighContrastHint();

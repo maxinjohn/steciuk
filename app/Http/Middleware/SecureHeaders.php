@@ -33,6 +33,8 @@ class SecureHeaders
 
         $fontCdn = 'https://fonts.bunny.net';
 
+        $trustedTypes = 'trusted-types goog#html default';
+
         if (config('security.csp_enabled') && ! AdminPanelConfig::isAdminRequest($request)) {
             $csp = implode('; ', [
                 "default-src 'self'",
@@ -47,6 +49,7 @@ class SecureHeaders
                 "base-uri 'self'",
                 "form-action 'self'",
                 "frame-ancestors 'self'",
+                $trustedTypes,
                 'upgrade-insecure-requests',
             ]);
             $response->headers->set('Content-Security-Policy', $csp);
@@ -65,6 +68,7 @@ class SecureHeaders
                 "base-uri 'self'",
                 "form-action 'self'",
                 "frame-ancestors 'none'",
+                $trustedTypes,
             ]));
         }
 

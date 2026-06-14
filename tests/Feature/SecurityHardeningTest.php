@@ -70,6 +70,7 @@ class SecurityHardeningTest extends TestCase
         $this->assertStringContainsString('https://static.cloudflareinsights.com', $csp);
         $this->assertStringContainsString('https://fonts.bunny.net', $csp);
         $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
+        $this->assertStringContainsString('trusted-types goog#html', $csp);
     }
 
     public function test_admin_pages_allow_bunny_fonts_in_csp(): void
@@ -98,6 +99,7 @@ class SecurityHardeningTest extends TestCase
         $response->assertOk();
         $csp = (string) $response->headers->get('Content-Security-Policy');
         $this->assertStringContainsString('https://challenges.cloudflare.com', $csp);
+        $this->assertStringContainsString('trusted-types goog#html', $csp);
     }
 
     public function test_honeypot_submission_is_logged(): void
