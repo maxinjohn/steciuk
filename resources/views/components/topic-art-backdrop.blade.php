@@ -12,12 +12,6 @@
     $url = pageTopicArtUrl($slug, $title, $context, $content, $category);
 @endphp
 
-@if (in_array($variant, ['hero', 'band'], true))
-    @push('head')
-        <link rel="preload" as="image" href="{{ $url }}">
-    @endpush
-@endif
-
 <div
     {{ $attributes->class([
         'topic-art-backdrop',

@@ -76,6 +76,62 @@ class FutureSiteConfig
         }, $paths)));
     }
 
+    /**
+     * Prefetch targets for the active request (never includes the current URL).
+     *
+     * @return list<string>
+     */
+    public static function speculationPrefetchPathsForRequest(?\Illuminate\Http\Request $request = null): array
+    {
+        return self::excludeCurrentPath(self::speculationPrefetchPaths(), $request);
+    }
+
+    /**
+     * Prerender targets for the active request (never includes the current URL).
+     *
+     * @return list<string>
+     */
+    public static function speculationPrerenderPathsForRequest(?\Illuminate\Http\Request $request = null): array
+    {
+        return self::excludeCurrentPath(self::speculationPrerenderPaths(), $request);
+    }
+
+    /**
+     * @param  list<string>  $paths
+     * @return list<string>
+     */
+    private static function excludeCurrentPath(array $paths, ?\Illuminate\Http\Request $request = null): array
+    {
+        $current = self::normalizeRequestPath($request);
+
+        if ($current === null) {
+            return $paths;
+        }
+
+        return array_values(array_filter(
+            $paths,
+            static fn (string $path): bool => self::normalizePath($path) !== $current,
+        ));
+    }
+
+    private static function normalizeRequestPath(?\Illuminate\Http\Request $request = null): ?string
+    {
+        $request ??= request();
+
+        if ($request === null) {
+            return null;
+        }
+
+        return self::normalizePath('/'.trim($request->path(), '/'));
+    }
+
+    private static function normalizePath(string $path): string
+    {
+        $path = '/'.trim($path, '/');
+
+        return $path === '/' ? '/' : rtrim($path, '/');
+    }
+
     public static function readingProgressForRequest(?\Illuminate\Http\Request $request = null): bool
     {
         if (! self::readingProgressEnabled()) {

@@ -43,6 +43,28 @@ class FutureSiteConfigTest extends TestCase
         $this->assertFalse(FutureSiteConfig::readingProgressForRequest($home));
     }
 
+    public function test_speculation_paths_exclude_current_request(): void
+    {
+        Config::set('site.future.speculation_paths', [
+            '/service-times',
+            '/events',
+        ]);
+        Config::set('site.future.speculation_prerender_paths', [
+            '/service-times',
+        ]);
+
+        $request = Request::create('/service-times', 'GET');
+
+        $this->assertSame(
+            ['/events'],
+            FutureSiteConfig::speculationPrefetchPathsForRequest($request),
+        );
+        $this->assertSame(
+            [],
+            FutureSiteConfig::speculationPrerenderPathsForRequest($request),
+        );
+    }
+
     public function test_future_features_can_be_disabled(): void
     {
         Setting::set('public_ui_experience', json_encode([

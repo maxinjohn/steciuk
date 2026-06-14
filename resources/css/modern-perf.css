@@ -1,12 +1,7 @@
 /* Speed + modern UI enhancements (keeps header/logo untouched) */
 
-@view-transition {
-    navigation: auto;
-}
-
-.view-transitions-enabled #main-content {
-    view-transition-name: main-content;
-}
+/* Cross-document view transitions (navigation: auto) are disabled on this MPA —
+   they throw uncaught AbortError ("Transition was skipped") in Chromium. */
 
 .hero-actions .btn-primary,
 .hero-actions .btn[class*='primary'],

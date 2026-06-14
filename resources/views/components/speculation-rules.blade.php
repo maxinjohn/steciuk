@@ -1,7 +1,7 @@
 @if (\App\Support\FutureSiteConfig::speculationEnabled())
     @php
-        $prefetch = \App\Support\FutureSiteConfig::speculationPrefetchPaths();
-        $prerender = \App\Support\FutureSiteConfig::speculationPrerenderPaths();
+        $prefetch = \App\Support\FutureSiteConfig::speculationPrefetchPathsForRequest();
+        $prerender = \App\Support\FutureSiteConfig::speculationPrerenderPathsForRequest();
         $rules = array_filter([
             'prefetch' => $prefetch !== [] ? [[
                 'source' => 'list',
