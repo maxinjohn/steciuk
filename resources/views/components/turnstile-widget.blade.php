@@ -31,6 +31,8 @@
 
                     const script = document.createElement('script');
                     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__steciTurnstileApiReady';
+                    script.async = true;
+                    script.defer = true;
                     script.onerror = () => {
                         delete window.__steciTurnstileApiReady;
                         window.__steciTurnstile.loadPromise = null;
@@ -136,9 +138,36 @@
             }
 
             function bootTurnstile() {
-                if (typeof window.__steciTurnstileRegister === 'function') {
-                    window.__steciTurnstileRegister(elementId, siteKey, setToken);
+                const mount = document.getElementById(elementId);
+
+                if (! mount) {
+                    return;
                 }
+
+                const load = () => {
+                    if (typeof window.__steciTurnstileRegister === 'function') {
+                        window.__steciTurnstileRegister(elementId, siteKey, setToken);
+                    }
+                };
+
+                const wrap = mount.closest('.turnstile-wrap') || mount;
+
+                if (! ('IntersectionObserver' in window)) {
+                    load();
+
+                    return;
+                }
+
+                const observer = new IntersectionObserver((entries) => {
+                    if (! entries.some((entry) => entry.isIntersecting)) {
+                        return;
+                    }
+
+                    observer.disconnect();
+                    load();
+                }, { rootMargin: '160px 0px' });
+
+                observer.observe(wrap);
             }
 
             if (document.readyState === 'loading') {

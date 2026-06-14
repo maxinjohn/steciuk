@@ -65,6 +65,25 @@ class FutureSiteConfigTest extends TestCase
         );
     }
 
+    public function test_speculation_rules_use_document_prefetch_only(): void
+    {
+        Config::set('site.future.enabled', true);
+        Config::set('site.future.speculation_rules', true);
+        Config::set('site.future.speculation_paths', [
+            '/service-times',
+            '/events',
+        ]);
+
+        $request = Request::create('/prayer-request', 'GET');
+        $rules = FutureSiteConfig::speculationRulesPayload($request);
+
+        $this->assertArrayHasKey('prefetch', $rules);
+        $this->assertCount(2, $rules['prefetch']);
+        $this->assertSame('document', $rules['prefetch'][0]['source']);
+        $this->assertSame('conservative', $rules['prefetch'][0]['eagerness']);
+        $this->assertArrayNotHasKey('prerender', $rules);
+    }
+
     public function test_future_features_can_be_disabled(): void
     {
         Setting::set('public_ui_experience', json_encode([

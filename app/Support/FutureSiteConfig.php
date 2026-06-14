@@ -97,6 +97,43 @@ class FutureSiteConfig
     }
 
     /**
+     * Interaction-gated Speculation Rules (no list prefetch on load).
+     *
+     * @return array<string, mixed>
+     */
+    public static function speculationRulesPayload(?\Illuminate\Http\Request $request = null): array
+    {
+        if (! self::speculationEnabled()) {
+            return [];
+        }
+
+        $paths = self::speculationPrefetchPathsForRequest($request);
+
+        if ($paths === []) {
+            return [];
+        }
+
+        $prefetch = [];
+
+        foreach ($paths as $path) {
+            $prefetch[] = [
+                'source' => 'document',
+                'where' => [
+                    'href_matches' => self::hrefMatchPattern($path),
+                ],
+                'eagerness' => 'conservative',
+            ];
+        }
+
+        return ['prefetch' => $prefetch];
+    }
+
+    private static function hrefMatchPattern(string $path): string
+    {
+        return url(self::normalizePath($path));
+    }
+
+    /**
      * @param  list<string>  $paths
      * @return list<string>
      */

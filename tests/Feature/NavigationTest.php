@@ -326,8 +326,9 @@ class NavigationTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertOk();
-        $response->assertSee('data-speculation-prefetch=', false);
         $response->assertSee('type="speculationrules"', false);
+        $response->assertSee('"source":"document"', false);
+        $response->assertDontSee('"source":"list"', false);
         $response->assertDontSee('parish-pulse-bar', false);
     }
 
