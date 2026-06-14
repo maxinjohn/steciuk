@@ -19,11 +19,14 @@
 
         <section class="page-section page-section--compact">
             <div class="page-section-inner mx-auto max-w-7xl">
-                <div class="gallery-mosaic">
+                <div class="gallery-mosaic feed-rail">
                     @forelse ($albums as $album)
                         <x-gallery-tile-card :album="$album" />
                     @empty
-                        <p class="feed-empty">Gallery albums coming soon.</p>
+                        <div class="feed-empty feed-empty--rich col-span-full">
+                            <p class="feed-empty__title">Gallery albums coming soon</p>
+                            <p class="feed-empty__text">Photos from worship and fellowship will appear here.</p>
+                        </div>
                     @endforelse
                 </div>
 

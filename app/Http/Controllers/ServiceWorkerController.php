@@ -28,6 +28,36 @@ const shouldBypassServiceWorker = (pathname) => {
     return MEMBER_BYPASS_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + '/'));
 };
 
+const cacheFirst = (request) =>
+    caches.open(CACHE).then((cache) =>
+        cache.match(request).then((cached) =>
+            cached || fetch(request).then((response) => {
+                if (response.ok) {
+                    cache.put(request, response.clone());
+                }
+
+                return response;
+            })
+        )
+    );
+
+const staleWhileRevalidate = (request) =>
+    caches.open(CACHE).then((cache) =>
+        cache.match(request).then((cached) => {
+            const networkFetch = fetch(request)
+                .then((response) => {
+                    if (response.ok) {
+                        cache.put(request, response.clone());
+                    }
+
+                    return response;
+                })
+                .catch(() => cached);
+
+            return cached || networkFetch;
+        })
+    );
+
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE).then((cache) => cache.add(OFFLINE_URL)).then(() => self.skipWaiting())
@@ -53,25 +83,36 @@ self.addEventListener('fetch', (event) => {
 
     const isStaticAsset =
         url.pathname.startsWith('/build/') ||
+        url.pathname.startsWith('/topic-art/') ||
         url.pathname.match(/\\.(css|js|woff2?|png|jpg|jpeg|webp|svg|ico|webmanifest)\$/);
 
     if (isStaticAsset) {
-        event.respondWith(
-            caches.open(CACHE).then((cache) =>
-                cache.match(event.request).then((cached) =>
-                    cached || fetch(event.request).then((response) => {
-                        if (response.ok) cache.put(event.request, response.clone());
-                        return response;
-                    })
-                )
-            )
-        );
+        event.respondWith(cacheFirst(event.request));
         return;
     }
 
-    event.respondWith(
-        fetch(event.request).catch(() => caches.match(OFFLINE_URL))
-    );
+    const acceptsHtml = (event.request.headers.get('accept') || '').includes('text/html');
+    const isNavigation = event.request.mode === 'navigate' || acceptsHtml;
+
+    if (isNavigation) {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    if (response.ok) {
+                        caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+                    }
+
+                    return response;
+                })
+                .catch(() =>
+                    caches.match(event.request).then((cached) => cached || caches.match(OFFLINE_URL))
+                )
+        );
+
+        return;
+    }
+
+    event.respondWith(staleWhileRevalidate(event.request));
 });
 JS;
 

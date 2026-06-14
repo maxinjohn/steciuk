@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './ui-polish.css';
+@import './modern-perf.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -6881,6 +6882,23 @@ html.dark {
     .glass-card {
         content-visibility: auto;
         contain-intrinsic-size: auto 320px;
+    }
+
+    .page-band,
+    .gallery-mosaic,
+    .past-events-grid,
+    .bento-grid,
+    .resource-list {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 280px;
+    }
+
+    .feed-card,
+    .gallery-tile,
+    .sermon-card,
+    .past-event-chip,
+    .resource-row {
+        transition-delay: var(--reveal-delay, 0ms);
     }
 
     .feed-card-cta {

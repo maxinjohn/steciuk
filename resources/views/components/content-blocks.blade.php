@@ -165,7 +165,11 @@
                         @forelse ($items as $ministry)
                             <x-ministry-card :ministry="$ministry" heading-tag="h3" />
                         @empty
-                            <p class="feed-empty col-span-full">Ministries will appear here soon.</p>
+                            <div class="feed-empty feed-empty--rich col-span-full">
+                                <p class="feed-empty__title">Ministries coming soon</p>
+                                <p class="feed-empty__text">Explore how you can serve, connect, and grow in parish life.</p>
+                                <x-button href="{{ route('ministries.index') }}" variant="outline" class="feed-empty__action">View ministries</x-button>
+                            </div>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -205,9 +209,15 @@
                                     :content="\App\Support\PageTopicArt::contentHintForRecord($event->description, null, null, $event->location, $event->category)"
                                 />
                                 <div class="feed-card-body">
-                                    <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
-                                        {{ $event->starts_at->format('l, j F') }}
-                                    </time>
+                                    <div class="feed-card-head">
+                                        <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
+                                            {{ $event->starts_at->format('l, j F') }}
+                                        </time>
+                                        <x-share-chip
+                                            :url="route('events.show', $event->slug)"
+                                            :title="$event->title"
+                                        />
+                                    </div>
                                     <h3 class="feed-card-title">{{ $event->title }}</h3>
                                     @if ($event->location)
                                         <p class="feed-card-desc">{{ $event->location }}</p>
@@ -216,7 +226,11 @@
                                 </div>
                             </x-card>
                         @empty
-                            <p class="feed-empty">No upcoming events at this time.</p>
+                            <div class="feed-empty feed-empty--rich col-span-full">
+                                <p class="feed-empty__title">No upcoming events right now</p>
+                                <p class="feed-empty__text">Join us for worship across our UK locations — times are updated regularly.</p>
+                                <x-button href="{{ url('/service-times') }}" variant="outline" class="feed-empty__action">View worship times</x-button>
+                            </div>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -263,9 +277,15 @@
                                     :content="\App\Support\PageTopicArt::contentHintForRecord($article->body ?? null, $article->excerpt, null, null, $article->category)"
                                 />
                                 <div class="feed-card-body">
-                                    <time datetime="{{ $article->published_at?->toIso8601String() }}" class="feed-meta">
-                                        {{ $article->published_at?->format('j F Y') }}
-                                    </time>
+                                    <div class="feed-card-head">
+                                        <time datetime="{{ $article->published_at?->toIso8601String() }}" class="feed-meta">
+                                            {{ $article->published_at?->format('j F Y') }}
+                                        </time>
+                                        <x-share-chip
+                                            :url="route('news.show', $article->slug)"
+                                            :title="$article->title"
+                                        />
+                                    </div>
                                     <h3 class="feed-card-title">{{ $article->title }}</h3>
                                     @if ($article->excerpt)
                                         <p class="feed-card-desc line-clamp-3">{{ $article->excerpt }}</p>
@@ -274,7 +294,10 @@
                                 </div>
                             </x-card>
                         @empty
-                            <p class="feed-empty">News articles will appear here soon.</p>
+                            <div class="feed-empty feed-empty--rich col-span-full">
+                                <p class="feed-empty__title">News coming soon</p>
+                                <p class="feed-empty__text">Parish updates and stories will appear here as they are published.</p>
+                            </div>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -323,6 +346,10 @@
                                             </div>
                                         </div>
                                         <div class="sermon-card-actions">
+                                            <x-share-chip
+                                                :url="route('sermons.index').'#sermon-'.$sermon->id"
+                                                :title="$sermon->title"
+                                            />
                                             @if ($sermon->youtube_url)
                                                 <x-button href="{{ $sermon->youtube_url }}" variant="primary" class="!min-h-11 !text-sm" target="_blank" rel="noopener noreferrer">Watch</x-button>
                                             @endif
@@ -331,7 +358,11 @@
                                 </div>
                             </x-card>
                         @empty
-                            <p class="feed-empty">Sermons will appear here soon.</p>
+                            <div class="feed-empty feed-empty--rich">
+                                <p class="feed-empty__title">Sermons coming soon</p>
+                                <p class="feed-empty__text">Recent messages will be listed here once published.</p>
+                                <x-button href="{{ url('/sermons') }}" variant="outline" class="feed-empty__action">Browse sermons</x-button>
+                            </div>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))

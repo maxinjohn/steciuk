@@ -9,7 +9,7 @@
 @endphp
 
 @if ($href)
-    <a href="{{ $href }}" {{ $attributes->merge(['class' => $baseClasses . ' ' . $paddingClass]) }}>
+    <a href="{{ $href }}" data-prefetch-link {{ $attributes->merge(['class' => $baseClasses . ' ' . $paddingClass]) }}>
         {{ $slot }}
     </a>
 @else

@@ -19,7 +19,7 @@
 
         <section class="page-section page-section--compact">
             <div class="page-section-inner mx-auto max-w-7xl">
-                <div class="sermon-stack">
+                <div class="sermon-stack feed-rail">
                     @forelse ($sermons as $sermon)
                         <x-card class="sermon-card topic-card wow-card overflow-hidden">
                             <div class="sermon-card-layout">
@@ -36,6 +36,7 @@
                                         :weekday="$sermon->preached_at?->format('D')"
                                         :category="$sermon->category"
                                         :content="\App\Support\PageTopicArt::contentHintForRecord($sermon->description ?? null, $sermon->summary ?? null, null, null, $sermon->bible_passage)"
+                                        :priority="$loop->first ? 'high' : 'lazy'"
                                     />
                                 </div>
                                 <div class="sermon-card-content">
@@ -47,6 +48,12 @@
                                             <h2 class="sermon-card-title">{{ $sermon->title }}</h2>
                                             <p class="sermon-card-meta">{{ $sermon->speaker }} · {{ $sermon->preached_at?->format('j F Y') }}</p>
                                         </div>
+                                        @if ($sermon->youtube_url)
+                                            <x-share-chip
+                                                :url="$sermon->youtube_url"
+                                                :title="$sermon->title"
+                                            />
+                                        @endif
                                     </div>
 
                                     @if ($sermon->description)
@@ -68,7 +75,11 @@
                             </div>
                         </x-card>
                     @empty
-                        <p class="feed-empty">Sermons will appear here soon.</p>
+                        <div class="feed-empty feed-empty--rich">
+                            <p class="feed-empty__title">Sermons coming soon</p>
+                            <p class="feed-empty__text">Recent messages will be listed here once published.</p>
+                            <x-button href="{{ url('/sermons') }}" variant="outline" class="feed-empty__action">Browse sermons</x-button>
+                        </div>
                     @endforelse
                 </div>
 

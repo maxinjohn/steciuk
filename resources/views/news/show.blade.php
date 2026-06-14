@@ -51,6 +51,11 @@
                     {{ $article->published_at->format('j F Y') }}
                 </time>
             @endif
+            <x-share-chip
+                :url="url()->current()"
+                :title="$article->title"
+                class="mt-3"
+            />
         </x-hero>
 
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">

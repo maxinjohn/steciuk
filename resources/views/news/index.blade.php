@@ -19,7 +19,7 @@
 
         <section class="page-section page-section--compact">
             <div class="page-section-inner mx-auto max-w-7xl">
-                <div class="feed-grid feed-grid--news">
+                <div class="feed-grid feed-grid--news feed-rail">
                     @forelse ($articles as $article)
                         <x-card
                             :href="route('news.show', $article->slug)"
@@ -42,11 +42,18 @@
                                 :weekday="$article->published_at?->format('D')"
                                 :category="$article->category"
                                 :content="\App\Support\PageTopicArt::contentHintForRecord($article->body ?? null, $article->excerpt, null, null, $article->category)"
+                                :priority="$loop->first ? 'high' : 'lazy'"
                             />
                             <div class="feed-card-body">
-                                <time datetime="{{ $article->published_at?->toIso8601String() }}" class="feed-meta">
-                                    {{ $article->published_at?->format('j F Y') }}
-                                </time>
+                                <div class="feed-card-head">
+                                    <time datetime="{{ $article->published_at?->toIso8601String() }}" class="feed-meta">
+                                        {{ $article->published_at?->format('j F Y') }}
+                                    </time>
+                                    <x-share-chip
+                                        :url="route('news.show', $article->slug)"
+                                        :title="$article->title"
+                                    />
+                                </div>
                                 <h2 class="feed-card-title">{{ $article->title }}</h2>
                                 @if ($article->excerpt)
                                     <p class="feed-card-desc line-clamp-3">{{ $article->excerpt }}</p>
@@ -55,7 +62,10 @@
                             </div>
                         </x-card>
                     @empty
-                        <p class="feed-empty">No news articles yet.</p>
+                        <div class="feed-empty feed-empty--rich col-span-full">
+                            <p class="feed-empty__title">News coming soon</p>
+                            <p class="feed-empty__text">Parish updates and stories will appear here as they are published.</p>
+                        </div>
                     @endforelse
                 </div>
 

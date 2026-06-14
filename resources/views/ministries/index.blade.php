@@ -23,7 +23,11 @@
                     @forelse ($ministries as $ministry)
                         <x-ministry-card :ministry="$ministry" heading-tag="h2" />
                     @empty
-                        <p class="feed-empty">Ministries coming soon.</p>
+                        <div class="feed-empty feed-empty--rich col-span-full">
+                            <p class="feed-empty__title">Ministries coming soon</p>
+                            <p class="feed-empty__text">Explore how you can serve, connect, and grow in parish life.</p>
+                            <x-button href="{{ route('ministries.index') }}" variant="outline" class="feed-empty__action">View ministries</x-button>
+                        </div>
                     @endforelse
                 </div>
             </div>

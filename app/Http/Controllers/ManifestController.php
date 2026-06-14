@@ -14,24 +14,44 @@ class ManifestController extends Controller
         $description = Setting::get('motto', 'For the Word of God and for the testimony of Jesus Christ');
         $themeColor = Setting::get('theme_color', '#d4cabb');
         $logo = Setting::get('logo');
-        $iconSrc = Setting::assetUrl($logo) ?? asset('images/steci-mark.svg');
+        $customIcon = Setting::assetUrl($logo);
+        $icon192 = $customIcon && ! str_ends_with($customIcon, '.svg')
+            ? $customIcon
+            : asset('icons/icon-192.png');
+        $icon512 = $customIcon && ! str_ends_with($customIcon, '.svg')
+            ? $customIcon
+            : asset('icons/icon-512.png');
+        $svgMark = asset('icons/favicon.svg');
 
         $icons = [
             [
-                'src' => $iconSrc,
+                'src' => $icon192,
                 'sizes' => '192x192',
-                'type' => str_ends_with($iconSrc, '.svg') ? 'image/svg+xml' : 'image/png',
+                'type' => 'image/png',
                 'purpose' => 'any',
             ],
             [
-                'src' => $iconSrc,
+                'src' => $icon512,
                 'sizes' => '512x512',
-                'type' => str_ends_with($iconSrc, '.svg') ? 'image/svg+xml' : 'image/png',
-                'purpose' => 'any maskable',
+                'type' => 'image/png',
+                'purpose' => 'any',
+            ],
+            [
+                'src' => $icon512,
+                'sizes' => '512x512',
+                'type' => 'image/png',
+                'purpose' => 'maskable',
+            ],
+            [
+                'src' => $svgMark,
+                'sizes' => 'any',
+                'type' => 'image/svg+xml',
+                'purpose' => 'any',
             ],
         ];
 
         $manifest = [
+            'id' => '/',
             'name' => $name,
             'short_name' => $shortName,
             'description' => $description,
@@ -48,18 +68,38 @@ class ManifestController extends Controller
             'shortcuts' => [
                 [
                     'name' => 'Service Times',
+                    'short_name' => 'Worship',
                     'url' => '/service-times',
                     'description' => 'Find worship locations across the UK',
+                    'icons' => [['src' => $icon192, 'sizes' => '192x192', 'type' => 'image/png']],
                 ],
                 [
                     'name' => 'Events',
+                    'short_name' => 'Events',
                     'url' => '/events',
                     'description' => 'Upcoming parish events',
+                    'icons' => [['src' => $icon192, 'sizes' => '192x192', 'type' => 'image/png']],
+                ],
+                [
+                    'name' => 'News',
+                    'short_name' => 'News',
+                    'url' => '/news',
+                    'description' => 'Latest parish news',
+                    'icons' => [['src' => $icon192, 'sizes' => '192x192', 'type' => 'image/png']],
+                ],
+                [
+                    'name' => 'Give',
+                    'short_name' => 'Give',
+                    'url' => '/give',
+                    'description' => 'Support parish ministry',
+                    'icons' => [['src' => $icon192, 'sizes' => '192x192', 'type' => 'image/png']],
                 ],
                 [
                     'name' => 'Prayer Request',
+                    'short_name' => 'Prayer',
                     'url' => '/prayer-request',
                     'description' => 'Submit a confidential prayer request',
+                    'icons' => [['src' => $icon192, 'sizes' => '192x192', 'type' => 'image/png']],
                 ],
             ],
         ];

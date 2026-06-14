@@ -115,7 +115,7 @@
                                     @php $childIcon = $iconFor($child->label); @endphp
                                     <a
                                         href="{{ $resolveUrl($child) }}"
-                                        @if ($resolveTarget($child)) target="{{ $resolveTarget($child) }}" @if ($resolveTarget($child) === '_blank') rel="noopener noreferrer" @endif @endif
+                                        @if ($resolveTarget($child)) target="{{ $resolveTarget($child) }}" @if ($resolveTarget($child) === '_blank') rel="noopener noreferrer" @endif @else data-prefetch-link @endif
                                         @class(['desktop-nav-flyout-link', 'menu-mega-link' => $useGrid])
                                         role="menuitem"
                                     >
@@ -137,7 +137,7 @@
                     @else
                         <a
                             href="{{ $url }}"
-                            @if ($target) target="{{ $target }}" @if ($target === '_blank') rel="noopener noreferrer" @endif @endif
+                            @if ($target) target="{{ $target }}" @if ($target === '_blank') rel="noopener noreferrer" @endif @else data-prefetch-link @endif
                             class="desktop-nav-link menu-link-desktop {{ $isActive ? 'is-active' : '' }}"
                             role="menuitem"
                         >
@@ -180,7 +180,7 @@
                         @foreach ($item->children as $child)
                             <a
                                 href="{{ $resolveUrl($child) }}"
-                                @if ($resolveTarget($child)) target="{{ $resolveTarget($child) }}" @if ($resolveTarget($child) === '_blank') rel="noopener noreferrer" @endif @endif
+                                @if ($resolveTarget($child)) target="{{ $resolveTarget($child) }}" @if ($resolveTarget($child) === '_blank') rel="noopener noreferrer" @endif @else data-prefetch-link @endif
                                 data-close-mobile-menu
                                 class="menu-link-mobile-sub"
                                 role="menuitem"
@@ -192,7 +192,7 @@
                 @else
                     <a
                         href="{{ $url }}"
-                        @if ($target) target="{{ $target }}" @if ($target === '_blank') rel="noopener noreferrer" @endif @endif
+                        @if ($target) target="{{ $target }}" @if ($target === '_blank') rel="noopener noreferrer" @endif @else data-prefetch-link @endif
                         data-close-mobile-menu
                         class="menu-link-mobile w-full"
                         role="menuitem"

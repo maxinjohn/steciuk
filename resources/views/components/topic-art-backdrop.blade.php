@@ -23,7 +23,8 @@
     <img
         src="{{ $url }}"
         alt=""
-        loading="{{ $variant === 'hero' ? 'eager' : 'lazy' }}"
+        loading="{{ in_array($variant, ['hero', 'band'], true) ? 'eager' : 'lazy' }}"
+        @if (in_array($variant, ['hero', 'band'], true)) fetchpriority="high" @endif
         decoding="async"
         @class([
             'topic-art-backdrop__image card-media-image card-media-image--topic card-media-image--dynamic',

@@ -60,6 +60,11 @@
                     – {{ $event->ends_at->format('g:i A') }}
                 @endif
             </time>
+            <x-share-chip
+                :url="url()->current()"
+                :title="$event->title"
+                class="mt-3"
+            />
         </x-hero>
 
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">

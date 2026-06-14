@@ -19,7 +19,7 @@
 
         <section class="page-section page-section--compact">
             <div class="page-section-inner mx-auto max-w-7xl">
-                <div class="feed-grid">
+                <div class="feed-grid feed-rail">
                     @forelse ($upcoming as $event)
                         <x-card
                             href="{{ route('events.show', $event->slug) }}"
@@ -41,11 +41,18 @@
                                 :weekday="$event->starts_at->format('D')"
                                 :category="$event->category"
                                 :content="\App\Support\PageTopicArt::contentHintForRecord($event->description, null, null, $event->location, $event->category)"
+                                :priority="$loop->first ? 'high' : 'lazy'"
                             />
                             <div class="feed-card-body">
-                                <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
-                                    {{ $event->starts_at->format('l, j F · g:i A') }}
-                                </time>
+                                <div class="feed-card-head">
+                                    <time datetime="{{ $event->starts_at->toIso8601String() }}" class="feed-meta">
+                                        {{ $event->starts_at->format('l, j F · g:i A') }}
+                                    </time>
+                                    <x-share-chip
+                                        :url="route('events.show', $event->slug)"
+                                        :title="$event->title"
+                                    />
+                                </div>
                                 <h3 class="feed-card-title">{{ $event->title }}</h3>
                                 @if ($event->location)
                                     <p class="feed-card-desc">{{ $event->location }}</p>
@@ -54,7 +61,11 @@
                             </div>
                         </x-card>
                     @empty
-                        <p class="feed-empty">No upcoming events. Check back soon.</p>
+                        <div class="feed-empty feed-empty--rich col-span-full">
+                            <p class="feed-empty__title">No upcoming events right now</p>
+                            <p class="feed-empty__text">Join us for worship across our UK locations — times are updated regularly.</p>
+                            <x-button href="{{ url('/service-times') }}" variant="outline" class="feed-empty__action">View worship times</x-button>
+                        </div>
                     @endforelse
                 </div>
 

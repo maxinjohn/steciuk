@@ -386,14 +386,38 @@ const initMobileNav = () => {
 
 const initScrollReveal = () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const selector = '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .faith-whisper-card, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip, .heavenly-comfort-card, .hero-gen-z';
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    const selector = isMobile
+        ? '.hero-gen-z, .hero-modern .hero-badge, .hero-modern .hero-title, .hero-modern .hero-actions, .page-section--compact:first-of-type .section-head, .page-section--compact:first-of-type .feed-card:first-child, .page-section--compact:first-of-type .bento-grid > *:first-child'
+        : '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .faith-whisper-card, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip, .heavenly-comfort-card, .hero-gen-z';
+
+    const staggerParents = '.feed-grid, .feed-grid--news, .sermon-stack, .gallery-mosaic, .bento-grid, .past-events-grid';
+
+    const applyStagger = (element) => {
+        const parent = element.closest(staggerParents);
+
+        if (! parent) {
+            return;
+        }
+
+        const index = [...parent.children].indexOf(element);
+
+        if (index < 0) {
+            return;
+        }
+
+        element.style.setProperty('--reveal-delay', `${Math.min(index * 55, 330)}ms`);
+    };
 
     const elements = document.querySelectorAll(selector);
 
     if (! elements.length) return;
 
     if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-        elements.forEach((el) => el.classList.add('is-visible'));
+        document.querySelectorAll('.animate-fade-up, .glass-card, .feed-card, .hero-gen-z').forEach((el) => {
+            el.classList.add('is-visible');
+        });
 
         return;
     }
@@ -407,10 +431,12 @@ const initScrollReveal = () => {
                 }
             });
         },
-        { threshold: 0.06, rootMargin: '0px 0px -24px 0px' }
+        { threshold: 0.06, rootMargin: isMobile ? '0px 0px 0px 0px' : '0px 0px -24px 0px' }
     );
 
     elements.forEach((el) => {
+        applyStagger(el);
+
         const rect = el.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
             el.classList.add('is-visible');
@@ -418,6 +444,111 @@ const initScrollReveal = () => {
         }
 
         observer.observe(el);
+    });
+};
+
+const prefetchedUrls = new Set();
+
+const prefetchUrl = (href) => {
+    if (! href || prefetchedUrls.has(href)) {
+        return;
+    }
+
+    try {
+        const url = new URL(href, window.location.origin);
+
+        if (url.origin !== window.location.origin || url.pathname === window.location.pathname) {
+            return;
+        }
+
+        prefetchedUrls.add(href);
+
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = url.pathname + url.search;
+        document.head.appendChild(link);
+    } catch {
+        // Ignore malformed URLs.
+    }
+};
+
+const initLinkPrefetch = () => {
+    document.querySelectorAll('[data-prefetch-link]').forEach((anchor) => {
+        const href = anchor.getAttribute('href');
+
+        if (! href) {
+            return;
+        }
+
+        const warm = () => prefetchUrl(href);
+
+        anchor.addEventListener('touchstart', warm, { passive: true, once: true });
+        anchor.addEventListener('mouseenter', warm, { passive: true, once: true });
+        anchor.addEventListener('focus', warm, { passive: true, once: true });
+    });
+};
+
+const hapticTap = (duration = 8) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    if (typeof navigator.vibrate === 'function') {
+        navigator.vibrate(duration);
+    }
+};
+
+const initHapticFeedback = () => {
+    document.querySelectorAll('.mobile-dock-item:not(.mobile-dock-item--menu)').forEach((item) => {
+        item.addEventListener('click', () => hapticTap(6), { passive: true });
+    });
+
+    document.querySelectorAll('.hero-actions .btn-primary, .parish-action-strip .btn-primary').forEach((button) => {
+        button.addEventListener('click', () => hapticTap(10), { passive: true });
+    });
+};
+
+const initViewTransitions = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+    }
+
+    document.documentElement.classList.add('view-transitions-enabled');
+};
+
+const initShareButtons = () => {
+    document.querySelectorAll('[data-share]').forEach((button) => {
+        if (button.dataset.shareBound === 'true') {
+            return;
+        }
+
+        button.dataset.shareBound = 'true';
+
+        button.addEventListener('click', async () => {
+            const url = button.dataset.shareUrl || window.location.href;
+            const title = button.dataset.shareTitle || document.title;
+            const payload = { title, text: title, url };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(payload);
+                    return;
+                } catch (error) {
+                    if (error?.name === 'AbortError') {
+                        return;
+                    }
+                }
+            }
+
+            try {
+                await navigator.clipboard.writeText(url);
+                button.classList.add('is-copied');
+                hapticTap(12);
+                window.setTimeout(() => button.classList.remove('is-copied'), 1800);
+            } catch {
+                window.prompt('Copy this link', url);
+            }
+        });
     });
 };
 
@@ -628,6 +759,10 @@ const initPublicSiteUi = () => {
     initMobileDock();
     initMobileNav();
     initMemberChip();
+    initLinkPrefetch();
+    initHapticFeedback();
+    initViewTransitions();
+    initShareButtons();
     initScrollReveal();
 
     if ('requestIdleCallback' in window) {
@@ -648,5 +783,8 @@ window.addEventListener('resize', syncDesktopNavLayout, { passive: true });
 document.addEventListener('livewire:navigated', () => {
     initDesktopNav();
     initMobileNav();
+    initLinkPrefetch();
+    initHapticFeedback();
+    initShareButtons();
     initScrollReveal();
 });

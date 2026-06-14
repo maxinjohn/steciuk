@@ -11,6 +11,7 @@
     'day' => null,
     'month' => null,
     'weekday' => null,
+    'priority' => 'lazy',
 ])
 
 @php
@@ -38,6 +39,7 @@
         :category="$category"
         :content="$content"
         :alt="$alt"
+        :priority="$priority"
         class="feed-card-image"
     />
 

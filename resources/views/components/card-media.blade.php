@@ -6,6 +6,7 @@
     'category' => null,
     'content' => null,
     'alt' => '',
+    'priority' => 'lazy',
 ])
 
 @php
@@ -15,7 +16,8 @@
 <img
     src="{{ cardMediaUrl($image, $slug, $title, $context, $category, $content) }}"
     alt="{{ $alt }}"
-    loading="lazy"
+    loading="{{ in_array($priority, ['eager', 'high'], true) ? 'eager' : 'lazy' }}"
+    @if ($priority === 'high') fetchpriority="high" @endif
     decoding="async"
     data-topic="{{ $topic }}"
     @class([

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\NextWorshipChip;
 use Illuminate\Support\Facades\Cache;
 
 class SiteCache
@@ -21,6 +22,7 @@ class SiteCache
     public static function forgetPublicContent(?string $pageSlug = null): void
     {
         HomePageData::forget();
+        NextWorshipChip::forget();
         ServiceLocations::forget();
         static::forgetSitemap();
         static::forgetPageContext($pageSlug);
