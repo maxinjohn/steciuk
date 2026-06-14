@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $event->title . ' | Events | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle($event->title, 'Events', $siteName))
 @section('description', strip_tags($event->description))
 @section('og_type', 'article')
 @if ($event->featured_image)
@@ -70,6 +70,8 @@
             </div>
         </x-hero>
 
+        <x-faith-page-bridge />
+
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
             <div class="page-section-inner mx-auto max-w-7xl">
                 <div class="article-layout">
@@ -129,5 +131,10 @@
                 </div>
             </div>
         </section>
+
+        <x-scripture-ribbon
+            text="Let us not give up meeting together, as some are in the habit of doing, but let us encourage one another."
+            reference="Hebrews 10:25"
+        />
     </article>
 @endsection

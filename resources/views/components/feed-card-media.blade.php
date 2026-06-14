@@ -16,12 +16,14 @@
 
 @php
     $topic = cardMediaTopic($slug, $title, $context, $category, $content);
+    $isTopicArt = cardMediaIsTopicArt($image);
 @endphp
 
 <div
     @class([
         'feed-card-media topic-card-media wow-card-media',
         'feed-card-media--dated' => filled($day) && filled($month),
+        'is-loaded' => $isTopicArt,
     ])
     data-topic="{{ $topic }}"
 >

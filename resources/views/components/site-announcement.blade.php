@@ -6,7 +6,7 @@
                 {{ $siteAnnouncementText }}
             </p>
             @if ($siteAnnouncementLink ?? null)
-                <a href="{{ $siteAnnouncementLink }}" class="site-announcement-link shrink-0 text-sm font-semibold text-brand underline-offset-2 hover:underline">
+                <a href="{{ safeUrl($siteAnnouncementLink) }}" class="site-announcement-link shrink-0 text-sm font-semibold text-brand underline-offset-2 hover:underline">
                     {{ $siteAnnouncementLinkLabel ?? 'Learn more' }} →
                 </a>
             @endif

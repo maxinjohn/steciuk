@@ -73,6 +73,32 @@ class FaithContentTest extends TestCase
         $this->assertSame('Global verse', $verses[0]['text']);
     }
 
+    public function test_trust_bar_verses_use_admin_global_pool(): void
+    {
+        Setting::set('faith_sanctuary_verses', json_encode([
+            ['text' => 'Ticker verse one', 'ref' => 'Tick 1:1'],
+            ['text' => 'Ticker verse two', 'ref' => 'Tick 2:2'],
+            ['text' => 'Scoped only', 'ref' => 'Scope 1:1', 'only_on' => 'error'],
+        ]), 'faith');
+
+        $verses = FaithContent::trustBarVerses();
+
+        $this->assertSame([
+            ['text' => 'Ticker verse one', 'ref' => 'Tick 1:1'],
+            ['text' => 'Ticker verse two', 'ref' => 'Tick 2:2'],
+        ], $verses);
+    }
+
+    public function test_trust_bar_verses_fall_back_to_prefilled_global_library(): void
+    {
+        Setting::forget('faith_sanctuary_verses');
+
+        $verses = FaithContent::trustBarVerses();
+
+        $this->assertNotEmpty($verses);
+        $this->assertSame('', $verses[0]['only_on'] ?? '');
+    }
+
     public function test_random_verse_falls_back_to_reference_defaults(): void
     {
         Setting::forget('faith_sanctuary_verses');

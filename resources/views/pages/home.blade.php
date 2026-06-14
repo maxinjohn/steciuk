@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $page?->seo_title ?? $siteName)
+@section('title', \App\Support\Seo::documentTitle($page?->seo_title, null, $siteName))
 @section('description', $page?->seo_description ?? $siteMotto)
 
 @section('content')

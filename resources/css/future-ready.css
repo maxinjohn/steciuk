@@ -1,0 +1,176 @@
+/* Forward-ready layer: adaptive perf, container queries, contrast, print, scroll-driven (progressive) */
+
+html {
+    color-scheme: light dark;
+}
+
+html.save-data-mode {
+    --site-shadow: none;
+    --site-shadow-lg: 0 1px 0 var(--site-border);
+}
+
+html.save-data-mode .topic-card-aura,
+html.save-data-mode .topic-card-shimmer,
+html.save-data-mode .topic-card-scanlines,
+html.save-data-mode .hero-deco,
+html.save-data-mode .page-band-orb,
+html.save-data-mode .heavenly-comfort-glow,
+html.save-data-mode .gospel-reminder-glow,
+html.save-data-mode .prayer-fab__halo {
+    display: none !important;
+}
+
+html.connection-slow .feed-card-media::before,
+html.connection-slow .resource-row-media::before,
+html.connection-slow .gallery-tile-media::before {
+    animation: none;
+}
+
+html.high-contrast-mode {
+    --site-border: #1c1917;
+    --site-border-strong: #0c0a09;
+    --site-glass-border: rgba(12, 10, 9, 0.35);
+}
+
+@media (prefers-contrast: more) {
+    :root {
+        --site-border: #1c1917;
+        --site-border-strong: #0c0a09;
+    }
+
+    .btn-primary,
+    .parish-action-card,
+    .evangelical-trust-verse,
+    .feed-card,
+    .card-modern {
+        outline: 1px solid color-mix(in srgb, var(--site-ink) 18%, transparent);
+    }
+}
+
+@media (forced-colors: active) {
+    .genz-kicker-dot,
+    .next-worship-chip__dot {
+        forced-color-adjust: none;
+    }
+}
+
+/* Container-query cards — component-level responsiveness (2017+ spec, wide support 2024+) */
+.feed-card,
+.parish-action-card,
+.faith-whisper-card,
+.giving-method-card,
+.resource-row {
+    container-type: inline-size;
+}
+
+@container (min-width: 16rem) {
+    .feed-card-title {
+        font-size: clamp(1rem, 2.5cqi, 1.125rem);
+    }
+
+    .parish-action-desc {
+        display: block;
+    }
+}
+
+@container (max-width: 15.99rem) {
+    .parish-action-desc {
+        display: none;
+    }
+}
+
+/* Scroll-driven reveal where supported (Chrome 115+, future baseline) */
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        html:not(.save-data-mode) .feed-card,
+        html:not(.save-data-mode) .faith-whisper-card,
+        html:not(.save-data-mode) .parish-action-card {
+            animation: futureReveal linear both;
+            animation-timeline: view();
+            animation-range: entry 0% cover 28%;
+        }
+    }
+}
+
+@keyframes futureReveal {
+    from {
+        opacity: 0;
+        transform: translateY(1.25rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Reading progress — article pages */
+.reading-progress {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    z-index: 220;
+    height: 3px;
+    pointer-events: none;
+    background: transparent;
+    transform-origin: left center;
+    scale: 0 1;
+    background: linear-gradient(
+        90deg,
+        var(--site-accent),
+        color-mix(in srgb, var(--site-brand) 80%, var(--site-accent))
+    );
+}
+
+html[dir='rtl'] .reading-progress {
+    transform-origin: right center;
+}
+
+.reading-progress.is-active {
+    scale: var(--reading-progress, 0) 1;
+}
+
+/* Print — parish essentials survive decades of browser churn */
+@media print {
+    .mobile-dock-wrap,
+    .prayer-fab,
+    .reading-progress,
+    .site-header-nav,
+    .theme-toggle-btn,
+    .divine-whisper-bar,
+    .faith-spark-strip,
+    .site-footer {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .site-header {
+        position: static !important;
+        box-shadow: none !important;
+    }
+
+    a[href]::after {
+        content: ' (' attr(href) ')';
+        font-size: 0.75rem;
+        color: #444;
+    }
+
+    .feed-card,
+    .card-modern {
+        break-inside: avoid;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    @supports (animation-timeline: view()) {
+        .feed-card,
+        .faith-whisper-card,
+        .parish-action-card {
+            animation: none;
+        }
+    }
+}

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Support\AdminPanelConfig;
+use App\Support\AdminSecurityConfig;
 use App\Support\ErrorResponse;
 use Closure;
 use Illuminate\Http\Request;
@@ -14,13 +15,14 @@ class AdminSessionTimeout
     {
         if (AdminPanelConfig::shouldTrackAdminSession($request) && auth()->check()) {
             $lastActivity = session('admin_last_activity');
-            $timeout = config('security.session_lifetime_admin', 120) * 60;
+            $timeout = AdminSecurityConfig::sessionLifetimeSeconds();
+            $now = time();
 
-            if ($lastActivity && (time() - $lastActivity) > $timeout) {
+            if ($lastActivity !== null && ($now - (int) $lastActivity) > $timeout) {
                 return $this->expireSession($request);
             }
 
-            session(['admin_last_activity' => time()]);
+            session(['admin_last_activity' => $now]);
         }
 
         return $next($request);
@@ -36,6 +38,7 @@ class AdminSessionTimeout
 
         \App\Services\SecurityLogger::warning('admin_session_expired', $userId, [
             'ip' => $request->ip(),
+            'timeout_minutes' => AdminSecurityConfig::sessionLifetimeMinutes(),
         ]);
 
         if ($request->hasHeader('X-Livewire') || $request->expectsJson()) {
@@ -44,6 +47,6 @@ class AdminSessionTimeout
 
         return redirect()
             ->to(AdminPanelConfig::url('login').'?expired=1')
-            ->with('status', 'Your session expired. Please sign in again.');
+            ->with('status', 'Your session expired after '.AdminSecurityConfig::sessionLifetimeMinutes().' minutes of inactivity. Please sign in again.');
     }
 }

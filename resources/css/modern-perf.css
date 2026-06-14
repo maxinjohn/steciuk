@@ -125,6 +125,12 @@ html.dark .next-worship-chip__label,
     width: calc(100% - 1.25rem);
     margin: 0 auto 0.375rem;
     justify-content: center;
+    padding-inline-end: 5.5rem;
+    pointer-events: auto;
+}
+
+.mobile-dock-worship-chip .next-worship-chip {
+    max-width: 100%;
 }
 
 .mobile-dock-item.is-active {
@@ -267,6 +273,90 @@ html.dark .next-worship-chip__label,
     opacity: 0;
 }
 
+.resource-row-media {
+    position: relative;
+}
+
+.resource-row-media::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    background: linear-gradient(
+        110deg,
+        color-mix(in srgb, var(--site-border) 55%, transparent) 8%,
+        color-mix(in srgb, var(--site-surface) 90%, white) 18%,
+        color-mix(in srgb, var(--site-border) 55%, transparent) 33%
+    );
+    background-size: 200% 100%;
+    animation: cardShimmer 1.35s ease-in-out infinite;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.resource-row-media.is-loaded::before {
+    opacity: 0;
+}
+
+.gallery-tile-media::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        110deg,
+        color-mix(in srgb, var(--site-border) 55%, transparent) 8%,
+        color-mix(in srgb, var(--site-surface) 90%, white) 18%,
+        color-mix(in srgb, var(--site-border) 55%, transparent) 33%
+    );
+    background-size: 200% 100%;
+    animation: cardShimmer 1.35s ease-in-out infinite;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.gallery-tile-media.is-loaded::before {
+    opacity: 0;
+}
+
+@media (max-width: 767px) {
+    .home-showcase-section .feed-grid.feed-rail--hint,
+    .home-showcase-section .feed-grid--news.feed-rail--hint,
+    .home-showcase-section .sermon-stack.feed-rail--hint,
+    .feed-rail.feed-grid.feed-rail--hint {
+        position: relative;
+    }
+
+    .home-showcase-section .feed-grid.feed-rail--hint::after,
+    .home-showcase-section .feed-grid--news.feed-rail--hint::after,
+    .home-showcase-section .sermon-stack.feed-rail--hint::after,
+    .feed-rail.feed-grid.feed-rail--hint::after {
+        content: 'Swipe →';
+        position: absolute;
+        right: 0.5rem;
+        bottom: 0.125rem;
+        z-index: 2;
+        padding: 0.2rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.625rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--site-accent);
+        background: color-mix(in srgb, var(--site-surface) 88%, var(--site-accent) 12%);
+        border: 1px solid color-mix(in srgb, var(--site-accent) 28%, var(--site-border));
+        pointer-events: none;
+        animation: feedHintPulse 2.4s ease-in-out infinite;
+    }
+}
+
+@keyframes feedHintPulse {
+    0%, 100% { opacity: 0.72; transform: translateX(0); }
+    50% { opacity: 1; transform: translateX(0.15rem); }
+}
+
 @keyframes cardShimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
@@ -362,6 +452,18 @@ html.dark .next-worship-chip__label,
     }
 
     .feed-card-media::before {
+        animation: none;
+    }
+
+    .resource-row-media::before {
+        animation: none;
+    }
+
+    .gallery-tile-media::before {
+        animation: none;
+    }
+
+    .feed-rail--hint::after {
         animation: none;
     }
 

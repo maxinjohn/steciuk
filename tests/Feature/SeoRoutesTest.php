@@ -106,4 +106,16 @@ class SeoRoutesTest extends TestCase
         $response->assertOk();
         $response->assertSee('<meta name="robots" content="noindex, nofollow">', false);
     }
+
+    public function test_cms_page_title_renders_apostrophes_without_html_entities(): void
+    {
+        config(['site.seed.mode' => \App\Support\SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(\Database\Seeders\ReferenceDataSeeder::class);
+
+        $response = $this->get('/womens-fellowship');
+
+        $response->assertOk();
+        $response->assertSee('<title>Women&#039;s Fellowship | STECI UK Parish</title>', false);
+        $response->assertDontSee('Women&amp;#039;s Fellowship', false);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Pages\Schemas;
 
 use App\Enums\PublishStatus;
 use App\Filament\Support\ChurchRichEditor;
+use App\Filament\Support\MenuPlacementFields;
 use App\Filament\Support\PublishStatusSelect;
 use App\Filament\Support\SecureFileUpload;
 use App\Models\Page;
@@ -183,9 +184,7 @@ class PageForm
                                     ->required(),
                                 Toggle::make('is_home')
                                     ->helperText('Only one page should be marked as the homepage.'),
-                                Section::make('Menus')
-                                    ->description('Use the Menu Placement tab below to add this page to header, footer, or mobile menus — including submenus.')
-                                    ->schema([]),
+                                ...MenuPlacementFields::schema(),
                             ]),
                     ])
                     ->columnSpanFull()

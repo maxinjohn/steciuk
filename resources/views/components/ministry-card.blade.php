@@ -9,7 +9,12 @@
     :padding="false"
     class="bento-tile topic-card wow-card overflow-hidden"
 >
-    <div class="bento-tile-media topic-card-media wow-card-media">
+    <div
+        @class([
+            'bento-tile-media topic-card-media wow-card-media',
+            'is-loaded' => cardMediaIsTopicArt($ministry->featured_image),
+        ])
+    >
         <div class="topic-card-aura" aria-hidden="true">
             <span class="topic-card-aura__orb topic-card-aura__orb--1"></span>
             <span class="topic-card-aura__orb topic-card-aura__orb--2"></span>

@@ -12,5 +12,10 @@ class AdminWelcomeWidget extends Widget
 
     protected string $view = 'filament.widgets.admin-welcome';
 
-    protected static bool $isLazy = false;
+    protected static bool $isLazy = true;
+
+    public static function isLazy(): bool
+    {
+        return app()->runningUnitTests() ? false : static::$isLazy;
+    }
 }

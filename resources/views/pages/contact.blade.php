@@ -1,9 +1,10 @@
 @extends('layouts.app')
 
-@section('title', $page->seo_title ?? $page->title . ' | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle($page->seo_title ?? $page->title, null, $siteName))
 @section('description', $page->seo_description ?? strip_tags($page->content))
 
 @section('content')
+    <x-breadcrumbs :items="[['label' => $page->title, 'current' => true]]" />
     <x-hero
         :title="$page->hero_title ?? $page->title"
         :subtitle="$page->hero_subtitle ?? 'Reach our parish office for worship, pastoral care, or prayer'"
@@ -15,6 +16,7 @@
         :art-context="\App\Support\PageTopicArt::contextForPage($page)"
         :art-content="\App\Support\PageTopicArt::contentHintForPage($page)"
     />
+    <x-faith-page-bridge strip-class="parish-action-strip--compact !py-3" />
     <x-scripture-ribbon
         text="The Lord is near to all who call on him, to all who call on him in truth."
         reference="Psalm 145:18"
@@ -95,7 +97,7 @@
                         <div class="prose-church prose-church--page mb-10">{!! safeHtml($page->content) !!}</div>
                     @endif
 
-                    <x-card class="contact-form-card shadow-lg ring-1 ring-[var(--site-border)]">
+                    <x-card class="contact-form-card form-gen-z card-modern shadow-lg ring-1 ring-[var(--site-border)]">
                         <h2 class="font-bold text-2xl font-semibold text-ink">{{ $contactFormHeading }}</h2>
                         <p class="mt-2 text-ink-muted">{{ $contactFormIntro }}</p>
                         <div class="mt-6">

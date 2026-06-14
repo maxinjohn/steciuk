@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-color-light="{{ $themeColor ?? '#d4cabb' }}" data-theme-color-dark="#131316">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-color-light="{{ $themeColor ?? '#d4cabb' }}" data-theme-color-dark="#131316"
+    @if (\App\Support\FutureSiteConfig::enabled())
+        data-speculation-prefetch="{{ implode('|', \App\Support\FutureSiteConfig::speculationPrefetchPaths()) }}"
+        data-reading-progress="{{ \App\Support\FutureSiteConfig::readingProgressForRequest() ? '1' : '0' }}"
+    @endif
+>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
@@ -77,6 +82,7 @@
     </script>
 
     @stack('head')
+    <x-speculation-rules />
 </head>
 <body @class([
     'site-body site-mesh has-mobile-dock min-h-screen flex flex-col min-[1300px]:pb-0',
@@ -87,6 +93,10 @@
         <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-[var(--site-brand)] focus:px-4 focus:py-2 focus:text-white focus:shadow-lg">
             Skip to main content
         </a>
+
+        @if ($heavenlyAtmosphereEnabled ?? true)
+            <x-heavenly-atmosphere />
+        @endif
 
         <x-site-announcement />
 
@@ -138,7 +148,10 @@
         </main>
 
         <x-divine-whisper-bar :whispers="$divineWhispers ?? []" />
-        <x-faith-spark-strip />
+        <x-faith-spark-strip
+            :kicker="$faithSparkStrip['kicker'] ?? null"
+            :items="$faithSparkStrip['items'] ?? []"
+        />
         <x-sanctuary-peace
             :ribbons="$faithSanctuaryRibbons ?? []"
             :verses="$faithSanctuaryVerses ?? []"
@@ -320,10 +333,15 @@
         </div>
     </nav>
 
+    @if (! request()->routeIs('login', 'register', 'password.request', 'password.reset', 'registration.pending', 'account'))
+        <x-prayer-fab
+            :label="$prayerFab['label'] ?? 'Pray'"
+            :url="$prayerFab['url'] ?? '/prayer-request'"
+            :aria-label="$prayerFab['aria_label'] ?? 'Submit a prayer request'"
+        />
+    @endif
+
     <div class="mobile-dock-wrap min-[1300px]:hidden">
-        @if (! request()->routeIs('login', 'register', 'password.request', 'password.reset', 'registration.pending', 'account'))
-            <x-prayer-fab />
-        @endif
         @if (! request()->routeIs('home'))
             <x-next-worship-chip :chip="$nextWorshipChip ?? null" class="mobile-dock-worship-chip" />
         @endif

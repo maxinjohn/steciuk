@@ -169,6 +169,20 @@ class AdminPanelConfig
         return static::shouldBypassAdminTraffic($request);
     }
 
+    public static function isAdminAuthContext(Request $request): bool
+    {
+        if (static::isAdminRequest($request)) {
+            return true;
+        }
+
+        if (static::isAdminLivewireRequest($request)) {
+            return true;
+        }
+
+        return static::refererIsAdminPanel($request->headers->get('referer'))
+            || static::originIsAdminPanel($request->headers->get('origin'));
+    }
+
     public static function shouldTrackAdminSession(Request $request): bool
     {
         if (static::isAdminRequest($request)) {

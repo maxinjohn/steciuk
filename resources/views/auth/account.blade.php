@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Account | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle('My Account', null, $siteName))
 @section('description', 'Manage your STECI UK Parish member account.')
 
 @section('content')
@@ -35,6 +35,22 @@
 
         $tabPanelStyle = static fn (string $tabId): string => $initialTab === $tabId ? '' : 'display: none;';
     @endphp
+
+    <x-hero
+        title="My Account"
+        subtitle="Your parish member portal — messages, giving, and family life"
+        eyebrow="Member portal"
+        badge="STECI UK"
+        size="small"
+        art-slug="account"
+        art-title="My Account"
+        art-content="Parish member account portal worship fellowship"
+    />
+    <x-evangelical-trust-bar variant="compact" />
+    <x-scripture-ribbon
+        text="Let us consider how we may spur one another on toward love and good deeds."
+        reference="Hebrews 10:24"
+    />
 
     <section class="member-portal py-8 sm:py-12 md:py-14">
         <div class="member-portal-shell site-content-shell mx-auto w-full max-w-7xl">

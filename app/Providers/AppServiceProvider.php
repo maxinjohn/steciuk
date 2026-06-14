@@ -11,9 +11,11 @@ use App\Listeners\FilamentAdminAuditListener;
 use App\Listeners\SyncReferenceDataAfterMigration;
 use App\Models\User;
 use App\Services\MailConfigService;
+use App\Services\PermissionService;
 use App\Services\SecurityLogger;
 use App\Services\SqliteHealth;
 use App\Services\SqliteOptimizer;
+use App\Support\AdminPanelConfig;
 use App\Support\SitePaths;
 use App\Support\SiteUrl;
 use Filament\Facades\Filament;
@@ -124,6 +126,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             Attempting::class,
             function (Attempting $event): void {
+                if (! AdminPanelConfig::isAdminAuthContext(request())) {
+                    return;
+                }
+
                 $email = Login::normalizeEmail($event->credentials['email'] ?? '');
 
                 if (! ThrottleAdminLogin::isLocked(request(), $email !== '' ? $email : null)) {
@@ -142,13 +148,24 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Auth\Events\Login::class,
             function (\Illuminate\Auth\Events\Login $event): void {
                 if ($event->user) {
-                    ThrottleAdminLogin::clear(
-                        request(),
-                        Login::normalizeEmail($event->user->email ?? ''),
-                    );
-                    session(['admin_last_activity' => time()]);
+                    $request = request();
+                    $email = Login::normalizeEmail($event->user->email ?? '');
+                    $isAdminContext = AdminPanelConfig::isAdminAuthContext($request);
+
+                    if ($isAdminContext) {
+                        ThrottleAdminLogin::clear($request, $email);
+                    }
+
+                    if (
+                        $isAdminContext
+                        && $event->user instanceof User
+                        && app(PermissionService::class)->canAccessAdmin($event->user)
+                    ) {
+                        session(['admin_last_activity' => time()]);
+                    }
+
                     SecurityLogger::audit('user_login', actor: $event->user, context: [
-                        'portal' => SecurityLogger::adminPortalLabel(),
+                        'portal' => SecurityLogger::detectPortal(),
                     ]);
                 }
             }
@@ -157,6 +174,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             Failed::class,
             function (Failed $event): void {
+                if (! AdminPanelConfig::isAdminAuthContext(request())) {
+                    return;
+                }
+
                 $email = Login::normalizeEmail($event->credentials['email'] ?? '');
 
                 if (

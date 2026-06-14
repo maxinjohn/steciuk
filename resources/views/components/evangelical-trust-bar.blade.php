@@ -3,26 +3,38 @@
 ])
 
 @php
-    $signals = [
-        ['label' => 'Holy Scripture', 'ref' => '2 Tim 3:16'],
-        ['label' => 'Gospel of Christ', 'ref' => 'John 14:6'],
-        ['label' => 'Grace by Faith', 'ref' => 'Eph 2:8–9'],
-        ['label' => 'Holy Communion', 'ref' => '1 Cor 11:26'],
-        ['label' => 'Prayer & Mission', 'ref' => 'Matt 28:19'],
-        ['label' => 'STECI Motto', 'ref' => 'Rev 1:9'],
-    ];
+    $verses = \App\Support\FaithContent::trustBarVerses();
+    $duration = max(120, min(480, count($verses) * 32));
 @endphp
 
-<div {{ $attributes->merge(['class' => 'evangelical-trust-bar evangelical-trust-bar--' . $variant]) }} aria-label="Evangelical faith markers">
-    <div class="evangelical-trust-bar-inner mx-auto max-w-7xl">
-        <div class="evangelical-trust-bar-track">
-            @foreach ($signals as $signal)
-                <span class="evangelical-trust-chip">
-                    <span class="evangelical-trust-cross" aria-hidden="true">✝</span>
-                    <span class="evangelical-trust-label">{{ $signal['label'] }}</span>
-                    <span class="evangelical-trust-ref">{{ $signal['ref'] }}</span>
-                </span>
-            @endforeach
+@if ($verses !== [])
+    <div
+        {{ $attributes->merge(['class' => 'evangelical-trust-bar evangelical-trust-bar--' . $variant]) }}
+        aria-label="Scripture from our parish library"
+    >
+        <div class="evangelical-trust-bar-inner mx-auto max-w-7xl">
+            <div class="sr-only" role="list">
+                @foreach ($verses as $verse)
+                    <p role="listitem">{{ $verse['text'] }} — {{ $verse['ref'] }}</p>
+                @endforeach
+            </div>
+
+            <div class="evangelical-trust-bar-marquee" aria-hidden="true">
+                <div
+                    class="evangelical-trust-bar-marquee__track"
+                    style="--trust-marquee-duration: {{ $duration }}s;"
+                >
+                    @foreach ([1, 2] as $pass)
+                        @foreach ($verses as $verse)
+                            <span class="evangelical-trust-verse">
+                                <span class="evangelical-trust-cross" aria-hidden="true">✝</span>
+                                <span class="evangelical-trust-text">{{ $verse['text'] }}</span>
+                                <span class="evangelical-trust-ref">{{ $verse['ref'] }}</span>
+                            </span>
+                        @endforeach
+                    @endforeach
+                </div>
+            </div>
         </div>
     </div>
-</div>
+@endif

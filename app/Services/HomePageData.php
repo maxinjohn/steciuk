@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Cache;
 
 class HomePageData
 {
-    private const CACHE_KEY = 'home.page.data.v9';
+    private const CACHE_KEY = 'home.page.data.v10';
 
     private const CACHE_TTL_SECONDS = 3600;
 
@@ -104,8 +104,9 @@ class HomePageData
                 ->limit(3)
                 ->get(),
             'albums' => GalleryAlbum::query()
-                ->select(['id', 'title', 'slug', 'cover_image', 'sort_order', 'status'])
+                ->select(['id', 'title', 'slug', 'description', 'cover_image', 'sort_order', 'status'])
                 ->active()
+                ->withCount(['photos as photos_count' => fn ($query) => $query->published()])
                 ->with(['photos' => fn ($query) => $query->published()->orderBy('sort_order')->limit(1)])
                 ->orderBy('sort_order')
                 ->limit(4)

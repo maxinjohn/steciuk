@@ -1,20 +1,22 @@
 @extends('layouts.app')
 
-@section('title', $page?->seo_title ?? 'Ministries')
+@section('title', \App\Support\Seo::documentTitle($page?->seo_title ?? 'Ministries', null, $siteName))
 @section('description', $page?->seo_description ?? 'Discover ministries at STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page" suppress-content>
+    <x-page-shell :page="$page" suppress-content suppress-hero>
         <x-breadcrumbs :items="[['label' => 'Ministries', 'current' => true]]" />
         <x-page-intro
-            title="Ministries & Mission"
-            subtitle="Sunday School, prayer, choir, and outreach — serving Christ together"
+            :title="$page?->hero_title ?? 'Our Ministries'"
+            :subtitle="$page?->hero_subtitle ?? 'Sunday School, prayer, choir, and outreach — serving Christ together'"
             kicker="Evangelical Oriental Protestant · Serve"
             scripture="To equip his people for works of service, so that the body of Christ may be built up."
             scripture-ref="Ephesians 4:12"
             art-slug="ministries"
-            art-title="Ministries & Mission"
+            :art-title="$page?->hero_title ?? 'Our Ministries'"
             art-context="ministry"
+            :show-strips="true"
+            :show-trust-bar="true"
         />
 
         <section class="page-section page-section--compact">

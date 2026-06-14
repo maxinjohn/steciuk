@@ -1,10 +1,16 @@
+@props([
+    'label' => 'Pray',
+    'url' => '/prayer-request',
+    'ariaLabel' => 'Submit a prayer request',
+])
+
 <a
-    href="{{ url('/prayer-request') }}"
-    class="prayer-fab min-[1300px]:hidden"
+    href="{{ url($url) }}"
+    class="prayer-fab"
     data-prefetch-link
-    aria-label="Submit a prayer request"
+    aria-label="{{ $ariaLabel }}"
 >
     <span class="prayer-fab__halo" aria-hidden="true"></span>
     <span class="prayer-fab__icon" aria-hidden="true">🙏</span>
-    <span class="prayer-fab__label">Pray</span>
+    <span class="prayer-fab__label">{{ $label }}</span>
 </a>

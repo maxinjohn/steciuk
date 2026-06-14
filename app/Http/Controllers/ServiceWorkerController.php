@@ -81,15 +81,7 @@ self.addEventListener('fetch', (event) => {
     if (event.request.mode === 'navigate') {
         event.respondWith(
             fetch(event.request)
-                .then((response) => {
-                    const cacheControl = response.headers.get('cache-control') || '';
-
-                    if (response.ok && ! cacheControl.includes('no-store')) {
-                        caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
-                    }
-
-                    return response;
-                })
+                .then((response) => response)
                 .catch(() =>
                     caches.match(event.request).then((cached) => cached || caches.match(OFFLINE_URL))
                 )

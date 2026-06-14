@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\AccountStatus;
 use App\Enums\UserRole;
+use App\Models\Setting;
 use App\Models\User;
 use App\Support\SeedConfig;
 use App\Support\SiteUrl;
@@ -26,6 +27,7 @@ class NavigationTest extends TestCase
             $response->assertOk();
             $response->assertSee('/topic-art/'.$slug.'/', false);
             $response->assertSee('hero-art-showcase', false);
+            $response->assertSee('evangelical-trust-bar-marquee', false);
         }
 
         $bandResponse = $this->get('/events');
@@ -313,5 +315,55 @@ class NavigationTest extends TestCase
         $response->assertSee('Welcome', false);
         $response->assertSee('Service Times', false);
         $response->assertSee('Join the parish', false);
+    }
+
+    public function test_future_ready_layer_renders_on_public_pages(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        config(['site.future.enabled' => true]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('data-speculation-prefetch=', false);
+        $response->assertSee('type="speculationrules"', false);
+        $response->assertDontSee('parish-pulse-bar', false);
+    }
+
+    public function test_trust_bar_renders_admin_verse_ticker_without_links(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        Setting::set('faith_sanctuary_verses', json_encode([
+            ['text' => 'The Lord is my shepherd; I shall not want.', 'ref' => 'Psalm 23:1'],
+            ['text' => 'For God so loved the world.', 'ref' => 'John 3:16'],
+        ]), 'faith');
+
+        $response = $this->get('/events');
+
+        $response->assertOk();
+        $response->assertSee('evangelical-trust-bar-marquee', false);
+        $response->assertSee('The Lord is my shepherd; I shall not want.', false);
+        $response->assertSee('Psalm 23:1', false);
+        $response->assertDontSee('evangelical-trust-chip', false);
+    }
+
+    public function test_cms_resource_pages_show_scripture_ticker(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        foreach (['/liturgy', '/lectionary'] as $path) {
+            $response = $this->get($path);
+
+            $response->assertOk();
+            $response->assertSee('evangelical-trust-bar-marquee', false);
+        }
+
+        $resources = $this->get('/resources');
+        $resources->assertOk();
+        $resources->assertSee('evangelical-trust-bar-marquee', false);
     }
 }

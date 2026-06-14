@@ -28,6 +28,8 @@
             />
         @endif
         <span class="page-band-cross" aria-hidden="true">✝</span>
+        <span class="page-band-cross page-band-cross--ghost" aria-hidden="true">✝</span>
+        <span class="page-band-heavenly-rays" aria-hidden="true"></span>
         <span class="page-band-orb page-band-orb--gold"></span>
         <span class="page-band-orb page-band-orb--navy"></span>
         <span class="page-band-grid"></span>

@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', $page?->seo_title ?? 'Sermons')
+@section('title', \App\Support\Seo::documentTitle($page?->seo_title ?? 'Sermons', null, $siteName))
 @section('description', $page?->seo_description ?? 'Biblical teaching from STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page" suppress-content>
+    <x-page-shell :page="$page" suppress-content suppress-hero>
         <x-breadcrumbs :items="[['label' => 'Sermons', 'current' => true]]" />
         <x-page-intro
             title="Expository Preaching"
@@ -15,6 +15,8 @@
             art-slug="sermons"
             art-title="Expository Preaching"
             art-context="sermon"
+            :show-strips="true"
+            :show-trust-bar="true"
         />
 
         <section class="page-section page-section--compact">

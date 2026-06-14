@@ -1,4 +1,5 @@
 // PWA + dark mode + scroll reveal + install prompt + mobile dock + gallery lightbox
+import './future-ready.js';
 
 const updateThemeColor = () => {
     const meta = document.querySelector('meta[name="theme-color"]');
@@ -389,8 +390,8 @@ const initScrollReveal = () => {
     const isMobile = window.matchMedia('(max-width: 767px)').matches;
 
     const selector = isMobile
-        ? '.hero-gen-z, .hero-modern .hero-badge, .hero-modern .hero-title, .hero-modern .hero-actions, .page-section--compact:first-of-type .section-head, .page-section--compact:first-of-type .feed-card:first-child, .page-section--compact:first-of-type .bento-grid > *:first-child'
-        : '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .faith-whisper-card, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-chip, .heavenly-comfort-card, .hero-gen-z';
+        ? '.hero-gen-z, .hero-modern .hero-badge, .hero-modern .hero-title, .hero-modern .hero-actions, .page-section--compact:first-of-type .section-head, .page-section--compact:first-of-type .feed-card:first-child, .page-section--compact:first-of-type .bento-grid > *:first-child, .heavenly-empty, .faith-spark-chip, .faith-whisper-card, .form-success-gen-z, .next-worship-chip, .page-band, .giving-method-card'
+        : '.animate-fade-up, .glass-card, .bento-grid > *, .bento-tile, .feed-card, .gallery-tile, .sermon-card, .location-card, .resource-row, .past-event-chip, .quote-gen-z, .cta-gen-z, .form-gen-z, .faith-pillar, .faith-whisper-card, .scripture-ribbon, .parish-action-card, .worship-rhythm-card, .evangelical-trust-verse, .heavenly-comfort-card, .hero-gen-z, .heavenly-empty, .faith-spark-chip, .evangelical-trust-bar, .detail-share-row, .page-band, .giving-method-card, .faith-whispers';
 
     const staggerParents = '.feed-grid, .feed-grid--news, .sermon-stack, .gallery-mosaic, .bento-grid, .past-events-grid';
 
@@ -480,6 +481,12 @@ const prefetchUrl = (href) => {
 
 const initLinkPrefetch = () => {
     document.querySelectorAll('[data-prefetch-link]').forEach((anchor) => {
+        if (anchor.dataset.prefetchBound === 'true') {
+            return;
+        }
+
+        anchor.dataset.prefetchBound = 'true';
+
         const href = anchor.getAttribute('href');
 
         if (! href) {
@@ -506,11 +513,30 @@ const hapticTap = (duration = 8) => {
 
 const initHapticFeedback = () => {
     document.querySelectorAll('.mobile-dock-item:not(.mobile-dock-item--menu)').forEach((item) => {
+        if (item.dataset.hapticBound === 'true') {
+            return;
+        }
+
+        item.dataset.hapticBound = 'true';
         item.addEventListener('click', () => hapticTap(6), { passive: true });
     });
 
     document.querySelectorAll('.hero-actions .btn-primary, .parish-action-strip .btn-primary').forEach((button) => {
+        if (button.dataset.hapticBound === 'true') {
+            return;
+        }
+
+        button.dataset.hapticBound = 'true';
         button.addEventListener('click', () => hapticTap(10), { passive: true });
+    });
+
+    document.querySelectorAll('.prayer-fab').forEach((fab) => {
+        if (fab.dataset.hapticBound === 'true') {
+            return;
+        }
+
+        fab.dataset.hapticBound = 'true';
+        fab.addEventListener('click', () => hapticTap(8), { passive: true });
     });
 };
 
@@ -599,7 +625,13 @@ const initShareButtons = () => {
 };
 
 const initCardMediaSkeletons = () => {
-    document.querySelectorAll('.feed-card-media').forEach((media) => {
+    document.querySelectorAll('.feed-card-media, .resource-row-media, .gallery-tile-media').forEach((media) => {
+        if (media.dataset.skeletonBound === 'true') {
+            return;
+        }
+
+        media.dataset.skeletonBound = 'true';
+
         const image = media.querySelector('img');
 
         if (! image) {
@@ -608,6 +640,11 @@ const initCardMediaSkeletons = () => {
         }
 
         const markLoaded = () => media.classList.add('is-loaded');
+
+        if (image.classList.contains('card-media-image--topic') || image.classList.contains('card-media-image--dynamic')) {
+            markLoaded();
+            return;
+        }
 
         if (image.complete) {
             markLoaded();
@@ -631,7 +668,14 @@ const showBlessingToast = (message) => {
         document.body.appendChild(toast);
     }
 
-    toast.innerHTML = `<span class="blessing-toast__icon" aria-hidden="true">✝</span><span>${message}</span>`;
+    toast.replaceChildren();
+    const icon = document.createElement('span');
+    icon.className = 'blessing-toast__icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '✝';
+    const copy = document.createElement('span');
+    copy.textContent = message;
+    toast.append(icon, copy);
     toast.classList.add('is-visible');
     hapticTap(14);
 
@@ -663,7 +707,11 @@ const initDivineWhisperBar = () => {
         lines[0]?.classList.add('is-active');
     }
 
-    window.setInterval(() => {
+    if (window.__divineWhisperInterval) {
+        window.clearInterval(window.__divineWhisperInterval);
+    }
+
+    window.__divineWhisperInterval = window.setInterval(() => {
         lines[index]?.classList.remove('is-active');
         index = (index + 1) % lines.length;
         lines[index]?.classList.add('is-active');
@@ -700,8 +748,52 @@ const initFormBlessings = () => {
             });
         });
 
-        window.__formBlessingObserver.observe(document.body, { childList: true, subtree: true });
+        document.querySelectorAll('.form-gen-z, .contact-form-card, .member-portal-card, main').forEach((root) => {
+            window.__formBlessingObserver.observe(root, { childList: true, subtree: true });
+        });
     }
+};
+
+const unlockMobileMenuScrollIfNeeded = () => {
+    if (! document.body.classList.contains('mobile-menu-open')) {
+        return;
+    }
+
+    const menu = document.getElementById('mobile-menu');
+    const overlay = document.getElementById('mobile-menu-overlay');
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const siteShell = document.getElementById('site-shell');
+
+    menu?.classList.remove('is-open');
+    overlay?.classList.remove('is-open');
+    toggle?.classList.remove('is-active');
+    toggle?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('mobile-menu-open');
+    siteShell?.removeAttribute('inert');
+    siteShell?.removeAttribute('aria-hidden');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    menu?.setAttribute('aria-hidden', 'true');
+    overlay?.setAttribute('aria-hidden', 'true');
+};
+
+const initFeedRailScrollHint = () => {
+    document.querySelectorAll('.home-showcase-section .feed-grid, .home-showcase-section .feed-grid--news, .home-showcase-section .sermon-stack, .feed-rail.feed-grid, .feed-rail.feed-grid--news').forEach((rail) => {
+        if (rail.dataset.scrollHintBound === 'true' || rail.querySelector('.feed-empty--heavenly, .feed-empty--rich')) {
+            return;
+        }
+
+        rail.dataset.scrollHintBound = 'true';
+        rail.classList.add('feed-rail--hint');
+
+        rail.addEventListener('scroll', () => {
+            rail.classList.remove('feed-rail--hint');
+            rail.classList.add('feed-rail--scrolled');
+        }, { passive: true, once: true });
+    });
 };
 
 const initMobileDock = () => {
@@ -710,9 +802,11 @@ const initMobileDock = () => {
     const menu = document.getElementById('mobile-menu');
     const overlay = document.getElementById('mobile-menu-overlay');
 
-    if (! toggle || ! menu) {
+    if (! toggle || ! menu || toggle.dataset.dockBound === 'true') {
         return;
     }
+
+    toggle.dataset.dockBound = 'true';
 
     const collapseMobileSections = () => {
         document.querySelectorAll('[data-mobile-nav-section]').forEach((section) => {
@@ -797,6 +891,12 @@ const initMobileDock = () => {
 
 const initMemberChip = () => {
     document.querySelectorAll('[data-member-chip]').forEach((root) => {
+        if (root.dataset.memberChipBound === 'true') {
+            return;
+        }
+
+        root.dataset.memberChipBound = 'true';
+
         const trigger = root.querySelector('[data-member-chip-trigger]');
         const panel = root.querySelector('[data-member-chip-panel]');
 
@@ -918,6 +1018,7 @@ const initPublicSiteUi = () => {
     initCardMediaSkeletons();
     initDivineWhisperBar();
     initFormBlessings();
+    initFeedRailScrollHint();
     initScrollReveal();
 
     if ('requestIdleCallback' in window) {
@@ -936,6 +1037,7 @@ window.addEventListener('load', () => {
 });
 window.addEventListener('resize', syncDesktopNavLayout, { passive: true });
 document.addEventListener('livewire:navigated', () => {
+    unlockMobileMenuScrollIfNeeded();
     initDesktopNav();
     initMobileNav();
     initLinkPrefetch();
@@ -944,5 +1046,6 @@ document.addEventListener('livewire:navigated', () => {
     initCardMediaSkeletons();
     initDivineWhisperBar();
     initFormBlessings();
+    initFeedRailScrollHint();
     initScrollReveal();
 });

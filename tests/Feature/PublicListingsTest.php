@@ -106,8 +106,23 @@ class PublicListingsTest extends TestCase
 
         $this->get(route('gallery.index'))
             ->assertOk()
-            ->assertSee('1 photos', false)
+            ->assertSee('1 photo', false)
             ->assertDontSee('2 photos', false);
+    }
+
+    public function test_home_gallery_tiles_render_topic_art_thumbnails(): void
+    {
+        config(['site.seed.mode' => SeedConfig::MODE_BOOTSTRAP]);
+        $this->seed(ReferenceDataSeeder::class);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Parish Life in Pictures', false)
+            ->assertSee('gallery-tile-media', false)
+            ->assertSee('is-loaded', false)
+            ->assertSee('/topic-art/', false)
+            ->assertSee('card-media-image--topic', false)
+            ->assertSee('Parish Worship Services', false);
     }
 
     public function test_bootstrap_if_empty_runs_on_fresh_database(): void

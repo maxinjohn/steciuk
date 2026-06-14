@@ -1,11 +1,12 @@
 @props([
     'title',
     'subtitle' => null,
-    'kicker' => 'Evangelical Oriental Protestant Parish',
+    'kicker' => null,
     'showStrips' => false,
+    'showTrustBar' => false,
     'showScripture' => true,
-    'scripture' => 'Your word is a lamp to my feet and a light to my path.',
-    'scriptureRef' => 'Psalm 119:105',
+    'scripture' => null,
+    'scriptureRef' => null,
     'artSlug' => null,
     'artTitle' => null,
     'artContext' => 'page',
@@ -13,6 +14,13 @@
     'artCategory' => null,
     'showTopicArt' => true,
 ])
+
+@php
+    $introDefaults = \App\Support\PublicUiContent::pageIntroDefaults();
+    $kicker = filled($kicker) ? $kicker : $introDefaults['kicker'];
+    $scripture = filled($scripture) ? $scripture : $introDefaults['scripture'];
+    $scriptureRef = filled($scriptureRef) ? $scriptureRef : $introDefaults['scripture_ref'];
+@endphp
 
 <x-page-band
     :title="$title"
@@ -26,8 +34,12 @@
     :show-topic-art="$showTopicArt"
 />
 
+@if ($showTrustBar)
+    <x-evangelical-trust-bar variant="compact" />
+@endif
+
 @if ($showStrips)
-    <x-parish-action-strip />
+    <x-parish-action-strip class="parish-action-strip--compact !py-3" />
 @endif
 
 @if ($showScripture)

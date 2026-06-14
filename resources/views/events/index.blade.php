@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', $page?->seo_title ?? 'Events')
+@section('title', \App\Support\Seo::documentTitle($page?->seo_title ?? 'Events', null, $siteName))
 @section('description', $page?->seo_description ?? 'Upcoming events at STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page" suppress-content>
+    <x-page-shell :page="$page" suppress-content suppress-hero>
         <x-breadcrumbs :items="[['label' => 'Events', 'current' => true]]" />
         <x-page-intro
             title="Parish Events"
@@ -15,6 +15,8 @@
             art-slug="events"
             art-title="Parish Events"
             art-context="event"
+            :show-strips="true"
+            :show-trust-bar="true"
         />
 
         <section class="page-section page-section--compact">

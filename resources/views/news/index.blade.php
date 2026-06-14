@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', $page?->seo_title ?? 'News')
+@section('title', \App\Support\Seo::documentTitle($page?->seo_title ?? 'News', null, $siteName))
 @section('description', $page?->seo_description ?? 'Latest news from STECI UK Parish')
 
 @section('content')
-    <x-page-shell :page="$page" suppress-content>
+    <x-page-shell :page="$page" suppress-content suppress-hero>
         <x-breadcrumbs :items="[['label' => 'News', 'current' => true]]" />
         <x-page-intro
             title="Parish News"
@@ -15,6 +15,8 @@
             art-slug="news"
             art-title="Parish News"
             art-context="news"
+            :show-strips="true"
+            :show-trust-bar="true"
         />
 
         <section class="page-section page-section--compact">

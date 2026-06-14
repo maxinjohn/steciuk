@@ -29,6 +29,16 @@ class ContextScriptureTest extends TestCase
         $this->assertSame('Matthew 4:4', $comfort['ref']);
     }
 
+    public function test_empty_state_for_services_and_resources(): void
+    {
+        $services = ContextScripture::emptyStateFor('services');
+        $resources = ContextScripture::emptyStateFor('resources');
+
+        $this->assertSame('Psalm 122:1', $services['ref']);
+        $this->assertSame('2 Timothy 3:16', $resources['ref']);
+        $this->assertSame('2 Corinthians 9:7', ContextScripture::emptyStateFor('give')['ref']);
+    }
+
     public function test_divine_whispers_pool_is_populated(): void
     {
         $this->assertNotEmpty(ContextScripture::divineWhispers());

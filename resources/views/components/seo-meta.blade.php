@@ -10,7 +10,11 @@
 @php
     use App\Support\Seo;
 
-    $metaTitle = $title ?? trim($__env->yieldContent('title')) ?: ($seoDefaultTitle ?? $siteName);
+    $metaTitle = Seo::metaText(
+        $title
+        ?? trim($__env->yieldContent('title'))
+        ?: ($seoDefaultTitle ?? $siteName)
+    );
     $metaDescription = Seo::truncateDescription(
         $description
         ?? trim($__env->yieldContent('description'))

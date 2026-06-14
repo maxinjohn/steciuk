@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Ministries\Schemas;
 
 use App\Filament\Support\ChurchRichEditor;
+use App\Filament\Support\MenuPlacementFields;
 use App\Filament\Support\SecureFileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -38,6 +39,7 @@ class MinistryForm
                     ])
                     ->default('active')
                     ->required(),
+                ...MenuPlacementFields::schema('ministries'),
             ]);
     }
 }

@@ -1,9 +1,25 @@
 @extends('layouts.app')
 
-@section('title', 'Registration Received | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle('Registration Received', null, $siteName))
 @section('description', 'Your STECI UK Parish registration is awaiting approval.')
 
 @section('content')
+    <x-hero
+        title="Awaiting Approval"
+        subtitle="Your registration is in the hands of our parish leadership"
+        eyebrow="Member registration"
+        badge="STECI UK"
+        size="small"
+        art-slug="register"
+        art-title="Registration Received"
+        art-content="Join the parish family registration welcome"
+    />
+    <x-evangelical-trust-bar variant="compact" />
+    <x-scripture-ribbon
+        text="Wait for the Lord; be strong and take heart and wait for the Lord."
+        reference="Psalm 27:14"
+    />
+
     <section class="member-portal member-portal--pending py-16 sm:py-20">
         <div class="member-portal-shell mx-auto max-w-2xl">
             <div class="member-portal-card member-portal-card--hero text-center">

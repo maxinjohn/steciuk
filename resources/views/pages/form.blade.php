@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $page->seo_title ?? $page->title . ' | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle($page->seo_title ?? $page->title, null, $siteName))
 @section('description', $page->seo_description ?? strip_tags($page->content))
 
 @section('content')
@@ -32,7 +32,7 @@
         :art-context="\App\Support\PageTopicArt::contextForPage($page)"
         :art-content="\App\Support\PageTopicArt::contentHintForPage($page)"
     />
-    <x-parish-action-strip class="parish-action-strip--compact" />
+    <x-faith-page-bridge />
     <x-scripture-ribbon :text="$scripture" :reference="$scriptureRef" />
 
     <section class="page-section page-section--article py-10 sm:py-12 md:py-14">

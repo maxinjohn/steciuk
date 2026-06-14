@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Account | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle('Create Account', null, $siteName))
 @section('description', 'Register for a parish member account on the STECI UK Parish website.')
 
 @section('content')
@@ -14,7 +14,7 @@
         art-title="Create Your Parish Account"
         art-content="Register and join the parish family as a new member"
     />
-    <x-parish-action-strip class="parish-action-strip--compact" />
+    <x-faith-page-bridge />
     <x-scripture-ribbon
         text="For it is by grace you have been saved, through faith — and this is not from yourselves, it is the gift of God."
         reference="Ephesians 2:8"

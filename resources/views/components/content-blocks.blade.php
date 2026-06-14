@@ -57,21 +57,23 @@
                 :art-content="trim(($data['subtitle'] ?? '').' '.($data['eyebrow'] ?? ''))"
             >
                 @if (! empty($data['primary_cta_label']))
-                    <x-button href="{{ $resolveLink($data['primary_cta_url'] ?? '#') }}" hero>
+                    <x-button href="{{ $resolveLink($data['primary_cta_url'] ?? '#') }}" hero data-prefetch-link>
                         {{ $data['primary_cta_label'] }}
                     </x-button>
                 @endif
                 @if (! empty($data['secondary_cta_label']))
-                    <x-button href="{{ $resolveLink($data['secondary_cta_url'] ?? '#') }}" hero variant="outline">
+                    <x-button href="{{ $resolveLink($data['secondary_cta_url'] ?? '#') }}" hero variant="outline" data-prefetch-link>
                         {{ $data['secondary_cta_label'] }}
                     </x-button>
                 @endif
                 @if (! empty($data['tertiary_cta_label']))
-                    <x-button href="{{ $resolveLink($data['tertiary_cta_url'] ?? '#') }}" hero variant="outline">
+                    <x-button href="{{ $resolveLink($data['tertiary_cta_url'] ?? '#') }}" hero variant="outline" data-prefetch-link>
                         {{ $data['tertiary_cta_label'] }}
                     </x-button>
                 @endif
             </x-hero>
+            <x-evangelical-trust-bar variant="hero" />
+            <x-parish-action-strip class="parish-action-strip--compact" />
             <x-scripture-ribbon text="God is spirit, and his worshippers must worship in the Spirit and in truth." reference="John 4:24" />
             <x-heavenly-comfort
                 :headers="$faithComfortHeaders ?? []"
@@ -165,11 +167,14 @@
                         @forelse ($items as $ministry)
                             <x-ministry-card :ministry="$ministry" heading-tag="h3" />
                         @empty
-                            <div class="feed-empty feed-empty--rich col-span-full">
-                                <p class="feed-empty__title">Ministries coming soon</p>
-                                <p class="feed-empty__text">Explore how you can serve, connect, and grow in parish life.</p>
-                                <x-button href="{{ route('ministries.index') }}" variant="outline" class="feed-empty__action">View ministries</x-button>
-                            </div>
+                            <x-heavenly-empty
+                                context="ministries"
+                                title="Ministries coming soon"
+                                :actionHref="route('ministries.index')"
+                                actionLabel="View ministries"
+                            >
+                                Explore how you can serve, connect, and grow in parish life.
+                            </x-heavenly-empty>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -229,11 +234,14 @@
                                 </div>
                             </x-card>
                         @empty
-                            <div class="feed-empty feed-empty--rich col-span-full">
-                                <p class="feed-empty__title">No upcoming events right now</p>
-                                <p class="feed-empty__text">Join us for worship across our UK locations — times are updated regularly.</p>
-                                <x-button href="{{ url('/service-times') }}" variant="outline" class="feed-empty__action">View worship times</x-button>
-                            </div>
+                            <x-heavenly-empty
+                                context="events"
+                                title="No upcoming events right now"
+                                :actionHref="url('/service-times')"
+                                actionLabel="View worship times"
+                            >
+                                Join us for worship across our UK locations — times are updated regularly.
+                            </x-heavenly-empty>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -299,10 +307,9 @@
                                 </div>
                             </x-card>
                         @empty
-                            <div class="feed-empty feed-empty--rich col-span-full">
-                                <p class="feed-empty__title">News coming soon</p>
-                                <p class="feed-empty__text">Parish updates and stories will appear here as they are published.</p>
-                            </div>
+                            <x-heavenly-empty context="news" title="News coming soon">
+                                Parish updates and stories will appear here as they are published.
+                            </x-heavenly-empty>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -363,11 +370,14 @@
                                 </div>
                             </x-card>
                         @empty
-                            <div class="feed-empty feed-empty--rich">
-                                <p class="feed-empty__title">Sermons coming soon</p>
-                                <p class="feed-empty__text">Recent messages will be listed here once published.</p>
-                                <x-button href="{{ url('/sermons') }}" variant="outline" class="feed-empty__action">Browse sermons</x-button>
-                            </div>
+                            <x-heavenly-empty
+                                context="sermons"
+                                title="Sermons coming soon"
+                                :actionHref="url('/sermons')"
+                                actionLabel="Browse sermons"
+                            >
+                                Recent messages will be listed here once published.
+                            </x-heavenly-empty>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))
@@ -390,7 +400,9 @@
                         @forelse ($items as $album)
                             <x-gallery-tile-card :album="$album" />
                         @empty
-                            <p class="feed-empty col-span-full">Gallery albums coming soon.</p>
+                            <x-heavenly-empty context="gallery" title="Gallery albums coming soon">
+                                Worship moments and parish life will appear here soon.
+                            </x-heavenly-empty>
                         @endforelse
                     </div>
                     @if (! empty($data['link_label']))

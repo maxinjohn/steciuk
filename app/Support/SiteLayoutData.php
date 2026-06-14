@@ -85,6 +85,11 @@ class SiteLayoutData
             'contextScripture' => ContextScripture::forRequest(),
             'showContextScriptureNudge' => self::showContextScriptureNudge(),
             'divineWhispers' => ContextScripture::divineWhispers(),
+            'faithSparkStrip' => PublicUiContent::sparkStrip(),
+            'parishActionStrip' => PublicUiContent::actionStrip(),
+            'pageIntroDefaults' => PublicUiContent::pageIntroDefaults(),
+            'prayerFab' => PublicUiContent::prayerFab(),
+            'heavenlyAtmosphereEnabled' => PublicUiContent::heavenlyAtmosphereEnabled(),
             'headerMenu' => self::withoutMemberAreaMenu($menus[MenuLocation::Header->value]),
             'footerMenu' => $menus[MenuLocation::Footer->value],
             'mobileMenu' => $menus[MenuLocation::Mobile->value],
@@ -153,6 +158,7 @@ class SiteLayoutData
             'registration.pending',
             'account',
             'account.giving.export',
+            'give',
             'events.index',
             'events.show',
             'news.index',
@@ -162,7 +168,13 @@ class SiteLayoutData
             'gallery.show',
             'ministries.index',
             'ministries.show',
-        );
+            'services.index',
+            'resources.index',
+        ) && ! (request()->routeIs('pages.show') && in_array((string) request()->route('slug', ''), [
+            'contact',
+            'prayer-request',
+            'give',
+        ], true));
     }
 
     public static function forget(): void

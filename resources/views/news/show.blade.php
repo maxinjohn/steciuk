@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ($article->seo_title ?? $article->title) . ' | ' . $siteName)
+@section('title', \App\Support\Seo::documentTitle($article->seo_title ?? $article->title, 'News', $siteName))
 @section('description', $article->seo_description ?? $article->excerpt ?? strip_tags($article->content))
 @section('og_type', 'article')
 @if ($article->featured_image)
@@ -60,6 +60,8 @@
             </div>
         </x-hero>
 
+        <x-faith-page-bridge />
+
         <section class="page-section page-section--article py-10 sm:py-12 md:py-16">
             <div class="page-section-inner mx-auto max-w-3xl">
                 @if ($article->category)
@@ -73,5 +75,10 @@
                 </div>
             </div>
         </section>
+
+        <x-scripture-ribbon
+            text="They devoted themselves to the apostles' teaching and to fellowship, to the breaking of bread and to prayer."
+            reference="Acts 2:42"
+        />
     </article>
 @endsection

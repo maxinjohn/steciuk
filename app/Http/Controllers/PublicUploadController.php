@@ -11,13 +11,23 @@ class PublicUploadController extends Controller
     {
         $path = str_replace('\\', '/', $path);
 
-        if ($path === '' || str_contains($path, '..')) {
+        if ($path === '' || str_contains($path, '..') || str_contains($path, "\0")) {
             abort(404);
         }
 
         SitePaths::ensurePublicDiskConfigured();
 
-        $absolute = SitePaths::publicUploadsRoot().'/'.$path;
+        $root = realpath(SitePaths::publicUploadsRoot());
+
+        if ($root === false) {
+            abort(404);
+        }
+
+        $absolute = realpath($root.'/'.$path);
+
+        if ($absolute === false || ! str_starts_with($absolute, $root.DIRECTORY_SEPARATOR)) {
+            abort(404);
+        }
 
         if (! is_file($absolute) || ! is_readable($absolute)) {
             abort(404);
@@ -28,6 +38,7 @@ class PublicUploadController extends Controller
         return response()->file($absolute, [
             'Content-Type' => $mime,
             'Cache-Control' => 'public, max-age=604800',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 }

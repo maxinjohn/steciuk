@@ -6,6 +6,7 @@
 @if (filled($chip))
     <a
         href="{{ $chip['url'] ?? url('/service-times') }}"
+        data-prefetch-link
         @class([
             'next-worship-chip',
             'next-worship-chip--live' => ! empty($chip['is_live']),
